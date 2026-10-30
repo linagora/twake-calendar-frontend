@@ -1,7 +1,8 @@
+import type { Mock } from 'vitest'
 import { handleCopyLink } from '@common/utils/handleCopyLink'
 
-const clipboardIn = (target: Window): jest.Mock => {
-  const writeText = jest.fn().mockResolvedValue(undefined)
+const clipboardIn = (target: Window): Mock => {
+  const writeText = vi.fn().mockResolvedValue(undefined)
   Object.defineProperty(target.navigator, 'clipboard', {
     value: { writeText },
     configurable: true
@@ -18,7 +19,7 @@ describe('handleCopyLink', () => {
     overlay.document.body.appendChild(button)
     const ownClipboard = clipboardIn(window)
     const overlayClipboard = clipboardIn(overlay)
-    const setOpen = jest.fn()
+    const setOpen = vi.fn()
 
     handleCopyLink(new URL('https://meet.example/abc'), setOpen, button)
     await Promise.resolve()

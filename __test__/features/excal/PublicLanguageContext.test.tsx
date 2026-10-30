@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest'
 import {
   isValidLanguage,
   getBrowserLanguage,
@@ -5,18 +6,18 @@ import {
 } from '@public/context/PublicLanguageContext'
 
 describe('PublicLanguageContext Localization helpers', () => {
-  let languageSpy: jest.SpyInstance
-  let languagesSpy: jest.SpyInstance
+  let languageSpy: MockInstance
+  let languagesSpy: MockInstance
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     localStorage.clear()
-    languageSpy = jest.spyOn(window.navigator, 'language', 'get')
-    languagesSpy = jest.spyOn(window.navigator, 'languages', 'get')
+    languageSpy = vi.spyOn(window.navigator, 'language', 'get')
+    languagesSpy = vi.spyOn(window.navigator, 'languages', 'get')
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
     ;(window as unknown as { LANG: string | undefined }).LANG = undefined
   })
 

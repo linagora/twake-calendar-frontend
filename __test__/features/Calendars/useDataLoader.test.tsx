@@ -9,18 +9,18 @@
 import { useCalendarDataLoader } from '@common/features/Calendars/useCalendarLoader'
 import { act, renderHook } from '@testing-library/react'
 
-const mockDispatch = jest.fn()
-const mockGetState = jest.fn()
+const mockDispatch = vi.fn()
+const mockGetState = vi.fn()
 
-jest.mock('@common/app/hooks', () => ({
+vi.mock('@common/app/hooks', () => ({
   useAppDispatch: () => mockDispatch,
   useAppSelector: (selector: (s: unknown) => unknown) =>
     selector(mockGetState())
 }))
 
-const mockGetCalendarDetailAsync = jest.fn()
-jest.mock('@common/features/Calendars/CalendarSlice', () => ({
-  ...jest.requireActual('@common/features/Calendars/CalendarSlice'),
+const mockGetCalendarDetailAsync = vi.fn()
+vi.mock('@common/features/Calendars/CalendarSlice', async () => ({
+  ...(await vi.importActual('@common/features/Calendars/CalendarSlice')),
   getCalendarDetail: (args: unknown) => mockGetCalendarDetailAsync(args)
 }))
 
@@ -30,7 +30,7 @@ const FIRST_WEEK = {
 }
 let mockViewRange = FIRST_WEEK
 
-jest.mock('@common/utils/dateUtils', () => ({
+vi.mock('@common/utils/dateUtils', () => ({
   formatDateToYYYYMMDDTHHMMSS: (d: Date) => d.toISOString(),
   getViewRange: (_date: Date, _view: string) => mockViewRange,
   getAdjacentWeekRange: (_date: Date) => ({
@@ -39,15 +39,15 @@ jest.mock('@common/utils/dateUtils', () => ({
   })
 }))
 
-jest.mock('@common/components/Calendar/utils/constants', () => ({
+vi.mock('@common/components/Calendar/utils/constants', () => ({
   CALENDAR_VIEWS: { dayGridMonth: 'dayGridMonth' }
 }))
 
 /** Unwrappable dispatch mock that resolves immediately */
 function makeDispatchResult(ok = true) {
   const unwrap = ok
-    ? jest.fn().mockResolvedValue({})
-    : jest.fn().mockRejectedValue(new Error('API error'))
+    ? vi.fn().mockResolvedValue({})
+    : vi.fn().mockRejectedValue(new Error('API error'))
   const action = { unwrap }
   return action
 }
@@ -79,7 +79,7 @@ function renderCalendarLoader(
 
 describe('useCalendarDataLoader — bug: dispatch fires before store is ready', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDispatch.mockReturnValue(makeDispatchResult(true))
   })
 
@@ -178,7 +178,7 @@ describe('useCalendarDataLoader — bug: dispatch fires before store is ready', 
 
 describe('useCalendarDataLoader — normal fetch behaviour', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDispatch.mockReturnValue(makeDispatchResult(true))
   })
 
@@ -260,7 +260,7 @@ describe('useCalendarDataLoader — normal fetch behaviour', () => {
 
 describe('useCalendarDataLoader — cache-clear flow', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDispatch.mockReturnValue(makeDispatchResult(true))
   })
 
@@ -351,7 +351,7 @@ describe('useCalendarDataLoader — outdated ranges', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDispatch.mockReturnValue(makeDispatchResult(true))
   })
 
@@ -385,7 +385,7 @@ describe('useCalendarDataLoader — outdated ranges', () => {
     // the displayed range stale before it lands
     const pendingLoads: (() => void)[] = []
     mockDispatch.mockReturnValue({
-      unwrap: jest.fn(
+      unwrap: vi.fn(
         () => new Promise<void>(resolve => pendingLoads.push(resolve))
       )
     })
@@ -415,7 +415,7 @@ describe('useCalendarDataLoader — outdated ranges', () => {
 
 describe('useCalendarDataLoader — temp calendars', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDispatch.mockReturnValue(makeDispatchResult(true))
   })
 

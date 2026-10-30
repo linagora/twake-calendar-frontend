@@ -3,10 +3,10 @@ import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 describe('TimezoneSelector', () => {
-  const mockOnChange = jest.fn()
+  const mockOnChange = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders with initial timezone value', () => {

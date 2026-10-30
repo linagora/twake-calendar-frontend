@@ -1,22 +1,23 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
+import type { Mock } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useVideoConference } from '@common/components/Event/hooks/useVideoConference'
 import { createVideoConferenceRoom } from '@common/features/Events/VideoConferenceDao'
 
-jest.mock('@common/features/Events/VideoConferenceDao')
-jest.mock('@common/app/hooks', () => ({
-  useAppSelector: jest.fn(() => undefined)
+vi.mock('@common/features/Events/VideoConferenceDao')
+vi.mock('@common/app/hooks', () => ({
+  useAppSelector: vi.fn(() => undefined)
 }))
 
 const LOCAL_LINK_PATTERN = /^https:\/\/meet\.local\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
 
 describe('useVideoConference', () => {
-  const setHasVideoConference = jest.fn()
-  const setMeetingLink = jest.fn()
-  const setShowDescription = jest.fn()
+  const setHasVideoConference = vi.fn()
+  const setMeetingLink = vi.fn()
+  const setShowDescription = vi.fn()
   const originalBaseUrl = window.VIDEO_CONFERENCE_BASE_URL
   const originalIntegration = window.MEET_BACKEND_INTEGRATION
 
@@ -24,7 +25,7 @@ describe('useVideoConference', () => {
     renderHook(() =>
       useVideoConference({
         description: '',
-        setDescription: jest.fn(),
+        setDescription: vi.fn(),
         setHasVideoConference,
         setMeetingLink,
         showMore: true,
@@ -40,7 +41,7 @@ describe('useVideoConference', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     window.VIDEO_CONFERENCE_BASE_URL = 'https://meet.local'
   })
 
@@ -64,7 +65,7 @@ describe('useVideoConference', () => {
 
   it('uses the room created by the side service when enabled', async () => {
     window.MEET_BACKEND_INTEGRATION = true
-    ;(createVideoConferenceRoom as jest.Mock).mockResolvedValue(
+    ;(createVideoConferenceRoom as Mock).mockResolvedValue(
       'https://meet.example.com/vep-txbc-trh'
     )
 
@@ -78,7 +79,7 @@ describe('useVideoConference', () => {
 
   it('falls back to a local code when Meet is not configured', async () => {
     window.MEET_BACKEND_INTEGRATION = true
-    ;(createVideoConferenceRoom as jest.Mock).mockResolvedValue(null)
+    ;(createVideoConferenceRoom as Mock).mockResolvedValue(null)
 
     await addVideoConference()
 
@@ -89,12 +90,10 @@ describe('useVideoConference', () => {
 
   it('adds no video conference when the room creation fails', async () => {
     window.MEET_BACKEND_INTEGRATION = true
-    ;(createVideoConferenceRoom as jest.Mock).mockRejectedValue(
+    ;(createVideoConferenceRoom as Mock).mockRejectedValue(
       new Error('createVideoConferenceRoom failed with status 502')
     )
-    const consoleError = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const { result } = renderVideoConferenceHook()
     await act(async () => {
@@ -110,12 +109,10 @@ describe('useVideoConference', () => {
 
   it('clears the failure when retrying and when dismissed', async () => {
     window.MEET_BACKEND_INTEGRATION = true
-    ;(createVideoConferenceRoom as jest.Mock).mockRejectedValueOnce(
+    ;(createVideoConferenceRoom as Mock).mockRejectedValueOnce(
       new Error('Failed to fetch')
     )
-    const consoleError = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { result } = renderVideoConferenceHook()
     await act(async () => {
       result.current.handleAddVideoConference()
@@ -126,7 +123,7 @@ describe('useVideoConference', () => {
       result.current.dismissCreationFailure()
     })
     expect(result.current.hasCreationFailed).toBe(false)
-    ;(createVideoConferenceRoom as jest.Mock).mockResolvedValueOnce(
+    ;(createVideoConferenceRoom as Mock).mockResolvedValueOnce(
       'https://meet.example.com/vep-txbc-trh'
     )
     await act(async () => {
@@ -142,7 +139,7 @@ describe('useVideoConference', () => {
   it('reports the room creation as pending until it settles', async () => {
     window.MEET_BACKEND_INTEGRATION = true
     let resolveRoom: (url: string) => void = () => {}
-    ;(createVideoConferenceRoom as jest.Mock).mockReturnValue(
+    ;(createVideoConferenceRoom as Mock).mockReturnValue(
       new Promise<string>(resolve => {
         resolveRoom = resolve
       })
@@ -163,7 +160,7 @@ describe('useVideoConference', () => {
   it('creates a single room when adding twice while the request is pending', async () => {
     window.MEET_BACKEND_INTEGRATION = true
     let resolveRoom: (url: string) => void = () => {}
-    ;(createVideoConferenceRoom as jest.Mock).mockReturnValue(
+    ;(createVideoConferenceRoom as Mock).mockReturnValue(
       new Promise<string>(resolve => {
         resolveRoom = resolve
       })

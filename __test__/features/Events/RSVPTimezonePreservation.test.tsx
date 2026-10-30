@@ -92,19 +92,17 @@ function attendeeOf(jCal: VCalComponent): VObjectProperty | undefined {
 
 describe('#1031 partstat update preserves DTSTART timezone', () => {
   beforeEach(() => {
-    jest.restoreAllMocks()
-    jest
-      .spyOn(EventDao, 'fetchEventJCal')
-      .mockResolvedValue(
-        JSON.parse(JSON.stringify(STORED_JCAL)) as VCalComponent
-      )
+    vi.restoreAllMocks()
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(
+      JSON.parse(JSON.stringify(STORED_JCAL)) as VCalComponent
+    )
   })
 
   it('updates only PARTSTAT in the stored jCal, leaving DTSTART intact', async () => {
-    const putSpy = jest
+    const putSpy = vi
       .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    const dispatch = vi.fn()
 
     await handleRSVP({
       dispatch,
@@ -159,11 +157,11 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
         ]
       ]
     ]
-    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(noMatchJCal)
-    const putSpy = jest
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(noMatchJCal)
+    const putSpy = vi
       .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    const dispatch = vi.fn()
 
     await handleRSVP({
       dispatch,
@@ -178,11 +176,11 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
   })
 
   it('falls back to regeneration when there is no user email', async () => {
-    const fetchSpy = jest.spyOn(EventDao, 'fetchEventJCal')
-    const putSpy = jest
+    const fetchSpy = vi.spyOn(EventDao, 'fetchEventJCal')
+    const putSpy = vi
       .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    const dispatch = vi.fn()
 
     await handleRSVP({
       dispatch,
@@ -321,19 +319,17 @@ function recurrenceIdOf(vevent: VCalComponent): string | undefined {
 
 describe('#1088 solo RSVP on recurring event patches only the target exception', () => {
   beforeEach(() => {
-    jest.restoreAllMocks()
-    jest
-      .spyOn(EventDao, 'fetchEventJCal')
-      .mockResolvedValue(
-        JSON.parse(JSON.stringify(RECURRING_JCAL)) as VCalComponent
-      )
+    vi.restoreAllMocks()
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(
+      JSON.parse(JSON.stringify(RECURRING_JCAL)) as VCalComponent
+    )
   })
 
   it('updates PARTSTAT only in the matching exception VEVENT, leaving others intact', async () => {
-    const putSpy = jest
+    const putSpy = vi
       .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    const dispatch = vi.fn()
 
     const exceptionEvent = {
       uid: 'recurring-uid/2026-06-19T10:15:00',
@@ -389,10 +385,11 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
   })
 
   it('preserves the RECURRENCE-ID and DTSTART of the patched exception byte-for-byte', async () => {
-    jest
-      .spyOn(EventDao, 'putEvent')
-      .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    vi.spyOn(EventDao, 'putEvent').mockResolvedValue({
+      ok: true,
+      status: 200
+    } as Response)
+    const dispatch = vi.fn()
 
     const exceptionEvent = {
       uid: 'recurring-uid/2026-06-26T08:15:00',
@@ -408,7 +405,7 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
       ]
     } as unknown as CalendarEvent
 
-    const putSpy = jest.spyOn(EventDao, 'putEvent')
+    const putSpy = vi.spyOn(EventDao, 'putEvent')
 
     await handleRSVP({
       dispatch,
@@ -479,11 +476,12 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
         ]
       ]
     ]
-    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(noAttendeeJCal)
-    jest
-      .spyOn(EventDao, 'putEvent')
-      .mockResolvedValue({ ok: true, status: 200 } as Response)
-    const dispatch = jest.fn()
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(noAttendeeJCal)
+    vi.spyOn(EventDao, 'putEvent').mockResolvedValue({
+      ok: true,
+      status: 200
+    } as Response)
+    const dispatch = vi.fn()
 
     const exceptionEvent = {
       uid: 'recurring-uid/2026-06-19T10:15:00',

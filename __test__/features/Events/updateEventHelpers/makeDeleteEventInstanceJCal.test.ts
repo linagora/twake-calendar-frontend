@@ -94,7 +94,7 @@ const deletedUsCentralOccurrence = {
 } as unknown as CalendarEvent
 
 beforeEach(() => {
-  jest.clearAllMocks()
+  vi.clearAllMocks()
 })
 
 describe('makeDeleteEventInstanceJCal', () => {

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as SearchDAO from '@common/features/Search/SearchDAO'
 import searchResultReducer, {
   searchEvents,
@@ -6,7 +7,7 @@ import searchResultReducer, {
 } from '@common/features/Search/SearchSlice'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@common/features/Search/SearchDAO')
+vi.mock('@common/features/Search/SearchDAO')
 
 describe('SearchSlice', () => {
   let store: any
@@ -74,7 +75,7 @@ describe('SearchSlice', () => {
           ]
         }
       }
-      ;(SearchDAO.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+      ;(SearchDAO.searchEvent as Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
         searchEvents({ search: 'test', filters: mockFilters })
@@ -92,7 +93,7 @@ describe('SearchSlice', () => {
         _total_hits: 1,
         _embedded: { events: [] }
       }
-      ;(SearchDAO.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+      ;(SearchDAO.searchEvent as Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
         searchEvents({ search: 'test', filters: mockFilters })
@@ -111,7 +112,7 @@ describe('SearchSlice', () => {
         _total_hits: 0,
         _embedded: { events: [] }
       }
-      ;(SearchDAO.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+      ;(SearchDAO.searchEvent as Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
         searchEvents({ search: 'nonexistent', filters: mockFilters })
@@ -124,7 +125,7 @@ describe('SearchSlice', () => {
 
     it('should handle search error', async () => {
       const mockError = new Error('Network error')
-      ;(SearchDAO.searchEvent as jest.Mock).mockRejectedValue(mockError)
+      ;(SearchDAO.searchEvent as Mock).mockRejectedValue(mockError)
 
       await store.dispatch(
         searchEvents({ search: 'test', filters: mockFilters })
@@ -137,7 +138,7 @@ describe('SearchSlice', () => {
     })
 
     it('should set loading state during search', async () => {
-      ;(SearchDAO.searchEvent as jest.Mock).mockImplementation(
+      ;(SearchDAO.searchEvent as Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 100))
       )
 

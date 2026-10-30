@@ -9,7 +9,6 @@ import {
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { CalendarApi } from '@fullcalendar/core'
-import { jest } from '@jest/globals'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
@@ -18,13 +17,13 @@ import { userAttendee } from '@common/features/User/models/attendee'
 
 describe('CalendarApp integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const renderCalendar = () => {
@@ -86,12 +85,12 @@ describe('CalendarApp integration', () => {
   }
 
   it('renders the event on the calendar and calendarRef works', async () => {
-    const dispatch = jest.fn().mockReturnValue(
+    const dispatch = vi.fn().mockReturnValue(
       Object.assign(Promise.resolve({}), {
         unwrap: () => Promise.resolve({})
       })
     ) as unknown as AppDispatch
-    jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
 
     renderCalendar()
     const calendarRef: React.RefObject<CalendarApi | null> | undefined =
@@ -115,10 +114,9 @@ describe('CalendarApp integration', () => {
         const newEnd = new Date(oldEnd.getTime() + 1800000) // +30 min
 
         fcEvent?.setEnd(newEnd)
-
-        waitFor(() => expect(dispatch).toHaveBeenCalled())
       }
     })
+    await waitFor(() => expect(dispatch).toHaveBeenCalled())
   })
 
   const createPreloadedState = (eventProps = {}) => ({
@@ -327,22 +325,22 @@ describe('CalendarApp integration', () => {
       }
     }
     beforeAll(() => {
-      jest.useFakeTimers()
-      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
     })
 
     afterAll(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
     it('keeps all attendees event participation on title update', async () => {
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
           return () => promise as any
         })
-      const onClose = jest.fn()
+      const onClose = vi.fn()
       renderWithProviders(
         <EventUpdateModal
           eventId="event1"
@@ -394,14 +392,14 @@ describe('CalendarApp integration', () => {
     })
 
     it('changes normal attendee to need action on time update and no organizer changes', async () => {
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
           return () => promise as any
         })
-      const onClose = jest.fn()
+      const onClose = vi.fn()
       renderWithProviders(
         <EventUpdateModal
           eventId="event1"
@@ -428,7 +426,7 @@ describe('CalendarApp integration', () => {
 
       // Wait for blur handler to complete
       await act(async () => {
-        jest.advanceTimersByTime(150)
+        vi.advanceTimersByTime(150)
       })
 
       const saveButton = screen.getByRole('button', { name: /save/i })
@@ -467,16 +465,16 @@ describe('CalendarApp integration', () => {
     it('update event attendees on drag', async () => {
       // Mock dispatch locally — this test calls createEventHandlers directly
       // and does not go through the Redux store or useAppDispatch.
-      const mockDispatch = jest.fn().mockReturnValue(
+      const mockDispatch = vi.fn().mockReturnValue(
         Object.assign(Promise.resolve({}), {
           unwrap: () => Promise.resolve({})
         })
       ) as unknown as AppDispatch
-      jest
-        .spyOn(appHooks, 'useAppDispatch')
-        .mockReturnValue(mockDispatch as unknown as AppDispatch)
+      vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(
+        mockDispatch as unknown as AppDispatch
+      )
 
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -484,38 +482,36 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
-      jest
-        .spyOn(EventDao, 'fetchEvent')
-        .mockImplementation(async event =>
-          jCalFromIcs(
-            [
-              'BEGIN:VCALENDAR',
-              'VERSION:2.0',
-              'BEGIN:VEVENT',
-              `UID:${event.uid}`,
-              `SUMMARY:${event.title || 'Event'}`,
-              'DTSTART:20251114T103100Z',
-              'DTEND:20251114T113100Z',
-              'END:VEVENT',
-              'END:VCALENDAR'
-            ].join('\r\n')
-          )
+      vi.spyOn(EventDao, 'fetchEvent').mockImplementation(async event =>
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            `SUMMARY:${event.title || 'Event'}`,
+            'DTSTART:20251114T103100Z',
+            'DTEND:20251114T113100Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
         )
+      )
 
       const eventHandlers = createEventHandlers({
-        setSelectedRange: jest.fn(),
-        setOpenEventModal: jest.fn(),
-        setTempEvent: jest.fn(),
-        setOpenEventDisplay: jest.fn(),
+        setSelectedRange: vi.fn(),
+        setOpenEventModal: vi.fn(),
+        setTempEvent: vi.fn(),
+        setOpenEventDisplay: vi.fn(),
         dispatch: mockDispatch,
         calendarRange: { start: new Date(), end: new Date() },
-        setEventDisplayedId: jest.fn(),
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedId: vi.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         calendars: preloadedState.calendars.list,
-        setSelectedEvent: jest.fn(),
-        setAfterChoiceFunc: jest.fn(),
-        setOpenEditModePopup: jest.fn()
+        setSelectedEvent: vi.fn(),
+        setAfterChoiceFunc: vi.fn(),
+        setOpenEditModePopup: vi.fn()
       } as unknown as EventHandlersProps)
 
       const mockArg = {
@@ -560,16 +556,16 @@ describe('CalendarApp integration', () => {
     it('update event attendees on resize', async () => {
       // Mock dispatch locally — this test calls createEventHandlers directly
       // and does not go through the Redux store or useAppDispatch.
-      const mockDispatch = jest.fn().mockReturnValue(
+      const mockDispatch = vi.fn().mockReturnValue(
         Object.assign(Promise.resolve({}), {
           unwrap: () => Promise.resolve({})
         })
       ) as unknown as AppDispatch
-      jest
-        .spyOn(appHooks, 'useAppDispatch')
-        .mockReturnValue(mockDispatch as unknown as AppDispatch)
+      vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(
+        mockDispatch as unknown as AppDispatch
+      )
 
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -577,38 +573,36 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
-      jest
-        .spyOn(EventDao, 'fetchEvent')
-        .mockImplementation(async event =>
-          jCalFromIcs(
-            [
-              'BEGIN:VCALENDAR',
-              'VERSION:2.0',
-              'BEGIN:VEVENT',
-              `UID:${event.uid}`,
-              `SUMMARY:${event.title || 'Event'}`,
-              'DTSTART:20251114T103100Z',
-              'DTEND:20251114T113100Z',
-              'END:VEVENT',
-              'END:VCALENDAR'
-            ].join('\r\n')
-          )
+      vi.spyOn(EventDao, 'fetchEvent').mockImplementation(async event =>
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            `SUMMARY:${event.title || 'Event'}`,
+            'DTSTART:20251114T103100Z',
+            'DTEND:20251114T113100Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
         )
+      )
 
       const eventHandlers = createEventHandlers({
-        setSelectedRange: jest.fn(),
-        setOpenEventModal: jest.fn(),
-        setTempEvent: jest.fn(),
-        setOpenEventDisplay: jest.fn(),
+        setSelectedRange: vi.fn(),
+        setOpenEventModal: vi.fn(),
+        setTempEvent: vi.fn(),
+        setOpenEventDisplay: vi.fn(),
         dispatch: mockDispatch,
         calendarRange: { start: new Date(), end: new Date() },
-        setEventDisplayedId: jest.fn(),
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedId: vi.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         calendars: preloadedState.calendars.list,
-        setSelectedEvent: jest.fn(),
-        setAfterChoiceFunc: jest.fn(),
-        setOpenEditModePopup: jest.fn()
+        setSelectedEvent: vi.fn(),
+        setAfterChoiceFunc: vi.fn(),
+        setOpenEditModePopup: vi.fn()
       } as unknown as EventHandlersProps)
 
       const mockArg = {
@@ -651,13 +645,13 @@ describe('CalendarApp integration', () => {
     })
 
     it('hands the dropped time over as an instant, whatever the zone of the event', async () => {
-      const mockDispatch = jest.fn().mockReturnValue(
+      const mockDispatch = vi.fn().mockReturnValue(
         Object.assign(Promise.resolve({}), {
           unwrap: () => Promise.resolve({})
         })
       ) as unknown as AppDispatch
 
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -665,35 +659,33 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
-      jest
-        .spyOn(EventDao, 'fetchEvent')
-        .mockImplementation(async event =>
-          jCalFromIcs(
-            [
-              'BEGIN:VCALENDAR',
-              'VERSION:2.0',
-              'BEGIN:VEVENT',
-              `UID:${event.uid}`,
-              'SUMMARY:Shanghai',
-              'DTSTART;TZID=Asia/Shanghai:20251114T183100',
-              'DTEND;TZID=Asia/Shanghai:20251114T193100',
-              'END:VEVENT',
-              'END:VCALENDAR'
-            ].join('\r\n')
-          )
+      vi.spyOn(EventDao, 'fetchEvent').mockImplementation(async event =>
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            'SUMMARY:Shanghai',
+            'DTSTART;TZID=Asia/Shanghai:20251114T183100',
+            'DTEND;TZID=Asia/Shanghai:20251114T193100',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
         )
+      )
 
       const eventHandlers = createEventHandlers({
-        setSelectedRange: jest.fn(),
-        setOpenEventDisplay: jest.fn(),
+        setSelectedRange: vi.fn(),
+        setOpenEventDisplay: vi.fn(),
         dispatch: mockDispatch,
-        setEventDisplayedId: jest.fn(),
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedId: vi.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         calendars: preloadedState.calendars.list,
-        setSelectedEvent: jest.fn(),
-        setAfterChoiceFunc: jest.fn(),
-        setOpenEditModePopup: jest.fn(),
+        setSelectedEvent: vi.fn(),
+        setAfterChoiceFunc: vi.fn(),
+        setOpenEditModePopup: vi.fn(),
         timezone: 'Asia/Shanghai'
       } as unknown as EventHandlersProps)
 
@@ -717,13 +709,13 @@ describe('CalendarApp integration', () => {
     })
 
     it('keeps the zone of DTSTART when the event bundles the zone of the grid first', async () => {
-      const mockDispatch = jest.fn().mockReturnValue(
+      const mockDispatch = vi.fn().mockReturnValue(
         Object.assign(Promise.resolve({}), {
           unwrap: () => Promise.resolve({})
         })
       ) as unknown as AppDispatch
 
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -731,51 +723,49 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
-      jest
-        .spyOn(EventDao, 'fetchEvent')
-        .mockImplementation(async event =>
-          jCalFromIcs(
-            [
-              'BEGIN:VCALENDAR',
-              'VERSION:2.0',
-              'BEGIN:VTIMEZONE',
-              'TZID:Europe/Paris',
-              'BEGIN:STANDARD',
-              'TZOFFSETFROM:+0100',
-              'TZOFFSETTO:+0100',
-              'DTSTART:19700101T000000',
-              'END:STANDARD',
-              'END:VTIMEZONE',
-              'BEGIN:VTIMEZONE',
-              'TZID:Asia/Tokyo',
-              'BEGIN:STANDARD',
-              'TZOFFSETFROM:+0900',
-              'TZOFFSETTO:+0900',
-              'DTSTART:19700101T000000',
-              'END:STANDARD',
-              'END:VTIMEZONE',
-              'BEGIN:VEVENT',
-              `UID:${event.uid}`,
-              'SUMMARY:Tokyo',
-              'DTSTART;TZID=Asia/Tokyo:20251114T193100',
-              'DTEND;TZID=Asia/Tokyo:20251114T203100',
-              'END:VEVENT',
-              'END:VCALENDAR'
-            ].join('\r\n')
-          )
+      vi.spyOn(EventDao, 'fetchEvent').mockImplementation(async event =>
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VTIMEZONE',
+            'TZID:Europe/Paris',
+            'BEGIN:STANDARD',
+            'TZOFFSETFROM:+0100',
+            'TZOFFSETTO:+0100',
+            'DTSTART:19700101T000000',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'BEGIN:VTIMEZONE',
+            'TZID:Asia/Tokyo',
+            'BEGIN:STANDARD',
+            'TZOFFSETFROM:+0900',
+            'TZOFFSETTO:+0900',
+            'DTSTART:19700101T000000',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            'SUMMARY:Tokyo',
+            'DTSTART;TZID=Asia/Tokyo:20251114T193100',
+            'DTEND;TZID=Asia/Tokyo:20251114T203100',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
         )
+      )
 
       const eventHandlers = createEventHandlers({
-        setSelectedRange: jest.fn(),
-        setOpenEventDisplay: jest.fn(),
+        setSelectedRange: vi.fn(),
+        setOpenEventDisplay: vi.fn(),
         dispatch: mockDispatch,
-        setEventDisplayedId: jest.fn(),
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedId: vi.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         calendars: preloadedState.calendars.list,
-        setSelectedEvent: jest.fn(),
-        setAfterChoiceFunc: jest.fn(),
-        setOpenEditModePopup: jest.fn(),
+        setSelectedEvent: vi.fn(),
+        setAfterChoiceFunc: vi.fn(),
+        setOpenEditModePopup: vi.fn(),
         timezone: 'Europe/Paris'
       } as unknown as EventHandlersProps)
 
@@ -795,13 +785,13 @@ describe('CalendarApp integration', () => {
     })
 
     it('moves an all-day event to the dropped day, whatever the zone of the grid (#1651)', async () => {
-      const mockDispatch = jest.fn().mockReturnValue(
+      const mockDispatch = vi.fn().mockReturnValue(
         Object.assign(Promise.resolve({}), {
           unwrap: () => Promise.resolve({})
         })
       ) as unknown as AppDispatch
 
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -809,40 +799,38 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
-      jest
-        .spyOn(EventDao, 'fetchEvent')
-        .mockImplementation(async event =>
-          jCalFromIcs(
-            [
-              'BEGIN:VCALENDAR',
-              'VERSION:2.0',
-              'BEGIN:VTIMEZONE',
-              'TZID:Europe/Paris',
-              'BEGIN:STANDARD',
-              'TZOFFSETFROM:+0100',
-              'TZOFFSETTO:+0100',
-              'DTSTART:19700101T000000',
-              'END:STANDARD',
-              'END:VTIMEZONE',
-              'BEGIN:VEVENT',
-              `UID:${event.uid}`,
-              'SUMMARY:Mid allday',
-              'DTSTART;VALUE=DATE:20261021',
-              'DTEND;VALUE=DATE:20261022',
-              'END:VEVENT',
-              'END:VCALENDAR'
-            ].join('\r\n')
-          )
+      vi.spyOn(EventDao, 'fetchEvent').mockImplementation(async event =>
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VTIMEZONE',
+            'TZID:Europe/Paris',
+            'BEGIN:STANDARD',
+            'TZOFFSETFROM:+0100',
+            'TZOFFSETTO:+0100',
+            'DTSTART:19700101T000000',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            'SUMMARY:Mid allday',
+            'DTSTART;VALUE=DATE:20261021',
+            'DTEND;VALUE=DATE:20261022',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
         )
+      )
 
       const calId = '667037022b752d0026472254/cal1'
       const eventHandlers = createEventHandlers({
-        setSelectedRange: jest.fn(),
-        setOpenEventDisplay: jest.fn(),
+        setSelectedRange: vi.fn(),
+        setOpenEventDisplay: vi.fn(),
         dispatch: mockDispatch,
-        setEventDisplayedId: jest.fn(),
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedId: vi.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         calendars: {
           [calId]: {
             id: calId,
@@ -858,9 +846,9 @@ describe('CalendarApp integration', () => {
             }
           }
         },
-        setSelectedEvent: jest.fn(),
-        setAfterChoiceFunc: jest.fn(),
-        setOpenEditModePopup: jest.fn(),
+        setSelectedEvent: vi.fn(),
+        setAfterChoiceFunc: vi.fn(),
+        setOpenEditModePopup: vi.fn(),
         timezone: 'Europe/Paris'
       } as unknown as EventHandlersProps)
 

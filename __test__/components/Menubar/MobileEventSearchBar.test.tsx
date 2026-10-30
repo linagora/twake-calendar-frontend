@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao')
 
 const preloadedState = {
   user: {

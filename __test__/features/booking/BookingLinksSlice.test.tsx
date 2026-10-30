@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import reducer, {
   listBookingLinks,
@@ -7,7 +8,7 @@ import reducer, {
 import * as bookingDAO from '@common/features/booking/BookingDao'
 import { BookingLink } from '@common/features/booking/types/BookingTypes'
 
-jest.mock('@common/features/booking/BookingDao')
+vi.mock('@common/features/booking/BookingDao')
 
 const mockBookingLink: BookingLink = {
   publicId: '550e8400-e29b-41d4-a716-446655440000',
@@ -55,13 +56,13 @@ describe('BookingLinksSlice', () => {
   }
 
   beforeEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   describe('listBookingLinks thunk', () => {
     it('should fetch and store booking links', async () => {
       const store = configureStore({ reducer })
-      ;(bookingDAO.listBookingLinks as jest.Mock).mockResolvedValue([
+      ;(bookingDAO.listBookingLinks as Mock).mockResolvedValue([
         mockBookingLink,
         mockBookingLink2
       ])
@@ -78,7 +79,7 @@ describe('BookingLinksSlice', () => {
 
     it('should handle error when fetching fails', async () => {
       const store = configureStore({ reducer })
-      ;(bookingDAO.listBookingLinks as jest.Mock).mockRejectedValue(
+      ;(bookingDAO.listBookingLinks as Mock).mockRejectedValue(
         new Error('Network error')
       )
 
@@ -100,7 +101,7 @@ describe('BookingLinksSlice', () => {
           list: [mockBookingLink, mockBookingLink2]
         }
       })
-      ;(bookingDAO.deleteBookingLink as jest.Mock).mockResolvedValue(undefined)
+      ;(bookingDAO.deleteBookingLink as Mock).mockResolvedValue(undefined)
 
       await store.dispatch(deleteBookingLink(mockBookingLink.publicId))
 
@@ -117,7 +118,7 @@ describe('BookingLinksSlice', () => {
           list: [mockBookingLink]
         }
       })
-      ;(bookingDAO.deleteBookingLink as jest.Mock).mockRejectedValue(
+      ;(bookingDAO.deleteBookingLink as Mock).mockRejectedValue(
         new Error('Delete failed')
       )
 
@@ -146,8 +147,8 @@ describe('BookingLinksSlice', () => {
         durationMinutes: 45
       }
 
-      ;(bookingDAO.updateBookingLink as jest.Mock).mockResolvedValue(undefined)
-      ;(bookingDAO.getBookingLink as jest.Mock).mockResolvedValue(updatedLink)
+      ;(bookingDAO.updateBookingLink as Mock).mockResolvedValue(undefined)
+      ;(bookingDAO.getBookingLink as Mock).mockResolvedValue(updatedLink)
 
       await store.dispatch(
         updateBookingLink({
@@ -184,8 +185,8 @@ describe('BookingLinksSlice', () => {
         active: false
       }
 
-      ;(bookingDAO.updateBookingLink as jest.Mock).mockResolvedValue(undefined)
-      ;(bookingDAO.getBookingLink as jest.Mock).mockResolvedValue(updatedLink)
+      ;(bookingDAO.updateBookingLink as Mock).mockResolvedValue(undefined)
+      ;(bookingDAO.getBookingLink as Mock).mockResolvedValue(updatedLink)
 
       await store.dispatch(
         updateBookingLink({
@@ -210,7 +211,7 @@ describe('BookingLinksSlice', () => {
         }
       })
 
-      ;(bookingDAO.updateBookingLink as jest.Mock).mockRejectedValue(
+      ;(bookingDAO.updateBookingLink as Mock).mockRejectedValue(
         new Error('Update failed')
       )
 
@@ -244,8 +245,8 @@ describe('BookingLinksSlice', () => {
         resolveGetBookingLink = resolve
       })
 
-      ;(bookingDAO.updateBookingLink as jest.Mock).mockResolvedValue(undefined)
-      ;(bookingDAO.getBookingLink as jest.Mock).mockReturnValue(
+      ;(bookingDAO.updateBookingLink as Mock).mockResolvedValue(undefined)
+      ;(bookingDAO.getBookingLink as Mock).mockReturnValue(
         getBookingLinkPromise
       )
 

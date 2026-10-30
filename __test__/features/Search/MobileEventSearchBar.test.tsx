@@ -1,10 +1,11 @@
+import type { Mock } from 'vitest'
 import MobileSearchBar from '@common/components/Menubar/MobileEventSearchBar'
 import { searchPeople } from '@common/features/User/UserDao'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao')
 
 describe('MobileEventSearchBar', () => {
   const preloadedState = {
@@ -32,8 +33,8 @@ describe('MobileEventSearchBar', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(searchPeople as jest.Mock).mockResolvedValue([])
+    vi.clearAllMocks()
+    ;(searchPeople as Mock).mockResolvedValue([])
   })
 
   it('empties the field when the Clear button is tapped', async () => {

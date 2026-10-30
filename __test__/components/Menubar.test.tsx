@@ -28,7 +28,7 @@ describe('Menubar', () => {
 
   it('has navigation controls element with correct class', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
@@ -49,7 +49,7 @@ describe('Menubar', () => {
 
   it('has current date time element with correct class', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
@@ -70,7 +70,7 @@ describe('Menubar', () => {
 
   it('has refresh button element with correct class when enabled', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
     window.ENABLE_REFRESH_BUTTON = true
     const { container } = renderWithProviders(
@@ -91,7 +91,7 @@ describe('Menubar', () => {
 
   it('hide refresh button element when disabled', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
     const { container } = renderWithProviders(
       <Menubar
@@ -110,7 +110,7 @@ describe('Menubar', () => {
 
   it('has view selector element with correct class', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
@@ -131,7 +131,7 @@ describe('Menubar', () => {
 
   it('navigates to settings page when clicking Settings', async () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
 
     const preloadedStateWithSettings = {
@@ -163,7 +163,7 @@ describe('Menubar', () => {
 
   it('shows all elements in normal mode (not expanded)', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
@@ -188,7 +188,7 @@ describe('Menubar', () => {
 
   it('verifies CSS classes are correctly applied to elements', () => {
     const mockCalendarRef = { current: null }
-    const mockOnRefresh = jest.fn()
+    const mockOnRefresh = vi.fn()
     const mockCurrentDate = new Date('2024-04-15')
     window.ENABLE_REFRESH_BUTTON = true
 

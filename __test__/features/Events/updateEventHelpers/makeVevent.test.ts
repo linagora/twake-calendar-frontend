@@ -133,7 +133,7 @@ describe('RFC 5545 – DTEND', () => {
 })
 
 describe('all-day dates in a browser behind UTC (#1651)', () => {
-  // Stands for the zone of the browser, jest runs in UTC
+  // Stands for the zone of the browser, Vitest runs in UTC
   beforeEach(() => {
     moment.tz.setDefault('America/New_York')
   })

@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BookingMetaInfo } from '@public/components/Booking/BookingHeader/BookingMetaInfo'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: 'en-US'
   })
 }))
 
-jest.mock('@common/components/Timezone/TimezoneSelector', () => ({
+vi.mock('@common/components/Timezone/TimezoneSelector', () => ({
   TimezoneSelector: ({ value, onChange }: any) => (
     <select
       data-testid="timezone-selector"
@@ -23,7 +23,7 @@ jest.mock('@common/components/Timezone/TimezoneSelector', () => ({
 
 describe('BookingMetaInfo', () => {
   it('renders timezone selector with selected timezone and calls onTimezoneChange', () => {
-    const onTimezoneChange = jest.fn()
+    const onTimezoneChange = vi.fn()
     const referenceDate = new Date('2036-01-26T00:00:00.000Z')
 
     render(

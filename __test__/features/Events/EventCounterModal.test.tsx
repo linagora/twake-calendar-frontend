@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { EventCounterModal } from '@common/features/Events/AttendanceValidation/EventCounterModal'
 import { makeCounterProposalPayload } from '@common/features/Events/transformers/makeCounterProposalPayload'
 import * as EventDao from '@common/features/Events/EventDao'
@@ -5,14 +6,14 @@ import { ContextualizedEvent } from '@common/types/EventsTypes'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/Events/EventDao', () => ({
-  postCounterProposal: jest.fn()
+vi.mock('@common/features/Events/EventDao', () => ({
+  postCounterProposal: vi.fn()
 }))
 
-jest.mock(
+vi.mock(
   '@common/features/Events/transformers/makeCounterProposalPayload',
   () => ({
-    makeCounterProposalPayload: jest.fn(() => ({ ical: 'BEGIN:VCALENDAR' }))
+    makeCounterProposalPayload: vi.fn(() => ({ ical: 'BEGIN:VCALENDAR' }))
   })
 )
 
@@ -51,14 +52,14 @@ const makeContext = (
 
 describe('EventCounterModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('shows the validation error when the proposed end is not after the start', async () => {
     renderWithProviders(
       <EventCounterModal
         open
-        setOpen={jest.fn()}
+        setOpen={vi.fn()}
         contextualizedEvent={makeContext(
           '2099-01-15T20:00:00Z',
           '2099-01-15T20:00:00Z'
@@ -75,7 +76,7 @@ describe('EventCounterModal', () => {
   })
 
   it('refuses a proposed slot that is already past', async () => {
-    const setOpen = jest.fn()
+    const setOpen = vi.fn()
     renderWithProviders(
       <EventCounterModal
         open
@@ -103,11 +104,7 @@ describe('EventCounterModal', () => {
     const context = makeContext('2000-01-15', '2000-01-16')
     context.event.allday = true
     renderWithProviders(
-      <EventCounterModal
-        open
-        setOpen={jest.fn()}
-        contextualizedEvent={context}
-      />
+      <EventCounterModal open setOpen={vi.fn()} contextualizedEvent={context} />
     )
 
     fireEvent.click(screen.getByText('eventPreview.sendProposal'))
@@ -122,11 +119,7 @@ describe('EventCounterModal', () => {
     const context = makeContext('2099-01-15', '2099-01-16')
     context.event.allday = true
     renderWithProviders(
-      <EventCounterModal
-        open
-        setOpen={jest.fn()}
-        contextualizedEvent={context}
-      />
+      <EventCounterModal open setOpen={vi.fn()} contextualizedEvent={context} />
     )
 
     expect(
@@ -138,15 +131,11 @@ describe('EventCounterModal', () => {
   })
 
   it('sends the exclusive end date of an all day proposal', async () => {
-    ;(EventDao.postCounterProposal as jest.Mock).mockResolvedValue({ ok: true })
+    ;(EventDao.postCounterProposal as Mock).mockResolvedValue({ ok: true })
     const context = makeContext('2099-01-15', '2099-01-17')
     context.event.allday = true
     renderWithProviders(
-      <EventCounterModal
-        open
-        setOpen={jest.fn()}
-        contextualizedEvent={context}
-      />
+      <EventCounterModal open setOpen={vi.fn()} contextualizedEvent={context} />
     )
 
     expect(
@@ -166,8 +155,8 @@ describe('EventCounterModal', () => {
   })
 
   it('sends a proposed slot to come', async () => {
-    ;(EventDao.postCounterProposal as jest.Mock).mockResolvedValue({ ok: true })
-    const setOpen = jest.fn()
+    ;(EventDao.postCounterProposal as Mock).mockResolvedValue({ ok: true })
+    const setOpen = vi.fn()
     renderWithProviders(
       <EventCounterModal
         open
@@ -189,11 +178,9 @@ describe('EventCounterModal', () => {
   })
 
   it('shows an error when sending the proposal fails', async () => {
-    ;(EventDao.postCounterProposal as jest.Mock).mockRejectedValue(
-      new Error('boom')
-    )
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-    const setOpen = jest.fn()
+    ;(EventDao.postCounterProposal as Mock).mockRejectedValue(new Error('boom'))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const setOpen = vi.fn()
 
     renderWithProviders(
       <EventCounterModal
@@ -216,12 +203,12 @@ describe('EventCounterModal', () => {
   })
 
   it('shows the event and the proposal in the user time zone, not the organizer one', async () => {
-    ;(EventDao.postCounterProposal as jest.Mock).mockResolvedValue(undefined)
+    ;(EventDao.postCounterProposal as Mock).mockResolvedValue(undefined)
 
     renderWithProviders(
       <EventCounterModal
         open
-        setOpen={jest.fn()}
+        setOpen={vi.fn()}
         contextualizedEvent={makeContext(
           '2099-01-15T08:00:00Z',
           '2099-01-15T09:00:00Z',

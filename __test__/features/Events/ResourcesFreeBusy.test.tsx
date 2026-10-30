@@ -1,23 +1,24 @@
+import type { MockedFunction } from 'vitest'
 import { useResourcesFreeBusy } from '@common/components/Attendees/useResourcesFreeBusy'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import * as FreeBusyDao from '@common/features/Events/FreeBusyDao'
 import * as UserDao from '@common/features/User/UserDao'
 import { renderHook, waitFor } from '@testing-library/react'
 
-jest.mock('@common/features/Events/FreeBusyDao')
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Events/FreeBusyDao')
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/features/Calendars/CalendarDAO')
 
-const mockGetUserData = UserDao.fetchUserByEmail as jest.MockedFunction<
+const mockGetUserData = UserDao.fetchUserByEmail as MockedFunction<
   typeof UserDao.fetchUserByEmail
 >
-const mockREPORT = FreeBusyDao.fetchFreeBusyReports as jest.MockedFunction<
+const mockREPORT = FreeBusyDao.fetchFreeBusyReports as MockedFunction<
   typeof FreeBusyDao.fetchFreeBusyReports
 >
-const mockPOST = FreeBusyDao.fetchFreeBusyPost as jest.MockedFunction<
+const mockPOST = FreeBusyDao.fetchFreeBusyPost as MockedFunction<
   typeof FreeBusyDao.fetchFreeBusyPost
 >
-const mockGetCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
+const mockGetCalendars = CalendarDAO.fetchCalendars as MockedFunction<
   typeof CalendarDAO.fetchCalendars
 >
 
@@ -63,7 +64,7 @@ const busyPeriod = { start: '20260314T130000Z', end: '20260314T140000Z' }
 
 describe('useResourcesFreeBusy', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockGetCalendars.mockResolvedValue({
       _embedded: {
         'dav:calendar': [

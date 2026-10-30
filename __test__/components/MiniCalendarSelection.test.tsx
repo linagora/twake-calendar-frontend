@@ -8,7 +8,7 @@ describe('MiniCalendar selected day', () => {
     <MiniCalendar
       calendarRef={calendarRef}
       selectedDate={selectedDate}
-      setSelectedMiniDate={jest.fn()}
+      setSelectedMiniDate={vi.fn()}
     />
   )
   const dayTile = (year: number, month: number, date: number): HTMLElement =>

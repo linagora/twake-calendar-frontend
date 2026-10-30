@@ -12,7 +12,7 @@ import type { CalendarEvent } from '@common/types/EventsTypes'
 const HOST = 'https://space.test'
 
 describe('the frame of TwakeSpace', () => {
-  const postMessage = jest.fn()
+  const postMessage = vi.fn()
   const parent = { postMessage } as unknown as Window
   let stop: (() => void) | undefined
 

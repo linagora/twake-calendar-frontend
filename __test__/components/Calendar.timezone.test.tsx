@@ -32,12 +32,12 @@ const makeState = (timezone: string) => ({
 
 describe('Calendar – dayHeaderContent respects selected timezone', () => {
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   async function renderAtPivotTime(timezone: string): Promise<string[]> {
     // Set fake timers the same way the working test does — single chained call
-    jest.useFakeTimers().setSystemTime(PIVOT_UTC)
+    vi.useFakeTimers().setSystemTime(PIVOT_UTC)
 
     await act(async () => {
       renderWithProviders(<CalendarLayout />, makeState(timezone))
@@ -45,7 +45,7 @@ describe('Calendar – dayHeaderContent respects selected timezone', () => {
 
     // Advance past the debounce (300ms) like the working navigation test does
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     const calendarRef = window.__calendarRef

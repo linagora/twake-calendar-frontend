@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import * as CalendarSlice from '@common/features/Calendars/CalendarSlice'
@@ -7,18 +8,16 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/features/Calendars/CalendarDAO')
 
-const mockedSearchUsers = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
-const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
+const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
+const mockedFetchCalendars = CalendarDAO.fetchCalendars as MockedFunction<
   typeof CalendarDAO.fetchCalendars
 >
 
 describe('RegisterCalendars', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
   const mockUser = new SearchResponseItem({
     id: 'user123',
     emailAddresses: [{ value: 'user@example.com' }],
@@ -62,7 +61,7 @@ describe('RegisterCalendars', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('searches for users and displays their calendars', async () => {
@@ -109,7 +108,7 @@ describe('RegisterCalendars', () => {
   })
 
   it('adds selected calendars on save', async () => {
-    const addSharedCalendarSpy = jest
+    const addSharedCalendarSpy = vi
       .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
@@ -158,7 +157,7 @@ describe('RegisterCalendars', () => {
   })
 
   it('does not add calendars that already exist', async () => {
-    const addSharedCalendarSpy = jest
+    const addSharedCalendarSpy = vi
       .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
@@ -340,7 +339,7 @@ describe('RegisterCalendars', () => {
   })
 
   it('does not call addSharedCalendar when no calendars are selected', async () => {
-    const addSharedCalendarSpy = jest
+    const addSharedCalendarSpy = vi
       .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
@@ -366,7 +365,7 @@ describe('RegisterCalendars', () => {
     expect(addSharedCalendarSpy).not.toHaveBeenCalled()
   })
   it('BUGFIX : handles calendar with no apple:color', async () => {
-    const addSharedCalendarSpy = jest
+    const addSharedCalendarSpy = vi
       .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any

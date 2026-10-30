@@ -11,30 +11,30 @@ import React, { PropsWithChildren } from 'react'
 // Mock cozy-interapp
 // Like cozy-interapp, create() returns the intent creation request promise
 // and stop() is attached to the promise returned by start()
-const mockStart = jest.fn()
-const mockStop = jest.fn()
+const mockStart = vi.fn()
+const mockStop = vi.fn()
 const withStart = (creation: Promise<unknown>): Promise<unknown> =>
   Object.assign(creation, {
     start: (...args: unknown[]) =>
       Object.assign(mockStart(...args), { stop: mockStop })
   })
-const mockCreate = jest.fn()
+const mockCreate = vi.fn()
 
-jest.mock('cozy-interapp', () => {
-  return jest.fn().mockImplementation(() => ({
-    create: mockCreate
-  }))
-})
+vi.mock('cozy-interapp', () => ({
+  default: vi.fn().mockImplementation(function () {
+    return { create: mockCreate }
+  })
+}))
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key
   })
 }))
 
-const mockEnsureSdkSignedIn = jest.fn()
+const mockEnsureSdkSignedIn = vi.fn()
 
-jest.mock('@common/utils/sdkSession', () => ({
+vi.mock('@common/utils/sdkSession', () => ({
   ensureSdkSignedIn: (...args: unknown[]): unknown =>
     mockEnsureSdkSignedIn(...args)
 }))
@@ -69,7 +69,7 @@ describe('useTdrivePicker', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockEnsureSdkSignedIn.mockResolvedValue({ status: 'ready' })
     mockCreate.mockImplementation(() => withStart(Promise.resolve({})))
     // Default: start() calls onReadyToUse then resolves with a file
@@ -85,7 +85,7 @@ describe('useTdrivePicker', () => {
 
   it('initializes with closed state', () => {
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper() }
     )
 
@@ -103,7 +103,7 @@ describe('useTdrivePicker', () => {
     })
 
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper(defaultUserState) }
     )
 
@@ -153,7 +153,7 @@ describe('useTdrivePicker', () => {
 
   it("does not open without the user's platform", async () => {
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper() }
     )
 
@@ -168,7 +168,7 @@ describe('useTdrivePicker', () => {
 
   it('does not open when idToken is missing', async () => {
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       {
         wrapper: createWrapper({
           user: {
@@ -192,11 +192,11 @@ describe('useTdrivePicker', () => {
   })
 
   it('handles API errors gracefully', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     mockEnsureSdkSignedIn.mockRejectedValue(new Error('API Error'))
 
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       {
         wrapper: createWrapper({
           user: {
@@ -226,7 +226,7 @@ describe('useTdrivePicker', () => {
   })
 
   it('calls onFilesSelected with file from intent result', async () => {
-    const onFilesSelected = jest.fn()
+    const onFilesSelected = vi.fn()
 
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
       onReadyToUse?.()
@@ -277,7 +277,7 @@ describe('useTdrivePicker', () => {
     })
 
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper(defaultUserState) }
     )
 
@@ -301,7 +301,7 @@ describe('useTdrivePicker', () => {
     })
 
     const { result, unmount } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper(defaultUserState) }
     )
 
@@ -322,7 +322,7 @@ describe('useTdrivePicker', () => {
       return new Promise(() => {})
     })
 
-    const onFilesSelected = jest.fn()
+    const onFilesSelected = vi.fn()
     const { result } = renderHook(() => useTdrivePicker({ onFilesSelected }), {
       wrapper: createWrapper(defaultUserState)
     })
@@ -356,7 +356,7 @@ describe('useTdrivePicker', () => {
     mockStart.mockImplementation(() => new Promise(() => {}))
 
     const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      () => useTdrivePicker({ onFilesSelected: vi.fn() }),
       { wrapper: createWrapper(defaultUserState) }
     )
 
@@ -381,7 +381,7 @@ describe('useTdrivePicker', () => {
 
 describe('makeIntentFetch', () => {
   it('sends the intent requests through the SDK client', async () => {
-    const fetchJSON = jest.fn().mockResolvedValue({ data: { id: 'intent-1' } })
+    const fetchJSON = vi.fn().mockResolvedValue({ data: { id: 'intent-1' } })
     const intentFetch = makeIntentFetch({ fetchJSON } as unknown as Sdk)
 
     const response = await intentFetch('POST', '/intents', {
@@ -400,7 +400,7 @@ describe('makeIntentFetch', () => {
   })
 
   it('sends no body without one', async () => {
-    const fetchJSON = jest.fn().mockResolvedValue({})
+    const fetchJSON = vi.fn().mockResolvedValue({})
     const intentFetch = makeIntentFetch({ fetchJSON } as unknown as Sdk)
 
     await intentFetch('GET', '/intents/intent-1')

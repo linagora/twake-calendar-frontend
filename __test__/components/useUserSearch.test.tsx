@@ -1,20 +1,21 @@
+import type { Mock } from 'vitest'
 import { useUserSearch } from '@common/components/Attendees/useUserSearch'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import { searchPeople } from '@common/features/User/UserDao'
 import { act, renderHook } from '@testing-library/react'
 
-jest.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao')
 
-const mockSearchUsers = searchPeople as jest.Mock
+const mockSearchUsers = searchPeople as Mock
 
 describe('useUserSearch', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.clearAllMocks()
+    vi.useFakeTimers()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('should initialize with default values', () => {
@@ -56,7 +57,7 @@ describe('useUserSearch', () => {
 
     // Wait for the mock promise to resolve within act
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve() // allow microtasks to flush
     })
 
@@ -84,7 +85,7 @@ describe('useUserSearch', () => {
     })
 
     act(() => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     expect(mockSearchUsers).not.toHaveBeenCalled()
@@ -105,7 +106,7 @@ describe('useUserSearch', () => {
     })
 
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve() // allow microtasks to flush
     })
 

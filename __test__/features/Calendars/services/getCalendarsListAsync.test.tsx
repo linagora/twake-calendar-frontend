@@ -1,46 +1,51 @@
+import type { Mock } from 'vitest'
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import { getOwnerOrResourceData } from '@common/features/Calendars/services/helpers'
 import { normalizeCalendar } from '@common/features/Calendars/utils/normalizeCalendar'
 import { fetchCurrentUser } from '@common/features/User/UserDao'
-import { formatReduxError } from '@common/utils/errorUtils'
+import {
+  formatReduxError,
+  httpStatusOf,
+  toRejectedError
+} from '@common/utils/errorUtils'
 
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/features/Calendars/services/helpers', () => {
-  const originalModule = jest.requireActual(
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/features/Calendars/services/helpers', async () => {
+  const originalModule = await vi.importActual(
     '@common/features/Calendars/services/helpers'
   )
   return {
     __esModule: true,
     ...originalModule,
-    getOwnerOrResourceData: jest.fn()
+    getOwnerOrResourceData: vi.fn()
   }
 })
-jest.mock('@common/features/Calendars/CalendarDAO')
-jest.mock('@common/utils/errorUtils')
-jest.mock('@common/features/Calendars/utils/normalizeCalendar')
-jest.mock('@common/utils/getAccessiblePair', () => ({
-  getAccessiblePair: jest.fn().mockReturnValue('#FFF')
+vi.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/utils/errorUtils')
+vi.mock('@common/features/Calendars/utils/normalizeCalendar')
+vi.mock('@common/utils/getAccessiblePair', () => ({
+  getAccessiblePair: vi.fn().mockReturnValue('#FFF')
 }))
 
-jest.mock('@mui/material/styles', () => ({
-  createTheme: jest.fn().mockReturnValue({})
+vi.mock('@mui/material/styles', () => ({
+  createTheme: vi.fn().mockReturnValue({})
 }))
 
-const mockedFetchCurrentUser = fetchCurrentUser as jest.Mock
-const mockedGetOwnerOrResourceData = getOwnerOrResourceData as jest.Mock
-const mockedFetchCalendars = fetchCalendars as jest.Mock
-const mockedFormatReduxError = formatReduxError as jest.Mock
-const mockedNormalizeCalendar = normalizeCalendar as jest.Mock
+const mockedFetchCurrentUser = fetchCurrentUser as Mock
+const mockedGetOwnerOrResourceData = getOwnerOrResourceData as Mock
+const mockedFetchCalendars = fetchCalendars as Mock
+const mockedFormatReduxError = formatReduxError as Mock
+const mockedNormalizeCalendar = normalizeCalendar as Mock
 
 describe('getCalendarsList', () => {
-  let dispatch: jest.Mock
-  let getState: jest.Mock
+  let dispatch: Mock
+  let getState: Mock
 
   beforeEach(() => {
-    dispatch = jest.fn()
-    getState = jest.fn()
-    jest.clearAllMocks()
+    dispatch = vi.fn()
+    getState = vi.fn()
+    vi.clearAllMocks()
 
     mockedFormatReduxError.mockImplementation(err => {
       if (err?.message) return err.message
@@ -159,8 +164,7 @@ describe('getCalendarsList', () => {
     })
 
     // toRejectedError is imported from a mocked module; provide the expected return
-    const { toRejectedError } = jest.requireMock('@common/utils/errorUtils')
-    toRejectedError.mockReturnValueOnce({
+    ;(toRejectedError as Mock).mockReturnValueOnce({
       status: 500,
       message: 'Server Error'
     })
@@ -190,8 +194,7 @@ describe('getCalendarsList', () => {
     })
 
     // httpStatusOf is imported from a mocked module; provide the expected return
-    const { httpStatusOf } = jest.requireMock('@common/utils/errorUtils')
-    httpStatusOf.mockReturnValueOnce(404)
+    ;(httpStatusOf as Mock).mockReturnValueOnce(404)
 
     const thunk = getCalendarsList()
     const result = await thunk(dispatch, getState, undefined)

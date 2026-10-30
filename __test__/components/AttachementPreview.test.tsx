@@ -3,13 +3,13 @@ import { Attachment } from '@common/types/Attachment'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key
   })
 }))
 
-jest.mock(
+vi.mock(
   '@common/components/EventPreview/AttachementPreview/AttachementChip',
   () => ({
     AttachementChip: ({

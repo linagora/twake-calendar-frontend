@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { buildFromSelectedRange } from '@common/components/Event/utils/initialValues/dateResolvers'
@@ -13,7 +13,7 @@ import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import type { DateSelectArg } from '@fullcalendar/core'
 
-jest.mock('p-map', () => jest.fn())
+vi.mock('p-map', () => ({ default: vi.fn() }))
 
 const baseCalendar: Calendar = {
   id: 'user-1/cal-1',
@@ -68,7 +68,7 @@ const baseValues = {
 
 describe('handleCreateEvent - team calendar organizer handling', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('does NOT set organizer for team calendar when there are no attendees', async () => {

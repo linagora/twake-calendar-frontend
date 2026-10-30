@@ -128,7 +128,7 @@ describe('makeSearchEventParam', () => {
 
 describe('makeSeriesJCal', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('propagates summary changes to overrides', async () => {

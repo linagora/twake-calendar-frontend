@@ -1,7 +1,7 @@
 import { getInitials, stringToGradient } from '@common/utils/avatarUtils'
 
-jest.mock('@linagora/twake-mui', () => ({
-  nameToColor: jest.fn((name: string) => {
+vi.mock('@linagora/twake-mui', () => ({
+  nameToColor: vi.fn((name: string) => {
     if (!name) return undefined
     const colors = [
       'sunrise',

@@ -1,7 +1,7 @@
 import { translateDuration } from '@common/components/EventPreview/utils/parseDuration'
 
 describe('translateDuration', () => {
-  const mockT = jest.fn(
+  const mockT = vi.fn(
     (key: string, params?: { duration?: string; count?: number }) => {
       if (params) {
         if (key.includes('duration_')) {

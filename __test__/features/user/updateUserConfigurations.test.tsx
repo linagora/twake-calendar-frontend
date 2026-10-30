@@ -4,11 +4,11 @@ import { updateUserConfigurations } from '@common/features/User/UserSlice'
 
 describe('updateUserConfigurations', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('applies the saved changes', async () => {
-    jest.spyOn(UserDao, 'patchConfigurations').mockResolvedValue(undefined)
+    vi.spyOn(UserDao, 'patchConfigurations').mockResolvedValue(undefined)
     const store = setupStore()
 
     await store.dispatch(updateUserConfigurations({ language: 'fr' }))
@@ -18,9 +18,9 @@ describe('updateUserConfigurations', () => {
   })
 
   it('keeps a failed save out of the fatal user error (#1716)', async () => {
-    jest
-      .spyOn(UserDao, 'patchConfigurations')
-      .mockRejectedValue(new Error('Request failed with status code 500'))
+    vi.spyOn(UserDao, 'patchConfigurations').mockRejectedValue(
+      new Error('Request failed with status code 500')
+    )
     const store = setupStore()
     const languageBefore = store.getState().user.coreConfig.language
 

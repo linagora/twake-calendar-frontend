@@ -7,7 +7,7 @@ import {
   Slot
 } from '@common/features/booking/types/BookingTypes'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, unknown>) =>
       params ? `${key} ${JSON.stringify(params)}` : key,
@@ -15,15 +15,13 @@ jest.mock('twake-i18n', () => ({
   })
 }))
 
-jest.mock('@public/features/booking/BookingDao', () => ({
-  getBookedEvent: jest.fn()
+vi.mock('@public/features/booking/BookingDao', () => ({
+  getBookedEvent: vi.fn()
 }))
 
-jest.mock(
-  '@/components/Booking/BookingHeader/BookingOwnerInfo',
-  () => ({ BookingOwnerDisplay: () => null }),
-  { virtual: true }
-)
+vi.mock('@public/components/Booking/BookingHeader/BookingOwnerInfo', () => ({
+  BookingOwnerDisplay: () => null
+}))
 
 const bookingInfo = {
   owner: { displayName: 'alice' },
@@ -35,7 +33,7 @@ const renderDialog = (slot: Slot, selectedTimezone: string): void => {
     <TwakeMuiThemeProvider>
       <BookingSuccessDialog
         open
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         selectedSlot={slot}
         bookingInfo={bookingInfo}
         selectedTimezone={selectedTimezone}

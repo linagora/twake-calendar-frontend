@@ -5,7 +5,7 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 
 let emitSearchState: (state: SearchState) => void
 
-jest.mock('@common/components/Attendees/PeopleSearch', () => ({
+vi.mock('@common/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
     onSearchStateChange
   }: {
@@ -23,9 +23,9 @@ describe('SearchCalendarsDialog', () => {
         objectTypes={['resource']}
         open
         selectedUsers={[]}
-        onChange={jest.fn()}
-        onClose={jest.fn()}
-        onCloseRegister={jest.fn()}
+        onChange={vi.fn()}
+        onClose={vi.fn()}
+        onCloseRegister={vi.fn()}
       />
     )
   }

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { setSelectedCalendars } from '@common/utils/storage/setSelectedCalendars'
 import { useWebSocketConnection } from '@linagora/twake-websocket'
 import { registerToCalendars } from '@common/websocket/operations/registerToCalendars'
@@ -8,13 +9,13 @@ import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { I18nContext } from 'twake-i18n'
 
-jest.mock('@common/websocket/operations/registerToCalendars')
-jest.mock('@common/websocket/operations/unregisterToCalendars')
-jest.mock('@linagora/twake-websocket', () => {
+vi.mock('@common/websocket/operations/registerToCalendars')
+vi.mock('@common/websocket/operations/unregisterToCalendars')
+vi.mock('@linagora/twake-websocket', () => {
   return {
     __esModule: true,
 
-    useWebSocketConnection: jest.fn()
+    useWebSocketConnection: vi.fn()
   }
 })
 
@@ -61,16 +62,16 @@ describe('WebSocketGate', () => {
 
   const createMockSocket = (readyState = WebSocket.OPEN) => ({
     readyState,
-    close: jest.fn(),
-    send: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    cleanup: jest.fn(),
+    close: vi.fn(),
+    send: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    cleanup: vi.fn(),
     onmessage: null
   })
 
   const mockConnection = (socket: any = mockSocket) =>
-    (useWebSocketConnection as jest.Mock).mockReturnValue({
+    (useWebSocketConnection as Mock).mockReturnValue({
       socketRef: { current: socket },
       isOpen: socket.readyState === WebSocket.OPEN,
       epoch: 0
@@ -81,7 +82,7 @@ describe('WebSocketGate', () => {
     mockSocket = createMockSocket()
     localStorage.clear()
     window.WEBSOCKET_URL = 'ws://localhost/ws'
-    ;(useWebSocketConnection as jest.Mock).mockReturnValue({
+    ;(useWebSocketConnection as Mock).mockReturnValue({
       socketRef: { current: null },
       isOpen: false,
       epoch: 0
@@ -90,21 +91,21 @@ describe('WebSocketGate', () => {
 
   afterEach(() => {
     cleanup()
-    jest.clearAllMocks()
-    jest.clearAllTimers()
+    vi.clearAllMocks()
+    vi.clearAllTimers()
     localStorage.clear()
   })
 
   describe('Authentication', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
-      jest.clearAllMocks()
-      jest.resetModules()
+      vi.useFakeTimers()
+      vi.clearAllMocks()
+      vi.resetModules()
     })
 
     afterEach(() => {
-      jest.runOnlyPendingTimers()
-      jest.useRealTimers()
+      vi.runOnlyPendingTimers()
+      vi.useRealTimers()
     })
     it('disables the connection when user is not authenticated', () => {
       render(<TestWrapper store={createMockStore(null, null)} />)
@@ -129,7 +130,7 @@ describe('WebSocketGate', () => {
       )
 
       const connectingSocket = createMockSocket(WebSocket.CONNECTING)
-      ;(useWebSocketConnection as jest.Mock).mockResolvedValue(connectingSocket)
+      ;(useWebSocketConnection as Mock).mockResolvedValue(connectingSocket)
 
       render(<TestWrapper store={store} />)
 
@@ -205,7 +206,7 @@ describe('WebSocketGate', () => {
         ])
       })
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       await act(async () => {
         setSelectedCalendars(['cal1', 'cal2', 'cal3'])
@@ -231,7 +232,7 @@ describe('WebSocketGate', () => {
         expect(registerToCalendars).toHaveBeenCalled()
       })
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       await act(async () => {
         setSelectedCalendars(['cal1'])
@@ -257,7 +258,7 @@ describe('WebSocketGate', () => {
         expect(registerToCalendars).toHaveBeenCalled()
       })
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       await act(async () => {
         setSelectedCalendars(['cal1', 'cal3'])
@@ -274,10 +275,10 @@ describe('WebSocketGate', () => {
     })
 
     it('should handle registration errors and not update previous calendar list', async () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation()
+      const consoleError = vi.spyOn(console, 'error').mockImplementation()
       localStorage.setItem('selectedCalendars', JSON.stringify(['cal1']))
       mockConnection()
-      ;(registerToCalendars as jest.Mock).mockImplementation(() => {
+      ;(registerToCalendars as Mock).mockImplementation(() => {
         throw new Error('Registration failed')
       })
 
@@ -294,8 +295,8 @@ describe('WebSocketGate', () => {
         expect(mockSocket.close).not.toHaveBeenCalled()
       })
 
-      jest.clearAllMocks()
-      ;(registerToCalendars as jest.Mock).mockImplementation(() => {})
+      vi.clearAllMocks()
+      ;(registerToCalendars as Mock).mockImplementation(() => {})
 
       await act(async () => {
         setSelectedCalendars(['cal1', 'cal2'])
@@ -356,7 +357,7 @@ describe('WebSocketGate', () => {
         expect(registerToCalendars).toHaveBeenCalled()
       })
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       await act(async () => {
         mockSocket.readyState = WebSocket.CLOSED
@@ -364,14 +365,14 @@ describe('WebSocketGate', () => {
       })
 
       // Wait a bit to ensure the effect would have run if it was going to
-      jest.useFakeTimers()
-      jest.advanceTimersByTime(100)
-      jest.useRealTimers()
+      vi.useFakeTimers()
+      vi.advanceTimersByTime(100)
+      vi.useRealTimers()
       expect(registerToCalendars).not.toHaveBeenCalled()
     })
 
     it('should handle unregistration errors gracefully', async () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation()
+      const consoleError = vi.spyOn(console, 'error').mockImplementation()
       localStorage.setItem(
         'selectedCalendars',
         JSON.stringify(['cal1', 'cal2'])
@@ -383,8 +384,8 @@ describe('WebSocketGate', () => {
         expect(registerToCalendars).toHaveBeenCalled()
       })
 
-      jest.clearAllMocks()
-      ;(unregisterToCalendars as jest.Mock).mockImplementation(() => {
+      vi.clearAllMocks()
+      ;(unregisterToCalendars as Mock).mockImplementation(() => {
         throw new Error('Unregistration failed')
       })
 

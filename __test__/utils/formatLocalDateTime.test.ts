@@ -5,7 +5,7 @@ import {
 
 describe('formatLocalDateTime', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('formats a date in the given time zone as YYYY-MM-DDTHH:mm', () => {
@@ -21,9 +21,9 @@ describe('formatLocalDateTime', () => {
   })
 
   it('does not depend on the en-CA pattern of the engine (Safari yields MM/DD/YYYY)', () => {
-    jest
-      .spyOn(Intl.DateTimeFormat.prototype, 'format', 'get')
-      .mockReturnValue(() => '10/07/2026, 01:00')
+    vi.spyOn(Intl.DateTimeFormat.prototype, 'format', 'get').mockReturnValue(
+      () => '10/07/2026, 01:00'
+    )
 
     expect(
       formatLocalDateTime(new Date('2026-10-06T23:00:00Z'), 'Europe/Paris')

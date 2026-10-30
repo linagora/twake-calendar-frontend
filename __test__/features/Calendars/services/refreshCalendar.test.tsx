@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import reducer, {
   refreshCalendarWithSyncToken
@@ -8,8 +9,8 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@common/features/Calendars/CalendarDAO')
-jest.mock('@common/features/Events/EventDao')
+vi.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Events/EventDao')
 
 describe('refreshCalendarWithSyncToken', () => {
   const mockCalendar: Calendar = {
@@ -53,7 +54,7 @@ describe('refreshCalendarWithSyncToken', () => {
     })
 
   beforeEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   it('should return early if calendar has no syncToken', async () => {
@@ -93,7 +94,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -151,10 +152,10 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
-    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -217,10 +218,10 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
-    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -256,7 +257,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -276,9 +277,7 @@ describe('refreshCalendarWithSyncToken', () => {
 
   it('should handle API errors gracefully', async () => {
     const mockError = new Error('Network error')
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockRejectedValue(
-      mockError
-    )
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockRejectedValue(mockError)
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -300,7 +299,7 @@ describe('refreshCalendarWithSyncToken', () => {
       // Missing _embedded field
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -336,7 +335,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -398,10 +397,10 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
-    ;(EventDao.reportEvent as jest.Mock)
+    ;(EventDao.reportEvent as Mock)
       .mockRejectedValueOnce(new Error('Failed to fetch'))
       .mockResolvedValueOnce(mockEventData)
 
@@ -429,7 +428,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -462,7 +461,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -479,7 +478,7 @@ describe('refreshCalendarWithSyncToken', () => {
   })
 
   it('should outdate the loaded ranges when an event is created outside of the refreshed range', async () => {
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue({
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue({
       'sync-token': 'new-token',
       _embedded: {
         'dav:item': [
@@ -493,7 +492,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     })
     // The event has no instance within the displayed range
-    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue({
+    ;(EventDao.reportEvent as Mock).mockResolvedValue({
       data: [null, null, []],
       _links: {
         self: { href: '/calendars/user1/cal1/september-event.ics' }
@@ -520,7 +519,7 @@ describe('refreshCalendarWithSyncToken', () => {
   })
 
   it('should keep the loaded ranges when nothing changed', async () => {
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue({
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue({
       'sync-token': 'new-token',
       _embedded: { 'dav:item': [] }
     })
@@ -575,10 +574,10 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
-    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     await store.dispatch(
@@ -632,7 +631,7 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
@@ -702,14 +701,14 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     })
 
-    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+    ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
       mockSyncResponse
     )
 
     let concurrentCalls = 0
     let maxConcurrent = 0
 
-    ;(EventDao.reportEvent as jest.Mock).mockImplementation(async () => {
+    ;(EventDao.reportEvent as Mock).mockImplementation(async () => {
       concurrentCalls++
       maxConcurrent = Math.max(maxConcurrent, concurrentCalls)
       await new Promise(resolve => setTimeout(resolve, 10))
@@ -821,16 +820,14 @@ describe('refreshCalendarWithSyncToken', () => {
       })
 
     beforeEach(() => {
-      ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      ;(CalendarDAO.fetchSyncTokenChanges as Mock).mockResolvedValue(
         syncResponse
       )
-      ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(expandedOccurrence)
+      ;(EventDao.reportEvent as Mock).mockResolvedValue(expandedOccurrence)
     })
 
     it('keeps the recurrence rule of the series', async () => {
-      ;(EventDao.fetchEvent as jest.Mock).mockResolvedValue(
-        storedSeries('WEEKLY')
-      )
+      ;(EventDao.fetchEvent as Mock).mockResolvedValue(storedSeries('WEEKLY'))
       const store = storeWithOccurrence({ freq: 'weekly' })
 
       await store.dispatch(
@@ -844,9 +841,7 @@ describe('refreshCalendarWithSyncToken', () => {
     })
 
     it('reads the rule again rather than keeping the stored one', async () => {
-      ;(EventDao.fetchEvent as jest.Mock).mockResolvedValue(
-        storedSeries('DAILY')
-      )
+      ;(EventDao.fetchEvent as Mock).mockResolvedValue(storedSeries('DAILY'))
       const store = storeWithOccurrence({ freq: 'weekly' })
 
       await store.dispatch(
@@ -875,10 +870,8 @@ describe('refreshCalendarWithSyncToken', () => {
     })
 
     it('still applies the refresh when the series cannot be read', async () => {
-      jest.spyOn(console, 'error').mockImplementation(() => undefined)
-      ;(EventDao.fetchEvent as jest.Mock).mockRejectedValue(
-        new Error('network')
-      )
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      ;(EventDao.fetchEvent as Mock).mockRejectedValue(new Error('network'))
       const store = storeWithOccurrence({ freq: 'weekly' })
 
       const result = await store.dispatch(

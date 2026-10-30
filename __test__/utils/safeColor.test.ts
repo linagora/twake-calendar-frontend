@@ -15,7 +15,7 @@ describe('isSafeColor', () => {
     undefined,
     null,
     42
-  ])('refuses %p', color => {
+  ])('refuses %j', color => {
     expect(isSafeColor(color)).toBe(false)
   })
 })

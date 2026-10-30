@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import React from 'react'
@@ -15,10 +16,10 @@ function makeMockJwt(payload: object): string {
 }
 
 describe('useParseToken', () => {
-  let consoleSpy: jest.SpyInstance
+  let consoleSpy: MockInstance
 
   beforeEach((): void => {
-    consoleSpy = jest.spyOn(console, 'error').mockImplementation((): void => {})
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation((): void => {})
   })
 
   afterEach((): void => {

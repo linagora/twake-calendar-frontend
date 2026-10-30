@@ -2,11 +2,11 @@ import { screen, fireEvent, act } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 import TimezoneChangeAlert from '@common/components/Timezone/TimezoneChangeAlert'
 
-jest.mock('@common/features/User/UserSlice', () => {
-  const actual = jest.requireActual('@common/features/User/UserSlice')
+vi.mock('@common/features/User/UserSlice', async () => {
+  const actual = await vi.importActual('@common/features/User/UserSlice')
   return {
     ...actual,
-    updateUserConfigurations: jest.fn().mockImplementation(() => {
+    updateUserConfigurations: vi.fn().mockImplementation(() => {
       return () => {
         const mockPromise = Promise.resolve() as any
         mockPromise.unwrap = () => Promise.resolve()
@@ -22,20 +22,19 @@ describe('TimezoneChangeAlert', () => {
   beforeEach(() => {
     originalDateTimeFormat = Intl.DateTimeFormat
     // Mock localStorage
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null)
-    jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null)
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {})
     window.ASK_FOR_TZ_UPDATE = true
   })
 
   afterEach(() => {
     Intl.DateTimeFormat = originalDateTimeFormat
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   const mockBrowserTZ = (tz: string) => {
-    jest
-      .spyOn(Intl, 'DateTimeFormat')
-      .mockImplementation((locales, options) => {
+    vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(
+      function (locales, options) {
         const timeZone = options?.timeZone || tz
         let offset = 'UTC'
         if (timeZone === 'Asia/Ho_Chi_Minh') {
@@ -50,7 +49,8 @@ describe('TimezoneChangeAlert', () => {
           resolvedOptions: () => ({ timeZone }),
           formatToParts: () => [{ type: 'timeZoneName', value: offset }]
         } as any
-      })
+      }
+    )
   }
 
   const baseState = {
@@ -100,7 +100,7 @@ describe('TimezoneChangeAlert', () => {
 
   it('shows modal when auto-detect is enabled and browser TZ differs from last checked TZ', () => {
     mockBrowserTZ('Asia/Ho_Chi_Minh')
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('Europe/Paris')
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('Europe/Paris')
 
     const state = {
       settings: {
@@ -117,7 +117,7 @@ describe('TimezoneChangeAlert', () => {
 
   it('does not show modal when same TZ was already checked', () => {
     mockBrowserTZ('Asia/Ho_Chi_Minh')
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('Asia/Ho_Chi_Minh')
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('Asia/Ho_Chi_Minh')
 
     const state = baseState
 

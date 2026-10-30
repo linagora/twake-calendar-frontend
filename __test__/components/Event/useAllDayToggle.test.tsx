@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   AllDayToggleParams,
   toInclusiveAllDayEnd,
@@ -8,8 +9,8 @@ import { act, renderHook } from '@testing-library/react'
 const PARIS = 'Europe/Paris'
 const TONGATAPU = 'Pacific/Tongatapu'
 
-function untickAllDay(overrides: Partial<AllDayToggleParams> = {}): jest.Mock {
-  const onAllDayChange = jest.fn()
+function untickAllDay(overrides: Partial<AllDayToggleParams> = {}): Mock {
+  const onAllDayChange = vi.fn()
   const { result } = renderHook(() =>
     useAllDayToggle({
       allday: true,
@@ -20,11 +21,11 @@ function untickAllDay(overrides: Partial<AllDayToggleParams> = {}): jest.Mock {
       endDate: '2026-10-10',
       endTime: '',
       timezone: PARIS,
-      setStartTime: jest.fn(),
-      setEndTime: jest.fn(),
-      setStart: jest.fn(),
-      setEnd: jest.fn(),
-      setAllDay: jest.fn(),
+      setStartTime: vi.fn(),
+      setEndTime: vi.fn(),
+      setStart: vi.fn(),
+      setEnd: vi.fn(),
+      setAllDay: vi.fn(),
       onAllDayChange,
       ...overrides
     })
@@ -36,12 +37,12 @@ function untickAllDay(overrides: Partial<AllDayToggleParams> = {}): jest.Mock {
 
 describe('useAllDayToggle (#1514)', () => {
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('moves the end to the next day when the proposed slot crosses midnight', () => {
     // 22:30 in Paris
-    jest.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
 
     const onAllDayChange = untickAllDay()
 
@@ -54,7 +55,7 @@ describe('useAllDayToggle (#1514)', () => {
 
   it('keeps the event day when the proposed slot does not cross midnight', () => {
     // 14:30 in Paris
-    jest.useFakeTimers().setSystemTime(new Date('2026-10-05T12:30:00Z'))
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-05T12:30:00Z'))
 
     const onAllDayChange = untickAllDay()
 
@@ -67,7 +68,7 @@ describe('useAllDayToggle (#1514)', () => {
 
   it('keeps the last day of a multi-day event when the slot crosses midnight', () => {
     // 22:30 in Paris
-    jest.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
 
     const onAllDayChange = untickAllDay({
       end: '2026-10-12',
@@ -83,7 +84,7 @@ describe('useAllDayToggle (#1514)', () => {
 
   it('proposes the next round hour in the zone of the event, not in the one of the browser', () => {
     // 09:30 in Tongatapu (UTC+13)
-    jest.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-05T20:30:00Z'))
 
     const onAllDayChange = untickAllDay({ timezone: TONGATAPU })
 
@@ -102,9 +103,9 @@ function renderToggle(
 ): {
   result: { current: ReturnType<typeof useAllDayToggle> }
   rerender: (props: { allday: boolean; start: string; end: string }) => void
-  onAllDayChange: jest.Mock
+  onAllDayChange: Mock
 } {
-  const onAllDayChange = jest.fn()
+  const onAllDayChange = vi.fn()
   const { result, rerender } = renderHook(
     props =>
       useAllDayToggle({
@@ -113,11 +114,11 @@ function renderToggle(
         startTime: props.start.split('T')[1] ?? '',
         endDate: props.end.split('T')[0],
         endTime: props.end.split('T')[1] ?? '',
-        setStartTime: jest.fn(),
-        setEndTime: jest.fn(),
-        setStart: jest.fn(),
-        setEnd: jest.fn(),
-        setAllDay: jest.fn(),
+        setStartTime: vi.fn(),
+        setEndTime: vi.fn(),
+        setStart: vi.fn(),
+        setEnd: vi.fn(),
+        setAllDay: vi.fn(),
         onAllDayChange
       }),
     { initialProps: { allday, start, end } }

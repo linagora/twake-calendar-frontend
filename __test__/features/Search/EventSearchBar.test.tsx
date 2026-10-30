@@ -6,7 +6,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao')
 const mockedSearchPeople = searchPeople
 
 describe('EventSearchBar', () => {
@@ -248,7 +248,7 @@ describe('EventSearchBar', () => {
   })
 
   it('should trigger search on Enter key', async () => {
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, preloadedState)
 
@@ -308,7 +308,7 @@ describe('EventSearchBar', () => {
     }
 
     it('searches the team calendars for "Team calendars"', async () => {
-      const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+      const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
       renderWithProviders(<SearchBar />, withTeamCalendar('team-calendars'))
 
       searchFor('standup')
@@ -323,7 +323,7 @@ describe('EventSearchBar', () => {
     })
 
     it('leaves the team calendars out of "Shared calendars"', async () => {
-      const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+      const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
       renderWithProviders(<SearchBar />, withTeamCalendar('shared-calendars'))
 
       searchFor('standup')
@@ -341,7 +341,7 @@ describe('EventSearchBar', () => {
   })
 
   it('should search the keyword in the field, not the previous one, on a second search', async () => {
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, preloadedState)
 
@@ -381,7 +381,7 @@ describe('EventSearchBar', () => {
     })
     mockedSearchPeople.mockResolvedValueOnce([mockUser])
 
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, preloadedState)
 
@@ -412,7 +412,7 @@ describe('EventSearchBar', () => {
     expect(searchSpy).toHaveBeenCalledTimes(1)
   })
   it('should not trigger search on Enter key when search is empty', async () => {
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, preloadedState)
 
@@ -428,7 +428,7 @@ describe('EventSearchBar', () => {
   })
 
   it('should not trigger search when filter keywords is empty', async () => {
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, preloadedState)
 
@@ -446,7 +446,7 @@ describe('EventSearchBar', () => {
     })
   })
   it('keeps the organizers picked in the filters when reopening them', async () => {
-    const searchSpy = jest.spyOn(searchThunk, 'searchEvents')
+    const searchSpy = vi.spyOn(searchThunk, 'searchEvents')
 
     renderWithProviders(<SearchBar />, {
       ...preloadedState,

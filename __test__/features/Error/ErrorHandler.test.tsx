@@ -3,7 +3,7 @@ import { EventErrorHandler } from '@common/components/Error/EventErrorHandler'
 describe('EventErrorHandler', () => {
   it('calls the callback when a new error is reported', () => {
     const handler = new EventErrorHandler()
-    const callback = jest.fn()
+    const callback = vi.fn()
 
     handler.setErrorCallback(callback)
     handler.reportError('123', 'Something broke')
@@ -13,7 +13,7 @@ describe('EventErrorHandler', () => {
 
   it('does not duplicate errors for same eventId', () => {
     const handler = new EventErrorHandler()
-    const callback = jest.fn()
+    const callback = vi.fn()
 
     handler.setErrorCallback(callback)
     handler.reportError('A', 'Error 1')
@@ -24,7 +24,7 @@ describe('EventErrorHandler', () => {
 
   it('clears errors properly', () => {
     const handler = new EventErrorHandler()
-    const callback = jest.fn()
+    const callback = vi.fn()
 
     handler.setErrorCallback(callback)
     handler.reportError('A', 'Error 1')

@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import {
@@ -12,9 +12,9 @@ import { prepareUpdateData } from '@common/features/Events/hooks/submitUpdateHel
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 
-jest.mock('p-map', () => jest.fn())
-jest.mock('@common/features/Events/hooks/submitUpdateHelpers/utils', () => ({
-  prepareUpdateData: jest.fn(() => null)
+vi.mock('p-map', () => ({ default: vi.fn() }))
+vi.mock('@common/features/Events/hooks/submitUpdateHelpers/utils', () => ({
+  prepareUpdateData: vi.fn(() => null)
 }))
 
 const params = (typeOfAction?: 'all' | 'solo'): HandleUpdateSubmitParams => ({
@@ -35,15 +35,15 @@ const params = (typeOfAction?: 'all' | 'solo'): HandleUpdateSubmitParams => ({
   calId: 'cal',
   eventId: 'uid',
   typeOfAction,
-  onClose: jest.fn(),
-  dispatch: jest.fn()
+  onClose: vi.fn(),
+  dispatch: vi.fn()
 })
 
 const submittedValues = (): EventFormValues =>
-  jest.mocked(prepareUpdateData).mock.calls[0][0].values
+  vi.mocked(prepareUpdateData).mock.calls[0][0].values
 
 describe('handleUpdateSubmit - weekly series on chosen weekdays (#1581)', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => vi.clearAllMocks())
 
   it('moves the series start to the first selected weekday', async () => {
     await handleUpdateSubmit(params('all'))

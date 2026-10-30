@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import { api } from '@common/utils/apiUtils'
 import * as timezoneUtils from '@common/utils/timezone'
@@ -5,11 +6,11 @@ import '@testing-library/jest-dom'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 describe('SettingsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     localStorage.clear()
   })
 
@@ -160,7 +161,7 @@ describe('SettingsPage', () => {
   })
 
   it('updates language immediately (optimistic update) and calls API in background', async () => {
-    ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+    ;(api.patch as Mock).mockResolvedValue({ status: 204 })
 
     const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -206,7 +207,7 @@ describe('SettingsPage', () => {
   })
 
   it('saves language change to localStorage immediately (optimistic update)', async () => {
-    ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+    ;(api.patch as Mock).mockResolvedValue({ status: 204 })
 
     renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -227,7 +228,7 @@ describe('SettingsPage', () => {
   })
 
   it('rolls back language change if API call fails', async () => {
-    ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+    ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
     const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -273,7 +274,7 @@ describe('SettingsPage', () => {
 
   describe('Timezone Settings', () => {
     beforeEach(() => {
-      ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+      ;(api.patch as Mock).mockResolvedValue({ status: 204 })
     })
     it('displays timezone selector in Settings tab', () => {
       renderWithProviders(<SettingsPage />, preloadedState)
@@ -407,8 +408,8 @@ describe('SettingsPage', () => {
         )
       })
 
-      jest.clearAllMocks()
-      ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+      vi.clearAllMocks()
+      ;(api.patch as Mock).mockResolvedValue({ status: 204 })
 
       fireEvent.mouseDown(timezoneInput)
       const laOption = await screen.findByText(/America\/Los Angeles/i)
@@ -561,7 +562,7 @@ describe('SettingsPage', () => {
     })
 
     it('rolls back timezone change if API call fails', async () => {
-      ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+      ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
       const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -593,7 +594,7 @@ describe('SettingsPage', () => {
     })
 
     it('rolls back browser default change if API call fails', async () => {
-      ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+      ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
       const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -648,7 +649,7 @@ describe('SettingsPage', () => {
         }
       }
 
-      jest.spyOn(timezoneUtils, 'getTimezoneOffset').mockReturnValue('UTC')
+      vi.spyOn(timezoneUtils, 'getTimezoneOffset').mockReturnValue('UTC')
 
       renderWithProviders(<SettingsPage />, stateWithoutTimeZone)
 
@@ -710,7 +711,7 @@ describe('SettingsPage', () => {
 
     describe('Alarm Emails Settings', () => {
       beforeEach(() => {
-        ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+        ;(api.patch as Mock).mockResolvedValue({ status: 204 })
       })
 
       it('displays alarmEmails toggle with correct initial state', () => {
@@ -758,7 +759,7 @@ describe('SettingsPage', () => {
       })
 
       it('updates alarmEmails immediately (optimistic update) and calls API in background', async () => {
-        ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+        ;(api.patch as Mock).mockResolvedValue({ status: 204 })
 
         const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -802,7 +803,7 @@ describe('SettingsPage', () => {
       })
 
       it('rolls back alarmEmails change if API call fails', async () => {
-        ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+        ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
         const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
@@ -829,7 +830,7 @@ describe('SettingsPage', () => {
       })
 
       it('sends false value when toggle is turned off', async () => {
-        ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+        ;(api.patch as Mock).mockResolvedValue({ status: 204 })
 
         const stateWithAlarmEmailsEnabled = {
           ...preloadedState,

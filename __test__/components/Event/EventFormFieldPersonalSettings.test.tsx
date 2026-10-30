@@ -18,12 +18,12 @@ describe('EventFormFieldPersonalSettings', () => {
           alarms: Valarms.fromList([])
         }}
         typeOfAction="solo"
-        setCalendarid={jest.fn()}
+        setCalendarid={vi.fn()}
         userPersonalCalendars={[]}
         showMore={false}
-        setAlarms={jest.fn()}
-        setBusy={jest.fn()}
-        setEventClass={jest.fn()}
+        setAlarms={vi.fn()}
+        setBusy={vi.fn()}
+        setEventClass={vi.fn()}
         isOrganizer={false}
         user={{ cal_address: 'mailto:bob@example.com' } as userAttendee}
       />,

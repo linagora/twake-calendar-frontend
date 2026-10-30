@@ -1,21 +1,20 @@
 import * as appHooks from '@common/app/hooks'
 import { AppDispatch } from '@common/app/store'
 import CalendarLayout from '@private/components/Calendar/CalendarLayout'
-import { jest } from '@jest/globals'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 describe('MiniCalendar', () => {
   const day = new Date()
   beforeEach(() => {
-    jest.clearAllMocks()
-    const dispatch = jest.fn().mockReturnValue(
+    vi.clearAllMocks()
+    const dispatch = vi.fn().mockReturnValue(
       Object.assign(Promise.resolve({}), {
         unwrap: () => Promise.resolve({})
       })
     ) as unknown as AppDispatch
-    jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
-    jest.useFakeTimers().clearAllTimers()
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
+    vi.useFakeTimers().clearAllTimers()
   })
 
   const renderCalendar = () => {

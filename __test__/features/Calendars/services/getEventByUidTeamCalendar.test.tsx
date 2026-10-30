@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import reducer, {
   getEventByUid
@@ -5,9 +6,9 @@ import reducer, {
 import { Calendar } from '@common/types/CalendarTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@common/features/Calendars/CalendarDAO', () => ({
-  ...jest.requireActual('@common/features/Calendars/CalendarDAO'),
-  fetchEventByUid: jest.fn()
+vi.mock('@common/features/Calendars/CalendarDAO', async () => ({
+  ...(await vi.importActual('@common/features/Calendars/CalendarDAO')),
+  fetchEventByUid: vi.fn()
 }))
 
 const TEAM_CAL_ID = 'team1/team1'
@@ -78,11 +79,11 @@ const storeFactory = () =>
     }
   })
 
-const fetchEventByUid = CalendarDAO.fetchEventByUid as jest.Mock
+const fetchEventByUid = CalendarDAO.fetchEventByUid as Mock
 
 describe('getEventByUid on a team calendar', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it("looks in the team's home once the user's home does not hold the event", async () => {

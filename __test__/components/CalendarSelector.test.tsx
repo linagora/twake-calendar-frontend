@@ -3,7 +3,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/useScreenSizeDetection', () => ({
+vi.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: (): { isTooSmall: boolean; isTablet: boolean } => ({
     isTooSmall: true,
     isTablet: false
@@ -20,7 +20,7 @@ describe('CalendarSelector on mobile', () => {
     events: {}
   }
 
-  const renderSelector = (setImportTarget = jest.fn()) =>
+  const renderSelector = (setImportTarget = vi.fn()) =>
     renderWithProviders(
       <CalendarSelector
         userId="user1"
@@ -49,7 +49,7 @@ describe('CalendarSelector on mobile', () => {
   })
 
   it('selects the tapped calendar as import destination', () => {
-    const setImportTarget = jest.fn()
+    const setImportTarget = vi.fn()
     renderSelector(setImportTarget)
 
     fireEvent.click(screen.getByRole('button', { name: /new_calendar/i }))

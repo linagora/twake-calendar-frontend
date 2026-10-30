@@ -6,24 +6,24 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 
 let mockTwakeSpace: object | null = null
 
-jest.mock('@common/features/Embed/twakeSpace', () => ({
+vi.mock('@common/features/Embed/twakeSpace', () => ({
   get twakeSpace(): object | null {
     return mockTwakeSpace
   }
 }))
 
-const mockGetPlatformSdk = jest.fn()
+const mockGetPlatformSdk = vi.fn()
 
-jest.mock('@common/utils/sdkSession', () => ({
+vi.mock('@common/utils/sdkSession', () => ({
   getPlatformSdk: (platformURL: string): unknown =>
     mockGetPlatformSdk(platformURL)
 }))
 
-const mockTwakeBar = jest.fn()
+const mockTwakeBar = vi.fn()
 
 // The bar itself is tested in its own package: only what calendar gives it
 // matters here
-jest.mock('@linagora/twake-bar', () => ({
+vi.mock('@linagora/twake-bar', () => ({
   TWAKE_BAR_HEIGHT: '3rem',
   SdkProvider: ({ children }: { children: React.ReactNode }): JSX.Element => (
     <div data-testid="sdk-provider">{children}</div>
@@ -68,7 +68,7 @@ describe('TwakeBarHeader', () => {
 
   afterEach(() => {
     document.documentElement.style.removeProperty('--twake-bar-height')
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('does nothing when TwakeSpace frames calendar', () => {

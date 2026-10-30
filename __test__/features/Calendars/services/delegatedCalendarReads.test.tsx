@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import reducer, {
   getCalendarDetail,
@@ -6,10 +7,10 @@ import reducer, {
 import { Calendar } from '@common/types/CalendarTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@common/features/Calendars/CalendarDAO', () => ({
-  ...jest.requireActual('@common/features/Calendars/CalendarDAO'),
-  fetchCalendar: jest.fn(),
-  fetchEventByUid: jest.fn()
+vi.mock('@common/features/Calendars/CalendarDAO', async () => ({
+  ...(await vi.importActual('@common/features/Calendars/CalendarDAO')),
+  fetchCalendar: vi.fn(),
+  fetchEventByUid: vi.fn()
 }))
 
 const OWNER_CAL_ID = 'owner1/cal1'
@@ -63,11 +64,11 @@ const storeFactory = () =>
 
 describe('reading a calendar shared with the user', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it("loads the events of the time range through the sharee's instance", async () => {
-    ;(CalendarDAO.fetchCalendar as jest.Mock).mockResolvedValue({
+    ;(CalendarDAO.fetchCalendar as Mock).mockResolvedValue({
       _embedded: { 'sync-token': 'token-1', 'dav:item': [item] }
     })
     const store = storeFactory()
@@ -91,7 +92,7 @@ describe('reading a calendar shared with the user', () => {
   })
 
   it('resolves an event found by UID in the instance to the shared calendar', async () => {
-    ;(CalendarDAO.fetchEventByUid as jest.Mock).mockResolvedValue({
+    ;(CalendarDAO.fetchEventByUid as Mock).mockResolvedValue({
       _embedded: { 'dav:item': [item] }
     })
     const store = storeFactory()
