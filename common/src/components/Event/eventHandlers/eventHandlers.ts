@@ -1,7 +1,5 @@
 import { AppDispatch } from '@common/app/store'
 import {
-  deleteEventInstance,
-  deleteEvent,
   putEvent as putEventAsync,
   updateEventInstance,
   updateEventLocal,
@@ -261,30 +259,5 @@ export async function handleRSVP({
       rsvp,
       fallbackEvent: newEvent
     })
-  }
-}
-
-export async function handleDelete(
-  isRecurring: boolean,
-  typeOfAction: 'solo' | 'all' | undefined,
-  onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void,
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  event: CalendarEvent,
-  calId: string,
-  eventId: string
-): Promise<void> {
-  onClose({}, 'backdropClick')
-
-  if (isRecurring && typeOfAction === 'solo') {
-    await dispatch(deleteEventInstance({ cal: calendar, event }))
-  } else {
-    await dispatch(
-      deleteEvent({
-        calId,
-        eventId,
-        eventURL: event.URL
-      })
-    )
   }
 }

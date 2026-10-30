@@ -9,3 +9,8 @@ export { setCalendarErrorReducer } from './setCalendarErrorReducer'
 export { setIsMobileSearchOpenReducer } from './setIsMobileSearchOpenReducer'
 export { updateCalColorReducer } from './updateCalColorReducer'
 export { updateEventLocalReducer } from './updateEventLocalReducer'
+export {
+  addPendingDeletionReducer,
+  markPendingDeletionCommittingReducer,
+  removePendingDeletionReducer
+} from './pendingDeletionReducers'

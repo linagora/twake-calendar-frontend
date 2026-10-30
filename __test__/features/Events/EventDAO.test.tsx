@@ -136,7 +136,8 @@ describe('eventDAO', () => {
     await deleteEvent({ URL: '/calendars/test.ics' })
 
     expect(api).toHaveBeenCalledWith('dav/calendars/test.ics', {
-      method: 'DELETE'
+      method: 'DELETE',
+      keepalive: true
     })
   })
 

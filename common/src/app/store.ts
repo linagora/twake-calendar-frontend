@@ -1,5 +1,6 @@
 import eventsCalendar from '@common/features/Calendars/CalendarSlice'
 import { postMutationRefreshMiddleware } from '@common/features/Calendars/listeners/postMutationRefresh'
+import { resumeUnsentDeletionsMiddleware } from '@common/features/Calendars/listeners/resumeUnsentDeletions'
 import bookingLinksReducer from '@common/features/booking/BookingLinksSlice'
 import searchResultReducer from '@common/features/Search/SearchSlice'
 import settingsReducer from '@common/features/Settings/SettingsSlice'
@@ -36,15 +37,19 @@ export const setupStore = (preloadedState?: Partial<RootState>) => {
       getDefaultMiddleware({
         serializableCheck: {
           // Class instances are intentionally stored here for .asJcal() serialization; plain data remains inspectable in devtools
-          ignoredActionPaths: ['payload.events'], // suppress during the fulfilled action check
+          ignoredActionPaths: ['payload.events', 'payload.event'], // suppress during the fulfilled action check
           ignoredPaths: [
             /^calendars\.list\..+\.events/, // suppress state checks for events
+            /^calendars\.pendingDeletions/, // the events a deletion hides
             'user.organiserData' // userOrganiser instance, stored for asJcal()/asMailto()
           ]
         }
       })
         .concat(routerMiddleware)
-        .prepend(postMutationRefreshMiddleware.middleware)
+        .prepend(
+          postMutationRefreshMiddleware.middleware,
+          resumeUnsentDeletionsMiddleware.middleware
+        )
   })
 }
 

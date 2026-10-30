@@ -1,22 +1,25 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { AppDispatch } from '@common/app/store'
-import { handleDelete } from '@common/components/Event/eventHandlers/eventHandlers'
-import {
-  deleteEvent,
-  setCalendarError
-} from '@common/features/Calendars/CalendarSlice'
+import { setCalendarError } from '@common/features/Calendars/CalendarSlice'
+import { useUndoableAction } from '@common/components/UndoableActions/UndoableActionsProvider'
 import { createEventContext } from '@common/features/Events/createEventContext'
+import {
+  commitEventDeletion,
+  scheduleEventDeletion,
+  undoEventDeletion
+} from '@common/features/Events/eventDeletion'
 import { canWriteToTeamCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
 import { ToUserData } from '@common/features/User/type/OpenPaasUserData'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent, ContextualizedEvent } from '@common/types/EventsTypes'
-import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useMemo, useState } from 'react'
+import { useI18n } from 'twake-i18n'
 import { useEventUpdateModalReopen } from './useEventUpdateModalReopen'
 
 const isMaskedClassification = (classification?: string): boolean =>
@@ -71,7 +74,7 @@ interface UseEventPreviewStateReturn {
   handleEditClick: () => void
   handleEditInOrganizerCalendar: () => void
   handleSettingsEditClick: () => void
-  handleDeleteClick: () => Promise<void>
+  handleDeleteClick: () => void
   handleDuplicateClick: () => void
   calendarid: string
   handleCalendarMove: (calendarid: string) => void
@@ -87,6 +90,8 @@ export function useEventPreviewState(
   onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void
 ): UseEventPreviewStateReturn {
   const dispatch = useAppDispatch()
+  const { t } = useI18n()
+  const scheduleUndoableAction = useUndoableAction()
   const calendars = useAppSelector(state => state.calendars) as {
     list: Record<string, Calendar>
     templist: Record<string, Calendar>
@@ -274,33 +279,37 @@ export function useEventPreviewState(
     }
   }
 
-  const handleDeleteClick = async (): Promise<void> => {
+  const deleteWithUndo = (scope: 'solo' | 'all'): void => {
+    onClose({}, 'backdropClick')
+    const organizer = normalizeIdentity(event.organizer?.cal_address ?? '')
+    const guestsNotified =
+      isOrganizer &&
+      (event.attendee ?? []).some(
+        attendee =>
+          attendee.cutype !== 'RESOURCE' &&
+          normalizeIdentity(attendee.cal_address) !== organizer
+      )
+    const deletionId = dispatch(scheduleEventDeletion({ calId, event, scope }))
+    scheduleUndoableAction({
+      message: t(
+        guestsNotified ? 'event.deletedGuestsNotified' : 'event.deleted',
+        { title: event.title || t('event.untitled') }
+      ),
+      commit: () => dispatch(commitEventDeletion(deletionId)),
+      undo: () => dispatch(undoEventDeletion(deletionId))
+    })
+  }
+
+  const handleDeleteClick = (): void => {
     if (isRecurring) {
       setAfterChoiceFunc(
         () =>
           (type?: 'solo' | 'all'): void =>
-            void handleDelete(
-              isRecurring,
-              type,
-              onClose,
-              dispatch,
-              calendar,
-              event,
-              calId,
-              eventId
-            )
+            deleteWithUndo(type === 'solo' ? 'solo' : 'all')
       )
       setOpenEditModePopup('delete')
     } else {
-      onClose({}, 'backdropClick')
-      try {
-        const result = await dispatch(
-          deleteEvent({ calId, eventId, eventURL: event.URL })
-        )
-        await assertThunkSuccess(result)
-      } catch (error) {
-        console.error('Failed to delete event:', error)
-      }
+      deleteWithUndo('all')
     }
   }
 

@@ -52,7 +52,8 @@
     "hide": "Masquer",
     "show": "Afficher",
     "close": "Fermer",
-    "update": "Mettre à jour"
+    "update": "Mettre à jour",
+    "undo": "Annuler"
   },
   "common": {
     "cancel": "Annuler",
@@ -269,7 +270,9 @@
       "invalidDateTime": "Date/heure invalide",
       "invalidTimeFormat": "Format d'heure invalide",
       "invalidRepeatInterval": "Saisissez un nombre entier entre 1 et %{max}"
-    }
+    },
+    "deleted": "Événement « %{title} » supprimé",
+    "deletedGuestsNotified": "Événement « %{title} » supprimé. Les participants recevront une annulation."
   },
   "peopleSearch": {
     "label": "Commencez à saisir un nom ou un e-mail",

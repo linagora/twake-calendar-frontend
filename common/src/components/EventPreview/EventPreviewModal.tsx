@@ -115,7 +115,7 @@ const EventPreviewModal: React.FC<{
       isNotPrivate={isNotPrivate}
       canEdit={canEdit}
       canDelete={canModify}
-      onDelete={() => void handleDeleteClick()}
+      onDelete={handleDeleteClick}
       onClose={() => onClose({}, 'backdropClick')}
       onEdit={handleEditClick}
       onMoreClick={e => setToggleActionMenu(e.currentTarget)}

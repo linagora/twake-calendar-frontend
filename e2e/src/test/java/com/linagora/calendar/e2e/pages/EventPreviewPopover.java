@@ -53,14 +53,31 @@ public class EventPreviewPopover {
         page.getByLabel("Edit event").click();
     }
 
+    /** Deletes the event, and returns once the server has it deleted. */
     public void delete() {
-        page.getByLabel("Delete event").click();
-        page.getByLabel("Delete event").waitFor(
-            new Locator.WaitForOptions().setState(WaitForSelectorState.DETACHED));
+        untilTheDeletionIsSent(this::clickDelete);
     }
 
     /** Deleting an occurrence of a series first asks what it should apply to. */
     public void delete(EventFormModal.Scope scope) {
+        untilTheDeletionIsSent(() -> clickDelete(scope));
+    }
+
+    /**
+     * Deletes the event and stays within the time to undo it: the event is gone from the grid,
+     * nothing has been sent yet.
+     */
+    public DeletionSnackbar startDeletion() {
+        clickDelete();
+        return new DeletionSnackbar(page).waitUntilShown();
+    }
+
+    private void clickDelete() {
+        page.getByLabel("Delete event").click();
+        waitUntilClosed();
+    }
+
+    private void clickDelete(EventFormModal.Scope scope) {
         page.getByLabel("Delete event").click();
         ScopeDialog dialog = ScopeDialog.waitFor(page);
         if (scope == EventFormModal.Scope.THIS_EVENT) {
@@ -68,8 +85,23 @@ public class EventPreviewPopover {
         } else {
             dialog.allEvents();
         }
+        waitUntilClosed();
+    }
+
+    private void waitUntilClosed() {
         page.getByLabel("Delete event").waitFor(
             new Locator.WaitForOptions().setState(WaitForSelectorState.DETACHED));
+    }
+
+    // The request leaves once the time to undo is over: a DELETE for the whole event, a PUT of
+    // the series without the occurrence for "This event"
+    private void untilTheDeletionIsSent(Runnable deletion) {
+        page.waitForResponse(
+            response -> response.url().contains(".ics")
+                && ("DELETE".equals(response.request().method())
+                    || "PUT".equals(response.request().method())),
+            new Page.WaitForResponseOptions().setTimeout(DeletionSnackbar.UNDO_WINDOW_MS + 15_000),
+            deletion);
     }
 
     /** Answers the invitation: Yes, No or Maybe. */

@@ -1,6 +1,10 @@
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { deleteEvent } from '@common/features/Events/EventDao'
-import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
+import {
+  httpStatusOf,
+  rejectedErrorMessage,
+  toRejectedError
+} from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
@@ -15,6 +19,8 @@ export const deleteEventThunk = (create: ReducerCreators<CalendarState>) =>
         await deleteEvent({ URL: eventURL })
         return { calId, eventId }
       } catch (err) {
+        // already gone: a deletion sent again after a reload ends up here
+        if (httpStatusOf(err) === 404) return { calId, eventId }
         return rejectWithValue(toRejectedError(err))
       }
     },

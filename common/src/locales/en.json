@@ -52,7 +52,8 @@
     "hide": "Hide",
     "show": "Show",
     "close": "Close",
-    "update": "Update"
+    "update": "Update",
+    "undo": "Undo"
   },
   "common": {
     "cancel": "Cancel",
@@ -269,7 +270,9 @@
       "invalidDateTime": "Invalid date/time",
       "invalidTimeFormat": "Invalid time format",
       "invalidRepeatInterval": "Enter a whole number between 1 and %{max}"
-    }
+    },
+    "deleted": "Event “%{title}” deleted",
+    "deletedGuestsNotified": "Event “%{title}” deleted. Guests will receive a cancellation."
   },
   "peopleSearch": {
     "label": "Start typing a name or email",

@@ -52,7 +52,8 @@
     "hide": "Ẩn",
     "show": "Hiện",
     "close": "Đóng",
-    "update": "Cập nhật"
+    "update": "Cập nhật",
+    "undo": "Hoàn tác"
   },
   "common": {
     "cancel": "Hủy",
@@ -269,7 +270,9 @@
       "invalidDateTime": "Ngày/giờ không hợp lệ",
       "invalidTimeFormat": "Định dạng thời gian không hợp lệ",
       "invalidRepeatInterval": "Nhập số nguyên từ 1 đến %{max}"
-    }
+    },
+    "deleted": "Đã xóa sự kiện “%{title}”",
+    "deletedGuestsNotified": "Đã xóa sự kiện “%{title}”. Người tham gia sẽ nhận được thông báo hủy."
   },
   "peopleSearch": {
     "label": "Nhập tên hoặc email",

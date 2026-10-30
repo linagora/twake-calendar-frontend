@@ -1,6 +1,8 @@
 import { AppDispatch } from '@common/app/store'
 import { getCalendarDetail } from '@common/features/Calendars/CalendarSlice'
 import { AclEntry } from '@common/features/Calendars/types/CalendarData'
+import { PendingDeletion } from '@common/features/Calendars/types/PendingDeletion'
+import { isHiddenByPendingDeletion } from '@common/features/Events/eventDeletion'
 import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
@@ -234,6 +236,7 @@ export const eventToFullCalendarFormat = ({
 interface ExtractEventsOptions {
   userAddress?: string
   hideDeclinedEvents?: boolean | null
+  pendingDeletions?: PendingDeletion[]
 }
 
 export const extractEvents = (
@@ -241,7 +244,7 @@ export const extractEvents = (
   calendars: Record<string, Calendar>,
   options?: ExtractEventsOptions
 ): CalendarEvent[] => {
-  const { hideDeclinedEvents } = options ?? {}
+  const { hideDeclinedEvents, pendingDeletions = [] } = options ?? {}
   const allEvents: CalendarEvent[] = []
 
   selectedCalendars.forEach(id => {
@@ -253,6 +256,7 @@ export const extractEvents = (
 
   return allEvents
     .filter(event => event.status !== 'CANCELLED')
+    .filter(event => !isHiddenByPendingDeletion(event, pendingDeletions))
     .filter(
       event =>
         !(

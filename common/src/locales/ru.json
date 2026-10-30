@@ -52,7 +52,8 @@
     "hide": "Скрыть",
     "show": "Показать",
     "close": "Закрыть",
-    "update": "Обновить"
+    "update": "Обновить",
+    "undo": "Отменить"
   },
   "common": {
     "cancel": "Отмена",
@@ -269,7 +270,9 @@
       "invalidDateTime": "Неверная дата/время",
       "invalidTimeFormat": "Неверный формат времени",
       "invalidRepeatInterval": "Введите целое число от 1 до %{max}"
-    }
+    },
+    "deleted": "Событие «%{title}» удалено",
+    "deletedGuestsNotified": "Событие «%{title}» удалено. Участники получат уведомление об отмене."
   },
   "peopleSearch": {
     "label": "Поиск по имени или email",
