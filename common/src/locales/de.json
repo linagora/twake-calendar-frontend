@@ -716,5 +716,17 @@
   "embed": {
     "signInRequired": "Sie sind abgemeldet. Melden Sie sich erneut an, um diesen Kalender zu sehen.",
     "calendarUnavailable": "Dieser Kalender ist nicht verfügbar. Möglicherweise sind Sie kein Mitglied."
+  },
+  "twakeBar": {
+    "home": "Startseite",
+    "apps": "Anwendungen",
+    "help": "Hilfe",
+    "userMenu": "Konto",
+    "noApps": "Keine Anwendungen gefunden.",
+    "manageProfile": "Profil verwalten",
+    "storage": "Speicher",
+    "gbAvailable": "GB verfügbar",
+    "emailDomainNotActive": "E-Mail nicht aktiv",
+    "logOut": "Abmelden"
   }
 }
