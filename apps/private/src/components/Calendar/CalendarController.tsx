@@ -460,7 +460,6 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
       {isMobile && (
         <ViewMoreEvents
           isOpen={isMoreEventsDrawerOpen}
-          onOpen={() => setIsMoreEventsDrawerOpen(true)}
           onClose={() => setIsMoreEventsDrawerOpen(false)}
           moreEvents={moreEvents}
           handleEventClick={eventHandlers.handleEventClick}

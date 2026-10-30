@@ -1,7 +1,11 @@
-import React from 'react'
-import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { CalendarSelectorDesktopMenu } from './CalendarSelectorDesktopMenu'
-import { CalendarSelectorMobileMenu } from './CalendarSelectorMobileMenu'
+import React, { useMemo } from 'react'
+import {
+  ActionsMenu,
+  ActionsMenuItem,
+  Divider,
+  ListItemText
+} from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
 
 interface CalendarSelectorMenuProps {
   id: string
@@ -32,39 +36,37 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   isVisible,
   isTeam
 }) => {
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
-
-  if (!isMobile) {
-    return (
-      <CalendarSelectorDesktopMenu
-        id={id}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={onClose}
-        onModify={onModify}
-        onDelete={onDelete}
-        onToggleVisibility={onToggleVisibility}
-        onPrint={onPrint}
-        isDefault={isDefault}
-        isPersonal={isPersonal}
-        isVisible={isVisible}
-        isTeam={isTeam}
-      />
-    )
-  }
+  const { t } = useI18n()
+  // ActionsMenu anchors on its ref, not on an anchorEl prop
+  const anchorRef = useMemo(() => ({ current: anchorEl }), [anchorEl])
 
   return (
-    <CalendarSelectorMobileMenu
-      open={open}
-      onClose={onClose}
-      onModify={onModify}
-      onDelete={onDelete}
-      onToggleVisibility={onToggleVisibility}
-      onPrint={onPrint}
-      isDefault={isDefault}
-      isPersonal={isPersonal}
-      isVisible={isVisible}
-      isTeam={isTeam}
-    />
+    <ActionsMenu id={id} ref={anchorRef} open={open} onClose={onClose}>
+      {onToggleVisibility !== undefined && (
+        <ActionsMenuItem onClick={onToggleVisibility}>
+          <ListItemText
+            primary={isVisible ? t('actions.hide') : t('actions.show')}
+          />
+        </ActionsMenuItem>
+      )}
+      {onToggleVisibility !== undefined && <Divider />}
+      <ActionsMenuItem onClick={onModify}>
+        <ListItemText primary={t('actions.modify')} />
+      </ActionsMenuItem>
+      {onPrint !== undefined && <Divider />}
+      {onPrint !== undefined && (
+        <ActionsMenuItem onClick={onPrint}>
+          <ListItemText primary={t('print.action')} />
+        </ActionsMenuItem>
+      )}
+      {!isDefault && !isTeam && <Divider />}
+      {!isDefault && !isTeam && (
+        <ActionsMenuItem onClick={onDelete} sx={{ color: 'error.main' }}>
+          <ListItemText
+            primary={isPersonal ? t('actions.delete') : t('actions.remove')}
+          />
+        </ActionsMenuItem>
+      )}
+    </ActionsMenu>
   )
 }

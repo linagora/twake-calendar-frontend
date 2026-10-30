@@ -65,12 +65,12 @@ describe('CalendarSelection on a phone-sized screen', () => {
 
   const dismissActionsSheet = async (): Promise<void> => {
     fireEvent.keyDown(
-      await screen.findByRole('button', { name: 'actions.modify' }),
+      await screen.findByRole('menuitem', { name: 'actions.modify' }),
       { key: 'Escape' }
     )
     await waitFor(() =>
       expect(
-        screen.queryByRole('button', { name: 'actions.modify' })
+        screen.queryByRole('menuitem', { name: 'actions.modify' })
       ).not.toBeInTheDocument()
     )
   }
@@ -86,7 +86,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
     )
 
     expect(
-      await screen.findByRole('button', { name: 'actions.modify' })
+      await screen.findByRole('menuitem', { name: 'actions.modify' })
     ).toBeInTheDocument()
   })
 
@@ -95,10 +95,10 @@ describe('CalendarSelection on a phone-sized screen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
 
-    const modify = await screen.findByRole('button', { name: 'actions.modify' })
+    const modify = await screen.findByRole('menuitem', { name: 'actions.modify' })
     await waitFor(() =>
       expect(
-        modify.closest('.MuiDrawer-paper')?.contains(document.activeElement)
+        modify.closest('.MuiPaper-root')?.contains(document.activeElement)
       ).toBe(true)
     )
   })
@@ -137,7 +137,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
       )
 
       expect(
-        await screen.findByRole('button', { name: 'actions.modify' })
+        await screen.findByRole('menuitem', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
       jest.useRealTimers()
@@ -160,7 +160,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
       )
 
       expect(
-        await screen.findByRole('button', { name: 'actions.modify' })
+        await screen.findByRole('menuitem', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
       jest.useRealTimers()

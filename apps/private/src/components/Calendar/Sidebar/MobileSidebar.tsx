@@ -44,6 +44,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
       variant="temporary"
       open={open}
       onClose={onClose}
+      disableEnforceFocus
       className="sidebar"
       sx={{
         [`& .MuiDrawer-paper`]: {

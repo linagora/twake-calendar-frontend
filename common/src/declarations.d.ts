@@ -22,53 +22,6 @@ declare module 'classnames' {
   export = classnames
 }
 
-declare module '@linagora/twake-mui' {
-  export * from '@mui/material'
-
-  export function useTheme<T = import('@mui/material').Theme>(): T
-
-  export type AvatarSize = 'xs' | 's' | 'm' | 'l' | 'xl'
-  export type AvatarDisplay = 'initial' | 'inline'
-
-  export interface AvatarProps extends Omit<
-    import('@mui/material').AvatarProps,
-    'color'
-  > {
-    color?: string
-    size?: AvatarSize | number
-    border?: boolean
-    innerBorder?: boolean
-    disabled?: boolean
-    display?: AvatarDisplay
-  }
-
-  export const Avatar: import('react').FC<AvatarProps>
-
-  export const radius: Record<string, string | number>
-
-  export const TwakeMuiThemeProvider: import('react').FC<
-    import('@mui/material/styles').ThemeProviderProps
-  >
-
-  export interface ChipProps extends Omit<
-    import('@mui/material').ChipProps,
-    'color'
-  > {
-    color?:
-      | 'default'
-      | 'primary'
-      | 'secondary'
-      | 'error'
-      | 'info'
-      | 'success'
-      | 'warning'
-      | (string & {})
-    square?: boolean
-  }
-
-  export const Chip: import('react').FC<ChipProps>
-}
-
 declare const process: {
   env: {
     [key: string]: string | undefined

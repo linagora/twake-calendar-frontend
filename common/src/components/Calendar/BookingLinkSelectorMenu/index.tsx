@@ -1,7 +1,11 @@
-import React from 'react'
-import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { BookingLinkDesktopMenu } from './BookingLinkDesktopMenu'
-import { BookingLinkMobileMenu } from './BookingLinkMobileMenu'
+import React, { useMemo } from 'react'
+import {
+  ActionsMenu,
+  ActionsMenuItem,
+  Divider,
+  ListItemText
+} from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
 
 interface BookingLinkSelectorMenuProps {
   anchorEl: HTMLElement | null
@@ -24,30 +28,26 @@ export const BookingLinkSelectorMenu: React.FC<
   onToggleVisibility,
   isVisible
 }) => {
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
-
-  if (!isMobile) {
-    return (
-      <BookingLinkDesktopMenu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={onClose}
-        onDelete={onDelete}
-        onEdit={onEdit}
-        onToggleVisibility={onToggleVisibility}
-        isVisible={isVisible}
-      />
-    )
-  }
+  const { t } = useI18n()
+  // ActionsMenu anchors on its ref, not on an anchorEl prop
+  const anchorRef = useMemo(() => ({ current: anchorEl }), [anchorEl])
 
   return (
-    <BookingLinkMobileMenu
-      open={open}
-      onClose={onClose}
-      onDelete={onDelete}
-      onEdit={onEdit}
-      onToggleVisibility={onToggleVisibility}
-      isVisible={isVisible}
-    />
+    <ActionsMenu ref={anchorRef} open={open} onClose={onClose}>
+      {onToggleVisibility !== undefined && (
+        <ActionsMenuItem onClick={onToggleVisibility}>
+          <ListItemText
+            primary={isVisible ? t('actions.hide') : t('actions.show')}
+          />
+        </ActionsMenuItem>
+      )}
+      {onToggleVisibility !== undefined && <Divider />}
+      <ActionsMenuItem onClick={onEdit}>
+        <ListItemText primary={t('actions.modify')} />
+      </ActionsMenuItem>
+      <ActionsMenuItem onClick={onDelete} sx={{ color: 'error.main' }}>
+        <ListItemText primary={t('actions.delete')} />
+      </ActionsMenuItem>
+    </ActionsMenu>
   )
 }

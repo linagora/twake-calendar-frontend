@@ -1,12 +1,12 @@
-import EventDuplication from '@common/components/Event/EventDuplicate'
-import { Menu, MenuItem } from '@linagora/twake-mui'
+import { ActionsMenu, ActionsMenuItem, ListItemText } from '@linagora/twake-mui'
+import { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { useAppSelector } from '@common/app/hooks'
 import { buildMailComposerUrl, resolveMailSpaUrl } from '@linagora/twake-utils'
 
 interface EventPreviewActionMenuProps {
-  anchorEl: Element | null
+  anchorEl: HTMLElement | null
   isEditable: boolean
   event: CalendarEvent
   userEmail: string
@@ -25,6 +25,8 @@ export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
   onEdit
 }) => {
   const { t } = useI18n()
+  // ActionsMenu anchors on its ref, not on an anchorEl prop
+  const anchorRef = useMemo(() => ({ current: anchorEl }), [anchorEl])
   const workplaceFqdn = useAppSelector(
     state => state.user.userData?.workplaceFqdn
   )
@@ -47,33 +49,35 @@ export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
     : null
 
   return (
-    <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
+    <ActionsMenu ref={anchorRef} open={Boolean(anchorEl)} onClose={onClose}>
       {isEditable && (
-        <MenuItem
+        <ActionsMenuItem
           onClick={() => {
             onClose()
             onEdit()
           }}
         >
-          {t('eventPreview.editEventSpecificSettings')}
-        </MenuItem>
+          <ListItemText primary={t('eventPreview.editEventSpecificSettings')} />
+        </ActionsMenuItem>
       )}
       {composeUrl && (
-        <MenuItem
+        <ActionsMenuItem
           onClick={() => {
             onClose()
             window.open(composeUrl, '_blank', 'noopener,noreferrer')
           }}
         >
-          {t('eventPreview.emailAttendees')}
-        </MenuItem>
+          <ListItemText primary={t('eventPreview.emailAttendees')} />
+        </ActionsMenuItem>
       )}
-      <EventDuplication
-        onOpenDuplicate={() => {
+      <ActionsMenuItem
+        onClick={() => {
           onClose()
           onDuplicate()
         }}
-      />
-    </Menu>
+      >
+        <ListItemText primary={t('eventDuplication.duplicateEvent')} />
+      </ActionsMenuItem>
+    </ActionsMenu>
   )
 }
