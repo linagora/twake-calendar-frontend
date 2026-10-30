@@ -114,10 +114,9 @@ describe('CalendarApp integration', () => {
         const newEnd = new Date(oldEnd.getTime() + 1800000) // +30 min
 
         fcEvent?.setEnd(newEnd)
-
-        waitFor(() => expect(dispatch).toHaveBeenCalled())
       }
     })
+    await waitFor(() => expect(dispatch).toHaveBeenCalled())
   })
 
   const createPreloadedState = (eventProps = {}) => ({
