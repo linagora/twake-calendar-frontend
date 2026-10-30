@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { eventSaved } from '@common/features/Events/eventSaveFeedbackSlice'
@@ -17,7 +17,7 @@ import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import type { DateSelectArg } from '@fullcalendar/core'
 
-jest.mock('p-map', () => jest.fn())
+vi.mock('p-map', () => ({ default: vi.fn() }))
 
 const baseCalendar: Calendar = {
   id: 'user-1/cal-1',
@@ -72,7 +72,7 @@ const baseValues = {
 
 describe('handleCreateEvent - team calendar organizer handling', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('does NOT set organizer for team calendar when there are no attendees', async () => {
@@ -335,14 +335,14 @@ describe('create save confirmation', () => {
       const pending = new Promise(resolve => {
         complete = resolve
       })
-      const dispatch = jest.fn((_action: unknown) => pending)
+      const dispatch = vi.fn((_action: unknown) => pending)
       try {
         const saving = handleCreateEvent({
           dispatch: dispatch as never,
           values: baseValues,
           targetCalendar: baseCalendar,
           showMore: true,
-          onClose: jest.fn()
+          onClose: vi.fn()
         })
         expect(
           dispatch.mock.calls.filter(([action]) => eventSaved.match(action))

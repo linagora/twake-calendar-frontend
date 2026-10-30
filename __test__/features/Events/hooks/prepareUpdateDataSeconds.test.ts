@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import {
@@ -14,7 +14,7 @@ import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
-jest.mock('p-map', () => jest.fn())
+vi.mock('p-map', () => ({ default: vi.fn() }))
 
 const organizer = new userOrganiser({
   cn: 'User',

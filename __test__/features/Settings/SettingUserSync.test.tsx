@@ -1,3 +1,4 @@
+import type { Mock, MockInstance } from 'vitest'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import settingsReducer, {
   setIsBrowserDefaultTimeZone,
@@ -13,15 +14,15 @@ import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 describe('Timezone synchronization after getOpenPaasUserData', () => {
-  let apiGetSpy: jest.SpyInstance
+  let apiGetSpy: MockInstance
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     localStorage.clear()
-    apiGetSpy = jest.spyOn(api, 'get')
+    apiGetSpy = vi.spyOn(api, 'get')
   })
 
   afterEach(() => {
@@ -359,7 +360,7 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
 
   describe('User Actions - Changing Timezone', () => {
     beforeEach(() => {
-      ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+      ;(api.patch as Mock).mockResolvedValue({ status: 204 })
     })
     test('User enables browser default => both states get the detected TZ', async () => {
       const { store } = renderWithProviders(<SettingsPage />, {

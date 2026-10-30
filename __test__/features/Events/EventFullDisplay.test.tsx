@@ -7,17 +7,17 @@ import dayjs from 'dayjs'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 describe('Event Full Display', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
   const day = new Date('2025-01-15T10:00:00.000Z') // Fixed date in UTC: Jan 15, 2025 10:00 AM UTC
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const preloadedState = {
@@ -232,14 +232,14 @@ describe('Event Full Display', () => {
   })
 
   it('saves event and moves it when calendar is changed', async () => {
-    const spyPut = jest
+    const spyPut = vi
       .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
-    const spyMove = jest
+    const spyMove = vi
       .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)

@@ -1,17 +1,18 @@
+import type { Mock } from 'vitest'
 import { api } from '@common/utils/apiUtils'
 import { fetchEntityById } from '@common/features/User/EntityDAO'
 
-jest.mock('@common/utils/apiUtils', () => ({
+vi.mock('@common/utils/apiUtils', () => ({
   api: {
-    get: jest.fn()
+    get: vi.fn()
   }
 }))
 
-const mockApiGet = api.get as jest.Mock
+const mockApiGet = api.get as Mock
 
 describe('EntityDAO', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('fetchEntityById', () => {
@@ -23,7 +24,7 @@ describe('EntityDAO', () => {
       }
       const mockResponse = { user: mockUserData }
       mockApiGet.mockReturnValue({
-        json: jest.fn().mockResolvedValue(mockResponse)
+        json: vi.fn().mockResolvedValue(mockResponse)
       })
 
       const result = await fetchEntityById('user-123')
@@ -36,7 +37,7 @@ describe('EntityDAO', () => {
       const mockResourceData = { _id: 'res-456', name: 'Room A' }
       const mockResponse = { resource: mockResourceData }
       mockApiGet.mockReturnValue({
-        json: jest.fn().mockResolvedValue(mockResponse)
+        json: vi.fn().mockResolvedValue(mockResponse)
       })
 
       const result = await fetchEntityById('res-456')

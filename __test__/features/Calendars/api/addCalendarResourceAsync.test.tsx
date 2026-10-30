@@ -1,23 +1,24 @@
+import type { Mock } from 'vitest'
 import { calendarAction } from '@common/features/Calendars/CalendarDAO'
 import { addCalendarResource } from '@common/features/Calendars/CalendarSlice'
 import { fetchOwnerOfResource } from '@common/features/Calendars/services/helpers'
 import { toRejectedError } from '@common/utils/errorUtils'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@common/features/Calendars/CalendarDAO')
-jest.mock('@common/features/Calendars/services/helpers')
-jest.mock('@common/utils/errorUtils')
+vi.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Calendars/services/helpers')
+vi.mock('@common/utils/errorUtils')
 
-const mockedCalendarAction = calendarAction as jest.Mock
-const mockedFetchOwnerOfResource = fetchOwnerOfResource as jest.Mock
-const mockedToRejectedError = toRejectedError as jest.Mock
+const mockedCalendarAction = calendarAction as Mock
+const mockedFetchOwnerOfResource = fetchOwnerOfResource as Mock
+const mockedToRejectedError = toRejectedError as Mock
 
 describe('addCalendarResource thunk', () => {
   let store: ReturnType<typeof configureStore>
-  const dispatch = jest.fn()
+  const dispatch = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     store = configureStore({
       reducer: () => ({})
     })
@@ -94,7 +95,7 @@ describe('addCalendarResource thunk', () => {
     mockedFetchOwnerOfResource.mockRejectedValueOnce(errorDetails)
 
     // Silence expected console error in tests
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const result = await addCalendarResource(
       mockPayload as unknown as Parameters<typeof addCalendarResource>[0]

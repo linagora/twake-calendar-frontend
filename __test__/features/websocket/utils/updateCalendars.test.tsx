@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { AppDispatch, RootState, store } from '@common/app/store'
 import {
   emptyEventsCal,
@@ -10,23 +11,23 @@ import { updateCalendars } from '@common/websocket/messaging/updateCalendars'
 import { WS_INBOUND_EVENTS } from '@common/websocket/protocols'
 import { waitFor } from '@testing-library/dom'
 
-jest.mock('@common/utils/CalendarRangeManager')
+vi.mock('@common/utils/CalendarRangeManager')
 
-jest.mock('@common/features/Calendars/CalendarSlice', () => {
-  const original = jest.requireActual(
+vi.mock('@common/features/Calendars/CalendarSlice', async () => {
+  const original = await vi.importActual(
     '@common/features/Calendars/CalendarSlice'
   )
   return {
     ...original,
-    emptyEventsCal: jest.fn(args => ({
+    emptyEventsCal: vi.fn(args => ({
       type: 'mock/emptyEventsCal',
       payload: args
     })),
-    getCalendarDetail: jest.fn(args => ({
+    getCalendarDetail: vi.fn(args => ({
       type: 'mock/getCalendarDetail',
       payload: args
     })),
-    refreshCalendarWithSyncToken: jest.fn(args => ({
+    refreshCalendarWithSyncToken: vi.fn(args => ({
       type: 'mock/refreshCalendarWithSyncToken',
       payload: args
     }))
@@ -34,16 +35,16 @@ jest.mock('@common/features/Calendars/CalendarSlice', () => {
 })
 
 const mockRefreshCalendarWithSyncToken =
-  refreshCalendarWithSyncToken as unknown as jest.Mock
+  refreshCalendarWithSyncToken as unknown as Mock
 
-jest.mock('@common/app/store', () => ({
+vi.mock('@common/app/store', () => ({
   store: {
-    getState: jest.fn()
+    getState: vi.fn()
   }
 }))
 
 describe('updateCalendars', () => {
-  let mockDispatch: jest.Mock
+  let mockDispatch: Mock
   const mockRange = {
     start: new Date('2025-01-15T10:00:00Z'),
     end: new Date('2025-01-16T10:00:00Z')
@@ -76,10 +77,10 @@ describe('updateCalendars', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    mockDispatch = jest.fn()
-    ;(getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange)
-    ;(store.getState as jest.Mock).mockReturnValue(mockState)
+    vi.clearAllMocks()
+    mockDispatch = vi.fn()
+    ;(getDisplayedCalendarRange as Mock).mockReturnValue(mockRange)
+    ;(store.getState as Mock).mockReturnValue(mockState)
     mockAccumulators.calendarsToRefresh = new Map<string, any>()
     mockAccumulators.calendarsToHide = new Set()
     mockAccumulators.debouncedUpdateFns = new Map()
@@ -137,7 +138,7 @@ describe('updateCalendars', () => {
       delegated: true,
       syncToken: 1
     }
-    ;(store.getState as jest.Mock).mockReturnValue({
+    ;(store.getState as Mock).mockReturnValue({
       calendars: { list: { [delegated.id]: delegated }, templist: {} }
     })
 
@@ -179,7 +180,7 @@ describe('updateCalendars', () => {
       }
     }
 
-    ;(store.getState as jest.Mock).mockReturnValue(stateWithTemp)
+    ;(store.getState as Mock).mockReturnValue(stateWithTemp)
 
     const message = {
       '/calendars/temp1/entry1': {}
@@ -217,7 +218,7 @@ describe('updateCalendars', () => {
       }
     } as unknown as RootState
 
-    ;(store.getState as jest.Mock).mockReturnValue(stateWithoutSyncToken)
+    ;(store.getState as Mock).mockReturnValue(stateWithoutSyncToken)
 
     const message = {
       '/calendars/cal1/entry1': {}

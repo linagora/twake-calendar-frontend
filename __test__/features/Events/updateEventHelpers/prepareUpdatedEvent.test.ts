@@ -1,10 +1,10 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { prepareUpdatedEvent } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
 
-jest.mock('p-map', () => jest.fn())
+vi.mock('p-map', () => ({ default: vi.fn() }))
 import {
   resolveAttendeesAndResources,
   resolveOrganizerEmail

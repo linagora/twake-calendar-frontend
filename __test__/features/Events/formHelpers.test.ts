@@ -4,8 +4,8 @@ import { RepetitionObject } from '@common/types/Repetition'
 
 describe('populateFormFromEvent', () => {
   it('correctly sets repetition data with wkst included', () => {
-    const mockSetRepetition = jest.fn()
-    const mockSetShowRepeat = jest.fn()
+    const mockSetRepetition = vi.fn()
+    const mockSetShowRepeat = vi.fn()
 
     const event = {
       uid: 'event-id',
@@ -23,21 +23,21 @@ describe('populateFormFromEvent', () => {
 
     const params = {
       event,
-      setTitle: jest.fn(),
-      setDescription: jest.fn(),
-      setLocation: jest.fn(),
-      setStart: jest.fn(),
-      setEnd: jest.fn(),
-      setAllDay: jest.fn(),
+      setTitle: vi.fn(),
+      setDescription: vi.fn(),
+      setLocation: vi.fn(),
+      setStart: vi.fn(),
+      setEnd: vi.fn(),
+      setAllDay: vi.fn(),
       setRepetition: mockSetRepetition,
       setShowRepeat: mockSetShowRepeat,
-      setAttendees: jest.fn(),
-      setAlarm: jest.fn(),
-      setEventClass: jest.fn(),
-      setBusy: jest.fn(),
-      setTimezone: jest.fn(),
-      setHasVideoConference: jest.fn(),
-      setMeetingLink: jest.fn()
+      setAttendees: vi.fn(),
+      setAlarm: vi.fn(),
+      setEventClass: vi.fn(),
+      setBusy: vi.fn(),
+      setTimezone: vi.fn(),
+      setHasVideoConference: vi.fn(),
+      setMeetingLink: vi.fn()
     }
 
     populateFormFromEvent(params)
@@ -58,8 +58,8 @@ describe('populateFormFromEvent', () => {
   })
 
   it('sets wkst to null if wkst is not provided in repetition', () => {
-    const mockSetRepetition = jest.fn()
-    const mockSetShowRepeat = jest.fn()
+    const mockSetRepetition = vi.fn()
+    const mockSetShowRepeat = vi.fn()
 
     const event = {
       uid: 'event-id',
@@ -76,21 +76,21 @@ describe('populateFormFromEvent', () => {
 
     const params = {
       event,
-      setTitle: jest.fn(),
-      setDescription: jest.fn(),
-      setLocation: jest.fn(),
-      setStart: jest.fn(),
-      setEnd: jest.fn(),
-      setAllDay: jest.fn(),
+      setTitle: vi.fn(),
+      setDescription: vi.fn(),
+      setLocation: vi.fn(),
+      setStart: vi.fn(),
+      setEnd: vi.fn(),
+      setAllDay: vi.fn(),
       setRepetition: mockSetRepetition,
       setShowRepeat: mockSetShowRepeat,
-      setAttendees: jest.fn(),
-      setAlarm: jest.fn(),
-      setEventClass: jest.fn(),
-      setBusy: jest.fn(),
-      setTimezone: jest.fn(),
-      setHasVideoConference: jest.fn(),
-      setMeetingLink: jest.fn()
+      setAttendees: vi.fn(),
+      setAlarm: vi.fn(),
+      setEventClass: vi.fn(),
+      setBusy: vi.fn(),
+      setTimezone: vi.fn(),
+      setHasVideoConference: vi.fn(),
+      setMeetingLink: vi.fn()
     }
 
     populateFormFromEvent(params)

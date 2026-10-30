@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as calDAO from '@common/features/Calendars/CalendarDAO'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
@@ -8,22 +9,22 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 describe('EventPopover', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
-  const mockOnClose = jest.fn()
-  const mockSetSelectedRange = jest.fn()
-  const mockCalendarRef = { current: { select: jest.fn() } } as any
+  const mockOnClose = vi.fn()
+  const mockSetSelectedRange = vi.fn()
+  const mockCalendarRef = { current: { select: vi.fn() } } as any
 
   const preloadedState = {
     user: {
@@ -106,8 +107,8 @@ describe('EventPopover', () => {
       ]
     }
   ]
-  ;(api.post as jest.Mock).mockReturnValue({
-    json: jest.fn().mockResolvedValue(mockUsers)
+  ;(api.post as Mock).mockReturnValue({
+    json: vi.fn().mockResolvedValue(mockUsers)
   })
 
   const defaultSelectedRange = {
@@ -296,7 +297,7 @@ describe('EventPopover', () => {
     const option = await screen.findByText('Calendar 3')
     fireEvent.click(option)
 
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
@@ -320,9 +321,7 @@ describe('EventPopover', () => {
 
   it('adds a attendee', async () => {
     try {
-      jest
-        .spyOn(calDAO, 'fetchCalendars')
-        .mockResolvedValue({ json: jest.fn() })
+      vi.spyOn(calDAO, 'fetchCalendars').mockResolvedValue({ json: vi.fn() })
       renderPopover()
       fireEvent.change(screen.getByLabelText('event.form.title'), {
         target: { value: 'newEvent' }
@@ -335,7 +334,7 @@ describe('EventPopover', () => {
         userEvent.type(select, 'john')
       })
       await act(async () => {
-        jest.advanceTimersByTime(400)
+        vi.advanceTimersByTime(400)
       })
       await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
 
@@ -346,7 +345,7 @@ describe('EventPopover', () => {
         userEvent.click(screen.getByText('John Doe'))
       })
 
-      const spy = jest
+      const spy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -389,7 +388,7 @@ describe('EventPopover', () => {
       // No alarm was set in the form, so alarms should be empty
       expect(receivedPayload.newEvent.alarms?.hasAlarms()).toBe(false)
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 
@@ -415,7 +414,7 @@ describe('EventPopover', () => {
       await userEvent.type(resourceCombobox, 'room')
 
       await act(async () => {
-        jest.advanceTimersByTime(400)
+        vi.advanceTimersByTime(400)
       })
 
       await waitFor(() => {
@@ -424,7 +423,7 @@ describe('EventPopover', () => {
 
       await userEvent.click(screen.getByText('Room 1'))
 
-      const spy = jest
+      const spy = vi
         .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
@@ -452,7 +451,7 @@ describe('EventPopover', () => {
         })
       )
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 
@@ -486,7 +485,7 @@ describe('EventPopover', () => {
     fireEvent.change(screen.getByLabelText('event.form.location'), {
       target: { value: newEvent.location }
     })
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
@@ -541,12 +540,12 @@ describe('EventPopover', () => {
 
   describe('EventModal - Drag and Drop Scenarios', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
-      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
     })
 
     afterAll(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
     // Test 2.1: Drag from allday slot (single day)
     it('sets allday=true when drag from allday slot (single day)', async () => {

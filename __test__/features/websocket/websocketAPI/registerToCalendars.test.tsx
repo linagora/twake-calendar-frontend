@@ -6,7 +6,7 @@ describe('registerToCalendars', () => {
   beforeEach(() => {
     mockSocket = {
       readyState: WebSocket.OPEN,
-      send: jest.fn()
+      send: vi.fn()
     }
   })
 
@@ -42,7 +42,7 @@ describe('registerToCalendars', () => {
   })
 
   it('should log registration', () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation()
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation()
     const calendarURIs = ['/calendars/cal1', '/calendars/cal2']
 
     registerToCalendars(mockSocket, calendarURIs)

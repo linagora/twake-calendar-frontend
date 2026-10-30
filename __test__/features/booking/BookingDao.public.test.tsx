@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { api } from '@common/utils/apiUtils'
 import {
   fetchBookingSlots,
@@ -8,10 +9,10 @@ import {
   CreateBookingRequest
 } from '@common/features/booking/types/BookingTypes'
 
-jest.mock('@common/utils/apiUtils', () => ({
+vi.mock('@common/utils/apiUtils', () => ({
   api: {
-    get: jest.fn(),
-    post: jest.fn()
+    get: vi.fn(),
+    post: vi.fn()
   }
 }))
 
@@ -35,14 +36,14 @@ const mockSlotsResponse: BookingSlotsResponse = {
 
 describe('Public Booking API', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('fetchBookingSlots', () => {
     it('should fetch slots successfully', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue(mockSlotsResponse)
+        json: vi.fn().mockResolvedValue(mockSlotsResponse)
       })
 
       const result = await fetchBookingSlots(
@@ -60,9 +61,9 @@ describe('Public Booking API', () => {
     })
 
     it('should include timeZone when provided', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue(mockSlotsResponse)
+        json: vi.fn().mockResolvedValue(mockSlotsResponse)
       })
 
       await fetchBookingSlots(
@@ -78,9 +79,9 @@ describe('Public Booking API', () => {
     })
 
     it('should URL encode query parameters', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue(mockSlotsResponse)
+        json: vi.fn().mockResolvedValue(mockSlotsResponse)
       })
 
       await fetchBookingSlots(
@@ -95,7 +96,7 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error when response is not ok (400 - invalid range)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -110,7 +111,7 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error when response is not ok (404 - link not found)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 404
       })
@@ -144,9 +145,9 @@ describe('Public Booking API', () => {
     }
 
     it('should create booking and return confirmation token', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           bookingConfirmationToken: 'signed-jwt-token'
         })
       })
@@ -172,9 +173,9 @@ describe('Public Booking API', () => {
         eventTitle: '30-min intro call'
       }
 
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           bookingConfirmationToken: 'signed-jwt-token'
         })
       })
@@ -192,10 +193,10 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error when response is not ok (400 - invalid slot)', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 400,
-        text: jest.fn().mockResolvedValue('')
+        text: vi.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -207,10 +208,10 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error when response is not ok (404 - link not found)', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 404,
-        text: jest.fn().mockResolvedValue('')
+        text: vi.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -222,10 +223,10 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error when response is not ok (422 - business validation)', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 422,
-        text: jest.fn().mockResolvedValue('')
+        text: vi.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -237,10 +238,10 @@ describe('Public Booking API', () => {
     })
 
     it('should throw error with backend message when response body is present', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 422,
-        text: jest.fn().mockResolvedValue('This slot is already booked')
+        text: vi.fn().mockResolvedValue('This slot is already booked')
       })
 
       await expect(

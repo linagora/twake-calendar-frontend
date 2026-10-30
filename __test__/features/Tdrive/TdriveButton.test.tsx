@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import React from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -6,13 +7,13 @@ import { Provider } from 'react-redux'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { setupStore } from '@common/app/store'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key
   })
 }))
 
-jest.mock('@common/features/Tdrive/components/TdrivePickerDialog', () => ({
+vi.mock('@common/features/Tdrive/components/TdrivePickerDialog', () => ({
   TdrivePickerDialog: ({ open }: { open: boolean }) =>
     React.createElement(
       'div',
@@ -21,10 +22,10 @@ jest.mock('@common/features/Tdrive/components/TdrivePickerDialog', () => ({
     )
 }))
 
-const mockOpenPicker = jest.fn()
-const mockClosePicker = jest.fn()
-const mockDismissOpenPickerError = jest.fn()
-const mockOnReadyToUse = jest.fn()
+const mockOpenPicker = vi.fn()
+const mockClosePicker = vi.fn()
+const mockDismissOpenPickerError = vi.fn()
+const mockOnReadyToUse = vi.fn()
 
 const defaultHookReturn = {
   isOpen: false,
@@ -36,18 +37,18 @@ const defaultHookReturn = {
   onReadyToUse: mockOnReadyToUse
 }
 
-jest.mock('@common/features/Tdrive/hooks/useTdrivePicker', () => ({
-  ...jest.requireActual('@common/features/Tdrive/hooks/useTdrivePicker'),
-  useTdrivePicker: jest.fn()
+vi.mock('@common/features/Tdrive/hooks/useTdrivePicker', async () => ({
+  ...(await vi.importActual('@common/features/Tdrive/hooks/useTdrivePicker')),
+  useTdrivePicker: vi.fn()
 }))
 
 import { useTdrivePicker } from '@common/features/Tdrive/hooks/useTdrivePicker'
-const mockUseTdrivePicker = useTdrivePicker as jest.MockedFunction<
+const mockUseTdrivePicker = useTdrivePicker as MockedFunction<
   typeof useTdrivePicker
 >
 
 describe('TdriveButton', () => {
-  const mockOnFilesSelected = jest.fn()
+  const mockOnFilesSelected = vi.fn()
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(
       Provider,
@@ -56,7 +57,7 @@ describe('TdriveButton', () => {
     )
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockUseTdrivePicker.mockReturnValue(defaultHookReturn)
   })
 
@@ -179,7 +180,7 @@ describe('TdriveButton', () => {
     }
 
     afterEach(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('dismisses the error when its close button is clicked', async () => {
@@ -190,10 +191,10 @@ describe('TdriveButton', () => {
     })
 
     it('dismisses the error after its auto hide duration', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
       renderWithError()
       act(() => {
-        jest.advanceTimersByTime(4000)
+        vi.advanceTimersByTime(4000)
       })
       expect(mockDismissOpenPickerError).toHaveBeenCalledTimes(1)
       expect(mockClosePicker).not.toHaveBeenCalled()

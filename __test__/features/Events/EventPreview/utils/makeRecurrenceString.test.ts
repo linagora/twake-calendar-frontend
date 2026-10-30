@@ -5,10 +5,10 @@ import es from '@common/locales/es.json'
 import fr from '@common/locales/fr.json'
 import italian from '@common/locales/it.json'
 import ru from '@common/locales/ru.json'
-import vi from '@common/locales/vi.json'
+import vietnamese from '@common/locales/vi.json'
 import { RepetitionObject } from '@common/types/Repetition'
 
-const LOCALES = { de, en, es, fr, it: italian, ru, vi }
+const LOCALES = { de, en, es, fr, it: italian, ru, vi: vietnamese }
 
 describe('makeRecurrenceString', () => {
   const freqUnits: Record<string, string> = {
@@ -18,7 +18,7 @@ describe('makeRecurrenceString', () => {
     yearly: 'years'
   }
 
-  const mockT = jest.fn((key: string, params?: any) => {
+  const mockT = vi.fn((key: string, params?: any) => {
     if (params) {
       if (key === 'eventPreview.everyInterval') {
         return `Every ${params.interval} ${params.unit}`

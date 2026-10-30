@@ -5,16 +5,16 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { RegularHoursRow } from '../../../../apps/private/src/features/booking/components/RegularHoursField/RegularHoursRow'
 import { TimePickerField } from '../../../../common/src/components/Event/components/DateTimeFields/TimePickerField'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, options: any) => options?.defaultValue || key
   })
 }))
 
-jest.mock(
+vi.mock(
   '../../../../common/src/components/Event/components/DateTimeFields/TimePickerField',
   () => ({
-    TimePickerField: jest.fn(({ value, onChange, testId, disabled }) => (
+    TimePickerField: vi.fn(({ value, onChange, testId, disabled }) => (
       <input
         className="MuiInputBase-input"
         data-testid={testId || 'mock-time-picker'}
@@ -32,8 +32,8 @@ jest.mock(
   })
 )
 
-const mockIsTooSmall = jest.fn(() => false)
-jest.mock('@common/useScreenSizeDetection', () => ({
+const mockIsTooSmall = vi.fn(() => false)
+vi.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: () => ({
     isTooSmall: mockIsTooSmall(),
     isTablet: false
@@ -51,11 +51,11 @@ const customRender = (ui: React.ReactElement, options?: any) =>
   })
 
 describe('RegularHoursRow', () => {
-  const mockHandleToggleDay = jest.fn()
-  const mockHandleTimeChange = jest.fn()
-  const mockHandleAddSlot = jest.fn()
-  const mockHandleRemoveSlot = jest.fn()
-  const mockHandleCopySlot = jest.fn()
+  const mockHandleToggleDay = vi.fn()
+  const mockHandleTimeChange = vi.fn()
+  const mockHandleAddSlot = vi.fn()
+  const mockHandleRemoveSlot = vi.fn()
+  const mockHandleCopySlot = vi.fn()
 
   const defaultProps = {
     day: 'MON' as any,
@@ -71,7 +71,7 @@ describe('RegularHoursRow', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders correctly', () => {

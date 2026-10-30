@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
@@ -14,9 +15,9 @@ import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 // Mocks
-jest.mock('@common/app/hooks', () => ({
-  useAppDispatch: jest.fn(),
-  useAppSelector: jest.fn(() => ({
+vi.mock('@common/app/hooks', () => ({
+  useAppDispatch: vi.fn(),
+  useAppSelector: vi.fn(() => ({
     user: {
       userData: null,
       tokens: null,
@@ -31,8 +32,9 @@ jest.mock('@common/app/hooks', () => ({
   }))
 }))
 
-jest.mock('@linagora/twake-oidc', () => ({
-  completeLogin: jest.fn(),
+vi.mock('@linagora/twake-oidc', async () => ({
+  ...(await vi.importActual('@linagora/twake-oidc')),
+  completeLogin: vi.fn(),
   LoginRequiredError: class extends Error {
     constructor(readonly returnTo: string) {
       super('The SSO needs the user to sign in')
@@ -40,13 +42,13 @@ jest.mock('@linagora/twake-oidc', () => ({
   }
 }))
 
-jest.mock('@common/features/Embed/twakeSpace', () => ({
-  twakeSpace: { notifyLoginRequired: jest.fn() }
+vi.mock('@common/features/Embed/twakeSpace', () => ({
+  twakeSpace: { notifyLoginRequired: vi.fn() }
 }))
 
-jest.mock('@common/features/User/UserSlice', () => {
+vi.mock('@common/features/User/UserSlice', async () => {
   const mockGetUser = Object.assign(
-    jest.fn(() => ({ type: 'GET_USER_ID' })),
+    vi.fn(() => ({ type: 'GET_USER_ID' })),
     {
       pending: { type: 'GET_USER_ID/pending' },
       fulfilled: { type: 'GET_USER_ID/fulfilled' },
@@ -55,16 +57,16 @@ jest.mock('@common/features/User/UserSlice', () => {
   )
 
   return {
-    ...jest.requireActual('@common/features/User/UserSlice'),
-    setUserData: jest.fn(data => ({ type: 'SET_USER', payload: data })),
-    setTokens: jest.fn(tokens => ({ type: 'SET_TOKENS', payload: tokens })),
+    ...(await vi.importActual('@common/features/User/UserSlice')),
+    setUserData: vi.fn(data => ({ type: 'SET_USER', payload: data })),
+    setTokens: vi.fn(tokens => ({ type: 'SET_TOKENS', payload: tokens })),
     getOpenPaasUserData: mockGetUser
   }
 })
 
-jest.mock('@common/features/Calendars/CalendarSlice', () => {
+vi.mock('@common/features/Calendars/CalendarSlice', async () => {
   const mockGetCalendars = Object.assign(
-    jest.fn(() => ({ type: 'GET_CALENDARS' })),
+    vi.fn(() => ({ type: 'GET_CALENDARS' })),
     {
       pending: { type: 'GET_CALENDARS/pending' },
       fulfilled: { type: 'GET_CALENDARS/fulfilled' },
@@ -73,19 +75,19 @@ jest.mock('@common/features/Calendars/CalendarSlice', () => {
   )
 
   return {
-    ...jest.requireActual('@common/features/Calendars/CalendarSlice'),
+    ...(await vi.importActual('@common/features/Calendars/CalendarSlice')),
     getCalendarsList: mockGetCalendars
   }
 })
 
 describe('CallbackResume', () => {
-  const dispatch = jest.fn()
+  const dispatch = vi.fn()
   let mockUserState: any
   let mockCalendarsState: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useAppDispatch as unknown as jest.Mock).mockReturnValue(dispatch)
+    vi.clearAllMocks()
+    ;(useAppDispatch as unknown as Mock).mockReturnValue(dispatch)
 
     // Initialize mock states
     mockUserState = {
@@ -99,7 +101,7 @@ describe('CallbackResume', () => {
       pending: false,
       error: null
     }
-    ;(useAppSelector as jest.Mock).mockImplementation(selector => {
+    ;(useAppSelector as Mock).mockImplementation(selector => {
       const state = {
         user: mockUserState,
         calendars: mockCalendarsState
@@ -118,7 +120,7 @@ describe('CallbackResume', () => {
       returnTo: '/calendar'
     }
 
-    ;(completeLogin as jest.Mock).mockResolvedValue(mockData)
+    ;(completeLogin as Mock).mockResolvedValue(mockData)
 
     const { rerender } = render(<CallbackResume />)
 
@@ -175,7 +177,7 @@ describe('CallbackResume', () => {
   })
 
   it('should go home when no sign-in is pending', async () => {
-    ;(completeLogin as jest.Mock).mockResolvedValue(null)
+    ;(completeLogin as Mock).mockResolvedValue(null)
     renderWithProviders(<CallbackResume />)
 
     await waitFor(() => {
@@ -186,7 +188,7 @@ describe('CallbackResume', () => {
   it('returns to the embed route the sign in started from', async () => {
     const mockTokenSet = { access_token: 'abc' }
     const mockUserInfo = { name: 'Test User' }
-    ;(completeLogin as jest.Mock).mockResolvedValue({
+    ;(completeLogin as Mock).mockResolvedValue({
       tokenSet: mockTokenSet,
       userinfo: mockUserInfo,
       returnTo: '/embed/calendars/team1'
@@ -207,7 +209,7 @@ describe('CallbackResume', () => {
   })
 
   it('shows an error when the SSO refuses the silent sign in', async () => {
-    ;(completeLogin as jest.Mock).mockRejectedValue(
+    ;(completeLogin as Mock).mockRejectedValue(
       new LoginRequiredError('/embed/calendars/team1')
     )
 

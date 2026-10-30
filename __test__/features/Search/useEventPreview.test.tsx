@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { setupStore } from '@common/app/store'
 import * as EventDao from '@common/features/Events/EventDao'
 import { useEventPreview } from '@common/features/Search/useEventPreview'
@@ -7,7 +8,7 @@ import { act, renderHook } from '@testing-library/react'
 import React, { PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
 
-jest.mock('@common/features/Events/EventDao')
+vi.mock('@common/features/Events/EventDao')
 
 const result = {
   data: {
@@ -34,7 +35,7 @@ const calendar = (overrides: Partial<Calendar>): Calendar =>
   }) as Calendar
 
 async function openedURL(cal: Calendar): Promise<string> {
-  ;(EventDao.fetchEvent as jest.Mock).mockResolvedValue({})
+  ;(EventDao.fetchEvent as Mock).mockResolvedValue({})
   const store = setupStore({})
   const wrapper = ({ children }: PropsWithChildren) => (
     <Provider store={store}>{children}</Provider>
@@ -45,12 +46,12 @@ async function openedURL(cal: Calendar): Promise<string> {
   await act(async () => {
     await hook.current.handleOpen()
   })
-  return (EventDao.fetchEvent as jest.Mock).mock.calls[0][0].URL
+  return (EventDao.fetchEvent as Mock).mock.calls[0][0].URL
 }
 
 describe('useEventPreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it("opens a result of a delegated calendar through the sharee's instance", async () => {

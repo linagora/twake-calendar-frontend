@@ -123,9 +123,7 @@ describe('extractCalendarEvents', () => {
   })
 
   it('skips and reports an event that cannot be read, keeping the others', () => {
-    const consoleError = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const unreadable = [
       'vevent',
       [
