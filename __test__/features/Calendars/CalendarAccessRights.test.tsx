@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { AccessTab } from '@common/components/Calendar/AccessTab'
 import {
   CalendarAccessRights,
@@ -12,26 +13,26 @@ import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils', () => ({
-  api: { post: jest.fn() }
+vi.mock('@common/utils/apiUtils', () => ({
+  api: { post: vi.fn() }
 }))
 
-jest.mock('@common/features/User/UserDao', () => ({
-  fetchUserById: jest.fn()
+vi.mock('@common/features/User/UserDao', () => ({
+  fetchUserById: vi.fn()
 }))
 
-jest.mock('@common/features/Calendars/CalendarDAO', () => ({
-  fetchSecretLink: jest.fn().mockResolvedValue({ secretLink: '' }),
-  fetchCalendarExport: jest.fn(),
-  updateDelegationCalendar: jest.fn()
+vi.mock('@common/features/Calendars/CalendarDAO', () => ({
+  fetchSecretLink: vi.fn().mockResolvedValue({ secretLink: '' }),
+  fetchCalendarExport: vi.fn(),
+  updateDelegationCalendar: vi.fn()
 }))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
-  jest.fn().mockImplementation(() => {
+  vi.fn().mockImplementation(() => {
     const result = Object.assign(Promise.resolve(resolvedValue), {
       unwrap: () => Promise.resolve(resolvedValue)
     })
-    return jest.fn().mockReturnValue(result)
+    return vi.fn().mockReturnValue(result)
   })
 
 describe('accessRightToDavProp', () => {
@@ -67,10 +68,10 @@ const baseCalendar: Calendar = {
 }
 
 describe('CalendarAccessRights', () => {
-  const mockOnChange = jest.fn()
-  const mockOnInvitesLoaded = jest.fn()
+  const mockOnChange = vi.fn()
+  const mockOnInvitesLoaded = vi.fn()
 
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => vi.clearAllMocks())
 
   it('renders the grant access rights section', () => {
     renderWithProviders(
@@ -203,7 +204,7 @@ describe('CalendarAccessRights', () => {
       ]
     }
 
-    ;(fetchUserById as jest.Mock).mockResolvedValue({
+    ;(fetchUserById as Mock).mockResolvedValue({
       preferredEmail: 'bob@example.com',
       firstname: 'Bob',
       lastname: 'Smith',
@@ -246,7 +247,7 @@ describe('CalendarAccessRights', () => {
       ]
     }
 
-    ;(fetchUserById as jest.Mock).mockRejectedValue(new Error('Not found'))
+    ;(fetchUserById as Mock).mockRejectedValue(new Error('Not found'))
 
     renderWithProviders(
       <CalendarAccessRights
@@ -275,9 +276,7 @@ describe('CalendarAccessRights', () => {
     }
 
     // Never resolves during the assertion window
-    ;(fetchUserById as jest.Mock).mockImplementation(
-      () => new Promise(() => {})
-    )
+    ;(fetchUserById as Mock).mockImplementation(() => new Promise(() => {}))
 
     renderWithProviders(
       <CalendarAccessRights
@@ -322,7 +321,7 @@ describe('CalendarAccessRights', () => {
       }
     }
 
-    ;(fetchUserById as jest.Mock).mockImplementation((id: string) => {
+    ;(fetchUserById as Mock).mockImplementation((id: string) => {
       if (id === 'admin1') {
         return Promise.resolve({
           preferredEmail: 'admin1@example.com',
@@ -374,9 +373,9 @@ const userState = {
 }
 
 describe('AccessTab – conditional rendering of CalendarAccessRights', () => {
-  const noop = jest.fn()
+  const noop = vi.fn()
 
-  afterEach(() => jest.clearAllMocks())
+  afterEach(() => vi.clearAllMocks())
 
   it('shows CalendarAccessRights when the current user owns the calendar', () => {
     renderWithProviders(
@@ -544,22 +543,22 @@ const existingCalendar: Calendar = {
 }
 
 describe('CalendarModal – updateDelegationCalendar integration', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(eventThunks, 'patchCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
-    jest
-      .spyOn(eventThunks, 'patchACLCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
-    jest
-      .spyOn(delegationThunks, 'updateDelegationCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
-    jest
-      .spyOn(eventThunks, 'getCalendarsList')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.clearAllMocks()
+    vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
+    vi.spyOn(eventThunks, 'patchACLCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
+    vi.spyOn(delegationThunks, 'updateDelegationCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
+    vi.spyOn(eventThunks, 'getCalendarsList').mockImplementation(
+      mockThunkWithUnwrap()
+    )
   })
 
   it('reloads the calendar list once the shares are saved so that the Access tab shows them', async () => {
@@ -574,7 +573,7 @@ describe('CalendarModal – updateDelegationCalendar integration', () => {
         }
       ]
     }
-    ;(fetchUserById as jest.Mock).mockResolvedValue({
+    ;(fetchUserById as Mock).mockResolvedValue({
       preferredEmail: 'bob@example.com',
       firstname: 'Bob',
       lastname: 'Smith',
@@ -623,16 +622,16 @@ describe('CalendarModal – updateDelegationCalendar integration', () => {
 })
 
 describe('CalendarModal – cancel button', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(delegationThunks, 'updateDelegationCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
-    jest
-      .spyOn(eventThunks, 'patchCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.clearAllMocks()
+    vi.spyOn(delegationThunks, 'updateDelegationCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
+    vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
   })
 
   it('calls onClose without saving when Cancel is clicked', async () => {

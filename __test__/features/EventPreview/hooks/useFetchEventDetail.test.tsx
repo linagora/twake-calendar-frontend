@@ -1,3 +1,4 @@
+import type { Mock, MockInstance } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useFetchEventDetail } from '@public/features/EventPreview/hooks/useFetchEventDetail'
 import { fetchEvent } from '@public/features/EventPreview/EventDao'
@@ -6,19 +7,19 @@ import React from 'react'
 import { I18nContext } from 'twake-i18n'
 import { HTTPError } from 'ky'
 
-jest.mock('@public/features/EventPreview/EventDao', () => ({
-  fetchEvent: jest.fn()
+vi.mock('@public/features/EventPreview/EventDao', () => ({
+  fetchEvent: vi.fn()
 }))
 
-jest.mock('@common/features/Events/transformers/parseFetchedEvent', () => ({
-  parseFetchedEvent: jest.fn()
+vi.mock('@common/features/Events/transformers/parseFetchedEvent', () => ({
+  parseFetchedEvent: vi.fn()
 }))
 
-const mockFetchEvent = fetchEvent as jest.Mock
-const mockParseFetchedEvent = parseFetchedEvent as jest.Mock
+const mockFetchEvent = fetchEvent as Mock
+const mockParseFetchedEvent = parseFetchedEvent as Mock
 
 describe('useFetchEventDetail', () => {
-  let consoleSpy: jest.SpyInstance
+  let consoleSpy: MockInstance
 
   const i18nContextValue = {
     t: (key: string) => {
@@ -42,8 +43,8 @@ describe('useFetchEventDetail', () => {
   )
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.clearAllMocks()
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {

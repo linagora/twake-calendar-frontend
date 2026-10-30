@@ -1,5 +1,4 @@
 import CalendarLayout from '@private/components/Calendar/CalendarLayout'
-import * as calendarUtils from '@common/components/Calendar/utils/calendarUtils'
 import { updateSlotLabelVisibility } from '@common/components/Calendar/utils/calendarUtils'
 import EventPreviewModal from '@common/components/EventPreview'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -38,7 +37,7 @@ describe('Calendar - Timezone Integration', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders TimezoneSelector in week view', async () => {
@@ -51,7 +50,7 @@ describe('Calendar - Timezone Integration', () => {
   })
 
   it('dispatches setTimeZone action when timezone is changed', async () => {
-    const setTimeZoneSpy = jest.spyOn(SettingsSlice, 'setTimeZone')
+    const setTimeZoneSpy = vi.spyOn(SettingsSlice, 'setTimeZone')
 
     renderWithProviders(<CalendarLayout />, baseState)
 
@@ -71,7 +70,7 @@ describe('Calendar - Timezone Integration', () => {
   })
 
   it('bugfix : temp timezone opens event with the time offseted', async () => {
-    const setTimeZoneSpy = jest.spyOn(SettingsSlice, 'setTimeZone')
+    const setTimeZoneSpy = vi.spyOn(SettingsSlice, 'setTimeZone')
 
     renderWithProviders(<CalendarLayout />, baseState)
 
@@ -121,12 +120,22 @@ describe('Calendar - Timezone Integration', () => {
 })
 
 describe('Calendar - Timezone Slot Label Visibility', () => {
+  // updateSlotLabelVisibility calls checkIfCurrentWeekOrDay directly, which a
+  // spy on the export does not intercept: give it the DOM it looks at instead
+  const mockCurrentWeekOrDay = (isCurrent: boolean): void => {
+    document.body.innerHTML = isCurrent
+      ? '<div class="fc-day-today"></div><div class="fc-timegrid-now-indicator-arrow"></div>'
+      : ''
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
   it('hides slot labels within 15 minutes of current time', () => {
     const currentTime = new Date('2025-01-15T14:30:00Z')
     const timezone = 'UTC'
-    jest
-      .spyOn(calendarUtils, 'checkIfCurrentWeekOrDay')
-      .mockImplementation(() => true)
+    mockCurrentWeekOrDay(true)
 
     // 14:25 - within 15 minutes
     const slot1425 = { text: '14:25' }
@@ -148,9 +157,7 @@ describe('Calendar - Timezone Slot Label Visibility', () => {
   })
 
   it('shows slot labels more than 15 minutes from current time', () => {
-    jest
-      .spyOn(calendarUtils, 'checkIfCurrentWeekOrDay')
-      .mockImplementation(() => true)
+    mockCurrentWeekOrDay(true)
 
     const currentTime = new Date('2025-01-15T14:30:00')
     const timezone = 'UTC'
@@ -169,9 +176,7 @@ describe('Calendar - Timezone Slot Label Visibility', () => {
   })
 
   it('returns visible class when not in current week/day', () => {
-    jest
-      .spyOn(calendarUtils, 'checkIfCurrentWeekOrDay')
-      .mockImplementation(() => false)
+    mockCurrentWeekOrDay(false)
     const currentTime = new Date('2025-01-15T14:30:00')
     const timezone = 'UTC'
     const slot = { text: '14:30' }
@@ -183,7 +188,7 @@ describe('Calendar - Timezone Slot Label Visibility', () => {
 })
 
 describe('EventDisplayPreview - Timezone Display', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   const baseEvent: CalendarEvent = {
     uid: 'event1',
@@ -230,7 +235,7 @@ describe('EventDisplayPreview - Timezone Display', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('does not show timezone offset for all-day events', async () => {

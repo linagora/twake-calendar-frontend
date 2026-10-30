@@ -9,14 +9,14 @@ import {
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { MobileTimeSlotSelectField } from '@private/features/booking/components/TimeSlotSelectField/MobileTimeSlotSelectField'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key
   })
 }))
 
 describe('MobileTimeSlotSelectField', () => {
-  const renderField = (setDuration = jest.fn()) =>
+  const renderField = (setDuration = vi.fn()) =>
     render(
       <TwakeMuiThemeProvider>
         <MobileTimeSlotSelectField duration={30} setDuration={setDuration} />
@@ -24,7 +24,7 @@ describe('MobileTimeSlotSelectField', () => {
     )
 
   it('closes the bottom sheet once a duration is picked', async () => {
-    const setDuration = jest.fn()
+    const setDuration = vi.fn()
     renderField(setDuration)
 
     fireEvent.click(

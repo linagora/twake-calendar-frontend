@@ -1,22 +1,26 @@
+import type { Mock } from 'vitest'
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { RegularHoursField } from '../../../../apps/private/src/features/booking/components/RegularHoursField'
 import { useRegularHours } from '../../../../apps/private/src/features/booking/hooks/useRegularHours'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, options: any) => options?.defaultValue || key
   })
 }))
 
-jest.mock(
+vi.mock(
   '../../../../apps/private/src/features/booking/hooks/useRegularHours',
-  () => ({
-    useRegularHours: jest.fn()
+  async () => ({
+    ...(await vi.importActual(
+      '../../../../apps/private/src/features/booking/hooks/useRegularHours'
+    )),
+    useRegularHours: vi.fn()
   })
 )
 
-jest.mock(
+vi.mock(
   '../../../../apps/private/src/features/booking/components/RegularHoursField/RegularHoursRow',
   () => ({
     RegularHoursRow: ({ day, isWorkingDay, isEnabled, dayLabel }: any) => (
@@ -32,16 +36,16 @@ jest.mock(
 )
 
 describe('RegularHoursField', () => {
-  const mockSetAvailabilityRules = jest.fn()
+  const mockSetAvailabilityRules = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useRegularHours as jest.Mock).mockReturnValue({
-      handleToggleDay: jest.fn(),
-      handleAddSlot: jest.fn(),
-      handleRemoveSlot: jest.fn(),
-      handleTimeChange: jest.fn(),
-      handleCopySlot: jest.fn(),
+    vi.clearAllMocks()
+    ;(useRegularHours as Mock).mockReturnValue({
+      handleToggleDay: vi.fn(),
+      handleAddSlot: vi.fn(),
+      handleRemoveSlot: vi.fn(),
+      handleTimeChange: vi.fn(),
+      handleCopySlot: vi.fn(),
       getDayLabel: (day: string) => `Label-${day}`
     })
   })

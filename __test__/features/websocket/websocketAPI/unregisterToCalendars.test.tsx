@@ -6,9 +6,9 @@ describe('unregisterToCalendars', () => {
   beforeEach(() => {
     mockSocket = {
       readyState: WebSocket.OPEN,
-      send: jest.fn()
+      send: vi.fn()
     }
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should send unregistration message with calendar URIs', () => {
@@ -43,7 +43,7 @@ describe('unregisterToCalendars', () => {
   })
 
   it('should log unregistration', () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation()
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation()
     const calendarURIs = ['/calendars/cal1', '/calendars/cal2']
 
     unregisterToCalendars(mockSocket, calendarURIs)

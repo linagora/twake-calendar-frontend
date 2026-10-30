@@ -4,6 +4,10 @@ import {
   EventHandlersProps
 } from '@common/components/Calendar/handlers/eventHandlers'
 import { EditModeDialog } from '@common/components/Event/EditModeDialog'
+import {
+  handleDelete,
+  handleRSVP
+} from '@common/components/Event/eventHandlers/eventHandlers'
 import EventPreviewModal from '@common/components/EventPreview'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
@@ -14,15 +18,17 @@ import { renderWithProviders } from '../../utils/Renderwithproviders'
 import { jCalFromIcs } from '../../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 
-jest.mock('@common/components/Event/utils/eventUtils', () => {
-  const actual = jest.requireActual('@common/components/Event/utils/eventUtils')
+vi.mock('@common/components/Event/utils/eventUtils', async () => {
+  const actual = await vi.importActual(
+    '@common/components/Event/utils/eventUtils'
+  )
   return {
     ...actual,
-    refreshCalendars: jest.fn(() => Promise.resolve()),
-    refreshSingularCalendar: jest.fn(() => Promise.resolve())
+    refreshCalendars: vi.fn(() => Promise.resolve()),
+    refreshSingularCalendar: vi.fn(() => Promise.resolve())
   }
 })
-const mockOnClose = jest.fn()
+const mockOnClose = vi.fn()
 const day = new Date('2025-03-15T10:00:00Z')
 
 const basePreloadedState = {
@@ -122,18 +128,18 @@ const masterVeventFixture = [
 
 describe('EditModeDialog Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   const renderDialog = async (
     type: 'edit' | 'attendance' | 'delete',
-    mockSetOpen = jest.fn(),
-    mockEventAction = jest.fn()
+    mockSetOpen = vi.fn(),
+    mockEventAction = vi.fn()
   ) => {
     await act(async () =>
       renderWithProviders(
@@ -167,8 +173,8 @@ describe('EditModeDialog Component', () => {
   })
 
   it("calls eventAction with 'solo' when solo option is selected and Ok clicked", async () => {
-    const mockSetOpen = jest.fn()
-    const mockEventAction = jest.fn()
+    const mockSetOpen = vi.fn()
+    const mockEventAction = vi.fn()
 
     await act(async () =>
       renderWithProviders(
@@ -192,8 +198,8 @@ describe('EditModeDialog Component', () => {
   })
 
   it("calls eventAction with 'all' when all option is selected and Ok clicked", async () => {
-    const mockSetOpen = jest.fn()
-    const mockEventAction = jest.fn()
+    const mockSetOpen = vi.fn()
+    const mockEventAction = vi.fn()
 
     await act(async () =>
       renderWithProviders(
@@ -216,8 +222,8 @@ describe('EditModeDialog Component', () => {
   })
 
   it('calls setOpen with null when Cancel is clicked', async () => {
-    const mockSetOpen = jest.fn()
-    const mockEventAction = jest.fn()
+    const mockSetOpen = vi.fn()
+    const mockEventAction = vi.fn()
 
     await act(async () =>
       renderWithProviders(
@@ -241,16 +247,16 @@ describe('EditModeDialog Component', () => {
 
 describe('EventPreviewModal - Recurring Event Interactions', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('shows EditModeDialog when editing a recurring event', async () => {
-    jest.spyOn(eventThunks, 'getEvent').mockImplementation(payload => {
+    vi.spyOn(eventThunks, 'getEvent').mockImplementation(payload => {
       return () =>
         Promise.resolve({
           calId: payload.calId,
@@ -354,7 +360,7 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
       }
     }
 
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -386,16 +392,16 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
 
 describe('Delete Recurring Event Instance', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('calls deleteEventInstance when deleting single instance', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'deleteEventInstance')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -433,25 +439,23 @@ describe('Delete Recurring Event Instance', () => {
   })
 
   it('calls deleteEvent when deleting all instances', async () => {
-    jest
-      .spyOn(EventDao, 'fetchEvent')
-      .mockResolvedValue(
-        jCalFromIcs(
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            'UID:recurring-base',
-            'SUMMARY:Recurring Event Instance',
-            'DTSTART:20250315T100000Z',
-            'DTEND:20250315T110000Z',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
-        )
+    vi.spyOn(EventDao, 'fetchEvent').mockResolvedValue(
+      jCalFromIcs(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          'UID:recurring-base',
+          'SUMMARY:Recurring Event Instance',
+          'DTSTART:20250315T100000Z',
+          'DTEND:20250315T110000Z',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
       )
+    )
 
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -491,19 +495,21 @@ describe('Delete Recurring Event Instance', () => {
 
 describe('RSVP to Recurring Event', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('calls updateEventInstance when accepting single instance', async () => {
-    jest
-      .spyOn(EventDao, 'fetchEventJCal')
-      .mockResolvedValue(['vcalendar', [], []] as any)
-    const spy = jest
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue([
+      'vcalendar',
+      [],
+      []
+    ] as any)
+    const spy = vi
       .spyOn(eventThunks, 'updateEventInstance')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
@@ -545,7 +551,7 @@ describe('RSVP to Recurring Event', () => {
   })
 
   it('calls updateSeriesPartstat when accepting all instances', async () => {
-    jest.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue([
+    vi.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue([
       [
         'vevent',
         [
@@ -570,7 +576,7 @@ describe('RSVP to Recurring Event', () => {
         []
       ]
     ] as any)
-    const spy = jest.spyOn(EventDao, 'putEvent').mockResolvedValue(undefined)
+    const spy = vi.spyOn(EventDao, 'putEvent').mockResolvedValue(undefined)
 
     await act(async () =>
       renderWithProviders(
@@ -653,13 +659,13 @@ describe('RSVP to Recurring Event', () => {
 
 describe('Edit Recurring Event in Full Display', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('renders event with recurrenceId in URL', async () => {
     await act(async () =>
@@ -680,24 +686,22 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateEventInstance when saving single instance with typeOfAction='solo'", async () => {
-    jest
-      .spyOn(EventDao, 'fetchEvent')
-      .mockResolvedValue(
-        jCalFromIcs(
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            'UID:recurring-base',
-            'SUMMARY:Recurring Event Instance',
-            'DTSTART:20250315T100000Z',
-            'DTEND:20250315T110000Z',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
-        )
+    vi.spyOn(EventDao, 'fetchEvent').mockResolvedValue(
+      jCalFromIcs(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          'UID:recurring-base',
+          'SUMMARY:Recurring Event Instance',
+          'DTSTART:20250315T100000Z',
+          'DTEND:20250315T110000Z',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
       )
-    const spy = jest
+    )
+    const spy = vi
       .spyOn(eventThunks, 'updateEventInstance')
       .mockImplementation(() => {
         return () => {
@@ -738,7 +742,7 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateSeries when saving all instances with typeOfAction='all'", async () => {
-    const getEventSpy = jest
+    const getEventSpy = vi
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
         jCalFromIcs(
@@ -757,15 +761,13 @@ describe('Edit Recurring Event in Full Display', () => {
         )
       )
 
-    const spy = jest
-      .spyOn(eventThunks, 'updateSeries')
-      .mockImplementation(() => {
-        return () => {
-          const promise = Promise.resolve()
-          ;(promise as any).unwrap = () => promise
-          return promise as any
-        }
-      })
+    const spy = vi.spyOn(eventThunks, 'updateSeries').mockImplementation(() => {
+      return () => {
+        const promise = Promise.resolve()
+        ;(promise as any).unwrap = () => promise
+        return promise as any
+      }
+    })
 
     await act(async () =>
       renderWithProviders(
@@ -828,7 +830,7 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("fetches master event data when typeOfAction='all'", async () => {
-    const getEventSpy = jest
+    const getEventSpy = vi
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
         jCalFromIcs(
@@ -871,30 +873,30 @@ describe('Edit Recurring Event in Full Display', () => {
 
 describe('Event Drag and Drop - Recurring Events', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('shows EditModeDialog when dragging recurring event', async () => {
-    const mockDispatch = jest.fn()
-    const mockSetSelectedEvent = jest.fn()
-    const mockSetOpenEditModePopup = jest.fn()
-    const mockSetAfterChoiceFunc = jest.fn()
+    const mockDispatch = vi.fn()
+    const mockSetSelectedEvent = vi.fn()
+    const mockSetOpenEditModePopup = vi.fn()
+    const mockSetAfterChoiceFunc = vi.fn()
 
     const eventHandlers = createEventHandlers({
-      setSelectedRange: jest.fn(),
-      setOpenEventModal: jest.fn(),
-      setTempEvent: jest.fn(),
-      setOpenEventDisplay: jest.fn(),
+      setSelectedRange: vi.fn(),
+      setOpenEventModal: vi.fn(),
+      setTempEvent: vi.fn(),
+      setOpenEventDisplay: vi.fn(),
       dispatch: mockDispatch,
       calendarRange: { start: new Date(), end: new Date() },
-      setEventDisplayedId: jest.fn(),
-      setEventDisplayedCalId: jest.fn(),
-      setEventDisplayedTemp: jest.fn(),
+      setEventDisplayedId: vi.fn(),
+      setEventDisplayedCalId: vi.fn(),
+      setEventDisplayedTemp: vi.fn(),
       calendars: basePreloadedState.calendars.list,
       setSelectedEvent: mockSetSelectedEvent,
       setAfterChoiceFunc: mockSetAfterChoiceFunc,
@@ -923,30 +925,30 @@ describe('Event Drag and Drop - Recurring Events', () => {
 
 describe('Event Resize - Recurring Events', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('shows EditModeDialog when resizing recurring event', async () => {
-    const mockDispatch = jest.fn()
-    const mockSetSelectedEvent = jest.fn()
-    const mockSetOpenEditModePopup = jest.fn()
-    const mockSetAfterChoiceFunc = jest.fn()
+    const mockDispatch = vi.fn()
+    const mockSetSelectedEvent = vi.fn()
+    const mockSetOpenEditModePopup = vi.fn()
+    const mockSetAfterChoiceFunc = vi.fn()
 
     const eventHandlers = createEventHandlers({
-      setSelectedRange: jest.fn(),
-      setOpenEventModal: jest.fn(),
-      setTempEvent: jest.fn(),
-      setOpenEventDisplay: jest.fn(),
+      setSelectedRange: vi.fn(),
+      setOpenEventModal: vi.fn(),
+      setTempEvent: vi.fn(),
+      setOpenEventDisplay: vi.fn(),
       dispatch: mockDispatch,
       calendarRange: { start: new Date(), end: new Date() },
-      setEventDisplayedId: jest.fn(),
-      setEventDisplayedCalId: jest.fn(),
-      setEventDisplayedTemp: jest.fn(),
+      setEventDisplayedId: vi.fn(),
+      setEventDisplayedCalId: vi.fn(),
+      setEventDisplayedTemp: vi.fn(),
       calendars: basePreloadedState.calendars.list,
       setSelectedEvent: mockSetSelectedEvent,
       setAfterChoiceFunc: mockSetAfterChoiceFunc,
@@ -976,13 +978,13 @@ describe('Event Resize - Recurring Events', () => {
 
 describe('RepeatEvent Component - Recurrence Editing', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('disables repetition fields when isOwn is false', async () => {
     await act(async () =>
@@ -1029,22 +1031,18 @@ describe('RepeatEvent Component - Recurrence Editing', () => {
 
 describe('handleRSVP function', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('calls putEvent for non-recurring events', async () => {
-    const mockDispatch = jest.fn()
+    const mockDispatch = vi.fn()
 
-    const {
-      handleRSVP
-    } = require('@common/components/Event/eventHandlers/eventHandlers')
-
-    jest.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
+    vi.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
       const promise = Promise.resolve(payload)
       ;(promise as any).unwrap = () => promise
       return () => promise as any
@@ -1081,23 +1079,19 @@ describe('handleRSVP function', () => {
 
 describe('handleDelete function', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('calls deleteEvent for non-recurring events', () => {
-    const mockDispatch = jest.fn()
-    const mockOnClose = jest.fn()
+    const mockDispatch = vi.fn()
+    const mockOnClose = vi.fn()
 
-    const {
-      handleDelete
-    } = require('@common/components/Event/eventHandlers/eventHandlers')
-
-    jest.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
+    vi.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
       return () => Promise.resolve(payload) as any
     })
 
@@ -1124,18 +1118,12 @@ describe('handleDelete function', () => {
   })
 
   it('calls deleteEventInstance when deleting solo recurring event', () => {
-    const mockDispatch = jest.fn()
-    const mockOnClose = jest.fn()
+    const mockDispatch = vi.fn()
+    const mockOnClose = vi.fn()
 
-    const {
-      handleDelete
-    } = require('@common/components/Event/eventHandlers/eventHandlers')
-
-    jest
-      .spyOn(eventThunks, 'deleteEventInstance')
-      .mockImplementation(payload => {
-        return () => Promise.resolve(payload) as any
-      })
+    vi.spyOn(eventThunks, 'deleteEventInstance').mockImplementation(payload => {
+      return () => Promise.resolve(payload) as any
+    })
 
     handleDelete(
       true, // isRecurring
@@ -1155,14 +1143,10 @@ describe('handleDelete function', () => {
   })
 
   it('calls deleteEvent when deleting all recurring events', () => {
-    const mockDispatch = jest.fn()
-    const mockOnClose = jest.fn()
+    const mockDispatch = vi.fn()
+    const mockOnClose = vi.fn()
 
-    const {
-      handleDelete
-    } = require('@common/components/Event/eventHandlers/eventHandlers')
-
-    jest.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
+    vi.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
       return () => Promise.resolve(payload) as any
     })
 
@@ -1186,13 +1170,13 @@ describe('handleDelete function', () => {
 
 describe('Calendar Integration - EditModeDialog Flow', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('passes correct eventId when editing all instances from preview', async () => {
     await act(async () =>
@@ -1229,16 +1213,16 @@ describe('Calendar Integration - EditModeDialog Flow', () => {
 
 describe('Event URL handling for recurring events', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   it('uses base ID for event URL when moving recurring event', async () => {
-    const moveEventSpy = jest
+    const moveEventSpy = vi
       .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const result = { calId: payload.cal.id, events: [] }
@@ -1246,15 +1230,15 @@ describe('Event URL handling for recurring events', () => {
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
-    jest.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
+    vi.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
       const result = { calId: payload.cal.id, events: [] }
       const promise = Promise.resolve(result)
       ;(promise as any).unwrap = () => promise
       return () => promise as any
     })
-    jest
-      .spyOn(EventDao, 'fetchAllRecurrentVevents')
-      .mockResolvedValue(masterVeventFixture)
+    vi.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue(
+      masterVeventFixture
+    )
 
     const twoCalState = {
       user: {
@@ -1368,7 +1352,7 @@ describe('Event URL handling for recurring events', () => {
 
     // Advance past the 500ms delay in the source code
     await act(async () => {
-      jest.advanceTimersByTime(600)
+      vi.advanceTimersByTime(600)
     })
 
     await waitFor(() => {

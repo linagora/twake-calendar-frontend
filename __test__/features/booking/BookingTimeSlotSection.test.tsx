@@ -7,14 +7,14 @@ import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 const render = (ui: React.ReactElement): ReturnType<typeof rtlRender> =>
   rtlRender(ui, { wrapper: TwakeMuiThemeProvider })
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: 'en-US'
   })
 }))
 
-jest.mock('@common/features/Search/searchResultsComponents', () => ({
+vi.mock('@common/features/Search/searchResultsComponents', () => ({
   DayBadge: ({ dayNum, dayName }: { dayNum: string; dayName: string }) => (
     <div data-testid="day-badge">
       {dayName} {dayNum}
@@ -29,7 +29,7 @@ describe('BookingTimeSlotSection', () => {
         selectedDay={null}
         slots={[]}
         selectedSlot={null}
-        onSelectSlot={jest.fn()}
+        onSelectSlot={vi.fn()}
         selectedTimezone="UTC"
       />
     )
@@ -43,7 +43,7 @@ describe('BookingTimeSlotSection', () => {
         selectedDay={dayjs('2036-01-26T00:00:00.000Z')}
         slots={[]}
         selectedSlot={null}
-        onSelectSlot={jest.fn()}
+        onSelectSlot={vi.fn()}
         selectedTimezone="UTC"
       />
     )
@@ -52,7 +52,7 @@ describe('BookingTimeSlotSection', () => {
   })
 
   it('renders available slots and calls onSelectSlot with the selected slot', async () => {
-    const onSelectSlot = jest.fn()
+    const onSelectSlot = vi.fn()
     const firstSlot = { start: '2036-01-26T09:00:00.000Z' }
     const secondSlot = { start: '2036-01-26T09:30:00.000Z' }
 
@@ -85,7 +85,7 @@ describe('BookingTimeSlotSection', () => {
         selectedDay={dayjs('2036-01-26T00:00:00.000Z')}
         slots={[firstSlot]}
         selectedSlot={null}
-        onSelectSlot={jest.fn()}
+        onSelectSlot={vi.fn()}
         selectedTimezone="Asia/Tokyo"
       />
     )

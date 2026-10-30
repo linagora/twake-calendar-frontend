@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { BookingStatusSwitch } from '@private/features/booking/components/BookingStatusSwitch'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, options?: { defaultValue?: string }) =>
       options?.defaultValue || key
@@ -15,7 +15,7 @@ describe('BookingStatusSwitch', () => {
     render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>)
 
   it('renders switch with active state and handles change', async () => {
-    const handleChange = jest.fn()
+    const handleChange = vi.fn()
     renderWithTheme(
       <BookingStatusSwitch active={true} onChange={handleChange} />
     )
@@ -34,7 +34,7 @@ describe('BookingStatusSwitch', () => {
   })
 
   it('renders switch with inactive state', async () => {
-    const handleChange = jest.fn()
+    const handleChange = vi.fn()
     renderWithTheme(
       <BookingStatusSwitch active={false} onChange={handleChange} />
     )

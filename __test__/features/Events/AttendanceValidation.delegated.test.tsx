@@ -5,13 +5,13 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { userData } from '@common/features/User/userDataTypes'
 import { render } from '@testing-library/react'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }))
 
-jest.mock('@common/app/hooks', () => ({
-  useAppDispatch: () => jest.fn(),
-  useAppSelector: jest.fn()
+vi.mock('@common/app/hooks', () => ({
+  useAppDispatch: () => vi.fn(),
+  useAppSelector: vi.fn()
 }))
 
 const makeUser = (email: string): userData => ({
@@ -53,7 +53,7 @@ const makeContext = (
     ...overrides
   }) as unknown as ContextualizedEvent
 
-const noopSetFunc = jest.fn()
+const noopSetFunc = vi.fn()
 
 describe('AttendanceValidation - delegation', () => {
   describe('non-delegated calendar', () => {

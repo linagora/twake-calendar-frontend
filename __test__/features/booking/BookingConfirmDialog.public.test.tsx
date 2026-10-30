@@ -3,17 +3,15 @@ import '@testing-library/jest-dom'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock(
-  '@/components/Booking/BookingHeader/BookingOwnerInfo',
-  () => ({ BookingOwnerDisplay: () => null }),
-  { virtual: true }
-)
+vi.mock('@public/components/Booking/BookingHeader/BookingOwnerInfo', () => ({
+  BookingOwnerDisplay: () => null
+}))
 
-const renderDialog = (onConfirm = jest.fn()): void => {
+const renderDialog = (onConfirm = vi.fn()): void => {
   renderWithProviders(
     <BookingConfirmDialog
       open
-      onClose={jest.fn()}
+      onClose={vi.fn()}
       selectedSlot={null}
       bookingInfo={null}
       onConfirm={onConfirm}

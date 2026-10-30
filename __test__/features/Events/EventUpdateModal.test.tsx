@@ -8,21 +8,21 @@ import { jCalFromIcs } from '../../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 
-jest.mock('@common/features/Events/EventDao')
-jest.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Events/EventDao')
+vi.mock('@common/features/Calendars/CalendarDAO')
 
 describe('EventUpdateModal Timezone Handling', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     sessionStorage.clear()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const preloadedState = {
@@ -223,7 +223,7 @@ describe('EventUpdateModal Timezone Handling', () => {
       }
     }
 
-    const mockPutEvent = jest.spyOn(EventDao, 'putEvent').mockResolvedValue({
+    const mockPutEvent = vi.spyOn(EventDao, 'putEvent').mockResolvedValue({
       status: 201,
       url: `/calendars/667037022b752d0026472254/cal1/test-event-resource.ics`
     } as any)
@@ -272,17 +272,17 @@ describe('EventUpdateModal Timezone Handling', () => {
 })
 
 describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.restoreAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.restoreAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const baseUID = 'recurring-event-base'
@@ -377,33 +377,31 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
     }
 
     // Mock DAO calls
-    const mockDeleteEvent = jest
+    const mockDeleteEvent = vi
       .spyOn(EventDao, 'deleteEvent')
       .mockResolvedValue({} as any)
-    const mockPutEvent = jest.spyOn(EventDao, 'putEvent').mockResolvedValue({
+    const mockPutEvent = vi.spyOn(EventDao, 'putEvent').mockResolvedValue({
       status: 201,
       url: `/calendars/${calId}/new-event.ics`
     } as any)
     // fetchEvent returns raw ICS string; parseFetchedEvent is called internally
-    jest
-      .spyOn(EventDao, 'fetchEvent')
-      .mockResolvedValue(
-        jCalFromIcs(
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            `UID:${baseUID}`,
-            'SUMMARY:Recurring Meeting',
-            'DTSTART:20250115T100000Z',
-            'DTEND:20250115T110000Z',
-            'RRULE:FREQ=DAILY;INTERVAL=1',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
-        )
+    vi.spyOn(EventDao, 'fetchEvent').mockResolvedValue(
+      jCalFromIcs(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=DAILY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
       )
-    jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
+    )
+    vi.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []
       }
@@ -532,31 +530,29 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
     }
 
     // Mock deleteEvent to fail with a non-404 error
-    const mockDeleteEvent = jest
+    const mockDeleteEvent = vi
       .spyOn(EventDao, 'deleteEvent')
       .mockRejectedValue(new Error('Network error'))
-    const mockPutEvent = jest
+    const mockPutEvent = vi
       .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ status: 201 } as any)
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-    jest
-      .spyOn(EventDao, 'fetchEvent')
-      .mockResolvedValue(
-        jCalFromIcs(
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            `UID:${baseUID}`,
-            'SUMMARY:Recurring Meeting',
-            'DTSTART:20250115T100000Z',
-            'DTEND:20250115T110000Z',
-            'RRULE:FREQ=WEEKLY;INTERVAL=1',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
-        )
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation()
+    vi.spyOn(EventDao, 'fetchEvent').mockResolvedValue(
+      jCalFromIcs(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=WEEKLY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
       )
+    )
 
     const { store } = renderWithProviders(
       <EventUpdateModal
@@ -689,34 +685,32 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       }
     }
 
-    jest.spyOn(EventDao, 'deleteEvent').mockResolvedValue({} as any)
-    jest.spyOn(EventDao, 'putEvent').mockResolvedValue({ status: 201 } as any)
-    jest
-      .spyOn(EventDao, 'fetchEvent')
-      .mockResolvedValue(
-        jCalFromIcs(
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            `UID:${baseUID}`,
-            'SUMMARY:Recurring Meeting',
-            'DTSTART:20250115T100000Z',
-            'DTEND:20250115T110000Z',
-            'RRULE:FREQ=MONTHLY;INTERVAL=1',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
-        )
+    vi.spyOn(EventDao, 'deleteEvent').mockResolvedValue({} as any)
+    vi.spyOn(EventDao, 'putEvent').mockResolvedValue({ status: 201 } as any)
+    vi.spyOn(EventDao, 'fetchEvent').mockResolvedValue(
+      jCalFromIcs(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=MONTHLY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
       )
-    jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
+    )
+    vi.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []
       }
     } as any)
 
     // Mock onCloseAll to test closing both modals
-    const mockOnCloseAll = jest.fn()
+    const mockOnCloseAll = vi.fn()
 
     renderWithProviders(
       <EventUpdateModal

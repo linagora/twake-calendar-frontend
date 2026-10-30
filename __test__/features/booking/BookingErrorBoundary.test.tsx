@@ -2,30 +2,26 @@ import { render, screen } from '@testing-library/react'
 import { BookingErrorBoundary } from '@public/features/booking/components/BookingErrorBoundary'
 import '@testing-library/jest-dom'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: 'en-US'
   })
 }))
 
-jest.mock(
-  '@/components/PublicLoadError',
-  () => ({
-    PublicLoadError: ({ title, detailMessage, action }: any) => (
-      <div data-testid="public-load-error">
-        <div>{title}</div>
-        {detailMessage && <div>{detailMessage}</div>}
-        {action && <div>{action}</div>}
-      </div>
-    )
-  }),
-  { virtual: true }
-)
+vi.mock('@public/components/PublicLoadError', () => ({
+  PublicLoadError: ({ title, detailMessage, action }: any) => (
+    <div data-testid="public-load-error">
+      <div>{title}</div>
+      {detailMessage && <div>{detailMessage}</div>}
+      {action && <div>{action}</div>}
+    </div>
+  )
+}))
 
 describe('BookingErrorBoundary', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders generic error when errorStatus is string', () => {

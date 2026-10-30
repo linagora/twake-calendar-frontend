@@ -1,22 +1,23 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
+import type { MockInstance } from 'vitest'
 import { patchConfigurations } from '@common/features/User/UserDao'
 import { ModuleConfiguration } from '@common/features/User/userDataTypes'
 import { api } from '@common/utils/apiUtils'
 import { waitFor } from '@testing-library/react'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 const configurationNamed = (name: string): ModuleConfiguration[] => [
   { name: 'core', configurations: [{ name, value: name }] }
 ]
 
 describe('patchConfigurations', () => {
-  let apiPatchSpy: jest.SpyInstance
+  let apiPatchSpy: MockInstance
 
   beforeEach(() => {
-    apiPatchSpy = jest.spyOn(api, 'patch')
+    apiPatchSpy = vi.spyOn(api, 'patch')
   })
 
   afterEach(() => {

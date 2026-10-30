@@ -301,9 +301,7 @@ describe('parseCalendarEvent', () => {
   })
 
   it('does not log the content of an event it cannot parse', () => {
-    const consoleError = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     parseCalendarEvent({
       data: [
@@ -323,7 +321,7 @@ describe('parseCalendarEvent', () => {
   })
 
   it('returns computed end when there is no end but a duration', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-07-18T00:00:00Z'))
+    vi.useFakeTimers().setSystemTime(new Date('2025-07-18T00:00:00Z'))
 
     const rawDataMissing: VObjectProperty[] = [
       ['UID', {}, 'text', 'event-1'],

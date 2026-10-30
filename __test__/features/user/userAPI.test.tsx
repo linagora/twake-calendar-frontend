@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import {
   makeConfigurationBody,
@@ -10,16 +11,14 @@ import {
   searchPeople
 } from '@common/features/User/UserDao'
 
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/utils/apiUtils')
 
-const mockFetchUserByEmail = fetchUserByEmail as jest.MockedFunction<
+const mockFetchUserByEmail = fetchUserByEmail as MockedFunction<
   typeof fetchUserByEmail
 >
-const mockSearchPeople = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
-const mockPatchConfigurations = patchConfigurations as jest.MockedFunction<
+const mockSearchPeople = searchPeople as MockedFunction<typeof searchPeople>
+const mockPatchConfigurations = patchConfigurations as MockedFunction<
   typeof patchConfigurations
 >
 
@@ -126,7 +125,7 @@ describe('makeConfigurationBody', () => {
 
 describe('patchConfigurations', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should call patchConfigurations with correct modules', async () => {

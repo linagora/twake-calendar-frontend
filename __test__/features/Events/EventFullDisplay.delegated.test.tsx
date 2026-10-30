@@ -4,16 +4,16 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 describe('Event Full Display — delegated calendar move', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const testDate = new Date('2025-01-15T10:00:00.000Z')
@@ -75,21 +75,21 @@ describe('Event Full Display — delegated calendar move', () => {
   }
 
   it('calls deleteEvent and putEvent — and NOT moveEvent — when moving to a delegated calendar', async () => {
-    const spyPut = jest
+    const spyPut = vi
       .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
-    const spyDelete = jest
+    const spyDelete = vi
       .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
-    const spyMove = jest
+    const spyMove = vi
       .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)

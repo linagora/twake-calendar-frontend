@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   deleteEvent,
   fetchAllRecurrentVevents,
@@ -15,7 +16,7 @@ import { api } from '@common/utils/apiUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 const day = new Date()
 
@@ -51,13 +52,13 @@ const mockEvent: CalendarEvent = {
 
 describe('eventDAO', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     delete window.CALDAV_PREFER_HANDLING
   })
 
   it('putEvent sends PUT request with JCal body', async () => {
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue(mockResponse)
     const jCal = calendarEventToJCal(mockEvent)
     const result = await putEvent(mockEvent, jCal)
 
@@ -75,7 +76,7 @@ describe('eventDAO', () => {
   it('putEvent sends strict Prefer header when configured', async () => {
     window.CALDAV_PREFER_HANDLING = 'strict'
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue(mockResponse)
     const jCal = calendarEventToJCal(mockEvent)
 
     await putEvent(mockEvent, jCal)
@@ -94,9 +95,9 @@ describe('eventDAO', () => {
   })
 
   it('putEvent logs when status is 201', async () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation()
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation()
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue(mockResponse)
 
     const jCal = calendarEventToJCal(mockEvent)
     await putEvent(mockEvent, jCal)
@@ -111,8 +112,8 @@ describe('eventDAO', () => {
 
   it('moveEvent sends MOVE request with destination header', async () => {
     const mockResponse = { status: 204 }
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
     })
     await moveEvent(mockEvent, 'newurl.ics')
 
@@ -129,8 +130,8 @@ describe('eventDAO', () => {
 
   it('deleteEvent sends DELETE request and returns json response', async () => {
     const mockResponse = { ok: true }
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
     })
 
     await deleteEvent({ URL: '/calendars/test.ics' })
@@ -180,8 +181,8 @@ describe('eventDAO', () => {
     ]
 
     beforeEach(() => {
-      ;(api.get as jest.Mock).mockResolvedValue({
-        json: jest.fn().mockResolvedValue(STORED_JCAL)
+      ;(api.get as Mock).mockResolvedValue({
+        json: vi.fn().mockResolvedValue(STORED_JCAL)
       })
     })
 
@@ -242,7 +243,7 @@ describe('eventDAO', () => {
     ['daily with null byday', { freq: 'daily', interval: 1, byday: null }]
   ])('putEvent handles repetition: %s', async (_, repetition) => {
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue(mockResponse)
 
     const event = {
       ...mockEvent,

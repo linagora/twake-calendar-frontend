@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import CalendarPopover from '@common/components/Calendar/CalendarModal'
 import { fetchSecretLink } from '@common/features/Calendars/CalendarDAO'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
@@ -5,26 +6,26 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/Calendars/CalendarDAO', () => ({
-  fetchSecretLink: jest.fn()
+vi.mock('@common/features/Calendars/CalendarDAO', () => ({
+  fetchSecretLink: vi.fn()
 }))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
-  jest.fn().mockImplementation(() => {
+  vi.fn().mockImplementation(() => {
     const dispatchResult = Object.assign(Promise.resolve(resolvedValue), {
       unwrap: () => Promise.resolve(resolvedValue)
     })
-    return jest.fn().mockReturnValue(dispatchResult)
+    return vi.fn().mockReturnValue(dispatchResult)
   })
 
 describe('CalendarPopover', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(eventThunks, 'updateDelegationCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.clearAllMocks()
+    vi.spyOn(eventThunks, 'updateDelegationCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
   })
 
   const renderPopover = (open = true) => {
@@ -75,9 +76,9 @@ describe('CalendarPopover', () => {
   })
 
   it('dispatches createCalendarAsync and calls onClose when Save clicked', async () => {
-    jest
-      .spyOn(eventThunks, 'createCalendarAsync')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.spyOn(eventThunks, 'createCalendarAsync').mockImplementation(
+      mockThunkWithUnwrap()
+    )
 
     renderPopover()
 
@@ -114,7 +115,7 @@ describe('CalendarPopover', () => {
 })
 
 describe('CalendarPopover (editing mode)', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
 
   const baseUser = {
     userData: {
@@ -137,10 +138,10 @@ describe('CalendarPopover (editing mode)', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(eventThunks, 'updateDelegationCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.clearAllMocks()
+    vi.spyOn(eventThunks, 'updateDelegationCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
   })
 
   it('prefills fields when calendar prop is given', () => {
@@ -175,7 +176,7 @@ describe('CalendarPopover (editing mode)', () => {
   })
 
   test('Save button is disabled when name is empty or whitespace only', () => {
-    renderWithProviders(<CalendarPopover open={true} onClose={jest.fn()} />, {
+    renderWithProviders(<CalendarPopover open={true} onClose={vi.fn()} />, {
       user: baseUser
     })
 
@@ -193,9 +194,9 @@ describe('CalendarPopover (editing mode)', () => {
   })
 
   it('allows modifying and saving existing calendar', async () => {
-    jest
-      .spyOn(eventThunks, 'patchCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
 
     renderWithProviders(
       <CalendarPopover
@@ -247,9 +248,9 @@ describe('CalendarPopover (editing mode)', () => {
       )
 
     beforeEach(() => {
-      jest
-        .spyOn(eventThunks, 'patchCalendar')
-        .mockImplementation(mockThunkWithUnwrap())
+      vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+        mockThunkWithUnwrap()
+      )
     })
 
     it('shows the display name instead of the internal #default name', () => {
@@ -343,14 +344,14 @@ describe('CalendarPopover (editing mode)', () => {
 })
 
 describe('CalendarPopover - Tabs Scenarios', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
   const baseUser = {
     userData: {
       openpaasId: 'user1'
     }
   }
 
-  const writeText = jest.fn()
+  const writeText = vi.fn()
 
   Object.assign(navigator, {
     clipboard: {
@@ -370,10 +371,10 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(eventThunks, 'updateDelegationCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.clearAllMocks()
+    vi.spyOn(eventThunks, 'updateDelegationCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
   })
 
   it('resets state after closing and reopening', () => {
@@ -419,13 +420,13 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   })
 
   it('patches ACL when visibility changes', async () => {
-    jest
-      .spyOn(eventThunks, 'patchCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
 
-    jest
-      .spyOn(eventThunks, 'patchACLCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.spyOn(eventThunks, 'patchACLCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
 
     renderWithProviders(
       <CalendarPopover
@@ -465,9 +466,9 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   it('copies CalDAV link from Access tab', async () => {
     window.DAV_BASE_URL = 'https://cal.example.org'
     Object.assign(navigator, {
-      clipboard: { writeText: jest.fn().mockResolvedValue(undefined) }
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) }
     })
-    ;(fetchSecretLink as jest.Mock).mockResolvedValue({
+    ;(fetchSecretLink as Mock).mockResolvedValue({
       secretLink: 'https://example.org/secret/initial'
     })
 
@@ -491,7 +492,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
       screen.getByRole('button', { name: 'calendar.copyCaldavAccess' })
     )
 
-    expect(navigator.clipboard.writeText as jest.Mock).toHaveBeenCalledWith(
+    expect(navigator.clipboard.writeText as Mock).toHaveBeenCalledWith(
       'https://cal.example.org/calendars/user1/cal1'
     )
 
@@ -504,9 +505,9 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   it('copies secret URL from Access tab', async () => {
     window.DAV_BASE_URL = 'https://cal.example.org'
     Object.assign(navigator, {
-      clipboard: { writeText: jest.fn().mockResolvedValue(undefined) }
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) }
     })
-    ;(fetchSecretLink as jest.Mock).mockResolvedValue({
+    ;(fetchSecretLink as Mock).mockResolvedValue({
       secretLink: 'https://example.org/secret/initial'
     })
 
@@ -531,7 +532,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
       screen.getByRole('button', { name: 'calendar.copySecretUrl' })
     )
 
-    expect(navigator.clipboard.writeText as jest.Mock).toHaveBeenCalledWith(
+    expect(navigator.clipboard.writeText as Mock).toHaveBeenCalledWith(
       'https://example.org/secret/initial'
     )
   })
@@ -540,12 +541,12 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     const file = new File(['test'], 'events.ics', { type: 'text/calendar' })
 
     it("creates a new calendar and imports events when Import with 'new' target", async () => {
-      jest
-        .spyOn(eventThunks, 'createCalendarAsync')
-        .mockImplementation(mockThunkWithUnwrap())
-      jest
-        .spyOn(eventThunks, 'importEventFromFile')
-        .mockImplementation(mockThunkWithUnwrap())
+      vi.spyOn(eventThunks, 'createCalendarAsync').mockImplementation(
+        mockThunkWithUnwrap()
+      )
+      vi.spyOn(eventThunks, 'importEventFromFile').mockImplementation(
+        mockThunkWithUnwrap()
+      )
 
       renderWithProviders(
         <CalendarPopover open={true} onClose={mockOnClose} />,
@@ -576,9 +577,9 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     })
 
     it('imports into an existing calendar when target is set', async () => {
-      jest
-        .spyOn(eventThunks, 'importEventFromFile')
-        .mockImplementation(mockThunkWithUnwrap())
+      vi.spyOn(eventThunks, 'importEventFromFile').mockImplementation(
+        mockThunkWithUnwrap()
+      )
 
       const calendars = {
         'user1/cal1': existingCalendar
@@ -690,9 +691,9 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     })
 
     it('imports into the calendar link the delegation exposes', async () => {
-      jest
-        .spyOn(eventThunks, 'importEventFromFile')
-        .mockImplementation(mockThunkWithUnwrap())
+      vi.spyOn(eventThunks, 'importEventFromFile').mockImplementation(
+        mockThunkWithUnwrap()
+      )
       const calendar = delegatedCalendar(true)
 
       renderWithProviders(
@@ -720,7 +721,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
   it('fetches and resets the secret link', async () => {
     window.DAV_BASE_URL = 'https://cal.example.org'
-    ;(fetchSecretLink as jest.Mock)
+    ;(fetchSecretLink as Mock)
       .mockResolvedValueOnce({
         secretLink: 'https://example.org/secret/initial'
       })
@@ -761,7 +762,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 })
 
 describe('CalendarPopover - public visibility of calendars administered by the user', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
   const user = {
     userData: { openpaasId: 'user1', email: 'user1@example.com' }
   }
@@ -793,7 +794,7 @@ describe('CalendarPopover - public visibility of calendars administered by the u
   const resource = { firstname: 'Room', emails: [], resource: true }
   const somebody = { firstname: 'Owner', emails: ['owner@example.com'] }
 
-  afterEach(() => jest.clearAllMocks())
+  afterEach(() => vi.clearAllMocks())
 
   it.each([
     ['a team calendar', team],
@@ -859,12 +860,12 @@ describe('CalendarPopover - public visibility of calendars administered by the u
   })
 
   it("saves the public visibility of a team calendar through the administrator's instance", async () => {
-    jest
-      .spyOn(eventThunks, 'patchCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
-    jest
-      .spyOn(eventThunks, 'patchACLCalendar')
-      .mockImplementation(mockThunkWithUnwrap())
+    vi.spyOn(eventThunks, 'patchCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
+    vi.spyOn(eventThunks, 'patchACLCalendar').mockImplementation(
+      mockThunkWithUnwrap()
+    )
 
     renderWithProviders(
       <CalendarPopover

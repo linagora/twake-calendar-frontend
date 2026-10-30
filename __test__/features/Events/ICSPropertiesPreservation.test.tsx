@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
 import {
   fetchAllRecurrentVevents,
@@ -16,7 +17,7 @@ import { RepetitionObject } from '@common/types/Repetition'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
-jest.mock('@common/features/Events/EventDao')
+vi.mock('@common/features/Events/EventDao')
 
 const MOCK_CALENDAR: Calendar = {
   id: 'cal-1',
@@ -532,7 +533,7 @@ describe('Edge cases', () => {
 
 describe('putEvent - passthroughProps preservation', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('includes passthroughProps in the PUT body', async () => {
@@ -573,7 +574,7 @@ describe('putEvent - passthroughProps preservation', () => {
 
 describe('putEventWithOverrides - passthroughProps isolation', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('preserves X-ATTACHMENT on the updated instance in the PUT body', async () => {
@@ -616,8 +617,8 @@ describe('putEventWithOverrides - passthroughProps isolation', () => {
       ]
     ] as any
 
-    ;(fetchAllRecurrentVevents as jest.Mock).mockResolvedValue(vevents)
-    ;(putEvent as jest.Mock).mockResolvedValue({ ok: true })
+    ;(fetchAllRecurrentVevents as Mock).mockResolvedValue(vevents)
+    ;(putEvent as Mock).mockResolvedValue({ ok: true })
 
     const jCal = makeEventWithOverrides(updatedInstance, vevents)
     const veventsResult = (jCal[2] as any[]).filter(

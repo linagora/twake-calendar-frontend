@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { api } from '@common/utils/apiUtils'
@@ -5,9 +6,9 @@ import '@testing-library/jest-dom'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils')
-jest.mock('@common/useScreenSizeDetection', () => ({
-  useScreenSizeDetection: jest.fn(() => ({
+vi.mock('@common/utils/apiUtils')
+vi.mock('@common/useScreenSizeDetection', () => ({
+  useScreenSizeDetection: vi.fn(() => ({
     isTooSmall: false,
     isTablet: false
   }))
@@ -51,8 +52,8 @@ async function chooseTheme(name: RegExp): Promise<void> {
 
 describe('ThemeSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useScreenSizeDetection as jest.Mock).mockReturnValue({
+    vi.clearAllMocks()
+    ;(useScreenSizeDetection as Mock).mockReturnValue({
       isTooSmall: false,
       isTablet: false
     })
@@ -60,7 +61,7 @@ describe('ThemeSelector', () => {
   })
 
   it('saves the chosen theme in the core.theme user setting', async () => {
-    ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+    ;(api.patch as Mock).mockResolvedValue({ status: 204 })
     const { store } = renderWithProviders(<SettingsPage />, makeState(null))
 
     await chooseTheme(/settings.themes.dark/)
@@ -84,7 +85,7 @@ describe('ThemeSelector', () => {
   })
 
   it('keeps the saved theme when the save fails', async () => {
-    ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+    ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
     const { store } = renderWithProviders(<SettingsPage />, makeState('light'))
 
     await chooseTheme(/settings.themes.dark/)
@@ -103,11 +104,11 @@ describe('ThemeSelector', () => {
   })
 
   it('opens a bottom sheet of the themes on a phone, as Language does', async () => {
-    ;(useScreenSizeDetection as jest.Mock).mockReturnValue({
+    ;(useScreenSizeDetection as Mock).mockReturnValue({
       isTooSmall: true,
       isTablet: false
     })
-    ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+    ;(api.patch as Mock).mockResolvedValue({ status: 204 })
     const { store } = renderWithProviders(<SettingsPage />, makeState('light'))
 
     expect(screen.queryByLabelText('settings.themeSelector')).toBe(null)
@@ -124,7 +125,7 @@ describe('ThemeSelector', () => {
   })
 
   it('names the phone Theme and Language fields after what they set', () => {
-    ;(useScreenSizeDetection as jest.Mock).mockReturnValue({
+    ;(useScreenSizeDetection as Mock).mockReturnValue({
       isTooSmall: true,
       isTablet: false
     })

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import * as appHooks from '@common/app/hooks'
 import { AppDispatch, setupStore } from '@common/app/store'
 import HandleLogin from '@private/features/User/HandleLogin'
@@ -6,6 +7,7 @@ import {
   useInitializeApp
 } from '@common/features/User/useInitializeApp'
 import { startLogin } from '@linagora/twake-oidc'
+import { getRetryDelay } from '@linagora/twake-websocket'
 import { setUserError } from '@common/features/User/UserSlice'
 
 import { renderHook, screen, waitFor } from '@testing-library/react'
@@ -13,35 +15,35 @@ import { Provider } from 'react-redux'
 import { push } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@linagora/twake-websocket', () => ({
+vi.mock('@linagora/twake-websocket', () => ({
   __esModule: true,
-  getRetryDelay: jest.fn(),
-  assertWebSocketAlive: jest.fn()
+  getRetryDelay: vi.fn(),
+  assertWebSocketAlive: vi.fn()
 }))
 
-jest.mock('@linagora/twake-oidc', () => ({
-  ...jest.requireActual('@linagora/twake-oidc'),
-  startLogin: jest.fn()
+vi.mock('@linagora/twake-oidc', async () => ({
+  ...(await vi.importActual('@linagora/twake-oidc')),
+  startLogin: vi.fn()
 }))
 
 describe('HandleLogin', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(startLogin as jest.Mock).mockReset()
-    const dispatch = jest.fn() as AppDispatch
-    jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
+    vi.clearAllMocks()
+    ;(startLogin as Mock).mockReset()
+    const dispatch = vi.fn() as AppDispatch
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
     sessionStorage.clear()
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation(query => ({
+      value: vi.fn().mockImplementation(query => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn()
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
       }))
     })
   })
@@ -93,14 +95,13 @@ describe('HandleLogin', () => {
       })
 
     beforeEach(() => {
-      const { getRetryDelay } = jest.requireMock('@linagora/twake-websocket')
-      getRetryDelay.mockReturnValue(0)
-      jest.spyOn(console, 'warn').mockImplementation(() => {})
-      jest.spyOn(console, 'error').mockImplementation(() => {})
+      ;(getRetryDelay as Mock).mockReturnValue(0)
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      vi.spyOn(console, 'error').mockImplementation(() => {})
     })
 
     test('tries again and redirects once it answers', async () => {
-      ;(startLogin as jest.Mock)
+      ;(startLogin as Mock)
         .mockRejectedValueOnce(new TypeError('Failed to fetch'))
         .mockResolvedValue(undefined)
 
@@ -110,9 +111,7 @@ describe('HandleLogin', () => {
     })
 
     test('shows the error page when it never answers', async () => {
-      ;(startLogin as jest.Mock).mockRejectedValue(
-        new TypeError('Failed to fetch')
-      )
+      ;(startLogin as Mock).mockRejectedValue(new TypeError('Failed to fetch'))
       const dispatch = appHooks.useAppDispatch()
 
       renderWithoutSession()
@@ -194,8 +193,8 @@ describe('HandleLogin', () => {
     expect(screen.queryByTestId('loading')).not.toBeInTheDocument()
   })
   test('goes to error page when there is error in user data', async () => {
-    const mockDispatch = jest.fn()
-    jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(mockDispatch)
+    const mockDispatch = vi.fn()
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(mockDispatch)
 
     renderWithProviders(<HandleLogin />, {
       user: {
@@ -225,8 +224,8 @@ describe('HandleLogin', () => {
   })
 
   test('goes to the calendar page when only the calendars failed to load', async () => {
-    const mockDispatch = jest.fn()
-    jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(mockDispatch)
+    const mockDispatch = vi.fn()
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(mockDispatch)
 
     renderWithProviders(<HandleLogin />, {
       user: {
