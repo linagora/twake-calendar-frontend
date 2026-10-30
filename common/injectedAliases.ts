@@ -1,7 +1,7 @@
 import path from 'path'
 
 /**
- * Returns a mapping of injected component aliases for Rsbuild and Jest.
+ * Returns a mapping of injected component aliases for Rsbuild.
  * @param appDir The root directory of the application (e.g. __dirname from rsbuild.config.ts)
  * @param overrides A mapping of specific @injected/* paths to their custom implementations
  */
