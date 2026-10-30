@@ -36,7 +36,7 @@ export const createCalendarThunk = (create: ReducerCreators<CalendarState>) =>
         const body = makePostCalendarBody({ calId, color, name, desc })
         await calendarAction(
           'POST',
-          `/calendars/${userData.openpaasId}.json`,
+          `/calendars/${userData.openpaasId}`,
           body
         )
 
@@ -67,7 +67,7 @@ export const createCalendarThunk = (create: ReducerCreators<CalendarState>) =>
         state.list[`${action.payload.userId}/${action.payload.calId}`] = {
           color: action.payload.color,
           id: `${action.payload.userId}/${action.payload.calId}`,
-          link: `/calendars/${action.payload.userId}/${action.payload.calId}.json`,
+          link: `/calendars/${action.payload.userId}/${action.payload.calId}`,
           description: action.payload.desc,
           name: action.payload.name,
           owner: action.payload.owner,

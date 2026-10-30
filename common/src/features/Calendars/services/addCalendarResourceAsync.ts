@@ -44,7 +44,7 @@ export const addCalendarResourceThunk = (
       }
       try {
         const body = makeAddSharedCalendarBody(calId, cal)
-        await calendarAction('POST', `/calendars/${userId}.json`, body)
+        await calendarAction('POST', `/calendars/${userId}`, body)
 
         if (resourceId) {
           try {
@@ -60,7 +60,7 @@ export const addCalendarResourceThunk = (
         return {
           calId: new CalDavLink(cal.cal._links).parseCalendarId(),
           color: cal.color,
-          link: `/calendars/${userId}/${calId}.json`,
+          link: `/calendars/${userId}/${calId}`,
           desc: cal.cal['caldav:description'] ?? '',
           name: cal.cal['dav:name'] ?? '',
           owner

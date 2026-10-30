@@ -36,7 +36,7 @@ describe('addCalendarResource thunk', () => {
         'caldav:description': 'A meeting room',
         _links: {
           self: {
-            href: '/calendars/res-456/cal-123.json'
+            href: '/calendars/res-456/cal-123'
           }
         }
       }
@@ -67,7 +67,7 @@ describe('addCalendarResource thunk', () => {
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(
       'POST',
-      `/calendars/${mockPayload.userId}.json`,
+      `/calendars/${mockPayload.userId}`,
       expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith('res-456')
@@ -77,7 +77,7 @@ describe('addCalendarResource thunk', () => {
       calId: 'res-456/cal-123',
       color: { background: '#000000', foreground: '#FFFFFF' },
       desc: 'A meeting room',
-      link: '/calendars/user-123/cal-123.json',
+      link: '/calendars/user-123/cal-123',
       name: 'Resource Room A',
       owner: {
         firstname: 'Creator',
@@ -102,7 +102,7 @@ describe('addCalendarResource thunk', () => {
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(
       'POST',
-      `/calendars/${mockPayload.userId}.json`,
+      `/calendars/${mockPayload.userId}`,
       expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith('res-456')
@@ -114,7 +114,7 @@ describe('addCalendarResource thunk', () => {
       calId: 'res-456/cal-123',
       color: { background: '#000000', foreground: '#FFFFFF' },
       desc: 'A meeting room',
-      link: '/calendars/user-123/cal-123.json',
+      link: '/calendars/user-123/cal-123',
       name: 'Resource Room A',
       owner: {
         firstname: '',
@@ -138,7 +138,7 @@ describe('addCalendarResource thunk', () => {
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(
       'POST',
-      `/calendars/${mockPayload.userId}.json`,
+      `/calendars/${mockPayload.userId}`,
       expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).not.toHaveBeenCalled()

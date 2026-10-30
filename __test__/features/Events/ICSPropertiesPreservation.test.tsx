@@ -20,7 +20,7 @@ jest.mock('@common/features/Events/EventDao')
 
 const MOCK_CALENDAR: Calendar = {
   id: 'cal-1',
-  link: '/dav/calendars/user/cal-1.json'
+  link: '/dav/calendars/user/cal-1'
 } as Calendar
 const EVENT_URL = '/dav/calendars/user/cal-1/event-abc.ics'
 

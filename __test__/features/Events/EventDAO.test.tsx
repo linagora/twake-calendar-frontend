@@ -224,12 +224,12 @@ describe('eventDAO', () => {
   })
 
   it('import event file', async () => {
-    await importEvent('123456789', '/calendar/calLink.json')
+    await importEvent('123456789', '/calendar/calLink')
 
     expect(api.post).toHaveBeenCalledWith('api/import', {
       body: JSON.stringify({
         fileId: '123456789',
-        target: '/calendar/calLink.json'
+        target: '/calendar/calLink'
       })
     })
   })

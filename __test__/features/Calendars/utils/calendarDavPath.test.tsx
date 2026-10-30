@@ -11,7 +11,7 @@ const SHAREE = 'sharee1'
 
 function rawCalendar(overrides: Partial<CalendarData>): CalendarData {
   return {
-    _links: { self: { href: `/calendars/${OWNER}/cal1.json` } },
+    _links: { self: { href: `/calendars/${OWNER}/cal1` } },
     acl: [],
     _embedded: { 'sync-token': '', 'dav:item': [] },
     ...overrides
@@ -28,8 +28,8 @@ describe('calendarDavPath', () => {
   it("reads a delegated calendar through the sharee's instance, never the owner's node", () => {
     const cal = normalizeCalendar(
       rawCalendar({
-        _links: { self: { href: `/calendars/${SHAREE}/instance1.json` } },
-        'calendarserver:delegatedsource': `/calendars/${OWNER}/cal1.json`
+        _links: { self: { href: `/calendars/${SHAREE}/instance1` } },
+        'calendarserver:delegatedsource': `/calendars/${OWNER}/cal1`
       }),
       SHAREE
     )
@@ -42,9 +42,9 @@ describe('calendarDavPath', () => {
   it('reads a public subscription from its source, as before', () => {
     const cal = normalizeCalendar(
       rawCalendar({
-        _links: { self: { href: `/calendars/${SHAREE}/subscription1.json` } },
+        _links: { self: { href: `/calendars/${SHAREE}/subscription1` } },
         'calendarserver:source': {
-          _links: { self: { href: `/calendars/${OWNER}/cal1.json` } }
+          _links: { self: { href: `/calendars/${OWNER}/cal1` } }
         }
       }),
       SHAREE
@@ -66,7 +66,7 @@ describe('eventDavPath', () => {
       eventDavPath(
         {
           id: `${OWNER}/cal1`,
-          link: `/calendars/${SHAREE}/instance1.json`,
+          link: `/calendars/${SHAREE}/instance1`,
           delegated: true
         },
         'event-uid'
@@ -77,7 +77,7 @@ describe('eventDavPath', () => {
   it('writes an event of an own calendar into its own node', () => {
     expect(
       eventDavPath(
-        { id: `${OWNER}/cal1`, link: `/calendars/${OWNER}/cal1.json` },
+        { id: `${OWNER}/cal1`, link: `/calendars/${OWNER}/cal1` },
         'event-uid'
       )
     ).toBe(`/calendars/${OWNER}/cal1/event-uid.ics`)
@@ -86,7 +86,7 @@ describe('eventDavPath', () => {
   it('keeps an event UID chosen by someone else within its own segment', () => {
     expect(
       eventDavPath(
-        { id: `${OWNER}/cal1`, link: `/calendars/${OWNER}/cal1.json` },
+        { id: `${OWNER}/cal1`, link: `/calendars/${OWNER}/cal1` },
         '../other/x?y#z'
       )
     ).toBe(`/calendars/${OWNER}/cal1/..%2Fother%2Fx%3Fy%23z.ics`)

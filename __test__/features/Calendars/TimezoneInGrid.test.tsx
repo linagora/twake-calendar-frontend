@@ -23,7 +23,7 @@ describe('Calendar - Timezone Integration', () => {
       list: {
         'user1/cal1': {
           id: 'user1/cal1',
-          link: '/calendars/user1/cal1.json',
+          link: '/calendars/user1/cal1',
           name: 'Test Calendar',
           description: '',
           color: '#33B679',

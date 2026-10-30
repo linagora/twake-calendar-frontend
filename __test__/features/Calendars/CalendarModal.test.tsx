@@ -312,7 +312,7 @@ describe('CalendarPopover (editing mode)', () => {
     const teamCalendar: Calendar = {
       ...existingCalendar,
       id: 'team1/cal1',
-      link: '/calendars/user1/instance1.json',
+      link: '/calendars/user1/instance1',
       delegated: true,
       owner: { firstname: 'Engineering Team', emails: [], teamCalendar: true }
     }
@@ -360,7 +360,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
   const existingCalendar: Calendar = {
     id: 'user1/cal1',
-    link: '/calendars/user1/cal1.json',
+    link: '/calendars/user1/cal1',
     name: 'Work Calendar',
     description: 'Team meetings',
     color: { light: '#33B679' },
@@ -602,7 +602,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
       await waitFor(() =>
         expect(eventThunks.importEventFromFile).toHaveBeenCalledWith(
           expect.objectContaining({
-            calLink: '/calendars/user1/cal1.json',
+            calLink: '/calendars/user1/cal1',
             file
           })
         )
@@ -629,7 +629,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   describe('Import into a delegated calendar', () => {
     const delegatedCalendar = (write: boolean): Calendar => ({
       id: 'owner1/cal1',
-      link: '/calendars/user1/shared1.json',
+      link: '/calendars/user1/shared1',
       name: 'Owner Calendar',
       owner: { firstname: 'Owner', emails: ['owner@example.com'] },
       visibility: 'public',
@@ -712,7 +712,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
       await waitFor(() =>
         expect(eventThunks.importEventFromFile).toHaveBeenCalledWith(
-          expect.objectContaining({ calLink: '/calendars/user1/shared1.json' })
+          expect.objectContaining({ calLink: '/calendars/user1/shared1' })
         )
       )
     })
@@ -771,7 +771,7 @@ describe('CalendarPopover - public visibility of calendars administered by the u
     access: 2 | 3 | 5
   ): Calendar => ({
     id: 'home1/cal1',
-    link: '/calendars/user1/instance1.json',
+    link: '/calendars/user1/instance1',
     name: 'Administered',
     description: '',
     color: { light: '#0062FF', dark: '#FFF' },
@@ -880,7 +880,7 @@ describe('CalendarPopover - public visibility of calendars administered by the u
     await waitFor(() =>
       expect(eventThunks.patchACLCalendar).toHaveBeenCalledWith({
         calId: 'home1/cal1',
-        calLink: '/calendars/user1/instance1.json',
+        calLink: '/calendars/user1/instance1',
         request: ''
       })
     )

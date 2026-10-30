@@ -17,7 +17,7 @@ jest.mock('p-map', () => jest.fn())
 
 const baseCalendar: Calendar = {
   id: 'user-1/cal-1',
-  link: 'user-1/cal-1.json',
+  link: 'user-1/cal-1',
   name: 'Personal Calendar',
   owner: {
     id: 'user-1',
@@ -31,7 +31,7 @@ const baseCalendar: Calendar = {
 
 const teamCalendar: Calendar = {
   id: 'team-1/cal-1',
-  link: 'team-1/cal-1.json',
+  link: 'team-1/cal-1',
   name: 'Team Calendar',
   owner: {
     id: 'team-1',

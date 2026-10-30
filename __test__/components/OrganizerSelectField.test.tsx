@@ -23,7 +23,7 @@ describe('OrganizerSelectField', () => {
 
   const teamCalendar: Calendar = {
     id: 'team/cal1',
-    link: 'team/cal1.json',
+    link: 'team/cal1',
     name: 'Engineers Team',
     owner: {
       firstname: 'Engineers Team',

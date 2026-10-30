@@ -14,7 +14,7 @@ export class CalDavLink {
 
   /**
    * Parses the calendar ID from the link's href.
-   * Extracts the ID from paths like '/calendars/user123/cal456.json'
+   * Extracts the ID from paths like '/calendars/user123/cal456'
    * @returns The calendar ID or undefined if the href is invalid
    */
   parseCalendarId(): string | undefined {
@@ -23,7 +23,7 @@ export class CalDavLink {
 
     const pathname = href.startsWith('http') ? new URL(href).pathname : href
 
-    const match = pathname.match(/^\/calendars\/(.+)\.json$/)
+    const match = pathname.replace(/\.json$/, '').match(/^\/calendars\/(.+)$/)
     return match?.[1]
   }
 

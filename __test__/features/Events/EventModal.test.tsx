@@ -276,7 +276,7 @@ describe('EventPopover', () => {
             color: '#0000FF',
             delegated: true,
             access: { write: true },
-            link: 'https://example.com/calendar.json',
+            link: 'https://example.com/calendar',
             owner: {
               emails: ['owner@example.com'],
               firstname: 'Owner',

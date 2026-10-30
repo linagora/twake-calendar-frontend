@@ -235,7 +235,7 @@ function CalendarPopover({
     dispatch(
       patchACLCalendar({
         calId: `${userData.openpaasId}/${calId}`,
-        calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
+        calLink: `/calendars/${userData.openpaasId}/${calId}`,
         request: visibility === 'public' ? '{DAV:}read' : ''
       })
     )
@@ -273,7 +273,7 @@ function CalendarPopover({
         if (importedContent) {
           dispatch(
             importEventFromFile({
-              calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
+              calLink: `/calendars/${userData.openpaasId}/${calId}`,
               file: importedContent
             })
           )

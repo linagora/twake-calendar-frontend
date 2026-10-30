@@ -25,7 +25,7 @@ const result = {
 const calendar = (overrides: Partial<Calendar>): Calendar =>
   ({
     id: 'owner1/cal1',
-    link: '/calendars/owner1/cal1.json',
+    link: '/calendars/owner1/cal1',
     name: 'cal',
     owner: { emails: [] },
     visibility: 'private',
@@ -58,7 +58,7 @@ describe('useEventPreview', () => {
       await openedURL(
         calendar({
           delegated: true,
-          link: '/calendars/sharee1/instance1.json'
+          link: '/calendars/sharee1/instance1'
         })
       )
     ).toBe('/calendars/sharee1/instance1/event1.ics')

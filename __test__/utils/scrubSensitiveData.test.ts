@@ -58,8 +58,8 @@ describe('scrubSensitiveData', () => {
 
     it('masks email addresses in DAV paths', () => {
       expect(
-        scrubUrl('https://cal.example/dav/calendars/alice@gouv.fr/cal.json')
-      ).toBe('https://cal.example/dav/calendars/[email]/cal.json')
+        scrubUrl('https://cal.example/dav/calendars/alice@gouv.fr/cal')
+      ).toBe('https://cal.example/dav/calendars/[email]/cal')
     })
   })
 

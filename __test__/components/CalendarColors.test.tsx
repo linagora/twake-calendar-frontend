@@ -32,7 +32,7 @@ describe('RegisterCalendars', () => {
     'apple:color': '#FF0000',
     _links: {
       self: {
-        href: '/calendars/user123/cal1.json'
+        href: '/calendars/user123/cal1'
       }
     }
   }
@@ -168,7 +168,7 @@ describe('RegisterCalendars', () => {
       ...mockCalendar,
       _links: {
         self: {
-          href: '/calendars/user1/cal1.json'
+          href: '/calendars/user1/cal1'
         }
       }
     }
@@ -299,7 +299,7 @@ describe('RegisterCalendars', () => {
       'apple:color': '#00FF00',
       _links: {
         self: {
-          href: '/calendars/user123/cal2.json'
+          href: '/calendars/user123/cal2'
         }
       }
     }
@@ -375,7 +375,7 @@ describe('RegisterCalendars', () => {
       'dav:name': 'Test Calendar',
       _links: {
         self: {
-          href: '/calendars/user123/cal2.json'
+          href: '/calendars/user123/cal2'
         }
       }
     }
@@ -432,7 +432,7 @@ describe('RegisterCalendars', () => {
       expect(addSharedCalendarSpy).toHaveBeenCalledWith({
         cal: {
           cal: {
-            _links: { self: { href: '/calendars/user123/cal2.json' } },
+            _links: { self: { href: '/calendars/user123/cal2' } },
             'dav:name': 'Test Calendar'
           },
           color: { dark: '#329655', light: '#D0ECDA' },

@@ -111,7 +111,7 @@ describe('RegisterCalendars', () => {
       _embedded: {
         'dav:calendar': [
           {
-            _links: { self: { href: '/calendars/room-a-id/cal-a.json' } },
+            _links: { self: { href: '/calendars/room-a-id/cal-a' } },
             'dav:name': 'Room A Calendar',
             'caldav:description': 'Main room A calendar',
             color: 'red'
@@ -176,7 +176,7 @@ describe('RegisterCalendars', () => {
       _embedded: {
         'dav:calendar': [
           {
-            _links: { self: { href: '/calendars/room-a-id/cal-a.json' } },
+            _links: { self: { href: '/calendars/room-a-id/cal-a' } },
             'dav:name': 'Room A Calendar',
             'caldav:description': 'Main room A calendar',
             color: 'red'

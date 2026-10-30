@@ -133,7 +133,7 @@ describe('updateCalendars', () => {
     const delegated = {
       id: 'owner1/cal1',
       name: 'Shared',
-      link: '/calendars/sharee1/instance1.json',
+      link: '/calendars/sharee1/instance1',
       delegated: true,
       syncToken: 1
     }

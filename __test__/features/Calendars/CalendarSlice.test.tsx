@@ -177,19 +177,19 @@ describe('CalendarSlice', () => {
     it('getCalendarsList loads user details in parallel for multiple owners', async () => {
       const mockCalendars = [
         {
-          _links: { self: { href: '/calendars/u1/cal1.json' } },
+          _links: { self: { href: '/calendars/u1/cal1' } },
           'dav:name': 'Calendar 1',
           'apple:color': '#FF0000',
           acl: []
         },
         {
-          _links: { self: { href: '/calendars/u2/cal2.json' } },
+          _links: { self: { href: '/calendars/u2/cal2' } },
           'dav:name': 'Calendar 2',
           'apple:color': '#00FF00',
           acl: []
         },
         {
-          _links: { self: { href: '/calendars/u3/cal3.json' } },
+          _links: { self: { href: '/calendars/u3/cal3' } },
           'dav:name': 'Calendar 3',
           'apple:color': '#0000FF',
           acl: []
@@ -236,19 +236,19 @@ describe('CalendarSlice', () => {
     it('getCalendarsList deduplicates getUserDetails calls for same ownerId', async () => {
       const mockCalendars = [
         {
-          _links: { self: { href: '/calendars/u1/cal1.json' } },
+          _links: { self: { href: '/calendars/u1/cal1' } },
           'dav:name': 'Calendar 1',
           'apple:color': '#FF0000',
           acl: []
         },
         {
-          _links: { self: { href: '/calendars/u1/cal2.json' } },
+          _links: { self: { href: '/calendars/u1/cal2' } },
           'dav:name': 'Calendar 2',
           'apple:color': '#00FF00',
           acl: []
         },
         {
-          _links: { self: { href: '/calendars/u1/cal3.json' } },
+          _links: { self: { href: '/calendars/u1/cal3' } },
           'dav:name': 'Calendar 3',
           'apple:color': '#0000FF',
           acl: []
@@ -276,7 +276,7 @@ describe('CalendarSlice', () => {
 
     it('getCalendarsList processes owners in batches of 20', async () => {
       const mockCalendars = Array.from({ length: 45 }, (_, i) => ({
-        _links: { self: { href: `/calendars/u${i + 1}/cal${i + 1}.json` } },
+        _links: { self: { href: `/calendars/u${i + 1}/cal${i + 1}` } },
         'dav:name': `Calendar ${i + 1}`,
         'apple:color': '#FF0000',
         acl: []
@@ -332,13 +332,13 @@ describe('CalendarSlice', () => {
     it('getCalendarsList handles errors in getUserDetails gracefully', async () => {
       const mockCalendars = [
         {
-          _links: { self: { href: '/calendars/u1/cal1.json' } },
+          _links: { self: { href: '/calendars/u1/cal1' } },
           'dav:name': 'Calendar 1',
           'apple:color': '#FF0000',
           acl: []
         },
         {
-          _links: { self: { href: '/calendars/u2/cal2.json' } },
+          _links: { self: { href: '/calendars/u2/cal2' } },
           'dav:name': 'Calendar 2',
           'apple:color': '#00FF00',
           acl: []
@@ -422,14 +422,14 @@ describe('CalendarSlice', () => {
       const payload = {
         calId: 'c1',
         color: { 'apple:color': '#0f0' },
-        link: '/calendars/u1/c1.json',
+        link: '/calendars/u1/c1',
         name: 'Shared',
         desc: 'Shared Desc',
         owner: { firstname: 'O', emails: ['o@example.com'] }
       }
       const mockCal = {
         cal: {
-          _links: { self: { href: '/calendars/u1/c1.json' } },
+          _links: { self: { href: '/calendars/u1/c1' } },
           'apple:color': '#0f0',
           'caldav:description': 'Shared Desc',
           'dav:name': 'Shared'
@@ -457,7 +457,7 @@ describe('CalendarSlice', () => {
       const payload = {
         calId: 'c1',
         color: { 'apple:color': '#0f0' },
-        link: '/calendars/u1/c1.json',
+        link: '/calendars/u1/c1',
         name: 'Shared',
         desc: 'Shared Desc',
         owner: { firstname: 'O', emails: ['o@example.com'] },
@@ -465,7 +465,7 @@ describe('CalendarSlice', () => {
       }
       const mockCal = {
         cal: {
-          _links: { self: { href: '/calendars/u1/c1.json' } },
+          _links: { self: { href: '/calendars/u1/c1' } },
           'apple:color': '#0f0',
           'caldav:description': 'Shared Desc',
           'dav:name': 'Shared'
@@ -492,7 +492,7 @@ describe('CalendarSlice', () => {
           events: {},
           visibility: 'public',
           owner: { firstname: 'O', emails: ['o@o.com'] },
-          link: '/calendars/t1.json',
+          link: '/calendars/t1',
           description: 'desc'
         } as Calendar
       }
@@ -643,7 +643,7 @@ describe('CalendarSlice', () => {
           { userId: 'u1', uid: 'missing' },
           {
             message:
-              'Request failed with status code 404 Not Found: REPORT http://api/dav/calendars/u1.json',
+              'Request failed with status code 404 Not Found: REPORT http://api/dav/calendars/u1',
             status: 404
           }
         )
@@ -670,7 +670,7 @@ describe('CalendarSlice', () => {
         importEventFromFile.rejected(
           null,
           'req16',
-          { calLink: '/calendars/u1/c1.json', file: new File([], 'a.ics') },
+          { calLink: '/calendars/u1/c1', file: new File([], 'a.ics') },
           { message: 'Failed to fetch', status: undefined }
         )
       )
@@ -683,7 +683,7 @@ describe('CalendarSlice', () => {
         importEventFromFile.rejected(
           null,
           'req17',
-          { calLink: '/calendars/u1/c1.json', file: new File([], 'a.ics') },
+          { calLink: '/calendars/u1/c1', file: new File([], 'a.ics') },
           { message: 'TRANSLATION:error.uploadedFileMissingId' }
         )
       )
@@ -742,7 +742,7 @@ describe('CalendarSlice', () => {
           { calId: 'c1', match: { start: '', end: '' } },
           {
             message:
-              'Request failed with status code 500 Internal Server Error: REPORT http://api/dav/calendars/u1/c1.json',
+              'Request failed with status code 500 Internal Server Error: REPORT http://api/dav/calendars/u1/c1',
             status: 500
           }
         )

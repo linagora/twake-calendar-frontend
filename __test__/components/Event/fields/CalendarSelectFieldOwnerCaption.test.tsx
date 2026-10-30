@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../../utils/Renderwithproviders'
 const delegatedCalendar = (owner: Record<string, unknown>): Calendar =>
   ({
     id: 'room/room',
-    link: '/calendars/room/room.json',
+    link: '/calendars/room/room',
     name: 'Room A',
     delegated: true,
     owner: {

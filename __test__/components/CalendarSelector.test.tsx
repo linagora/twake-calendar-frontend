@@ -13,7 +13,7 @@ jest.mock('@common/useScreenSizeDetection', () => ({
 describe('CalendarSelector on mobile', () => {
   const calendar: Calendar = {
     id: 'user1/cal1',
-    link: '/calendars/user1/cal1.json',
+    link: '/calendars/user1/cal1',
     name: 'Office',
     owner: { firstname: 'alice', emails: ['alice@example.com'] },
     visibility: 'public',

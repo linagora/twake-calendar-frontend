@@ -15,7 +15,7 @@ describe('refreshCalendarWithSyncToken', () => {
   const mockCalendar: Calendar = {
     id: 'user1/cal1',
     name: 'Test Calendar',
-    link: '/calendars/user1/cal1.json',
+    link: '/calendars/user1/cal1',
     owner: { firstname: 'Test User', emails: ['test@example.com'] },
     description: 'Test calendar description',
     delegated: false,
