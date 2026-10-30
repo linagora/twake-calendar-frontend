@@ -23,7 +23,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { AccessSelector } from './AccessSelector'
+import { AccessRightOption, AccessSelector } from './AccessSelector'
 
 export interface UserWithAccess extends User {
   accessRight: AccessRight
@@ -50,7 +50,7 @@ function UserAccessRow({
 }: {
   user: UserWithAccess
   canEdit: boolean
-  accessRightOptions: { value: AccessRight; label: string }[]
+  accessRightOptions: AccessRightOption[]
   onRemove: (email: string) => void
   onChangeRight: (email: string, right: AccessRight) => void
 }): JSX.Element {
@@ -311,10 +311,22 @@ export function CalendarAccessRights({
     )
   }
 
-  const accessRightOptions: { value: AccessRight; label: string }[] = [
-    { value: 2, label: t('calendarPopover.access.viewAllEvents') },
-    { value: 3, label: t('calendarPopover.access.editor') },
-    { value: 5, label: t('calendarPopover.access.administrator') }
+  const accessRightOptions: AccessRightOption[] = [
+    {
+      value: 2,
+      label: t('calendarPopover.access.viewAllEvents'),
+      description: t('calendar.rights.readDesc')
+    },
+    {
+      value: 3,
+      label: t('calendarPopover.access.editor'),
+      description: t('calendar.rights.editorDesc')
+    },
+    {
+      value: 5,
+      label: t('calendarPopover.access.administrator'),
+      description: t('calendar.rights.adminDesc')
+    }
   ]
 
   return (

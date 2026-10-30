@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
+import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   createCalendarAsync,
   getCalendarsList,
@@ -30,7 +31,8 @@ function CalendarPopover({
   open,
   onClose,
   onCalendarCreated,
-  calendar
+  calendar,
+  initialTab = 'settings'
 }: {
   open: boolean
   onClose: (
@@ -39,6 +41,8 @@ function CalendarPopover({
   ) => void
   onCalendarCreated?: (calId: string) => void
   calendar?: Calendar
+  /** Tab shown on open, e.g. 'access' to share the calendar */
+  initialTab?: 'settings' | 'access'
 }) {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
@@ -110,6 +114,10 @@ function CalendarPopover({
     fillCalendarData()
   }, [calendar, open, displayedName])
 
+  useEffect(() => {
+    if (open) setTab(initialTab)
+  }, [open, initialTab])
+
   const handleUsersWithAccessChange = useCallback((users: UserWithAccess[]) => {
     setUsersWithAccess(users)
   }, [])
@@ -121,6 +129,7 @@ function CalendarPopover({
   }, [])
 
   const [saveError, setSaveError] = useState('')
+  const [accessSavedOpen, setAccessSavedOpen] = useState(false)
 
   const updateCalendar = async (calId: string, calLink: string) => {
     const newName =
@@ -181,7 +190,7 @@ function CalendarPopover({
         u => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u))
       )
 
-    if (!hasChanges || !canManageInvites) return
+    if (!hasChanges || !canManageInvites) return false
 
     // Send all remaining users in `set`: the server treats it as the full list
     const set = usersWithAccess
@@ -206,6 +215,7 @@ function CalendarPopover({
     // shows the saved shares, as no live update follows a share posted to the
     // administrator's copy of a resource calendar.
     void dispatch(getCalendarsList())
+    return true
   }
 
   const createCalendar = async (
@@ -249,7 +259,11 @@ function CalendarPopover({
       const initialUsersSnapshot = [...initialUsersRef.current]
       try {
         await updateCalendar(calendar.id, calendar.link)
-        await updateCalendarInvites(calendar.link, initialUsersSnapshot)
+        const sharingUpdated = await updateCalendarInvites(
+          calendar.link,
+          initialUsersSnapshot
+        )
+        if (sharingUpdated) setAccessSavedOpen(true)
       } catch {
         setSaveError(t('error.title'))
         return
@@ -319,100 +333,109 @@ function CalendarPopover({
   }
 
   return (
-    <ResponsiveDialog
-      open={open}
-      onClose={() => handleClose({}, 'backdropClick')}
-      // the header holds the tabs, not a title: neither names the dialog,
-      // and the header is no heading
-      ariaLabel={displayedName || t('calendarPopover.tabs.addNew')}
-      dialogTitleProps={{ component: 'div' }}
-      title={
-        <Tabs value={tab} onChange={(_e, v) => setTab(v)}>
-          <Tab
-            value="settings"
-            label={
-              calendar
-                ? t('calendarPopover.tabs.settings')
-                : t('calendarPopover.tabs.addNew')
-            }
+    <>
+      <ResponsiveDialog
+        open={open}
+        onClose={() => handleClose({}, 'backdropClick')}
+        // the header holds the tabs, not a title: neither names the dialog,
+        // and the header is no heading
+        ariaLabel={displayedName || t('calendarPopover.tabs.addNew')}
+        dialogTitleProps={{ component: 'div' }}
+        title={
+          <Tabs value={tab} onChange={(_e, v) => setTab(v)}>
+            <Tab
+              value="settings"
+              label={
+                calendar
+                  ? t('calendarPopover.tabs.settings')
+                  : t('calendarPopover.tabs.addNew')
+              }
+            />
+            {calendar && (
+              <Tab value="access" label={t('calendarPopover.tabs.access')} />
+            )}
+            {canImport && (
+              <Tab value="import" label={t('calendarPopover.tabs.import')} />
+            )}
+          </Tabs>
+        }
+        actions={
+          <>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => handleClose({}, 'cancel')}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              disabled={tab === 'import' ? !importedContent : !name.trim()}
+              variant="contained"
+              onClick={
+                tab === 'import'
+                  ? handleImport
+                  : () => handleClose({}, 'backdropClick')
+              }
+            >
+              {tab === 'import'
+                ? t('actions.import')
+                : calendar
+                  ? t('actions.save')
+                  : t('actions.create')}
+            </Button>
+          </>
+        }
+      >
+        {tab === 'import' && (
+          <ImportTab
+            importTarget={importTarget}
+            setImportTarget={setImportTarget}
+            setImportedContent={setImportedContent}
+            userId={userData.openpaasId ?? ''}
+            newCalParams={{
+              name: newCalName,
+              setName: setNewCalName,
+              description: newCalDescription,
+              setDescription: setNewCalDescription,
+              color: newCalColor,
+              setColor: setNewCalColor,
+              visibility: newCalVisibility,
+              setVisibility: setNewCalVisibility
+            }}
           />
-          {calendar && (
-            <Tab value="access" label={t('calendarPopover.tabs.access')} />
-          )}
-          {canImport && (
-            <Tab value="import" label={t('calendarPopover.tabs.import')} />
-          )}
-        </Tabs>
-      }
-      actions={
-        <>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => handleClose({}, 'cancel')}
-          >
-            {t('common.cancel')}
-          </Button>
-          <Button
-            disabled={tab === 'import' ? !importedContent : !name.trim()}
-            variant="contained"
-            onClick={
-              tab === 'import'
-                ? handleImport
-                : () => handleClose({}, 'backdropClick')
-            }
-          >
-            {tab === 'import'
-              ? t('actions.import')
-              : calendar
-                ? t('actions.save')
-                : t('actions.create')}
-          </Button>
-        </>
-      }
-    >
-      {tab === 'import' && (
-        <ImportTab
-          importTarget={importTarget}
-          setImportTarget={setImportTarget}
-          setImportedContent={setImportedContent}
-          userId={userData.openpaasId ?? ''}
-          newCalParams={{
-            name: newCalName,
-            setName: setNewCalName,
-            description: newCalDescription,
-            setDescription: setNewCalDescription,
-            color: newCalColor,
-            setColor: setNewCalColor,
-            visibility: newCalVisibility,
-            setVisibility: setNewCalVisibility
-          }}
-        />
-      )}
-      {tab === 'settings' && (
-        <SettingsTab
-          name={name}
-          setName={setName}
-          description={description}
-          setDescription={setDescription}
-          color={color}
-          setColor={setColor}
-          visibility={visibility}
-          setVisibility={setVisibility}
-          calendar={calendar}
-          autoFocusName={!calendar}
-        />
-      )}
-      {tab === 'access' && calendar && (
-        <AccessTab
-          calendar={calendar}
-          usersWithAccess={usersWithAccess}
-          onUsersWithAccessChange={handleUsersWithAccessChange}
-          onInvitesLoaded={handleInvitesLoaded}
-        />
-      )}
-      <ErrorSnackbar error={saveError} type="calendar" />
-    </ResponsiveDialog>
+        )}
+        {tab === 'settings' && (
+          <SettingsTab
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            color={color}
+            setColor={setColor}
+            visibility={visibility}
+            setVisibility={setVisibility}
+            calendar={calendar}
+            autoFocusName={!calendar}
+          />
+        )}
+        {tab === 'access' && calendar && (
+          <AccessTab
+            calendar={calendar}
+            usersWithAccess={usersWithAccess}
+            onUsersWithAccessChange={handleUsersWithAccessChange}
+            onInvitesLoaded={handleInvitesLoaded}
+          />
+        )}
+        <ErrorSnackbar error={saveError} type="calendar" />
+      </ResponsiveDialog>
+      {/* outside the dialog: the save ends after the dialog has closed */}
+      <SnackbarAlert
+        open={accessSavedOpen}
+        setOpen={setAccessSavedOpen}
+        message={t('calendar.accessSaved')}
+        autoHideDuration={4000}
+      />
+    </>
   )
 }
 

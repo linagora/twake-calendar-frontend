@@ -9,6 +9,18 @@
     "caldav_access": "Accesso CalDAV",
     "secretUrl": "URL segreto",
     "secretUrlDesc": "L'indirizzo segreto consente di vedere tutti gli eventi del calendario anche senza permessi di accesso. Puoi reimpostare l'indirizzo segreto attuale e ottenerne uno nuovo.",
+    "share": "Condividi",
+    "rights": {
+      "readDesc": "Vede gli eventi, senza poterli modificare",
+      "editorDesc": "Può anche creare, modificare ed eliminare eventi",
+      "adminDesc": "Può anche condividere il calendario e modificarne le impostazioni"
+    },
+    "accessSaved": "Condivisione aggiornata",
+    "resetSecretUrl": {
+      "title": "Reimpostare l'URL segreto?",
+      "body": "Le app e le persone che usano l'URL segreto attuale non vedranno più questo calendario. Dovrai fornire loro quello nuovo.",
+      "done": "Nuovo URL segreto creato"
+    },
     "copyCaldavAccess": "Copia l'indirizzo CalDAV",
     "copySecretUrl": "Copia l'URL segreto",
     "exportCalendar": "Esporta calendario",

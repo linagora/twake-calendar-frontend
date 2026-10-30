@@ -9,6 +9,18 @@
     "caldav_access": "CalDAV-Zugriff",
     "secretUrl": "Geheime URL",
     "secretUrlDesc": "Mit der geheimen Adresse können alle Termine des Kalenders auch ohne Zugriffsrechte angezeigt werden. Sie können Ihre aktuelle geheime Adresse zurücksetzen und eine neue erhalten.",
+    "share": "Teilen",
+    "rights": {
+      "readDesc": "Sieht die Termine, kann sie nicht ändern",
+      "editorDesc": "Kann außerdem Termine erstellen, ändern und löschen",
+      "adminDesc": "Kann außerdem den Kalender freigeben und seine Einstellungen ändern"
+    },
+    "accessSaved": "Freigabe aktualisiert",
+    "resetSecretUrl": {
+      "title": "Geheime URL zurücksetzen?",
+      "body": "Apps und Personen, die die aktuelle geheime URL verwenden, sehen diesen Kalender nicht mehr. Sie müssen ihnen die neue URL geben.",
+      "done": "Neue geheime URL erstellt"
+    },
     "copyCaldavAccess": "CalDAV-Adresse kopieren",
     "copySecretUrl": "Geheime URL kopieren",
     "exportCalendar": "Kalender exportieren",

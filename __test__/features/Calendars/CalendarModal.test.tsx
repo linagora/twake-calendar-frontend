@@ -2,7 +2,7 @@ import CalendarPopover from '@common/components/Calendar/CalendarModal'
 import { fetchSecretLink } from '@common/features/Calendars/CalendarDAO'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { Calendar } from '@common/types/CalendarTypes'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 jest.mock('@common/features/Calendars/CalendarDAO', () => ({
@@ -747,6 +747,11 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /reset/i }))
 
+    const confirm = await screen.findByRole('dialog', {
+      name: 'calendar.resetSecretUrl.title'
+    })
+    fireEvent.click(within(confirm).getByRole('button', { name: /reset/i }))
+
     await waitFor(() =>
       expect(
         screen.getByDisplayValue('https://example.org/secret/new')
@@ -756,6 +761,90 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     expect(fetchSecretLink).toHaveBeenCalledWith(
       existingCalendar.link.replace('.json', ''),
       true
+    )
+    expect(
+      await screen.findByText('calendar.resetSecretUrl.done')
+    ).toBeInTheDocument()
+  })
+
+  it.each([
+    [
+      'Cancel',
+      (dialog: HTMLElement): boolean =>
+        fireEvent.click(within(dialog).getByRole('button', { name: /cancel/i }))
+    ],
+    [
+      'Escape',
+      (dialog: HTMLElement): boolean =>
+        fireEvent.keyDown(dialog, { key: 'Escape' })
+    ]
+  ])(
+    'keeps the secret link when the reset is dismissed with %s',
+    async (_how, dismiss) => {
+      ;(fetchSecretLink as jest.Mock).mockResolvedValueOnce({
+        secretLink: 'https://example.org/secret/initial'
+      })
+
+      renderWithProviders(
+        <CalendarPopover
+          open={true}
+          onClose={mockOnClose}
+          calendar={existingCalendar}
+        />,
+        { user: baseUser }
+      )
+
+      fireEvent.click(screen.getByRole('tab', { name: /Access/i }))
+      await screen.findByDisplayValue('https://example.org/secret/initial')
+
+      fireEvent.click(screen.getByRole('button', { name: /reset/i }))
+
+      const confirm = await screen.findByRole('dialog', {
+        name: 'calendar.resetSecretUrl.title'
+      })
+      expect(
+        within(confirm).getByText('calendar.resetSecretUrl.body')
+      ).toBeInTheDocument()
+      // the safe choice has the focus
+      expect(
+        within(confirm).getByRole('button', { name: /cancel/i })
+      ).toHaveFocus()
+
+      dismiss(confirm)
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole('dialog', {
+            name: 'calendar.resetSecretUrl.title'
+          })
+        ).not.toBeInTheDocument()
+      )
+      expect(fetchSecretLink).toHaveBeenCalledTimes(1)
+      expect(
+        screen.getByDisplayValue('https://example.org/secret/initial')
+      ).toBeInTheDocument()
+    }
+  )
+
+  it('opens on the Access tab with the focus in the people field when asked to', async () => {
+    ;(fetchSecretLink as jest.Mock).mockResolvedValue({ secretLink: '' })
+
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+        initialTab="access"
+      />,
+      { user: baseUser }
+    )
+
+    expect(screen.getByRole('tab', { name: /Access/i })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    )
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText('peopleSearch.label')).toHaveFocus()
     )
   })
 })

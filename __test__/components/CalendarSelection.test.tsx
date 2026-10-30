@@ -21,6 +21,11 @@ jest.mock(
   })
 )
 
+jest.mock('@common/features/Calendars/CalendarDAO', () => ({
+  ...jest.requireActual('@common/features/Calendars/CalendarDAO'),
+  fetchSecretLink: jest.fn().mockResolvedValue({ secretLink: '' })
+}))
+
 jest.mock('@common/features/booking/BookingDao', () => ({
   listBookingLinks: jest.fn().mockResolvedValue([])
 }))
@@ -260,6 +265,85 @@ describe('CalendarSelection', () => {
         screen.getByText('calendarPopover.tabs.addNew')
       ).toBeInTheDocument()
     )
+  })
+
+  describe('Share in the calendar menu', () => {
+    const openMenuOf = (name: string): void => {
+      const row = screen.getByText(name).closest('li') as HTMLElement
+      fireEvent.click(
+        within(row).getByRole('button', { name: 'common.moreOptions' })
+      )
+    }
+    const sharedReadOnly = {
+      ...calendarsMock,
+      'user3/cal1': {
+        ...calendarsMock['user3/cal1'],
+        invite: [
+          {
+            href: 'mailto:test@test.com',
+            principal: '/principals/users/user1',
+            access: 2,
+            inviteStatus: 2
+          }
+        ]
+      }
+    }
+
+    it('opens the calendar on the Access tab with the focus in the people field', async () => {
+      renderWithProviders(
+        <CalendarSelection
+          selectedCalendars={[]}
+          setSelectedCalendars={jest.fn()}
+        />,
+        {
+          user: baseUser,
+          calendars: {
+            list: {
+              ...calendarsMock,
+              'user1/cal1': {
+                ...calendarsMock['user1/cal1'],
+                link: '/calendars/user1/cal1.json'
+              }
+            },
+            pending: false
+          }
+        }
+      )
+
+      openMenuOf('Calendar personal')
+      fireEvent.click(
+        await screen.findByRole('menuitem', { name: 'calendar.share' })
+      )
+
+      expect(
+        await screen.findByRole('tab', { name: 'calendarPopover.tabs.access' })
+      ).toHaveAttribute('aria-selected', 'true')
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('peopleSearch.label')).toHaveFocus()
+      )
+    })
+
+    it('is not offered for a calendar shared read-only with the user', async () => {
+      renderWithProviders(
+        <CalendarSelection
+          selectedCalendars={[]}
+          setSelectedCalendars={jest.fn()}
+        />,
+        {
+          user: baseUser,
+          calendars: { list: sharedReadOnly, pending: false }
+        }
+      )
+
+      openMenuOf('Calendar shared')
+
+      expect(
+        await screen.findByRole('menuitem', { name: 'actions.modify' })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole('menuitem', { name: 'calendar.share' })
+      ).not.toBeInTheDocument()
+    })
   })
 
   it('Navigates to deletion dialog and deletes personal cal', async () => {

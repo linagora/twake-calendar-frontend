@@ -9,6 +9,18 @@
     "caldav_access": "Truy cập CalDAV",
     "secretUrl": "URL bí mật",
     "secretUrlDesc": "Địa chỉ bí mật có thể được dùng để xem tất cả sự kiện trong lịch ngay cả khi không có quyền truy cập. Bạn có thể đặt lại địa chỉ bí mật và nhận địa chỉ mới.",
+    "share": "Chia sẻ",
+    "rights": {
+      "readDesc": "Xem được các sự kiện, không thể thay đổi",
+      "editorDesc": "Cũng có thể tạo, sửa và xóa sự kiện",
+      "adminDesc": "Cũng có thể chia sẻ lịch và thay đổi cài đặt của lịch"
+    },
+    "accessSaved": "Đã cập nhật chia sẻ",
+    "resetSecretUrl": {
+      "title": "Đặt lại URL bí mật?",
+      "body": "Các ứng dụng và người dùng URL bí mật hiện tại sẽ không còn xem được lịch này. Bạn sẽ cần gửi cho họ URL mới.",
+      "done": "Đã tạo URL bí mật mới"
+    },
     "copyCaldavAccess": "Sao chép địa chỉ CalDAV",
     "copySecretUrl": "Sao chép URL bí mật",
     "exportCalendar": "Xuất lịch",

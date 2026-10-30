@@ -9,6 +9,7 @@ interface CalendarSelectorMenuProps {
   open: boolean
   onClose: () => void
   onModify: () => void
+  onShare?: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
   onPrint?: () => void
@@ -24,6 +25,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   open,
   onClose,
   onModify,
+  onShare,
   onDelete,
   onToggleVisibility,
   onPrint,
@@ -42,6 +44,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
         open={open}
         onClose={onClose}
         onModify={onModify}
+        onShare={onShare}
         onDelete={onDelete}
         onToggleVisibility={onToggleVisibility}
         onPrint={onPrint}
@@ -58,6 +61,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
       open={open}
       onClose={onClose}
       onModify={onModify}
+      onShare={onShare}
       onDelete={onDelete}
       onToggleVisibility={onToggleVisibility}
       onPrint={onPrint}

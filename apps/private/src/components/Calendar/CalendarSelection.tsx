@@ -12,6 +12,7 @@ import {
 } from '@common/features/booking/BookingLinksSlice'
 import { BookingLink } from '@common/features/booking/types/BookingTypes'
 import { calendarIdFromEventHref } from '@common/features/Calendars/CalendarDAO'
+import { canAdministerCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import {
   addCalendarResource,
   addSharedCalendar,
@@ -61,6 +62,8 @@ import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 import { PrintScheduleModal } from './PrintSchedule/PrintScheduleModal'
 import WebAssetOffOutlinedIcon from '@mui/icons-material/WebAssetOffOutlined'
 import { getBestColor } from '@common/components/Event/EventChip/EventChipUtils'
+
+type CalendarModalTab = 'settings' | 'access'
 
 type SectionHeader = {
   title: string
@@ -204,7 +207,7 @@ const CalendarAccordion: React.FC<{
   showAddButton?: boolean
   onAddClick?: () => void
   defaultExpanded?: boolean
-  setOpen: (id: string) => void
+  setOpen: (id: string, tab?: CalendarModalTab) => void
   hideOwner?: boolean
   isTeam?: boolean
 }> = ({
@@ -238,7 +241,7 @@ const CalendarAccordion: React.FC<{
           isTeam={isTeam}
           selectedCalendars={selectedCalendars}
           handleCalendarToggle={handleToggle}
-          setOpen={() => setOpen(id)}
+          setOpen={tab => setOpen(id, tab)}
           hideOwner={hideOwner}
         />
       ))}
@@ -532,8 +535,18 @@ const CalendarSelection: React.FC<{
     )
   }
   const [selectedCalId, setSelectedCalId] = useState('')
+  const [selectedCalTab, setSelectedCalTab] =
+    useState<CalendarModalTab>('settings')
 
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null)
+  const handleOpenCalendar = (
+    id: string,
+    tab: CalendarModalTab = 'settings'
+  ): void => {
+    setAnchorElCal(document.body)
+    setSelectedCalId(id)
+    setSelectedCalTab(tab)
+  }
   const [anchorElCalOthers, setAnchorElCalOthers] =
     useState<HTMLElement | null>(null)
   const [anchorElCalResources, setAnchorElCalResources] =
@@ -612,10 +625,7 @@ const CalendarSelection: React.FC<{
           handleToggle={handleCalendarToggle}
           showAddButton
           onAddClick={() => setAnchorElCal(document.body)}
-          setOpen={(id: string) => {
-            setAnchorElCal(document.body)
-            setSelectedCalId(id)
-          }}
+          setOpen={handleOpenCalendar}
           defaultExpanded
         />
 
@@ -624,10 +634,7 @@ const CalendarSelection: React.FC<{
           calendars={delegatedCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
-          setOpen={(id: string) => {
-            setAnchorElCal(document.body)
-            setSelectedCalId(id)
-          }}
+          setOpen={handleOpenCalendar}
           defaultExpanded
         />
 
@@ -643,10 +650,7 @@ const CalendarSelection: React.FC<{
             setAnchorElCalOthers(document.body)
           }}
           handleToggle={handleCalendarToggle}
-          setOpen={(id: string) => {
-            setAnchorElCal(document.body)
-            setSelectedCalId(id)
-          }}
+          setOpen={handleOpenCalendar}
           defaultExpanded
         />
 
@@ -657,10 +661,7 @@ const CalendarSelection: React.FC<{
           calendars={teamCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
-          setOpen={(id: string) => {
-            setAnchorElCal(document.body)
-            setSelectedCalId(id)
-          }}
+          setOpen={handleOpenCalendar}
           defaultExpanded
           isTeam
           hideOwner
@@ -679,10 +680,7 @@ const CalendarSelection: React.FC<{
             }}
             showAddButton
             handleToggle={handleCalendarToggle}
-            setOpen={(id: string) => {
-              setAnchorElCal(document.body)
-              setSelectedCalId(id)
-            }}
+            setOpen={handleOpenCalendar}
             defaultExpanded
             hideOwner={true}
           />
@@ -691,8 +689,10 @@ const CalendarSelection: React.FC<{
       <CalendarPopover
         open={Boolean(anchorElCal)}
         calendar={calendars?.[selectedCalId] ?? undefined}
+        initialTab={selectedCalTab}
         onClose={() => {
           setSelectedCalId('')
+          setSelectedCalTab('settings')
           setAnchorElCal(null)
         }}
         onCalendarCreated={(id: string) =>
@@ -759,7 +759,7 @@ const CalendarSelector: React.FC<{
   isTeam?: boolean
   selectedCalendars: string[]
   handleCalendarToggle: (name: string) => void
-  setOpen: () => void
+  setOpen: (tab?: CalendarModalTab) => void
   hideOwner?: boolean
 }> = ({
   calendars,
@@ -780,6 +780,9 @@ const CalendarSelector: React.FC<{
   const color = getBestColor(calendars[id].color, background)
   const dispatch = useAppDispatch()
   const calLink = useAppSelector(state => state.calendars.list[id].link) ?? ''
+  const userData = useAppSelector(state => state.user.userData)
+  // the Access tab only lets administrators grant rights
+  const canShare = canAdministerCalendar(calendars[id], userData ?? {})
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -929,7 +932,8 @@ const CalendarSelector: React.FC<{
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        onModify={setOpen}
+        onModify={() => setOpen()}
+        onShare={canShare ? (): void => setOpen('access') : undefined}
         onDelete={() => setDeletePopupOpen(true)}
         onToggleVisibility={() => handleCalendarToggle(id)}
         onPrint={() => setPrintOpen(true)}

@@ -22,6 +22,7 @@ import { FieldWithLabel } from '@common/components/Event/components/FieldWithLab
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import Tooltip from '@common/components/Tooltip'
 import { CalendarAccessRights, UserWithAccess } from './CalendarAccessRights'
+import { ResetSecretUrlDialog } from './ResetSecretUrlDialog'
 
 interface AccessTabProps {
   calendar: Calendar
@@ -47,6 +48,8 @@ export function AccessTab({
 
   const [secretLink, setSecretLink] = useState('')
   const [open, setOpen] = useState(false)
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
+  const [resetDoneOpen, setResetDoneOpen] = useState(false)
 
   const [exportLoading, setExportLoading] = useState(false)
   const [exportError, setExportError] = useState('')
@@ -68,12 +71,14 @@ export function AccessTab({
   }, [calendar.link])
 
   const handleResetSecretLink = async () => {
+    setResetConfirmOpen(false)
     try {
       const newSecret = await fetchSecretLink(
         calendar.link.replace('.json', ''),
         true
       )
       setSecretLink(newSecret.secretLink)
+      setResetDoneOpen(true)
     } catch (e) {
       console.error(e)
       setExportError((e as Error).message)
@@ -191,7 +196,7 @@ export function AccessTab({
           <Button
             variant="contained"
             color="inherit"
-            onClick={handleResetSecretLink}
+            onClick={() => setResetConfirmOpen(true)}
             sx={{ borderRadius: '4px' }}
           >
             {t('actions.reset')}
@@ -235,6 +240,17 @@ export function AccessTab({
         setOpen={setOpen}
         open={open}
         message={t('common.link_copied')}
+      />
+      <SnackbarAlert
+        setOpen={setResetDoneOpen}
+        open={resetDoneOpen}
+        message={t('calendar.resetSecretUrl.done')}
+        autoHideDuration={4000}
+      />
+      <ResetSecretUrlDialog
+        open={resetConfirmOpen}
+        onCancel={() => setResetConfirmOpen(false)}
+        onConfirm={() => void handleResetSecretLink()}
       />
       <ErrorSnackbar error={exportError} type="calendar" />
     </>
