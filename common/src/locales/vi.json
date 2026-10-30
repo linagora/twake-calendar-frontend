@@ -142,6 +142,7 @@
     "untitled": "Không có tiêu đề",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "Không có sự kiện để hiển thị",
+    "noEventsInPeriod": "Không có sự kiện nào từ %{start} đến %{end}",
     "list": {
       "until": "Đến"
     },

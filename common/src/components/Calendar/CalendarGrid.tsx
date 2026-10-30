@@ -218,7 +218,13 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             updateSlotLabelVisibility(new Date(), arg, otherProps.timezone)
           ]}
           nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
-          noEventsContent={() => <NoEventsContent isPending={isPending} />}
+          noEventsContent={() => (
+            <NoEventsContent
+              isPending={isPending}
+              period={dateRange}
+              timezone={otherProps.timezone}
+            />
+          )}
           moreLinkClick={otherProps.handleMoreLinkClick}
           moreLinkContent={arg => (
             <MoreLinkContent

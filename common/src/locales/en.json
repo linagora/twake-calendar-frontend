@@ -142,6 +142,7 @@
     "untitled": "Untitled",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "No events to display",
+    "noEventsInPeriod": "No event from %{start} to %{end}",
     "list": {
       "until": "Until"
     },

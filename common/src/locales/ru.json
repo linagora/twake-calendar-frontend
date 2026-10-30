@@ -142,6 +142,7 @@
     "untitled": "Без названия",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "Нет событий для отображения",
+    "noEventsInPeriod": "Нет событий с %{start} по %{end}",
     "list": {
       "until": "До"
     },

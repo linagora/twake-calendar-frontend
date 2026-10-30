@@ -177,7 +177,7 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
 
         calendar.switchView("Schedule");
 
-        PlaywrightAssertions.assertThat(page.getByText("No events to display").first())
+        PlaywrightAssertions.assertThat(page.getByText("No event from").first())
             .isVisible(new com.microsoft.playwright.assertions.LocatorAssertions.IsVisibleOptions()
                 .setTimeout(20_000));
     }

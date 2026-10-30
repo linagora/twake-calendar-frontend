@@ -142,6 +142,7 @@
     "untitled": "Ohne Titel",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "Keine Termine vorhanden",
+    "noEventsInPeriod": "Keine Termine vom %{start} bis %{end}",
     "list": {
       "until": "Bis"
     },
