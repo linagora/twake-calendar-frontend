@@ -1,3 +1,10 @@
+import {
+  useCalendarShortcuts,
+  OPEN_CALENDAR_SEARCH,
+  OPEN_KEYBOARD_SHORTCUTS
+} from '@common/hooks/useCalendarShortcuts'
+import { navigateCalendar } from '@common/components/Menubar/navigateCalendar'
+import { KeyboardShortcutsDialog } from '@common/components/Menubar/KeyboardShortcutsDialog'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import TempSearchDialog from '@common/components/Calendar/TempSearchDialog'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
@@ -137,6 +144,23 @@ export default function CalendarLayout(): JSX.Element {
     }
   }, [view])
 
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  useEffect(() => {
+    const openHelp = (): void => setShortcutsOpen(true)
+    window.addEventListener(OPEN_KEYBOARD_SHORTCUTS, openHelp)
+    return () => window.removeEventListener(OPEN_KEYBOARD_SHORTCUTS, openHelp)
+  }, [])
+
+  useCalendarShortcuts({
+    enabled: view === 'calendar',
+    onNavigate: action =>
+      navigateCalendar(calendarRef.current, action, handleDateChange),
+    onViewChange: handleViewChange,
+    onCreate: () => controllerRef.current?.handleCreateEvent(),
+    onSearch: () => window.dispatchEvent(new Event(OPEN_CALENDAR_SEARCH)),
+    onShowHelp: () => setShortcutsOpen(true)
+  })
+
   const menubarProps: MenubarProps = {
     calendarRef,
     onRefresh: () => void handleRefresh(),
@@ -151,6 +175,10 @@ export default function CalendarLayout(): JSX.Element {
   return (
     <div className={cx('App ', { 'App--mobile': isMobile })}>
       <SkipLink />
+      <KeyboardShortcutsDialog
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
       {(view === 'calendar' || view === 'search') && (
         <main className="main-layout calendar-layout">
           {/* Ahead of the sidebar headings, in reading order */}

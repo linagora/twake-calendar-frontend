@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "showList": "Show keyboard shortcuts"
+  },
   "locale": "en-gb",
   "calendar": {
     "personal": "My calendars",

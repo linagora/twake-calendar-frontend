@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Phím tắt",
+    "showList": "Hiển thị phím tắt"
+  },
   "locale": "vi",
   "calendar": {
     "personal": "Lịch cá nhân",

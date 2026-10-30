@@ -1,3 +1,4 @@
+import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { clearSearch } from '@common/features/Search/SearchSlice'
 import { setView } from '@common/features/Settings/SettingsSlice'
@@ -13,7 +14,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import MenuIcon from '@mui/icons-material/Menu'
 import SearchIcon from '@mui/icons-material/Search'
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Tooltip } from '../Tooltip'
 import { DatePickerMobile } from './components/DatePickerMobile'
@@ -52,6 +53,12 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
   const [openEventSearch, setOpenEventSearch] = useState(false)
+
+  useEffect(() => {
+    const openSearch = (): void => setOpenEventSearch(true)
+    window.addEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+    return () => window.removeEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+  }, [])
 
   // The full title, when it overflows its two lines: up to 390px a period
   // across two months does, whatever the language

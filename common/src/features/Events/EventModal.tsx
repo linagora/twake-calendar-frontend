@@ -129,6 +129,25 @@ const EventPopover: React.FC<{
     <>
       <ResponsiveDialog
         open={open}
+        onKeyDownCapture={e => {
+          if (
+            e.key !== 'Enter' ||
+            e.nativeEvent.isComposing ||
+            e.repeat ||
+            e.altKey
+          )
+            return
+          const target = e.target as HTMLElement
+          const compactTitle =
+            !showMore &&
+            target instanceof HTMLInputElement &&
+            target.dataset.eventTitle === 'true'
+          if (e.ctrlKey || e.metaKey || (compactTitle && !e.shiftKey)) {
+            e.preventDefault()
+            e.stopPropagation()
+            void formRef.current?.submit()
+          }
+        }}
         anchorEl={anchorEl}
         dynamicPositioning={
           !isListView(currentView) && anchorEl !== document.body

@@ -27,7 +27,7 @@ export const NavigationControls: React.FC<{
           '& button:last-of-type': { borderRadius: '0 12px 12px 0' }
         }}
       >
-        <Tooltip title={labels.prev}>
+        <Tooltip title={`${labels.prev} (P)`}>
           <Button
             sx={{ width: 20 }}
             onClick={() => onNavigate('prev')}
@@ -36,12 +36,12 @@ export const NavigationControls: React.FC<{
             <ChevronLeftIcon sx={{ height: 20 }} />
           </Button>
         </Tooltip>
-        <Tooltip title={t('menubar.today')}>
+        <Tooltip title={`${t('menubar.today')} (T)`}>
           <Button onClick={() => onNavigate('today')}>
             {t('menubar.today')}
           </Button>
         </Tooltip>
-        <Tooltip title={labels.next}>
+        <Tooltip title={`${labels.next} (N)`}>
           <Button
             sx={{ width: 20 }}
             onClick={() => onNavigate('next')}

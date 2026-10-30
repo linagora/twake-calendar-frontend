@@ -1,3 +1,4 @@
+import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
 import { User } from '@common/components/Attendees/types'
@@ -167,6 +168,16 @@ const SearchBar: React.FC<{
     onToggleSearch?.(true)
   }
 
+  useEffect(() => {
+    const openSearch = (): void => {
+      setExtended(true)
+      onToggleSearch?.(true)
+      inputRef.current?.focus()
+    }
+    window.addEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+    return () => window.removeEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+  }, [onToggleSearch])
+
   return (
     <>
       <Box
@@ -184,7 +195,7 @@ const SearchBar: React.FC<{
         }}
       >
         {!extended && (
-          <Tooltip title={t('tooltip.searchEventsOrCalendars')}>
+          <Tooltip title={`${t('tooltip.searchEventsOrCalendars')} (/)`}>
             <IconButton size="xsmall" sx={{ mr: 1 }} onClick={handleOpenSearch}>
               <SearchIcon />
             </IconButton>

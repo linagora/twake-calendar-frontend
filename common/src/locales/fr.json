@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "showList": "Afficher les raccourcis clavier"
+  },
   "locale": "fr-fr",
   "calendar": {
     "personal": "Mes calendriers",

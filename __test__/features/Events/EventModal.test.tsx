@@ -456,67 +456,85 @@ describe('EventPopover', () => {
     }
   })
 
-  it('dispatches putEvent and calls onClose when Save is clicked', async () => {
-    renderPopover()
-    const newEvent = {
-      title: 'Meeting',
-      allday: false,
-      uid: '6045c603-11ab-43c5-bc30-0641420bb3a8',
-      description: 'Discuss project',
-      location: 'Zoom',
-      organizer: { cn: 'test', cal_address: 'test@test.com' },
-      timezone: 'Europe/Paris',
-      transp: 'TRANSPARENT'
-    }
+  it.each(['button', 'title Enter', 'Ctrl+Enter', 'Cmd+Enter'])(
+    'dispatches putEvent and calls onClose with %s',
+    async method => {
+      renderPopover()
+      const newEvent = {
+        title: 'Meeting',
+        allday: false,
+        uid: '6045c603-11ab-43c5-bc30-0641420bb3a8',
+        description: 'Discuss project',
+        location: 'Zoom',
+        organizer: { cn: 'test', cal_address: 'test@test.com' },
+        timezone: 'Europe/Paris',
+        transp: 'TRANSPARENT'
+      }
 
-    // Fill inputs
-    fireEvent.change(screen.getByLabelText('event.form.title'), {
-      target: { value: newEvent.title }
-    })
-    // Click "Add description" button first
-    fireEvent.click(
-      screen.getByRole('button', { name: 'event.form.addDescription' })
-    )
-    fireEvent.change(screen.getByLabelText('event.form.description'), {
-      target: { value: newEvent.description }
-    })
-    fireEvent.click(
-      screen.getByRole('button', { name: 'event.form.locationPlaceholder' })
-    )
-    fireEvent.change(screen.getByLabelText('event.form.location'), {
-      target: { value: newEvent.location }
-    })
-    const spy = jest
-      .spyOn(eventThunks, 'putEvent')
-      .mockImplementation(payload => {
-        const promise = Promise.resolve(payload)
-        ;(promise as any).unwrap = () => promise
-        return () => promise as any
+      // Fill inputs
+      fireEvent.change(screen.getByLabelText('event.form.title'), {
+        target: { value: newEvent.title }
+      })
+      // Click "Add description" button first
+      fireEvent.click(
+        screen.getByRole('button', { name: 'event.form.addDescription' })
+      )
+      fireEvent.change(screen.getByLabelText('event.form.description'), {
+        target: { value: newEvent.description }
+      })
+      fireEvent.click(
+        screen.getByRole('button', { name: 'event.form.locationPlaceholder' })
+      )
+      fireEvent.change(screen.getByLabelText('event.form.location'), {
+        target: { value: newEvent.location }
+      })
+      const spy = jest
+        .spyOn(eventThunks, 'putEvent')
+        .mockImplementation(payload => {
+          const promise = Promise.resolve(payload)
+          ;(promise as any).unwrap = () => promise
+          return () => promise as any
+        })
+
+      if (method === 'button') {
+        fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+      } else if (method === 'title Enter') {
+        fireEvent.keyDown(screen.getByLabelText('event.form.title'), {
+          key: 'Enter'
+        })
+      } else {
+        fireEvent.click(
+          screen.getByRole('button', { name: 'common.moreOptions' })
+        )
+        fireEvent.keyDown(screen.getByLabelText('event.form.description'), {
+          key: 'Enter',
+          ctrlKey: method === 'Ctrl+Enter',
+          metaKey: method === 'Cmd+Enter'
+        })
+      }
+
+      await waitFor(() => {
+        expect(spy).toHaveBeenCalled()
       })
 
-    fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+      const receivedPayload = spy.mock.calls[0][0]
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled()
-    })
+      expect(receivedPayload.cal).toEqual(
+        preloadedState.calendars.list['667037022b752d0026472254/cal1']
+      )
 
-    const receivedPayload = spy.mock.calls[0][0]
+      expect(receivedPayload.newEvent.title).toBe(newEvent.title)
+      expect(receivedPayload.newEvent.description).toBe(newEvent.description)
+      expect(receivedPayload.newEvent.location).toBe(newEvent.location)
+      expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer)
+      expect(receivedPayload.newEvent.color).toEqual(
+        preloadedState.calendars.list['667037022b752d0026472254/cal1'].color
+      )
 
-    expect(receivedPayload.cal).toEqual(
-      preloadedState.calendars.list['667037022b752d0026472254/cal1']
-    )
-
-    expect(receivedPayload.newEvent.title).toBe(newEvent.title)
-    expect(receivedPayload.newEvent.description).toBe(newEvent.description)
-    expect(receivedPayload.newEvent.location).toBe(newEvent.location)
-    expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer)
-    expect(receivedPayload.newEvent.color).toEqual(
-      preloadedState.calendars.list['667037022b752d0026472254/cal1'].color
-    )
-
-    // onClose should be called
-    expect(mockOnClose).toHaveBeenCalledWith(true)
-  })
+      // onClose should be called
+      expect(mockOnClose).toHaveBeenCalledWith(true)
+    }
+  )
 
   it('calls onClose with refresh = false when Cancel clicked', () => {
     renderPopover()

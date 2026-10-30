@@ -25,13 +25,13 @@ export const SmallNavigationControls: React.FC<{
           size="xsmall"
           onClick={() => onNavigate('prev')}
           aria-label={labels.prev}
-          title={labels.prev}
+          title={`${labels.prev} (P)`}
         >
           <ChevronLeftIcon sx={{ height: 30 }} />
         </IconButton>
         <IconButton
           aria-label={t('menubar.today')}
-          title={t('menubar.today')}
+          title={`${t('menubar.today')} (T)`}
           sx={{
             // Neutral like the outline of the desktop navigation buttons
             border: '1px solid',
@@ -49,7 +49,7 @@ export const SmallNavigationControls: React.FC<{
           size="xsmall"
           onClick={() => onNavigate('next')}
           aria-label={labels.next}
-          title={labels.next}
+          title={`${labels.next} (N)`}
         >
           <ChevronRightIcon sx={{ height: 30 }} />
         </IconButton>
