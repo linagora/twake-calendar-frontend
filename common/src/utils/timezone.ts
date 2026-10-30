@@ -117,7 +117,10 @@ export function getTimezoneOffset(
   tzName: string,
   date: Date = new Date()
 ): string {
-  const fmt = new Intl.DateTimeFormat(undefined, {
+  // The output is a fixed `UTC±N` label, independent of the user's locale:
+  // some locales would print a typographic minus sign (U+2212) or their own
+  // prefix, which the `GMT` -> `UTC` replacement below would miss.
+  const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: tzName,
     timeZoneName: 'shortOffset'
   })
