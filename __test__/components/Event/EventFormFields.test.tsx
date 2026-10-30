@@ -11,9 +11,9 @@ describe('EventPopover', () => {
   afterEach(() => {
     window.HIDE_RESOURCES = undefined
   })
-  const mockOnClose = jest.fn()
-  const mockSetSelectedRange = jest.fn()
-  const mockCalendarRef = { current: { select: jest.fn() } } as any
+  const mockOnClose = vi.fn()
+  const mockSetSelectedRange = vi.fn()
+  const mockCalendarRef = { current: { select: vi.fn() } } as any
 
   const preloadedState = {
     user: {

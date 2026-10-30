@@ -1,7 +1,7 @@
 import { PublicLoadError } from '@public/components/PublicLoadError'
 import { render } from '@testing-library/react'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }))
 

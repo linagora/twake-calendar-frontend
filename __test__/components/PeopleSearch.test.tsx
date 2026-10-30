@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
 import { User } from '@common/components/Attendees/types'
 import { dedupeByEmail } from '@common/components/Attendees/usePeopleSearchState'
@@ -8,10 +9,8 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
-const mockedSearchUsers = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
+vi.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
 
 describe('PeopleSearch', () => {
   const baseUser: SearchResponseItem = new SearchResponseItem({
@@ -26,7 +25,7 @@ describe('PeopleSearch', () => {
     selectedUsers: User[] = [],
     props?: Partial<React.ComponentProps<typeof PeopleSearch>>
   ) {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     renderWithProviders(
       <PeopleSearch
         objectTypes={['user']}
@@ -39,12 +38,12 @@ describe('PeopleSearch', () => {
   }
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     mockedSearchUsers.mockReset()
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('calls searchUsers after debounce when typing', async () => {
@@ -54,7 +53,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -69,7 +68,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     const option = await screen.findByText('Test User')
@@ -93,7 +92,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -102,7 +101,7 @@ describe('PeopleSearch', () => {
   })
 
   it('triggers onToggleEventPreview on Enter key press', () => {
-    const onToggleEventPreview = jest.fn()
+    const onToggleEventPreview = vi.fn()
     setup([], { onToggleEventPreview })
 
     const input = screen.getByRole('combobox')
@@ -123,7 +122,7 @@ describe('PeopleSearch', () => {
 
     userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -145,7 +144,7 @@ describe('PeopleSearch', () => {
     await userEvent.type(input, 'Test')
 
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -159,13 +158,13 @@ describe('PeopleSearch', () => {
 
   it('reports the cleared query when options are hidden', async () => {
     mockedSearchUsers.mockResolvedValueOnce([])
-    const onSearchStateChange = jest.fn()
+    const onSearchStateChange = vi.fn()
     setup([], { hideOptions: true, onSearchStateChange })
 
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'zz')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
     await waitFor(() =>
       expect(onSearchStateChange).toHaveBeenLastCalledWith(
@@ -184,11 +183,11 @@ describe('PeopleSearch', () => {
   })
 
   it('does not report an empty query before anything was typed', async () => {
-    const onSearchStateChange = jest.fn()
+    const onSearchStateChange = vi.fn()
     setup([], { hideOptions: true, onSearchStateChange })
 
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     expect(onSearchStateChange).not.toHaveBeenCalled()
@@ -201,7 +200,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -213,7 +212,7 @@ describe('PeopleSearch', () => {
     await userEvent.clear(input)
     await userEvent.type(input, 'Error')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -226,7 +225,7 @@ describe('PeopleSearch', () => {
     await userEvent.clear(input)
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -246,7 +245,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     const loadingText = await screen.findByText(
@@ -293,7 +292,7 @@ describe('PeopleSearch', () => {
 
   describe('paste multiple attendees', () => {
     function setupFreeSolo(selectedUsers: User[] = []) {
-      const onChange = jest.fn()
+      const onChange = vi.fn()
       renderWithProviders(
         <PeopleSearch
           objectTypes={['user']}
@@ -599,7 +598,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'valid@example.com')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       const options = await screen.findAllByText('valid@example.com')
@@ -671,7 +670,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'BOB@Open-Paas.org')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       fireEvent.keyDown(input, { key: 'Enter' })
@@ -699,7 +698,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'TEST@Example.com')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
       await screen.findByRole('option')
 
@@ -725,7 +724,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'Test')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
       await userEvent.click(await screen.findByRole('option'))
 
@@ -791,7 +790,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'Test')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       // Wait for options to appear
@@ -819,7 +818,7 @@ describe('PeopleSearch', () => {
       const input = screen.getByRole('combobox')
       await userEvent.type(input, 'Test')
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       await waitFor(() => {

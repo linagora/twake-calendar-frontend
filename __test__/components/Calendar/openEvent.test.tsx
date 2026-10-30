@@ -44,7 +44,7 @@ const calendars: Record<string, Calendar> = {
 
 function clickOn(uid: string): EventClickArg {
   const info = {
-    jsEvent: { preventDefault: jest.fn(), target: document.body },
+    jsEvent: { preventDefault: vi.fn(), target: document.body },
     el: document.body,
     event: { extendedProps: { uid, calId }, _def: { extendedProps: {} } }
   }
@@ -53,18 +53,18 @@ function clickOn(uid: string): EventClickArg {
 
 function openEvent(uid: string): void {
   const handlers = createEventHandlers({
-    dispatch: jest.fn(),
+    dispatch: vi.fn(),
     calendars,
-    setAnchorEl: jest.fn(),
-    setSelectedRange: jest.fn(),
-    setOpenEventDisplay: jest.fn(),
-    setEventDisplayedId: jest.fn(),
-    setEventDisplayedCalId: jest.fn(),
-    setEventDisplayedTemp: jest.fn(),
-    setSelectedEvent: jest.fn(),
-    setAfterChoiceFunc: jest.fn(),
-    setOpenEditModePopup: jest.fn(),
-    setTempEvent: jest.fn()
+    setAnchorEl: vi.fn(),
+    setSelectedRange: vi.fn(),
+    setOpenEventDisplay: vi.fn(),
+    setEventDisplayedId: vi.fn(),
+    setEventDisplayedCalId: vi.fn(),
+    setEventDisplayedTemp: vi.fn(),
+    setSelectedEvent: vi.fn(),
+    setAfterChoiceFunc: vi.fn(),
+    setOpenEditModePopup: vi.fn(),
+    setTempEvent: vi.fn()
   } as unknown as EventHandlersProps)
 
   handlers.handleEventClick(clickOn(uid))
@@ -77,7 +77,7 @@ function openEvent(uid: string): void {
  */
 describe('Opening an event from the grid', () => {
   it('does not read a simple event again', () => {
-    const getEvent = jest.spyOn(eventThunks, 'getEvent')
+    const getEvent = vi.spyOn(eventThunks, 'getEvent')
 
     openEvent('simple')
 
@@ -85,7 +85,7 @@ describe('Opening an event from the grid', () => {
   })
 
   it('does not read an occurrence whose repetition is already known', () => {
-    const getEvent = jest.spyOn(eventThunks, 'getEvent')
+    const getEvent = vi.spyOn(eventThunks, 'getEvent')
 
     openEvent('known-series/20250315T100000')
 
@@ -93,7 +93,7 @@ describe('Opening an event from the grid', () => {
   })
 
   it('reads an occurrence that came without its repetition', () => {
-    const getEvent = jest.spyOn(eventThunks, 'getEvent')
+    const getEvent = vi.spyOn(eventThunks, 'getEvent')
 
     openEvent('series/20250315T100000')
 
@@ -103,7 +103,7 @@ describe('Opening an event from the grid', () => {
   })
 
   it('reads an event that came without the zone it was written in', () => {
-    const getEvent = jest.spyOn(eventThunks, 'getEvent')
+    const getEvent = vi.spyOn(eventThunks, 'getEvent')
 
     openEvent('zoneless')
 

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { CalendarApi } from '@fullcalendar/core'
 import {
   act,
@@ -15,14 +16,14 @@ import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 const render = (ui: React.ReactElement): ReturnType<typeof rtlRender> =>
   rtlRender(ui, { wrapper: TwakeMuiThemeProvider })
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: (): { t: (key: string) => string; lang: string } => ({
     t: (key: string) => key,
     lang: 'en'
   })
 }))
 
-const scrollIntoViewMock = jest.fn()
+const scrollIntoViewMock = vi.fn()
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView
 
@@ -35,13 +36,13 @@ afterAll(() => {
 })
 
 function makeCalendarApi(initialDate: Date): CalendarApi & {
-  getDate: jest.Mock
-  gotoDate: jest.Mock
+  getDate: Mock
+  gotoDate: Mock
 } {
   let _date = initialDate
   const mockApi = {
-    getDate: jest.fn(() => _date),
-    gotoDate: jest.fn((d: Date) => {
+    getDate: vi.fn(() => _date),
+    gotoDate: vi.fn((d: Date) => {
       _date = d
     })
   }
@@ -50,7 +51,7 @@ function makeCalendarApi(initialDate: Date): CalendarApi & {
 
 describe('DatePickerMobile', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     scrollIntoViewMock.mockClear()
   })
 
@@ -59,13 +60,13 @@ describe('DatePickerMobile', () => {
   ): Promise<
     RenderResult & {
       calendarApi: CalendarApi
-      onDateChange: jest.Mock
-      onCloseDatePicker: jest.Mock
+      onDateChange: Mock
+      onCloseDatePicker: Mock
     }
   > => {
     const calendarApi = makeCalendarApi(initialDate)
-    const onDateChange = jest.fn()
-    const onCloseDatePicker = jest.fn()
+    const onDateChange = vi.fn()
+    const onCloseDatePicker = vi.fn()
 
     const renderResult = await act(() =>
       render(
@@ -85,7 +86,7 @@ describe('DatePickerMobile', () => {
     expected: { day: number; month: number; year: number }
   ): void => {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const gotoDateMock = calendarApi.gotoDate as jest.Mock<void, [Date]>
+    const gotoDateMock = calendarApi.gotoDate as Mock<void, [Date]>
     const navigatedDate: Date = gotoDateMock.mock.calls[0][0]
     expect(navigatedDate.getDate()).toBe(expected.day)
     expect(navigatedDate.getMonth()).toBe(expected.month)
@@ -128,7 +129,7 @@ describe('DatePickerMobile', () => {
 
     expectNavigatedDate(calendarApi, { day: 20, month: 5, year: 2025 })
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const gotoDateMock = calendarApi.gotoDate as jest.Mock<void, [Date]>
+    const gotoDateMock = calendarApi.gotoDate as Mock<void, [Date]>
     expect(onDateChange).toHaveBeenCalledWith(gotoDateMock.mock.calls[0][0])
   })
 
@@ -161,7 +162,7 @@ describe('DatePickerMobile', () => {
           calendarRef={{ current: calendarApi }}
           currentDate={newDate}
           onDateChange={onDateChange}
-          onCloseDatePicker={jest.fn()} // Need to pass dummy fn for required prop
+          onCloseDatePicker={vi.fn()} // Need to pass dummy fn for required prop
         />
       )
     })

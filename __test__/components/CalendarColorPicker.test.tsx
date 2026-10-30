@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { ColorPicker } from '@common/components/Calendar/CalendarColorPicker'
 import { defaultColors } from '@common/utils/defaultColors'
 import { fireEvent, screen } from '@testing-library/react'
@@ -6,7 +7,7 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 describe('ColorPicker', () => {
   const loadedColor = { light: '#F5CFD0', dark: '#8E1E22' }
 
-  function renderLoadedAfterMount(onChange: jest.Mock): void {
+  function renderLoadedAfterMount(onChange: Mock): void {
     // Mimics CalendarModal: first rendered with the first preset, then
     // with the calendar colour once loaded
     const { rerender } = renderWithProviders(
@@ -16,7 +17,7 @@ describe('ColorPicker', () => {
   }
 
   it('cancelling the custom picker restores the current colour', () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     renderLoadedAfterMount(onChange)
 
     fireEvent.click(screen.getByLabelText('colorPicker.selectCustom'))
@@ -26,7 +27,7 @@ describe('ColorPicker', () => {
   })
 
   it('the custom picker starts from the current colour', () => {
-    renderLoadedAfterMount(jest.fn())
+    renderLoadedAfterMount(vi.fn())
 
     fireEvent.click(screen.getByLabelText('colorPicker.selectCustom'))
 
@@ -35,7 +36,7 @@ describe('ColorPicker', () => {
 
   it('names each preset swatch through the translations', () => {
     renderWithProviders(
-      <ColorPicker selectedColor={defaultColors[0]} onChange={jest.fn()} />
+      <ColorPicker selectedColor={defaultColors[0]} onChange={vi.fn()} />
     )
 
     expect(
@@ -46,7 +47,7 @@ describe('ColorPicker', () => {
   })
 
   it('flags an invalid hex value and disables Save until it is fixed', () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     renderLoadedAfterMount(onChange)
 
     fireEvent.click(screen.getByLabelText('colorPicker.selectCustom'))
@@ -79,7 +80,7 @@ describe('ColorPicker', () => {
   })
 
   it('opens again on a valid colour after an invalid value was cancelled', () => {
-    renderLoadedAfterMount(jest.fn())
+    renderLoadedAfterMount(vi.fn())
 
     fireEvent.click(screen.getByLabelText('colorPicker.selectCustom'))
     fireEvent.change(screen.getByRole('textbox', { name: 'colorPicker.hex' }), {
@@ -93,7 +94,7 @@ describe('ColorPicker', () => {
   })
 
   it('groups the swatches as radios walked with the arrow keys', () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     const { rerender } = renderWithProviders(
       <ColorPicker selectedColor={defaultColors[1]} onChange={onChange} />
     )
@@ -121,7 +122,7 @@ describe('ColorPicker', () => {
 
   it('opens the custom picker from the keyboard with focus on the Hex field', () => {
     renderWithProviders(
-      <ColorPicker selectedColor={defaultColors[0]} onChange={jest.fn()} />
+      <ColorPicker selectedColor={defaultColors[0]} onChange={vi.fn()} />
     )
     const custom = screen.getByRole('button', {
       name: 'colorPicker.selectCustom'
@@ -138,7 +139,7 @@ describe('ColorPicker', () => {
   })
 
   it('expands a three-digit hex value to six digits', () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     renderLoadedAfterMount(onChange)
 
     fireEvent.click(screen.getByLabelText('colorPicker.selectCustom'))

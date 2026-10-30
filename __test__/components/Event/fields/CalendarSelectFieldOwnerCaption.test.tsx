@@ -23,7 +23,7 @@ const renderCollapsed = (calendar: Calendar): void => {
   renderWithProviders(
     <CalendarSelectField
       calendarid={calendar.id}
-      setCalendarid={jest.fn()}
+      setCalendarid={vi.fn()}
       userPersonalCalendars={[calendar]}
       showMore={false}
     />

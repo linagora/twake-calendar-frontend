@@ -28,12 +28,12 @@ const FROZEN_DATE = new Date(2025, 5, 15) // 15 Jun 2025, local midnight
 
 describe('isDateInPast', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('returns false for an empty string', () => {
@@ -64,12 +64,12 @@ describe('isDateInPast', () => {
 
 describe('validateEventForm — start date', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('is invalid when startDate is empty', () => {
@@ -108,12 +108,12 @@ describe('validateEventForm — start date', () => {
 
 describe('validateEventForm — start time', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('is invalid when startTime is empty and not all-day', () => {
@@ -138,12 +138,12 @@ describe('validateEventForm — start time', () => {
 
 describe('validateEventForm — compact layout (same-day, showMore=false)', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   // In compact mode: showMore=false, allday=false, startDate === endDate → showTimeOnly=true
@@ -208,12 +208,12 @@ describe('validateEventForm — compact layout (same-day, showMore=false)', () =
 
 describe('validateEventForm — expanded layout (showMore=true)', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const expandedParams = (overrides: Partial<ValidationParams> = {}) =>
@@ -283,12 +283,12 @@ describe('validateEventForm — expanded layout (showMore=true)', () => {
 
 describe('validateEventForm — all-day events', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
+    vi.useFakeTimers()
+    vi.setSystemTime(FROZEN_DATE)
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   const alldayParams = (overrides: Partial<ValidationParams> = {}) =>
@@ -334,12 +334,12 @@ describe('isValidRepetition', () => {
     expect(isValidRepetition({ freq: 'weekly' })).toBe(true)
   })
 
-  it.each([1, 2, MAX_REPEAT_INTERVAL])('accepts interval %p', interval => {
+  it.each([1, 2, MAX_REPEAT_INTERVAL])('accepts interval %s', interval => {
     expect(isValidRepetition({ freq: 'weekly', interval })).toBe(true)
   })
 
   it.each([0, -1, 1.5, NaN, Infinity, MAX_REPEAT_INTERVAL + 1])(
-    'rejects interval %p',
+    'rejects interval %s',
     interval => {
       expect(isValidRepetition({ freq: 'weekly', interval })).toBe(false)
     }

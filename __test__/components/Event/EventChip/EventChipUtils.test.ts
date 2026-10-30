@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { getEffectiveColor } from '@common/components/Event/EventChip/EventChipUtils'
@@ -7,21 +7,17 @@ import { createTheme } from '@mui/material/styles'
 import { Calendar } from '@common/types/CalendarTypes'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
 
-jest.mock('@common/utils/getAccessiblePair', () => ({
-  getAccessiblePair: jest.fn((color: string) =>
+vi.mock('@common/utils/getAccessiblePair', () => ({
+  getAccessiblePair: vi.fn((color: string) =>
     color === '#000000' ? '#ffffff' : '#000000'
   )
 }))
 
-jest.mock(
-  '@injected/components/Attendees/AttendeeActions',
-  () => ({
-    AttendeeActions: () => null
-  }),
-  { virtual: true }
-)
+vi.mock('@injected/components/Attendees/AttendeeActions', () => ({
+  AttendeeActions: () => null
+}))
 
-jest.mock('@common/components/Event/EventChip/EventChip', () => ({
+vi.mock('@common/components/Event/EventChip/EventChip', () => ({
   EVENT_DURATION: {
     SHORT: 15,
     MEDIUM: 30,
@@ -33,7 +29,7 @@ describe('getEffectiveColor', () => {
   const theme = createTheme()
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should apply correct color for event created from booking', () => {

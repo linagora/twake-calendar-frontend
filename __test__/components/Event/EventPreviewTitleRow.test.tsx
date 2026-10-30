@@ -3,7 +3,7 @@ import '@testing-library/jest-dom'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
-jest.mock('@common/components/EventPreview/EventTimeSubtitle', () => ({
+vi.mock('@common/components/EventPreview/EventTimeSubtitle', () => ({
   EventTimeSubtitle: (): null => null
 }))
 

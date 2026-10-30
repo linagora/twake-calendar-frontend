@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { useOpenNewEventFromUrl } from '@common/components/Calendar/hooks/useOpenNewEventFromUrl'
 import { PENDING_NEW_EVENT_ATTENDEES_KEY } from '@common/features/Events/newEventDeepLinkUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
@@ -13,9 +14,9 @@ const renderWith = ({
 }: {
   userId?: string
   calendars?: Record<string, Calendar>
-} = {}): { setTempEvent: jest.Mock; setAnchorEl: jest.Mock } => {
-  const setTempEvent = jest.fn()
-  const setAnchorEl = jest.fn()
+} = {}): { setTempEvent: Mock; setAnchorEl: Mock } => {
+  const setTempEvent = vi.fn()
+  const setAnchorEl = vi.fn()
   renderHook(() =>
     useOpenNewEventFromUrl({ userId, calendars, setTempEvent, setAnchorEl })
   )

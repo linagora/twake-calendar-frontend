@@ -1,23 +1,24 @@
+import type { Mock } from 'vitest'
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import { addCalendarResource } from '@common/features/Calendars/CalendarSlice'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Calendars/CalendarDAO')
 
-jest.mock('@common/features/Calendars/CalendarSlice', () => {
-  const calendarSlice = jest.requireActual(
+vi.mock('@common/features/Calendars/CalendarSlice', async () => {
+  const calendarSlice = await vi.importActual(
     '@common/features/Calendars/CalendarSlice'
   )
   return {
     __esModule: true,
     ...calendarSlice,
-    addCalendarResource: jest.fn()
+    addCalendarResource: vi.fn()
   }
 })
 
-jest.mock('@common/components/Attendees/PeopleSearch', () => ({
+vi.mock('@common/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
     onChange
   }: {
@@ -50,12 +51,12 @@ jest.mock('@common/components/Attendees/PeopleSearch', () => ({
   )
 }))
 
-const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.Mock
-const mockedAddCalendarResource = addCalendarResource as unknown as jest.Mock
+const mockedFetchCalendars = CalendarDAO.fetchCalendars as Mock
+const mockedAddCalendarResource = addCalendarResource as unknown as Mock
 
 describe('RegisterCalendars', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   const baseUser = {
@@ -69,7 +70,7 @@ describe('RegisterCalendars', () => {
   }
 
   const setup = (isOpen = true) => {
-    const onClose = jest.fn()
+    const onClose = vi.fn()
     renderWithProviders(
       <RegisterCalendars
         onClose={onClose}

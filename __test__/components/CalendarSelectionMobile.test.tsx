@@ -1,28 +1,29 @@
+import type { Mock } from 'vitest'
 import CalendarSelection from '../../apps/private/src/components/Calendar/CalendarSelection'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/useScreenSizeDetection', () => ({
+vi.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: (): { isTooSmall: boolean; isTablet: boolean } => ({
     isTooSmall: true,
     isTablet: false
   })
 }))
 
-jest.mock(
+vi.mock(
   '../../apps/private/src/features/booking/CreateAppointmentModal',
   () => ({
     CreateAppointmentModal: (): null => null
   })
 )
 
-jest.mock('@common/features/booking/BookingDao', () => ({
-  listBookingLinks: jest.fn().mockResolvedValue([])
+vi.mock('@common/features/booking/BookingDao', () => ({
+  listBookingLinks: vi.fn().mockResolvedValue([])
 }))
 
 describe('CalendarSelection on a phone-sized screen', () => {
-  const renderSelection = (setSelectedCalendars = jest.fn()): jest.Mock => {
+  const renderSelection = (setSelectedCalendars = vi.fn()): Mock => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={['user1/cal1']}
@@ -58,7 +59,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
     const touch = { pageX: 0, pageY: 0, clientX: 0, clientY: 0 }
     fireEvent.touchStart(row, { touches: [touch] })
     act(() => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
     fireEvent.touchEnd(row, { changedTouches: [touch] })
   }
@@ -104,7 +105,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
   })
 
   it('does not toggle the calendar with the click ending a long press', () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     try {
       const setSelectedCalendars = renderSelection()
       const checkbox = screen.getByRole('checkbox', {
@@ -116,12 +117,12 @@ describe('CalendarSelection on a phone-sized screen', () => {
 
       expect(setSelectedCalendars).not.toHaveBeenCalled()
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 
   it('opens the actions sheet with the button after a long press', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     try {
       renderSelection()
       const row = screen
@@ -140,12 +141,12 @@ describe('CalendarSelection on a phone-sized screen', () => {
         await screen.findByRole('button', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 
   it('opens the actions sheet with the button when a long press delivered no click', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     try {
       renderSelection()
       const row = screen
@@ -163,7 +164,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
         await screen.findByRole('button', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 })
