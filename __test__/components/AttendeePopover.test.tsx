@@ -1,15 +1,12 @@
 import React from 'react'
-import { fireEvent, screen, act, waitFor } from '@testing-library/react'
+import { fireEvent, screen, act } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 import { AttendeePopover } from '@common/components/Attendees/AttendeePopover'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { searchPeople } from '@common/features/User/UserDao'
 
 jest.mock('@common/features/User/UserDao')
-const mockedSearchPeople = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
+const mockedSearchPeople = searchPeople
 
 jest.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: jest.fn(() => ({

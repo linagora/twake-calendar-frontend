@@ -63,6 +63,10 @@ if (typeof window !== 'undefined') {
   window.WS_PING_PERIOD_MS = 5000
   window.WS_PING_TIMEOUT_PERIOD_MS = 5000
 }
+
+if (typeof Element !== 'undefined') {
+  Element.prototype.scrollIntoView = jest.fn()
+}
 jest.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: jest.fn(() => ({ isMobile: false, isTablet: false }))
 }))

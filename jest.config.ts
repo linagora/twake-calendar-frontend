@@ -1,5 +1,10 @@
 import type { Config } from 'jest'
 
+// Markdown helpers in twake-mui depend on ESM packages, including transitive
+// parser utilities. Transform them in every project that imports the UI library.
+const markdownEsmPackages =
+  'remark-parse|remark-stringify|unified|mdast-util-[^/]+|micromark(?:-[^/]+)?|unist-util-[^/]+|vfile(?:-message)?|bail|trough|devlop|dequal|is-plain-obj|decode-named-character-reference|character-entities|ccount|escape-string-regexp|longest-streak|zwitch|markdown-table'
+
 // Set timezone to UTC for consistent test results across all environments
 process.env.TZ = 'UTC'
 
@@ -38,7 +43,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        `/node_modules/(?!(${markdownEsmPackages}|preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)`
       ],
 
       moduleNameMapper: {
@@ -93,7 +98,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        `/node_modules/(?!(${markdownEsmPackages}|preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)`
       ],
 
       moduleNameMapper: {
@@ -144,7 +149,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(ky|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        `/node_modules/(?!(${markdownEsmPackages}|ky|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)`
       ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
