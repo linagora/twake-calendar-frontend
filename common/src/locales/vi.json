@@ -132,6 +132,8 @@
     "invalidHex": "Nhập một màu như #1A73E8"
   },
   "event": {
+    "saved": "Đã lưu sự kiện",
+    "savedFor": "Đã lưu sự kiện vào %{date}",
     "createEvent": "Tạo sự kiện",
     "createInAgenda": "Tạo trong lịch của %{owner}",
     "updateEvent": "Cập nhật sự kiện",

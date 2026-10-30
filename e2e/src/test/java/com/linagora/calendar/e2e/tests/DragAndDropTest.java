@@ -74,14 +74,14 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
     private String startTimeOf(CalendarPage calendar, String title) {
         EventFormModal form = calendar.openEvent(title).edit().expand();
         String start = form.startTime();
-        form.cancel();
+        form.cancelAndDiscard();
         return start;
     }
 
     private String endTimeOf(CalendarPage calendar, String title) {
         EventFormModal form = calendar.openEvent(title).edit().expand();
         String end = form.endTime();
-        form.cancel();
+        form.cancelAndDiscard();
         return end;
     }
 

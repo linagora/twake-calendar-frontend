@@ -1,3 +1,4 @@
+import { eventSaved } from '../../eventSaveFeedbackSlice'
 import { AppDispatch } from '@common/app/store'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
@@ -159,6 +160,7 @@ export async function handleCreateEvent({
     const result = await dispatch(putEvent({ cal: targetCalendar, newEvent }))
     await assertThunkSuccess(result)
     clearEventFormTempData('create')
+    dispatch(eventSaved(newEvent))
   } catch (error) {
     handleCreateEventError(values, error)
   }

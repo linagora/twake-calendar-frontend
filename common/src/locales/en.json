@@ -132,6 +132,8 @@
     "invalidHex": "Enter a color like #1A73E8"
   },
   "event": {
+    "saved": "Event saved",
+    "savedFor": "Event saved for %{date}",
     "createEvent": "Create",
     "createInAgenda": "Create in %{owner}'s agenda",
     "updateEvent": "Update Event",

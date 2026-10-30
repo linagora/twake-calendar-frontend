@@ -2,8 +2,12 @@
  * @jest-environment jsdom
  */
 
+import { eventSaved } from '@common/features/Events/eventSaveFeedbackSlice'
 import { buildFromSelectedRange } from '@common/components/Event/utils/initialValues/dateResolvers'
-import { buildNewEvent } from '@common/features/Events/hooks/submitCreateHelpers/createAction'
+import {
+  buildNewEvent,
+  handleCreateEvent
+} from '@common/features/Events/hooks/submitCreateHelpers/createAction'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -316,4 +320,53 @@ describe('buildNewEvent - weekly series on chosen weekdays (#1581)', () => {
 
     expect(newEvent.start).toBe('2026-10-11T19:00:00.000Z')
   })
+})
+
+describe('create save confirmation', () => {
+  it.each([true, false])(
+    'confirms only a successful server save (success=%s)',
+    async success => {
+      const originalUUID = crypto.randomUUID
+      Object.defineProperty(crypto, 'randomUUID', {
+        configurable: true,
+        value: () => 'new-uid'
+      })
+      let complete!: (result: unknown) => void
+      const pending = new Promise(resolve => {
+        complete = resolve
+      })
+      const dispatch = jest.fn((_action: unknown) => pending)
+      try {
+        const saving = handleCreateEvent({
+          dispatch: dispatch as never,
+          values: baseValues,
+          targetCalendar: baseCalendar,
+          showMore: true,
+          onClose: jest.fn()
+        })
+        expect(
+          dispatch.mock.calls.filter(([action]) => eventSaved.match(action))
+        ).toHaveLength(0)
+        complete({
+          type: success ? 'put/fulfilled' : 'put/rejected',
+          error: { message: 'Save failed' }
+        })
+        await saving
+        const notifications = dispatch.mock.calls
+          .map(([action]) => action)
+          .filter(eventSaved.match)
+        expect(notifications).toHaveLength(success ? 1 : 0)
+        if (success)
+          expect(notifications[0].payload.event).toMatchObject({
+            uid: 'new-uid',
+            calId: baseCalendar.id
+          })
+      } finally {
+        Object.defineProperty(crypto, 'randomUUID', {
+          configurable: true,
+          value: originalUUID
+        })
+      }
+    }
+  )
 })

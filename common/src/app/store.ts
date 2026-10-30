@@ -1,3 +1,4 @@
+import eventSaveFeedbackReducer from '@common/features/Events/eventSaveFeedbackSlice'
 import eventsCalendar from '@common/features/Calendars/CalendarSlice'
 import { postMutationRefreshMiddleware } from '@common/features/Calendars/listeners/postMutationRefresh'
 import bookingLinksReducer from '@common/features/booking/BookingLinksSlice'
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   bookingLinks: bookingLinksReducer,
   settings: settingsReducer,
   searchResult: searchResultReducer,
+  eventSaveFeedback: eventSaveFeedbackReducer,
   loading: loadingReducer
 })
 

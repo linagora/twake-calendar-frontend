@@ -240,6 +240,7 @@ public class EventFormModal {
     }
 
     public EventFormModal timezone(String timezone) {
+        String expectedTitle = title();
         // the picker shows "America/New York" for America/New_York: type and match what it shows
         String shown = timezone.replace('_', ' ');
         for (int attempt = 1; attempt <= 3; attempt++) {
@@ -258,7 +259,14 @@ public class EventFormModal {
                 wanted.first().waitFor(new Locator.WaitForOptions().setTimeout(15_000));
                 wanted.first().click();
                 awaitNoOverlay();
-                if (timezoneInput().inputValue().contains(shown)) {
+                if (!expectedTitle.equals(title())) {
+                    titleInput().fill(expectedTitle);
+                }
+                // Read the selected value after blur and the expansion autofocus settle,
+                // rather than accepting the autocomplete's transient search text.
+                timezoneInput().press("Tab");
+                page.waitForTimeout(300);
+                if (timezoneInput().inputValue().contains(shown) && expectedTitle.equals(title())) {
                     return this;
                 }
             } catch (com.microsoft.playwright.TimeoutError retry) {
@@ -383,14 +391,24 @@ public class EventFormModal {
      * guest silently dropped turns into a puzzling failure three assertions later.
      */
     public EventFormModal addGuest(String email) {
+        String expectedTitle = title();
         for (int attempt = 1; attempt <= 3; attempt++) {
             Locator guests = page.getByPlaceholder("Add participants");
             guests.click();
             guests.fill("");
             guests.pressSequentially(email, new Locator.PressSequentiallyOptions().setDelay(30));
             page.waitForTimeout(400);
+            // The opening form can autofocus its title during typing, just as it can
+            // during fillAndHold. Restore it before checking for the guest: otherwise
+            // an email typed into the title can even look like a successful addition.
+            if (!expectedTitle.equals(title())) {
+                titleInput().fill(expectedTitle);
+            }
             guests.press("Enter");
             page.waitForTimeout(400);
+            if (!expectedTitle.equals(title())) {
+                titleInput().fill(expectedTitle);
+            }
             if (text().contains(email)) {
                 return this;
             }
@@ -653,6 +671,20 @@ public class EventFormModal {
 
     public void cancel() {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Cancel").setExact(true)).last().click();
+    }
+
+    /** Cancels an inspection completely, including the unsaved-changes confirmation. */
+    public void cancelAndDiscard() {
+        cancel();
+        Locator discard = page.getByRole(AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Discard").setExact(true));
+        // A late form update may make even an inspection dirty. Complete the
+        // cancellation before the next inspection tries to open the event again.
+        page.waitForCondition(() -> !isOpen() || discard.isVisible());
+        if (discard.isVisible()) {
+            discard.click();
+        }
+        titleInput().waitFor(new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.HIDDEN));
     }
 
     public void close() {

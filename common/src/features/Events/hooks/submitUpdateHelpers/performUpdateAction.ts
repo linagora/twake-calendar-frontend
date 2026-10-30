@@ -1,3 +1,4 @@
+import { eventSaved } from '../../eventSaveFeedbackSlice'
 import {
   handleUpdateError,
   handleUpdateRecurringSolo,
@@ -35,23 +36,16 @@ export async function performUpdateAction(
         oldCalId: calId,
         newCalId
       })
-      return
-    }
-
-    if (!recurrenceId) {
+    } else if (!recurrenceId) {
       await handleUpdateNonRecurring(params)
-      return
-    }
-
-    if (typeOfAction === 'solo') {
+    } else if (typeOfAction === 'solo') {
       await handleUpdateRecurringSolo({ ...params, recurrenceId })
-      return
-    }
-
-    if (typeOfAction === 'all') {
+    } else if (typeOfAction === 'all') {
       await handleUpdateRecurringSeries(params)
+    } else {
       return
     }
+    dispatch(eventSaved(newEvent))
   } catch (error) {
     handleUpdateError({
       error,
