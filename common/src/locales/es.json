@@ -92,6 +92,7 @@
     "participants": "Participantes",
     "noResults": "No se han encontrado eventos",
     "resultsCount": "%{smart_count} evento encontrado |||| %{smart_count} eventos encontrados",
+    "resultsFor": "%{smart_count} resultado para «%{keyword}» |||| %{smart_count} resultados para «%{keyword}»",
     "resultsTitle": "Resultados de la búsqueda",
     "noResultsSubtitle": "Pruebe a ajustar los filtros o los términos de búsqueda.",
     "error": {
