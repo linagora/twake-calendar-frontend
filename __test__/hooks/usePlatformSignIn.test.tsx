@@ -4,9 +4,9 @@ import { renderHook } from '@testing-library/react'
 import React, { PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
 
-const mockEnsureSdkSignedIn = jest.fn()
+const mockEnsureSdkSignedIn = vi.fn()
 
-jest.mock('@common/utils/sdkSession', () => ({
+vi.mock('@common/utils/sdkSession', () => ({
   ensureSdkSignedIn: (...args: unknown[]): unknown =>
     mockEnsureSdkSignedIn(...args)
 }))

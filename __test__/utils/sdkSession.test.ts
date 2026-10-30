@@ -1,18 +1,19 @@
+import type { Mock } from 'vitest'
 import type * as SdkSession from '@common/utils/sdkSession'
 
-const mockCreateSdk = jest.fn()
+const mockCreateSdk = vi.fn()
 
-jest.mock('@linagora/twake-sdk', () => ({
+vi.mock('@linagora/twake-sdk', () => ({
   createSdk: (options: unknown): unknown => mockCreateSdk(options)
 }))
 
 // Like the SDK client, a successful login makes the client ready
 const makeSdk = (
   login: () => Promise<void> = () => Promise.resolve()
-): { status: string; login: jest.Mock } => {
+): { status: string; login: Mock } => {
   const sdk = {
     status: 'waiting',
-    login: jest.fn(async () => {
+    login: vi.fn(async () => {
       await login()
       sdk.status = 'ready'
     })
@@ -25,13 +26,12 @@ describe('ensureSdkSignedIn', () => {
   let getPlatformSdk: typeof SdkSession.getPlatformSdk
 
   // The session lives in the module: each test starts from a fresh one
-  beforeEach(() => {
+  beforeEach(async () => {
     mockCreateSdk.mockReset()
-    jest.isolateModules(() => {
-      ;({ ensureSdkSignedIn, getPlatformSdk } = jest.requireActual<
-        typeof SdkSession
-      >('@common/utils/sdkSession'))
-    })
+    vi.resetModules()
+    ;({ ensureSdkSignedIn, getPlatformSdk } = await vi.importActual<
+      typeof SdkSession
+    >('@common/utils/sdkSession'))
   })
 
   it('gives the client of the session before it is signed in', async () => {

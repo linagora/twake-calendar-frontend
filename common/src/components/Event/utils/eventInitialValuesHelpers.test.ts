@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 import { buildFromExistingEvent } from './eventInitialValuesHelpers'
 import type { CalendarEvent } from '@common/types/EventsTypes'
