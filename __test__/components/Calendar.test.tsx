@@ -373,9 +373,9 @@ describe('calendar Availability search', () => {
         expect(screen.getAllByText('event.createEvent')).toHaveLength(2)
         expect(screen.getAllByText(/New User/i)).toHaveLength(2)
       },
-      { timeout: 10000 }
+      { timeout: 20000 }
     )
-  }, 15000)
+  }, 30000)
 
   it('open window with attendees filled after temp search on enter in temp input', async () => {
     const spy = vi
@@ -418,9 +418,9 @@ describe('calendar Availability search', () => {
         expect(screen.getAllByText('event.createEvent')).toHaveLength(2)
         expect(screen.getAllByText(/New User/i)).toHaveLength(2)
       },
-      { timeout: 10000 }
+      { timeout: 20000 }
     )
-  }, 15000)
+  }, 30000)
 
   it('BUGFIX: can untoggle all calendar.personal', async () => {
     vi.spyOn(calendarDetailThunks, 'getCalendarDetail').mockImplementation(

@@ -4,6 +4,7 @@ import EventPreviewModal from '@common/components/EventPreview'
 import EventPopover from '@common/features/Events/EventModal'
 import { Menu } from '@linagora/twake-mui'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import * as appHooks from '@common/app/hooks'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 const day = new Date()
@@ -90,6 +91,10 @@ describe('EventDuplication', () => {
 })
 
 describe('EventPopover', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('renders with event data', () => {
     renderWithProviders(
       <EventPopover
@@ -110,8 +115,11 @@ describe('EventPopover', () => {
     expect(screen.getByDisplayValue(/Test Event/i)).toBeInTheDocument()
   })
 
-  it('saves duplicated event when Save is clicked', () => {
+  it('saves duplicated event when Save is clicked', async () => {
     const onClose = vi.fn()
+    // Only the submit/close path matters here: keep the save thunk from
+    // leaking async work into the next test
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(vi.fn() as never)
 
     renderWithProviders(
       <EventPopover
@@ -121,10 +129,12 @@ describe('EventPopover', () => {
         selectedRange={null}
         setSelectedRange={vi.fn()}
         calendarRef={{ current: null }}
-        event={
-          preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
-            .event1
-        }
+        event={{
+          ...preloadedState.calendars.list['667037022b752d0026472254/cal1']
+            .events.event1,
+          // The form refuses to submit an event ending before it starts
+          end: new Date(day.getTime() + 3600000).toISOString()
+        }}
       />,
       preloadedState
     )
@@ -134,7 +144,7 @@ describe('EventPopover', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
 
-    waitFor(() => expect(onClose).toHaveBeenCalled())
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
   })
 })
 
