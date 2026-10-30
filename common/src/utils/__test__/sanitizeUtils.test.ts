@@ -1,11 +1,13 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 import { sanitizeHtml } from '../sanitizeUtils'
 
-jest.mock('dompurify', () => {
-  return jest.requireActual('dompurify')(window)
-})
+vi.mock('dompurify', async () => ({
+  default: (
+    await vi.importActual<typeof import('dompurify')>('dompurify')
+  ).default(window)
+}))
 
 describe('sanitizeUtils', () => {
   describe('sanitizeHtml', () => {

@@ -74,7 +74,7 @@ describe('getCalendarVisibility', () => {
   })
 })
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }))
 
