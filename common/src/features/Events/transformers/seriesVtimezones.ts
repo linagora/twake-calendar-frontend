@@ -30,7 +30,10 @@ function tzidOf([, props]: VCalComponent): string | undefined {
  * `America/Chicago` rules under `TZID:US/Central`.
  */
 function knownVtimezone(tzid: string): VCalComponent | undefined {
-  const timezoneData = TIMEZONES.zones[resolveTimezone(tzid)]
+  const resolved = resolveTimezone(tzid)
+  const timezoneData = Object.hasOwn(TIMEZONES.zones, resolved)
+    ? TIMEZONES.zones[resolved]
+    : undefined
   if (!timezoneData) {
     return undefined
   }

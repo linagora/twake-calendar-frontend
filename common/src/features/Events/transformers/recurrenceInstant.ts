@@ -1,3 +1,4 @@
+import { isMomentZone } from '@common/utils/timezone'
 import moment from 'moment-timezone'
 
 /**
@@ -29,7 +30,7 @@ export function recurrenceInstant(
     return moment.utc(raw).valueOf()
   }
   const zone = tzid ?? fallbackTz
-  if (zone && moment.tz.zone(zone)) {
+  if (isMomentZone(zone)) {
     return moment.tz(raw, zone).valueOf()
   }
   return moment(raw).valueOf()
@@ -55,7 +56,7 @@ function hasDefiniteZone(
     return true
   }
   const zone = tzid ?? fallbackTz
-  return Boolean(zone && moment.tz.zone(zone))
+  return isMomentZone(zone)
 }
 
 /**

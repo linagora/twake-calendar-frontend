@@ -325,5 +325,40 @@ describe('updateSeriesPartstatJCal', () => {
       )
       expect(futureTargetAttendee[1].partstat).toBe('ACCEPTED')
     })
+
+    it.each(['constructor', '__proto__'])(
+      'answers a series with an override in the zone %s',
+      tzid => {
+        const override: VCalComponent = [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'recurring-event'],
+            ['recurrence-id', {}, 'date-time', '2027-01-04T10:00:00Z'],
+            ['dtend', { tzid }, 'date-time', '2027-01-04T12:00:00'],
+            [
+              'attendee',
+              { partstat: 'NEEDS-ACTION' },
+              'cal-address',
+              'mailto:user@example.com'
+            ]
+          ],
+          []
+        ]
+
+        const jcal = updateSeriesPartstatJCal(
+          [createMasterVevent(), override],
+          baseEvent,
+          targetEmail,
+          'ACCEPTED',
+          fixedNow
+        )
+
+        const updatedOverride = (jcal[2] as VCalComponent[])[1]
+        const targetAttendee = (updatedOverride[1] as any[]).find(
+          p => p[0] === 'attendee'
+        )
+        expect(targetAttendee[1].partstat).toBe('ACCEPTED')
+      }
+    )
   })
 })

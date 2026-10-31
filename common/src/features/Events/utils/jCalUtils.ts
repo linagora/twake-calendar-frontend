@@ -1,5 +1,5 @@
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
-import { resolveTimezone } from '@common/utils/timezone'
+import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
 import moment from 'moment-timezone'
 import { getTzidParam } from '../transformers/recurrenceInstant'
 
@@ -35,7 +35,7 @@ export function knownZone(
   fallbackTimezone: string
 ): string {
   const resolved = tzid ? resolveTimezone(tzid) : undefined
-  return resolved && moment.tz.zone(resolved) ? resolved : fallbackTimezone
+  return isMomentZone(resolved) ? resolved : fallbackTimezone
 }
 
 export function parseInstant(
