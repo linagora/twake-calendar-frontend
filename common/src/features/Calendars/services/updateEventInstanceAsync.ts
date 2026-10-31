@@ -1,6 +1,6 @@
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import {
-  fetchAllRecurrentVevents,
+  fetchRecurrentSeries,
   putEvent
 } from '@common/features/Events/EventDao'
 import { makeEventWithOverrides } from '@common/features/Events/transformers/makeEventWithOverrides'
@@ -20,8 +20,8 @@ export const updateEventInstanceThunk = (
   >(
     async ({ cal, event }, { rejectWithValue }) => {
       try {
-        const vevents = await fetchAllRecurrentVevents(event)
-        const jCal = makeEventWithOverrides(event, vevents)
+        const { vevents, vtimezones } = await fetchRecurrentSeries(event)
+        const jCal = makeEventWithOverrides(event, vevents, vtimezones)
         await putEvent(event, jCal)
 
         return { calId: cal.id, event }
