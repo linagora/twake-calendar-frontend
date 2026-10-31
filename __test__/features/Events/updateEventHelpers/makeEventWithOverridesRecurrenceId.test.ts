@@ -148,3 +148,94 @@ describe('makeEventWithOverrides — RECURRENCE-ID form (#1088)', () => {
     expect(summary![3]).toBe('Updated by the organiser')
   })
 })
+
+describe('makeEventWithOverrides — tz-naive recurrenceId of a stored override (#1882)', () => {
+  function weeklyParisMaster(): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        [
+          'dtstart',
+          { tzid: 'Europe/Paris' },
+          'date-time',
+          '2025-03-03T09:00:00'
+        ],
+        ['rrule', {}, 'recur', { freq: 'WEEKLY' }]
+      ],
+      []
+    ]
+  }
+
+  // Moved by another client: RECURRENCE-ID keeps the zone of the series,
+  // DTSTART uses the new zone
+  function overrideMovedToNewYork(): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        [
+          'recurrence-id',
+          { tzid: 'Europe/Paris' },
+          'date-time',
+          '2025-03-10T09:00:00'
+        ],
+        [
+          'dtstart',
+          { tzid: 'America/New_York' },
+          'date-time',
+          '2025-03-10T09:00:00'
+        ],
+        ['summary', {}, 'text', 'Moved to New York']
+      ],
+      []
+    ]
+  }
+
+  // The override as parseFetchedEvent reads it: the RECURRENCE-ID value
+  // without its TZID
+  function editedOccurrence(timezone: string): CalendarEvent {
+    return {
+      uid: 'series-1',
+      timezone,
+      recurrenceId: '2025-03-10T09:00:00',
+      start: '2025-03-10T13:00:00.000Z',
+      end: '2025-03-10T14:00:00.000Z',
+      attendee: [],
+      title: 'Edited'
+    } as unknown as CalendarEvent
+  }
+
+  function expectReplacedOverride(jCal: VCalComponent): void {
+    const vevents = (jCal[2] as VCalComponent[]).filter(
+      ([name]) => name === 'vevent'
+    )
+    expect(vevents).toHaveLength(2)
+    const props = vevents[1][1]
+    expect(props).toContainEqual([
+      'recurrence-id',
+      { tzid: 'Europe/Paris' },
+      'date-time',
+      '2025-03-10T09:00:00'
+    ])
+    expect(props).toContainEqual(['summary', {}, 'text', 'Edited'])
+  }
+
+  it('replaces the override when its RECURRENCE-ID zone is not the DTSTART zone of the edited occurrence', () => {
+    const jCal = makeEventWithOverrides(editedOccurrence('America/New_York'), [
+      weeklyParisMaster(),
+      overrideMovedToNewYork()
+    ])
+
+    expectReplacedOverride(jCal)
+  })
+
+  it('replaces the override when the zone of the occurrence is changed in the form', () => {
+    const jCal = makeEventWithOverrides(editedOccurrence('Asia/Ho_Chi_Minh'), [
+      weeklyParisMaster(),
+      overrideMovedToNewYork()
+    ])
+
+    expectReplacedOverride(jCal)
+  })
+})
