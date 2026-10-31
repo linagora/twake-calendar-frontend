@@ -194,4 +194,36 @@ describe('renderPrintDocument', () => {
     expect(html).not.toContain('<script>alert(1)</script>')
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
   })
+
+  it('prints an event late in the evening after the clocks went back', () => {
+    const tz = 'Europe/London'
+    const periods = buildPrintPeriods(
+      'day',
+      dayjs.tz('2016-10-29', tz).startOf('day'),
+      dayjs.tz('2016-11-01', tz).startOf('day')
+    )
+
+    const html = renderPrintDocument({
+      periods,
+      calendars: [
+        {
+          events: selectPrintEvents(
+            [
+              makeEvent({
+                start: '2016-10-31T23:15:00Z',
+                end: '2016-10-31T23:45:00Z',
+                title: 'Late call'
+              })
+            ],
+            tz,
+            LABELS.noTitle
+          )
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    expect(html).toContain('Late call')
+  })
 })

@@ -62,7 +62,10 @@ export const buildPrintPeriods = (
   const lastStart = startOfPeriod(rangeEnd, scale)
 
   while (!cursor.isAfter(lastStart) && periods.length < MAX_PRINT_PERIODS) {
-    const end = cursor.add(1, unit)
+    // On a `dayjs.tz` instance `add` keeps the UTC offset of the cursor, so a
+    // DST change would shift every following page off local midnight.
+    // `startOf` resolves the wall time again in the zone of the cursor.
+    const end = startOfPeriod(cursor.add(1, unit), scale)
     periods.push({
       scale,
       start: cursor,
