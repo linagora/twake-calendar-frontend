@@ -21,15 +21,16 @@ export function toPathRoute(location: UrlParts): string | null {
     return null
   }
 
-  // Parsed as a path of a fixed origin rather than as a URL reference: a
-  // fragment starting with "//" or "/\" would otherwise be scheme-relative,
-  // and its empty or foreign authority would throw or leak into the result.
+  // Parsed as a path of a fixed origin: as a reference, a leading `//` (or
+  // `/\`) would be read as an authority.
   const target = new URL(`http://localhost${location.hash.slice(1)}`)
-  // Leading empty segments would make the result scheme-relative again.
-  const pathname = target.pathname.replace(/^\/{2,}/, '/')
   const searchParams = new URLSearchParams(location.search)
   target.searchParams.forEach((value, key) => searchParams.append(key, value))
   const search = searchParams.toString()
+
+  // Empty segments survive dot-segment removal (`/.//x` becomes `//x`): a
+  // path starting with `//` would be resolved as another host.
+  const pathname = target.pathname.replace(/^\/+/, '/')
 
   return `${pathname}${search ? `?${search}` : ''}${target.hash}`
 }
