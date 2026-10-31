@@ -8,8 +8,8 @@ import {
   refreshCalendarWithSyncToken
 } from '@common/features/Calendars/CalendarSlice'
 import {
-  fetchAllRecurrentVevents,
   fetchEventJCal,
+  fetchRecurrentSeries,
   putEvent
 } from '@common/features/Events/EventDao'
 import {
@@ -166,8 +166,15 @@ async function handleAllRSVP({
   userEmail: string
   rsvp: PartStat
 }): Promise<void> {
-  const vevents = await fetchAllRecurrentVevents(event)
-  const jCal = updateSeriesPartstatJCal(vevents, event, userEmail, rsvp)
+  const { vevents, vtimezones } = await fetchRecurrentSeries(event)
+  const jCal = updateSeriesPartstatJCal(
+    vevents,
+    event,
+    userEmail,
+    rsvp,
+    undefined,
+    vtimezones
+  )
   await putEvent(event, jCal)
 }
 

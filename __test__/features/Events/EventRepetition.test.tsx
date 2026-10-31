@@ -545,31 +545,34 @@ describe('RSVP to Recurring Event', () => {
   })
 
   it('calls updateSeriesPartstat when accepting all instances', async () => {
-    jest.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue([
-      [
-        'vevent',
+    jest.spyOn(EventDao, 'fetchRecurrentSeries').mockResolvedValue({
+      vevents: [
         [
-          ['uid', {}, 'text', 'recurring-base'],
-          ['summary', {}, 'text', 'Recurring Event Instance'],
-          ['dtstart', {}, 'date-time', '20250315T100000Z'],
-          ['dtend', {}, 'date-time', '20250315T110000Z'],
-          ['recurrence-id', {}, 'date-time', '20250315T100000Z'],
+          'vevent',
           [
-            'attendee',
-            { cn: 'test', partstat: 'NEEDS-ACTION' },
-            'cal-address',
-            'mailto:test@test.com'
+            ['uid', {}, 'text', 'recurring-base'],
+            ['summary', {}, 'text', 'Recurring Event Instance'],
+            ['dtstart', {}, 'date-time', '20250315T100000Z'],
+            ['dtend', {}, 'date-time', '20250315T110000Z'],
+            ['recurrence-id', {}, 'date-time', '20250315T100000Z'],
+            [
+              'attendee',
+              { cn: 'test', partstat: 'NEEDS-ACTION' },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            [
+              'attendee',
+              { cn: 'John', partstat: 'NEEDS-ACTION' },
+              'cal-address',
+              'mailto:john@test.com'
+            ]
           ],
-          [
-            'attendee',
-            { cn: 'John', partstat: 'NEEDS-ACTION' },
-            'cal-address',
-            'mailto:john@test.com'
-          ]
-        ],
-        []
-      ]
-    ] as any)
+          []
+        ]
+      ],
+      vtimezones: []
+    } as any)
     const spy = jest.spyOn(EventDao, 'putEvent').mockResolvedValue(undefined)
 
     await act(async () =>
