@@ -1,4 +1,5 @@
 import { makeVevent } from '@common/features/Events/utils'
+import { formatDateTimeToICal } from '@common/features/Events/utils/formatDateToICal'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -817,5 +818,78 @@ describe('RFC 5545 – RRULE must not appear in override (exception) events', ()
     const vevent = makeVevent(event, TZID, true)
     expect(getProp(vevent, 'rrule')).toBeDefined()
     expect(getProp(vevent, 'recurrence-id')).toBeUndefined()
+  })
+})
+
+describe('makeVevent – zone known to neither moment nor ical.js', () => {
+  const UNKNOWN = 'Customized Time Zone'
+
+  it('writes DTSTART, DTEND, RECURRENCE-ID and EXDATE as UTC without TZID', () => {
+    const vevent = makeVevent(
+      baseEvent({
+        start: '2025-03-10T09:00:00.000Z',
+        end: '2025-03-10T10:00:00.000Z',
+        recurrenceId: '2025-03-10T09:00:00Z',
+        exdates: ['2025-03-17T09:00:00Z'],
+        timezone: UNKNOWN
+      }),
+      UNKNOWN
+    )
+
+    expect(getProp(vevent, 'dtstart')).toEqual([
+      'dtstart',
+      {},
+      'date-time',
+      '2025-03-10T09:00:00Z'
+    ])
+    expect(getProp(vevent, 'dtend')).toEqual([
+      'dtend',
+      {},
+      'date-time',
+      '2025-03-10T10:00:00Z'
+    ])
+    expect(getProp(vevent, 'recurrence-id')).toEqual([
+      'recurrence-id',
+      {},
+      'date-time',
+      '2025-03-10T09:00:00Z'
+    ])
+    expect(getProp(vevent, 'exdate')).toEqual([
+      'exdate',
+      {},
+      'date-time',
+      '2025-03-17T09:00:00Z'
+    ])
+  })
+
+  it('keeps the TZID for a known zone', () => {
+    const vevent = makeVevent(
+      baseEvent({ start: '2025-03-10T09:00:00.000Z' }),
+      TZID
+    )
+
+    expect(getProp(vevent, 'dtstart')).toEqual([
+      'dtstart',
+      { tzid: TZID },
+      'date-time',
+      '2025-03-10T10:00:00'
+    ])
+  })
+})
+
+describe('formatDateTimeToICal – UTC fallback', () => {
+  it('pads the year to four digits', () => {
+    expect(formatDateTimeToICal(new Date('0615-06-13T09:00:00Z'))).toBe(
+      '0615-06-13T09:00:00Z'
+    )
+  })
+
+  it('pads the year to four digits for an unknown zone', () => {
+    expect(
+      formatDateTimeToICal(
+        new Date('0615-06-13T09:00:00Z'),
+        'Customized Time Zone'
+      )
+    ).toBe('0615-06-13T09:00:00Z')
   })
 })
