@@ -6,7 +6,7 @@ import moment from 'moment-timezone'
 import { detectDateTimeFormat } from '@common/components/Event/utils/dateTimeHelpers'
 
 // TIMEZONES data must be imported or defined separately.
-import { TIMEZONES } from './timezone-data'
+import { findTimezoneAlias, findTimezoneData, TIMEZONES } from './timezone-data'
 
 export const browserDefaultTimeZone =
   Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -30,26 +30,24 @@ function buildTimezone(tzid: string, ics: string): ICAL.Timezone {
 }
 
 function findTimezone(tzid: string): ICAL.Timezone {
-  if (TIMEZONES.zones[tzid]) {
-    return buildTimezone(tzid, TIMEZONES.zones[tzid].ics)
+  const timezoneData = findTimezoneData(tzid)
+  if (timezoneData) {
+    return buildTimezone(tzid, timezoneData.ics)
   }
 
-  const alias = TIMEZONES.aliases[tzid]
-  if (alias && alias.aliasTo) {
-    return findTimezone(alias.aliasTo)
+  const aliasTo = findTimezoneAlias(tzid)
+  if (aliasTo) {
+    return findTimezone(aliasTo)
   }
 
   throw new Error(`Unknown timezone alias: ${tzid}`)
 }
 
 export function resolveTimezone(tzName: string): string {
-  if (Object.hasOwn(TIMEZONES.zones, tzName)) {
+  if (findTimezoneData(tzName)) {
     return tzName
   }
-  if (Object.hasOwn(TIMEZONES.aliases, tzName)) {
-    return TIMEZONES.aliases[tzName].aliasTo
-  }
-  return tzName
+  return findTimezoneAlias(tzName) ?? tzName
 }
 
 /**

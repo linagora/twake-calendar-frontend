@@ -239,3 +239,24 @@ describe('makeEventWithOverrides — tz-naive recurrenceId of a stored override 
     expectReplacedOverride(jCal)
   })
 })
+
+describe('makeEventWithOverrides — zone named like an Object.prototype member (#1887)', () => {
+  it.each(['toString', 'constructor', 'hasOwnProperty'])(
+    'writes the occurrence of a series in the %s zone',
+    timezone => {
+      const updatedInstance = {
+        uid: 'uid-1',
+        timezone,
+        recurrenceId: '2026-06-25T05:00:00',
+        start: '2026-06-25T05:00:00',
+        end: '2026-06-25T06:00:00',
+        attendee: [],
+        title: 'Updated by the organiser'
+      } as unknown as CalendarEvent
+
+      const jCal = makeEventWithOverrides(updatedInstance, [masterVEvent()])
+
+      expect(listOverrides(jCal)).toHaveLength(1)
+    }
+  )
+})

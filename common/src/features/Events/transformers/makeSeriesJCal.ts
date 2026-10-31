@@ -1,5 +1,5 @@
 import moment from 'moment-timezone'
-import { TIMEZONES } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezone-data'
 import {
   VCalComponent,
   VObjectProperty,
@@ -521,7 +521,7 @@ export const makeSeriesJCal = (
     finalVevents,
     options.storedVtimezones ?? [],
     () =>
-      makeTimezone(TIMEZONES.zones[event.timezone], event).component
+      makeTimezone(findTimezoneData(event.timezone), event).component
         .jCal as VCalComponent
   )
 

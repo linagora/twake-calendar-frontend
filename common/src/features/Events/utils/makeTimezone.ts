@@ -1,14 +1,13 @@
-import { TIMEZONES } from '@common/utils/timezone-data'
+import { findTimezoneData, TimezoneData } from '@common/utils/timezone-data'
 import ICAL from 'ical.js'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
 export function makeTimezone(
-  timezoneData:
-    { ics: string; latitude: string; longitude: string } | undefined,
+  timezoneData: TimezoneData | undefined,
   event: CalendarEvent
 ): ICAL.Timezone {
-  if (!timezoneData) {
-    const utcIcs = TIMEZONES.zones['Etc/UTC']?.ics
+  if (typeof timezoneData?.ics !== 'string') {
+    const utcIcs = findTimezoneData('Etc/UTC')?.ics
     if (!utcIcs) {
       throw new Error('Missing timezone ICS for Etc/UTC')
     }
