@@ -194,4 +194,49 @@ describe('renderPrintDocument', () => {
     expect(html).not.toContain('<script>alert(1)</script>')
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
   })
+
+  const renderSchedule = (color: string): string =>
+    renderPrintDocument({
+      periods: buildPrintPeriods(
+        'day',
+        dayjs('2026-07-22'),
+        dayjs('2026-07-22')
+      ),
+      calendars: [
+        { events: printEvents([makeEvent({ color: { light: color } })]) }
+      ],
+      locale: 'en',
+      layout: 'schedule',
+      labels: LABELS
+    })
+
+  it.each([
+    'red;background-image:url(https://example.invalid/x.png)',
+    'url(https://example.invalid/x.png)',
+    'red;position:fixed;inset:0',
+    'red;content:"x"',
+    'rgb(0,0,0);position:fixed'
+  ])(
+    'writes no declaration but its own colours for the calendar colour %s',
+    color => {
+      const html = renderSchedule(color)
+
+      expect(html).not.toContain('url(')
+      expect(html).not.toMatch(
+        /style="[^"]*(position|content|background-image)\s*:/
+      )
+      expect(html).toContain('background:#5b6b8c;border-left-color:#3f4c66;')
+    }
+  )
+
+  it.each([
+    '#336699',
+    'red',
+    'rgb(51, 102, 153)',
+    'hsla(210deg 50% 40% / 0.5)'
+  ])('keeps the valid calendar colour %s', color => {
+    expect(renderSchedule(color)).toContain(
+      `background:${color};border-left-color:${color};`
+    )
+  })
 })
