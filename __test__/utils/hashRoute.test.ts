@@ -73,3 +73,22 @@ describe('toPathRoute', () => {
     ).toBe('/events/abc?view=week#details')
   })
 })
+
+describe('toPathRoute with an authority-like or dot-segment hash path', () => {
+  it.each([
+    ['#/.////#details', '/#details'],
+    ['#/.//other.example/x', '/other.example/x'],
+    ['#/a/..//other.example/', '/other.example/'],
+    ['#///#details', '/#details'],
+    ['#/\\#details', '/#details'],
+    ['#//', '/'],
+    ['#//other.example/x', '/other.example/x']
+  ])('returns a same-origin path for %s', (hash, expected) => {
+    const result = toPathRoute({ pathname: '/events/abc', search: '', hash })
+
+    expect(result).toBe(expected)
+    expect(new URL(result!, 'https://calendar.example').origin).toBe(
+      'https://calendar.example'
+    )
+  })
+})

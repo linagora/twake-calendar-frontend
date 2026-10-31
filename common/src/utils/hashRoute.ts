@@ -21,12 +21,18 @@ export function toPathRoute(location: UrlParts): string | null {
     return null
   }
 
-  const target = new URL(location.hash.slice(1), 'http://localhost')
+  // Parsed as a path of a fixed origin: as a reference, a leading `//` (or
+  // `/\`) would be read as an authority.
+  const target = new URL(`http://localhost${location.hash.slice(1)}`)
   const searchParams = new URLSearchParams(location.search)
   target.searchParams.forEach((value, key) => searchParams.append(key, value))
   const search = searchParams.toString()
 
-  return `${target.pathname}${search ? `?${search}` : ''}${target.hash}`
+  // Empty segments survive dot-segment removal (`/.//x` becomes `//x`): a
+  // path starting with `//` would be resolved as another host.
+  const pathname = target.pathname.replace(/^\/+/, '/')
+
+  return `${pathname}${search ? `?${search}` : ''}${target.hash}`
 }
 
 /**
