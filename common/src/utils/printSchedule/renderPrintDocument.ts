@@ -46,10 +46,24 @@ const esc = (value: string): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
-const eventStyle = (color?: string): string =>
-  color
-    ? `background:${esc(color)};border-left-color:${esc(color)};`
+// The colour comes from the calendar owner (apple:color), possibly another
+// user: only plain colour syntax may reach a style attribute, as `;`, `:` or
+// `url(` would let it add declarations or load a remote resource. Function
+// arguments hold no parenthesis, colon nor semicolon, so they cannot nest.
+const SAFE_COLOR =
+  /^(#[0-9a-f]{3,8}|[a-z]+|(rgba?|hsla?)\([0-9a-z.,%\s/+-]*\))$/i
+
+const safeColor = (color?: string): string | undefined => {
+  const trimmed = color?.trim()
+  return trimmed && SAFE_COLOR.test(trimmed) ? trimmed : undefined
+}
+
+const eventStyle = (rawColor?: string): string => {
+  const color = safeColor(rawColor)
+  return color
+    ? `background:${color};border-left-color:${color};`
     : 'background:#5b6b8c;border-left-color:#3f4c66;'
+}
 
 const timedEventLabel = (event: PrintEvent): string =>
   `${event.start.format('HH:mm')}–${event.end.format('HH:mm')}`
