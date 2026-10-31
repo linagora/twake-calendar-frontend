@@ -43,10 +43,10 @@ function findTimezone(tzid: string): ICAL.Timezone {
 }
 
 export function resolveTimezone(tzName: string): string {
-  if (TIMEZONES.zones[tzName]) {
+  if (Object.hasOwn(TIMEZONES.zones, tzName)) {
     return tzName
   }
-  if (TIMEZONES.aliases[tzName]) {
+  if (Object.hasOwn(TIMEZONES.aliases, tzName)) {
     return TIMEZONES.aliases[tzName].aliasTo
   }
   return tzName
@@ -62,6 +62,20 @@ export function isValidTimeZone(tzName: unknown): tzName is string {
   try {
     new Intl.DateTimeFormat(undefined, { timeZone: tzName })
     return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Whether moment-timezone knows the zone. A TZID comes straight from received
+ * data, and moment-timezone keeps its zones in plain objects: it throws a
+ * TypeError on an inherited name such as "constructor" or "__proto__".
+ */
+export function isMomentZone(tzName: unknown): tzName is string {
+  if (typeof tzName !== 'string' || !tzName) return false
+  try {
+    return Boolean(moment.tz.zone(tzName))
   } catch {
     return false
   }
