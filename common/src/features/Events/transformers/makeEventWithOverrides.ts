@@ -7,10 +7,12 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { makeTimezone, makeVevent } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 import { getTzidParam, sameRecurrence } from './recurrenceInstant'
+import { makeSeriesVtimezones } from './seriesVtimezones'
 
 export function makeEventWithOverrides(
   updatedEvent: CalendarEvent,
-  vevents: VCalComponent[]
+  vevents: VCalComponent[],
+  storedVtimezones: VCalComponent[] = []
 ): VCalComponent {
   const updatedVevent = makeVevent(
     updatedEvent,
@@ -36,14 +38,16 @@ export function makeEventWithOverrides(
     nextVevents.push(updatedVevent as VCalComponent)
   }
 
-  const timezoneData = findTimezoneData(updatedEvent.timezone)
-  const vtimezone = makeTimezone(timezoneData, updatedEvent)
+  // A VTIMEZONE for each TZID of the series, not only the edited zone. See #1881.
+  const vtimezones = makeSeriesVtimezones(
+    nextVevents,
+    storedVtimezones,
+    () =>
+      makeTimezone(findTimezoneData(updatedEvent.timezone), updatedEvent)
+        .component.jCal as VCalComponent
+  )
 
-  return [
-    'vcalendar',
-    VcalendarProperties,
-    [...nextVevents, vtimezone.component.jCal as VCalComponent]
-  ]
+  return ['vcalendar', VcalendarProperties, [...nextVevents, ...vtimezones]]
 }
 
 function findRecurrenceId(vevent: VCalComponent): VObjectProperty | undefined {
