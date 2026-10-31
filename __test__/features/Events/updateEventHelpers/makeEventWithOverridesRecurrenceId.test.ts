@@ -148,3 +148,88 @@ describe('makeEventWithOverrides — RECURRENCE-ID form (#1088)', () => {
     expect(summary![3]).toBe('Updated by the organiser')
   })
 })
+
+describe('makeEventWithOverrides — Windows TZID RECURRENCE-ID (#1884)', () => {
+  function windowsOverride(tzid: string, recurrenceId: string): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'uid-1'],
+        ['recurrence-id', { tzid }, 'date-time', recurrenceId],
+        ['dtstart', { tzid }, 'date-time', recurrenceId],
+        ['summary', {}, 'text', 'Moved occurrence']
+      ],
+      []
+    ]
+  }
+
+  function editedInstance(
+    recurrenceId: string,
+    timezone: string
+  ): CalendarEvent {
+    return {
+      uid: 'uid-1',
+      timezone,
+      recurrenceId,
+      start: '2026-06-25T05:00:00',
+      end: '2026-06-25T06:00:00',
+      attendee: [],
+      title: 'Updated by the organiser'
+    } as unknown as CalendarEvent
+  }
+
+  function recurrenceIds(jCal: VCalComponent): VObjectProperty[] {
+    return listOverrides(jCal).flatMap(([, props]) =>
+      (props as VObjectProperty[]).filter(([k]) => k === 'recurrence-id')
+    )
+  }
+
+  it('replaces a Windows TZID override instead of appending a duplicate RECURRENCE-ID', () => {
+    // 03:00 "Romance Standard Time" (Europe/Paris, summer) == 01:00Z
+    const jCal = makeEventWithOverrides(
+      editedInstance('2025-09-30T01:00:00Z', 'Europe/Paris'),
+      [
+        masterVEvent(),
+        windowsOverride('Romance Standard Time', '2025-09-30T03:00:00')
+      ]
+    )
+
+    expect(recurrenceIds(jCal)).toEqual([
+      [
+        'recurrence-id',
+        { tzid: 'Romance Standard Time' },
+        'date-time',
+        '2025-09-30T03:00:00'
+      ]
+    ])
+  })
+
+  it('does not replace a Windows TZID override of another instant sharing the wall clock', () => {
+    // 03:00 "Eastern Standard Time" == 07:00Z, 03:00 St John's == 05:30Z
+    const other = windowsOverride(
+      'Eastern Standard Time',
+      '2033-09-10T03:00:00'
+    )
+
+    const jCal = makeEventWithOverrides(
+      editedInstance('2033-09-10T03:00:00', 'America/St_Johns'),
+      [masterVEvent(), other]
+    )
+
+    expect(listOverrides(jCal)).toHaveLength(2)
+    expect(listOverrides(jCal)[0]).toEqual(other)
+  })
+
+  it('reads an unknown TZID in the event timezone rather than as a bare wall clock', () => {
+    // "toString" resolves to no zone: 12:15 is read in Europe/Paris (10:15Z)
+    const other = windowsOverride('toString', '2030-06-04T12:15:00')
+
+    const jCal = makeEventWithOverrides(
+      editedInstance('2030-06-04T12:15:00Z', 'Europe/Paris'),
+      [masterVEvent(), other]
+    )
+
+    expect(listOverrides(jCal)).toHaveLength(2)
+    expect(listOverrides(jCal)[0]).toEqual(other)
+  })
+})
