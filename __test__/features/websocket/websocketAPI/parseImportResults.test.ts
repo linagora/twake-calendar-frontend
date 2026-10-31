@@ -39,6 +39,27 @@ describe('parseImportResults', () => {
     ])
   })
 
+  it.each([0.1, -1, Infinity, -Infinity, NaN, 2 ** 53])(
+    'should read a count of %p as 0',
+    count => {
+      const message = {
+        '/calendars/cal1/entry1': {
+          imports: {
+            importId: {
+              status: 'completed',
+              succeedCount: count,
+              failedCount: count
+            }
+          }
+        }
+      }
+
+      expect(parseImportResults(message)).toEqual([
+        { status: 'completed', succeedCount: 0, failedCount: 0 }
+      ])
+    }
+  )
+
   it('should ignore imports with an unknown status', () => {
     const message = {
       '/calendars/cal1/entry1': {
