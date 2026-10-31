@@ -2,6 +2,22 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
 
+/**
+ * The parameters, type and value of a DTSTART-like property. A zone unknown to
+ * both moment and ical.js is written as UTC, which must not carry a TZID.
+ */
+function dateValue(
+  event: CalendarEvent,
+  date: string,
+  tzid: string
+): [Record<string, string>, string, string] {
+  if (event.allday) {
+    return [{}, 'date', formatDateToICal(new Date(date))]
+  }
+  const value = formatDateTimeToICal(new Date(date), tzid)
+  return [value.endsWith('Z') ? {} : { tzid }, 'date-time', value]
+}
+
 export function makeVevent(
   event: CalendarEvent,
   tzid: string,
@@ -13,14 +29,7 @@ export function makeVevent(
     [
       ['uid', {}, 'text', extractEventBaseUuid(event.uid)],
       ['transp', {}, 'text', event.transp ?? 'OPAQUE'],
-      [
-        'dtstart',
-        event.allday ? {} : { tzid },
-        event.allday ? 'date' : 'date-time',
-        event.allday
-          ? formatDateToICal(new Date(event.start))
-          : formatDateTimeToICal(new Date(event.start), tzid)
-      ],
+      ['dtstart', ...dateValue(event, event.start, tzid)],
       ['class', {}, 'text', event.class ?? 'PUBLIC'],
       ['sequence', {}, 'integer', event.sequence ?? 1],
       [
@@ -40,14 +49,7 @@ export function makeVevent(
   }
 
   if (event.end) {
-    vevent[1].push([
-      'dtend',
-      event.allday ? {} : { tzid },
-      event.allday ? 'date' : 'date-time',
-      event.allday
-        ? formatDateToICal(new Date(event.end))
-        : formatDateTimeToICal(new Date(event.end), tzid)
-    ])
+    vevent[1].push(['dtend', ...dateValue(event, event.end, tzid)])
   }
   if (event.organizer) {
     vevent[1].push(event.organizer.asJcal())
@@ -59,11 +61,7 @@ export function makeVevent(
     isOccurrence = true
     vevent[1].push([
       'recurrence-id',
-      event.allday ? {} : { tzid },
-      event.allday ? 'date' : 'date-time',
-      event.allday
-        ? formatDateToICal(new Date(event.recurrenceId))
-        : formatDateTimeToICal(new Date(event.recurrenceId), tzid)
+      ...dateValue(event, event.recurrenceId, tzid)
     ])
   }
   if (event.description) {
@@ -79,14 +77,7 @@ export function makeVevent(
 
   if (event.exdates && event.exdates.length > 0) {
     event.exdates.forEach(ex => {
-      vevent[1].push([
-        'exdate',
-        event.allday ? {} : { tzid },
-        event.allday ? 'date' : 'date-time',
-        event.allday
-          ? formatDateToICal(new Date(ex))
-          : formatDateTimeToICal(new Date(ex), tzid)
-      ])
+      vevent[1].push(['exdate', ...dateValue(event, ex, tzid)])
     })
   }
 

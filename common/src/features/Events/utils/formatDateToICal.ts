@@ -54,7 +54,7 @@ export function formatDateTimeToICal(date: Date, timezone?: string): string {
     }
   }
 
-  const year = date.getUTCFullYear()
+  const year = String(date.getUTCFullYear()).padStart(4, '0')
   const month = pad(date.getUTCMonth() + 1)
   const day = pad(date.getUTCDate())
   const hours = pad(date.getUTCHours())
