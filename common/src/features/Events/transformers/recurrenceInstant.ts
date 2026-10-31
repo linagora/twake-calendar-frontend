@@ -1,4 +1,4 @@
-import { isMomentZone } from '@common/utils/timezone'
+import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
 import moment from 'moment-timezone'
 
 /**
@@ -12,7 +12,8 @@ import moment from 'moment-timezone'
  *
  * Resolution order:
  * - a trailing `Z` is treated as UTC,
- * - otherwise the explicit `tzid` parameter (when present) fixes the zone,
+ * - otherwise the explicit `tzid` parameter (when present and known, Windows
+ *   and alias names being resolved to their IANA zone) fixes the zone,
  * - otherwise the value is interpreted in `fallbackTz` (the series timezone).
  *
  * Returns `NaN` for empty/unparseable values so callers can skip them.
@@ -29,16 +30,37 @@ export function recurrenceInstant(
   if (/Z$/.test(raw)) {
     return moment.utc(raw).valueOf()
   }
-  const zone = tzid ?? fallbackTz
-  if (isMomentZone(zone)) {
+  const zone = definiteZone(tzid, fallbackTz)
+  if (zone) {
     return moment.tz(raw, zone).valueOf()
   }
   return moment(raw).valueOf()
 }
 
 /**
+ * The IANA zone a value is read in: its `tzid` resolved through the alias table
+ * (Outlook writes Windows names such as "Romance Standard Time", which moment
+ * does not know), else `fallbackTz` resolved the same way, else `undefined`.
+ * A TZID that stays unknown falls back to `fallbackTz` rather than to the
+ * wall-clock string comparison, which would ignore a `Z` on the other side.
+ */
+function definiteZone(tzid?: string, fallbackTz?: string): string | undefined {
+  return knownIanaZone(tzid) ?? knownIanaZone(fallbackTz)
+}
+
+function knownIanaZone(tzid?: string): string | undefined {
+  if (!tzid) {
+    return undefined
+  }
+  // A TZID such as "constructor" or "toString" makes moment-timezone throw:
+  // isMomentZone answers no instead
+  const resolved = resolveTimezone(tzid)
+  return isMomentZone(resolved) ? resolved : undefined
+}
+
+/**
  * True when a value resolves to an unambiguous instant: it carries a trailing
- * `Z`, an explicit `tzid`, or a `fallbackTz` is supplied to anchor the bare
+ * `Z`, a known `tzid`, or a known `fallbackTz` is supplied to anchor the bare
  * wall-clock value. Without any of these the value is tz-naive and would be
  * resolved in the (arbitrary) system-local zone, so its instant cannot be
  * trusted for comparison.
@@ -55,8 +77,7 @@ function hasDefiniteZone(
   if (/Z$/.test(raw)) {
     return true
   }
-  const zone = tzid ?? fallbackTz
-  return isMomentZone(zone)
+  return definiteZone(tzid, fallbackTz) !== undefined
 }
 
 /**
