@@ -128,4 +128,29 @@ describe('parseMessage', () => {
     expect(result.calendarsToRefresh.size).toBe(0)
     expect(result.shouldRefreshCalendarList).toBe(false)
   })
+
+  it.each([null, 42, true, 'subscribed', ['subscribed']])(
+    'should ignore a calendarList value of %p and keep processing other keys',
+    value => {
+      const message = {
+        [WS_INBOUND_EVENTS.CALENDAR_LIST]: value,
+        [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: ['/calendars/u1/c1']
+      }
+
+      const result = parseMessage(message)
+
+      expect(result.calendarsToRefresh).toEqual(new Set(['/calendars/u1/c1']))
+      expect(result.shouldRefreshCalendarList).toBe(false)
+    }
+  )
+
+  it('should refresh subscribed calendars of a calendarList object', () => {
+    const message = {
+      [WS_INBOUND_EVENTS.CALENDAR_LIST]: { subscribed: ['/calendars/u1/c2'] }
+    }
+
+    const result = parseMessage(message)
+
+    expect(result.calendarsToRefresh).toEqual(new Set(['/calendars/u1/c2']))
+  })
 })

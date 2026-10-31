@@ -35,7 +35,11 @@ export function parseMessage(message: unknown) {
       case WS_INBOUND_EVENTS.CALENDAR_CLIENT_REGISTERED:
         break
       case WS_INBOUND_EVENTS.CALENDAR_LIST:
-        if (value === null) {
+        if (
+          typeof value !== 'object' ||
+          value === null ||
+          Array.isArray(value)
+        ) {
           break
         }
         Object.keys(value).forEach(key => {
