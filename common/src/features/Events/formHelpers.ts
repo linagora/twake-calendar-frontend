@@ -2,7 +2,7 @@ import { resolveTimezone } from '@common/utils/timezone'
 import { formatDateTimeInTimezone } from '@common/components/Event/utils/dateTimeFormatters'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
-import { TIMEZONES } from '@common/utils/timezone-data'
+import { findTimezoneData, TIMEZONES } from '@common/utils/timezone-data'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -21,7 +21,7 @@ export function createTimezoneList(): TimezoneListResult {
 
   const getTimezoneOffset = (tzName: string): string => {
     const resolvedTz = resolveTimezone(tzName)
-    const tzData = TIMEZONES.zones[resolvedTz]
+    const tzData = findTimezoneData(resolvedTz)
     if (!tzData) return ''
 
     const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/)

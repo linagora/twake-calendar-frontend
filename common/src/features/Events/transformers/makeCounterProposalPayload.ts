@@ -1,5 +1,5 @@
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { TIMEZONES } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezone-data'
 import ICAL from 'ical.js'
 import { CounterProposalPayload } from '@common/features/Events/EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -78,8 +78,8 @@ export function makeCounterProposalPayload({
   message?: string
 }): CounterProposalPayload {
   const resolvedTz = resolveTimezone(event.timezone || 'Etc/UTC')
-  const timezone = TIMEZONES.zones[resolvedTz] ? resolvedTz : 'Etc/UTC'
-  const timezoneData = TIMEZONES.zones[resolvedTz] ?? TIMEZONES.zones['Etc/UTC']
+  const timezone = findTimezoneData(resolvedTz) ? resolvedTz : 'Etc/UTC'
+  const timezoneData = findTimezoneData(timezone)
 
   // Build the counter event with proposed dates
   const counterEvent: CalendarEvent = {

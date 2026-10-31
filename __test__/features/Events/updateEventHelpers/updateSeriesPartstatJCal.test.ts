@@ -361,4 +361,38 @@ describe('updateSeriesPartstatJCal', () => {
       }
     )
   })
+
+  it.each(['toString', 'constructor', 'hasOwnProperty'])(
+    'answers a series whose zone is named like the Object.prototype member %s',
+    timezone => {
+      const master: VCalComponent = [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'series-1'],
+          ['dtstart', { tzid: timezone }, 'date-time', '2025-03-17T09:00:00'],
+          ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+          [
+            'attendee',
+            { partstat: 'NEEDS-ACTION' },
+            'cal-address',
+            'mailto:user@example.com'
+          ]
+        ],
+        []
+      ]
+
+      const jcal = updateSeriesPartstatJCal(
+        [master],
+        { ...baseEvent, timezone },
+        targetEmail,
+        'ACCEPTED',
+        fixedNow
+      )
+
+      const attendee = ((jcal[2] as VCalComponent[])[0][1] as any[]).find(
+        p => p[0] === 'attendee'
+      )
+      expect(attendee[1].partstat).toBe('ACCEPTED')
+    }
+  )
 })

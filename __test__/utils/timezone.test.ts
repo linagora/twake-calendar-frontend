@@ -1,7 +1,70 @@
 import {
   convertEventDateTimeToISO,
-  isValidTimeZone
+  isMomentZone,
+  isValidTimeZone,
+  resolveTimezone
 } from '@common/utils/timezone'
+import {
+  findTimezoneAlias,
+  findTimezoneData
+} from '@common/utils/timezone-data'
+import { makeTimezone } from '@common/features/Events/utils/makeTimezone'
+import { CalendarEvent } from '@common/types/EventsTypes'
+
+const prototypeMembers = ['toString', 'constructor', 'hasOwnProperty']
+
+describe('findTimezoneData', () => {
+  it('finds a known zone', () => {
+    expect(findTimezoneData('Europe/Paris')?.ics).toContain('Europe/Paris')
+  })
+
+  it.each(prototypeMembers)(
+    'does not take the Object.prototype member %s for a zone',
+    name => {
+      expect(findTimezoneData(name)).toBeUndefined()
+      expect(findTimezoneAlias(name)).toBeUndefined()
+    }
+  )
+})
+
+describe('resolveTimezone', () => {
+  it('resolves an alias to its zone', () => {
+    expect(resolveTimezone('US/Central')).toBe('America/Chicago')
+  })
+
+  it.each(prototypeMembers)(
+    'keeps a zone named like the Object.prototype member %s',
+    name => {
+      expect(resolveTimezone(name)).toBe(name)
+    }
+  )
+})
+
+describe('isMomentZone', () => {
+  it('knows an IANA zone', () => {
+    expect(isMomentZone('Europe/Paris')).toBe(true)
+  })
+
+  it.each([...prototypeMembers, '__proto__'])(
+    'answers no for the Object.prototype member %s',
+    name => {
+      expect(isMomentZone(name)).toBe(false)
+    }
+  )
+})
+
+describe('makeTimezone', () => {
+  it('falls back to Etc/UTC when the data carries no ICS', () => {
+    const event = { timezone: 'toString' } as CalendarEvent
+
+    const timezone = makeTimezone(
+      Object.prototype.toString as unknown as undefined,
+      event
+    )
+
+    expect(timezone.tzid).toBe('Etc/UTC')
+  })
+})
 
 describe('isValidTimeZone', () => {
   it('accepts a zone known to the browser', () => {
