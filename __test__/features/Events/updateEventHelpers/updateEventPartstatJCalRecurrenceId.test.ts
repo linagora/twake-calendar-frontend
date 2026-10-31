@@ -114,3 +114,71 @@ describe('updateEventPartstatJCal — RECURRENCE-ID form (#1088)', () => {
     expect(patched).toBeNull()
   })
 })
+
+describe('updateEventPartstatJCal — Windows TZID RECURRENCE-ID (#1884)', () => {
+  const matchUser = (_p: Record<string, string>, addr: string): boolean =>
+    addr.toLowerCase() === 'user@example.com'
+
+  function override(
+    params: Record<string, string>,
+    recurrenceId: string
+  ): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        ['recurrence-id', params, 'date-time', recurrenceId],
+        [
+          'attendee',
+          { partstat: 'NEEDS-ACTION' },
+          'cal-address',
+          'mailto:user@example.com'
+        ]
+      ],
+      []
+    ]
+  }
+
+  it('matches a Windows TZID RECURRENCE-ID by instant', () => {
+    // 09:00 "Romance Standard Time" (Europe/Paris, winter) == 08:00Z
+    const jcal: VCalComponent = [
+      'vcalendar',
+      [],
+      [override({ tzid: 'Romance Standard Time' }, '2025-03-24T09:00:00')]
+    ]
+
+    const patched = updateEventPartstatJCal(
+      jcal,
+      matchUser,
+      'ACCEPTED',
+      '2025-03-24T08:00:00Z',
+      'Europe/Paris'
+    )
+
+    expect(patched).not.toBeNull()
+    expect(overrideAttendeePartstat(patched)).toBe('ACCEPTED')
+  })
+
+  it('does not answer another occurrence whose Windows wall clock reads like the UTC value', () => {
+    // 18:30 "Samoa Standard Time" (Pacific/Apia, UTC+13) == 05:30Z
+    const jcal: VCalComponent = [
+      'vcalendar',
+      [],
+      [
+        override({ tzid: 'Samoa Standard Time' }, '2029-12-13T18:30:00'),
+        override({}, '2029-12-13T18:30:00Z')
+      ]
+    ]
+
+    const patched = updateEventPartstatJCal(
+      jcal,
+      matchUser,
+      'DECLINED',
+      '2029-12-13T18:30:00Z',
+      'Europe/Paris'
+    )
+
+    expect(patched![2][0]).toEqual(jcal[2][0])
+    expect(patched![2][1]).not.toEqual(jcal[2][1])
+  })
+})
