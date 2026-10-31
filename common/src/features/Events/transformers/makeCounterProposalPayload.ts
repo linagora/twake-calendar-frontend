@@ -1,5 +1,5 @@
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { findTimezoneData } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezoneLookup'
 import ICAL from 'ical.js'
 import { CounterProposalPayload } from '@common/features/Events/EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'

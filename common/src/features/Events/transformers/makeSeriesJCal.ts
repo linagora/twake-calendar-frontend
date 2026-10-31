@@ -1,5 +1,5 @@
 import moment from 'moment-timezone'
-import { findTimezoneData } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezoneLookup'
 import {
   VCalComponent,
   VObjectProperty,

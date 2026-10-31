@@ -11,7 +11,7 @@ import {
 } from '@common/features/Events/utils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { findTimezoneData } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezoneLookup'
 import moment from 'moment-timezone'
 import { incrementSequenceNumber } from './makeSeriesJCal'
 import { filterComponents } from './parseFetchedEvent'
