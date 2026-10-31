@@ -2,11 +2,13 @@ import {
   VCalComponent,
   VObjectProperty
 } from '@common/features/Calendars/types/CalendarData'
+import { normalizeCalAddress } from '@common/utils/normalizeEmail'
 import { getTzidParam, sameRecurrence } from './recurrenceInstant'
 
 /**
  * Predicate identifying the ATTENDEE whose PARTSTAT must be updated.
- * Receives the attendee parameters and its (mailto-stripped) calendar address.
+ * Receives the attendee parameters and its normalized calendar address
+ * (trimmed, lowercased, mailto-stripped).
  */
 export type AttendeeMatcher = (
   params: Record<string, string>,
@@ -84,10 +86,7 @@ export function updateEventPartstatJCal(
           }
 
           const params = (prop[1] ?? {}) as Record<string, string>
-          const calAddress = ((prop[3] as string | undefined) ?? '').replace(
-            /^mailto:/i,
-            ''
-          )
+          const calAddress = normalizeCalAddress(prop[3] as string | undefined)
 
           if (matchAttendee(params, calAddress)) {
             matched = true
