@@ -13,6 +13,7 @@ import {
 } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 import { normalizeCalAddress } from '@common/utils/normalizeEmail'
+import { makeSeriesVtimezones } from './seriesVtimezones'
 
 function isAllDayProp(prop: VObjectProperty | undefined): boolean {
   if (!prop || typeof prop[3] !== 'string') return false
@@ -83,7 +84,8 @@ export function updateSeriesPartstatJCal(
   event: CalendarEvent,
   attendeeEmail: string,
   partstat: string,
-  nowMs?: number
+  nowMs?: number,
+  storedVtimezones: VCalComponent[] = []
 ): VCalComponent {
   const now = nowMs ?? Date.now()
   const fallbackTimezone = event.timezone || 'UTC'
@@ -128,12 +130,13 @@ export function updateSeriesPartstatJCal(
     return updateVeventAttendee(vevent)
   })
 
-  const timezoneData = findTimezoneData(event.timezone)
-  const vtimezone = makeTimezone(timezoneData, event)
+  const vtimezones = makeSeriesVtimezones(
+    finalVevents,
+    storedVtimezones,
+    () =>
+      makeTimezone(findTimezoneData(event.timezone), event).component
+        .jCal as VCalComponent
+  )
 
-  return [
-    'vcalendar',
-    VcalendarProperties,
-    [...finalVevents, vtimezone.component.jCal as VCalComponent]
-  ]
+  return ['vcalendar', VcalendarProperties, [...finalVevents, ...vtimezones]]
 }

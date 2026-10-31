@@ -395,4 +395,102 @@ describe('updateSeriesPartstatJCal', () => {
       expect(attendee[1].partstat).toBe('ACCEPTED')
     }
   )
+
+  describe('updateSeriesPartstatJCal VTIMEZONEs', () => {
+    const tzidsOf = (jcal: VCalComponent): unknown[] =>
+      (jcal[2] as VCalComponent[])
+        .filter(([name]) => name === 'vtimezone')
+        .map(c => (c[1] as any[]).find(([k]) => k === 'tzid')?.[3])
+
+    const master: VCalComponent = [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        [
+          'dtstart',
+          { tzid: 'Romance Standard Time' },
+          'date-time',
+          '2025-03-17T09:00:00'
+        ],
+        ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+        [
+          'attendee',
+          { partstat: 'NEEDS-ACTION' },
+          'cal-address',
+          'mailto:user@example.com'
+        ]
+      ],
+      []
+    ]
+    const override: VCalComponent = [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        [
+          'recurrence-id',
+          { tzid: 'America/New_York' },
+          'date-time',
+          '2025-03-24T04:00:00'
+        ],
+        [
+          'attendee',
+          { partstat: 'NEEDS-ACTION' },
+          'cal-address',
+          'mailto:user@example.com'
+        ]
+      ],
+      []
+    ]
+    const event = { ...baseEvent, timezone: 'Europe/Paris' }
+
+    it('writes a VTIMEZONE for every TZID the series uses', () => {
+      const out = updateSeriesPartstatJCal(
+        [master, override],
+        event,
+        targetEmail,
+        'ACCEPTED',
+        fixedNow
+      )
+
+      const tzids = tzidsOf(out)
+      expect(tzids).toEqual(
+        expect.arrayContaining(['Romance Standard Time', 'America/New_York'])
+      )
+      expect(new Set(tzids).size).toBe(tzids.length)
+      expect(tzids).not.toContain('Europe/Paris')
+    })
+
+    it('keeps the stored VTIMEZONE of a TZID as it was', () => {
+      const storedVtimezone: VCalComponent = [
+        'vtimezone',
+        [['tzid', {}, 'text', 'Romance Standard Time']],
+        [
+          [
+            'standard',
+            [
+              ['dtstart', {}, 'date-time', '1601-10-28T03:00:00'],
+              ['tzoffsetfrom', {}, 'utc-offset', '+02:00'],
+              ['tzoffsetto', {}, 'utc-offset', '+01:00']
+            ],
+            []
+          ]
+        ]
+      ]
+
+      const out = updateSeriesPartstatJCal(
+        [master, override],
+        event,
+        targetEmail,
+        'ACCEPTED',
+        fixedNow,
+        [storedVtimezone]
+      )
+
+      const vtimezones = (out[2] as VCalComponent[]).filter(
+        ([name]) => name === 'vtimezone'
+      )
+      expect(vtimezones).toContainEqual(storedVtimezone)
+      expect(tzidsOf(out)).toHaveLength(2)
+    })
+  })
 })
