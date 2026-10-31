@@ -74,27 +74,21 @@ describe('toPathRoute', () => {
   })
 })
 
-describe('toPathRoute with an authority-like hash path', () => {
-  it.each(['#///#details', '#/\\#details', '#//'])(
-    'does not throw on %s and returns a same-origin path',
-    hash => {
-      let result: string | null = null
-      expect(() => {
-        result = toPathRoute({ pathname: '/events/abc', search: '', hash })
-      }).not.toThrow()
-      expect(result).toMatch(/^\/(?![/\\])/)
-    }
-  )
+describe('toPathRoute with an authority-like or dot-segment hash path', () => {
+  it.each([
+    ['#/.////#details', '/#details'],
+    ['#/.//other.example/x', '/other.example/x'],
+    ['#/a/..//other.example/', '/other.example/'],
+    ['#///#details', '/#details'],
+    ['#/\\#details', '/#details'],
+    ['#//', '/'],
+    ['#//other.example/x', '/other.example/x']
+  ])('returns a same-origin path for %s', (hash, expected) => {
+    const result = toPathRoute({ pathname: '/events/abc', search: '', hash })
 
-  it('keeps the nested fragment after an empty authority', () => {
-    expect(
-      toPathRoute({ pathname: '/events/abc', search: '', hash: '#///#details' })
-    ).toBe('/#details')
-  })
-
-  it('does not read a double slash segment as a host', () => {
-    expect(
-      toPathRoute({ pathname: '/', search: '', hash: '#//other.example/x' })
-    ).toBe('/other.example/x')
+    expect(result).toBe(expected)
+    expect(new URL(result!, 'https://calendar.example').origin).toBe(
+      'https://calendar.example'
+    )
   })
 })
