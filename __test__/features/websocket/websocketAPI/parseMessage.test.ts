@@ -98,4 +98,34 @@ describe('parseMessage', () => {
     expect(result.calendarsToRefresh.size).toBe(1)
     expect(result.calendarsToRefresh).toContain('/calendars/cal1/entry1')
   })
+
+  it('should keep only string calendar paths', () => {
+    const { calendarsToRefresh, calendarsToHide } = parseMessage({
+      [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: [
+        ['/calendars/a/a'],
+        42,
+        null,
+        '/calendars/u1/c1'
+      ],
+      [WS_INBOUND_EVENTS.CLIENT_UNREGISTERED]: [
+        { toString: {} },
+        '/calendars/u2/c2'
+      ],
+      [WS_INBOUND_EVENTS.CALENDAR_LIST]: {
+        subscribed: [{ id: 'x' }, '/calendars/u3/c3']
+      }
+    })
+
+    expect(calendarsToRefresh).toEqual(
+      new Set(['/calendars/u1/c1', '/calendars/u3/c3'])
+    )
+    expect(calendarsToHide).toEqual(new Set(['/calendars/u2/c2']))
+  })
+
+  it('should ignore a null calendar list', () => {
+    const result = parseMessage({ [WS_INBOUND_EVENTS.CALENDAR_LIST]: null })
+
+    expect(result.calendarsToRefresh.size).toBe(0)
+    expect(result.shouldRefreshCalendarList).toBe(false)
+  })
 })
