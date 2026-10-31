@@ -73,3 +73,28 @@ describe('toPathRoute', () => {
     ).toBe('/events/abc?view=week#details')
   })
 })
+
+describe('toPathRoute with an authority-like hash path', () => {
+  it.each(['#///#details', '#/\\#details', '#//'])(
+    'does not throw on %s and returns a same-origin path',
+    hash => {
+      let result: string | null = null
+      expect(() => {
+        result = toPathRoute({ pathname: '/events/abc', search: '', hash })
+      }).not.toThrow()
+      expect(result).toMatch(/^\/(?![/\\])/)
+    }
+  )
+
+  it('keeps the nested fragment after an empty authority', () => {
+    expect(
+      toPathRoute({ pathname: '/events/abc', search: '', hash: '#///#details' })
+    ).toBe('/#details')
+  })
+
+  it('does not read a double slash segment as a host', () => {
+    expect(
+      toPathRoute({ pathname: '/', search: '', hash: '#//other.example/x' })
+    ).toBe('/other.example/x')
+  })
+})
