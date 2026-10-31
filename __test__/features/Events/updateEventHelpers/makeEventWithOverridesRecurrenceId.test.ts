@@ -148,3 +148,91 @@ describe('makeEventWithOverrides — RECURRENCE-ID form (#1088)', () => {
     expect(summary![3]).toBe('Updated by the organiser')
   })
 })
+
+describe('makeEventWithOverrides — VTIMEZONEs of the series (#1881)', () => {
+  const updatedInstance = {
+    uid: 'series-1',
+    timezone: 'Europe/Paris',
+    recurrenceId: '2025-06-02T07:00:00Z',
+    start: '2025-06-02T09:00:00',
+    end: '2025-06-02T10:00:00',
+    attendee: [],
+    title: 'Edited occurrence'
+  } as unknown as CalendarEvent
+
+  function series(tzid: string): VCalComponent[] {
+    return [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'series-1'],
+          ['dtstart', { tzid }, 'date-time', '2025-03-03T09:00:00'],
+          ['rrule', {}, 'recur', { freq: 'WEEKLY' }]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'series-1'],
+          ['recurrence-id', { tzid }, 'date-time', '2025-03-10T09:00:00'],
+          [
+            'dtstart',
+            { tzid: 'Asia/Tokyo' },
+            'date-time',
+            '2025-03-10T17:00:00'
+          ]
+        ],
+        []
+      ]
+    ]
+  }
+
+  function vtimezones(jCal: VCalComponent): VCalComponent[] {
+    return (jCal[2] as VCalComponent[]).filter(([name]) => name === 'vtimezone')
+  }
+
+  function tzidsOf(jCal: VCalComponent): unknown[] {
+    return vtimezones(jCal).map(
+      ([, props]) =>
+        (props as VObjectProperty[]).find(([k]) => k === 'tzid')?.[3]
+    )
+  }
+
+  it('writes a VTIMEZONE for every TZID of the series', () => {
+    const jCal = makeEventWithOverrides(updatedInstance, series('Europe/Paris'))
+
+    expect(tzidsOf(jCal)).toEqual(['Europe/Paris', 'Asia/Tokyo'])
+  })
+
+  it('keeps the stored VTIMEZONE of a TZID the client does not know by name', () => {
+    const storedVtimezone: VCalComponent = [
+      'vtimezone',
+      [['tzid', {}, 'text', 'europe/paris']],
+      [
+        [
+          'standard',
+          [
+            ['dtstart', {}, 'date-time', '1970-01-01T00:00:00'],
+            ['tzoffsetfrom', {}, 'utc-offset', '+01:00'],
+            ['tzoffsetto', {}, 'utc-offset', '+01:00']
+          ],
+          []
+        ]
+      ]
+    ]
+
+    const jCal = makeEventWithOverrides(
+      updatedInstance,
+      series('europe/paris'),
+      [storedVtimezone]
+    )
+
+    const tzids = tzidsOf(jCal)
+    expect(tzids).toEqual(
+      expect.arrayContaining(['europe/paris', 'Europe/Paris', 'Asia/Tokyo'])
+    )
+    expect(new Set(tzids).size).toBe(tzids.length)
+    expect(vtimezones(jCal)).toContainEqual(storedVtimezone)
+  })
+})
