@@ -65,6 +65,49 @@ describe('toPrintEvent', () => {
   })
 })
 
+describe('selectPrintEvents', () => {
+  it('skips events whose start cannot be read', () => {
+    const events = selectPrintEvents(
+      [
+        makeEvent({
+          uid: 'ok',
+          start: '2026-03-10',
+          end: '2026-03-11',
+          allday: true
+        }),
+        makeEvent({ uid: 'bad-allday', start: 'not a date', allday: true }),
+        makeEvent({ uid: 'bad-timed', start: 'not a date' })
+      ],
+      'Etc/UTC',
+      '(No title)'
+    )
+
+    expect(events.map(e => e.uid)).toEqual(['ok'])
+  })
+
+  it('falls back to a one-day span when an all-day end cannot be read', () => {
+    const [event] = selectPrintEvents(
+      [makeEvent({ start: '2026-03-10', end: 'tomorrow', allday: true })],
+      'Etc/UTC',
+      '(No title)'
+    )
+
+    expect(event.start.format('YYYY-MM-DD')).toBe('2026-03-10')
+    expect(event.end.format('YYYY-MM-DD')).toBe('2026-03-11')
+  })
+
+  it('falls back to the default span when a timed end cannot be read', () => {
+    const [event] = selectPrintEvents(
+      [makeEvent({ start: '2026-03-10T09:00:00Z', end: 'tomorrow' })],
+      'Etc/UTC',
+      '(No title)'
+    )
+
+    expect(event.end.isValid()).toBe(true)
+    expect(event.end.isAfter(event.start)).toBe(true)
+  })
+})
+
 describe('eventsInPeriod', () => {
   it('keeps only events overlapping the half-open period range', () => {
     const events = selectPrintEvents(

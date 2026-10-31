@@ -12,12 +12,20 @@ const resolveColor = (event: CalendarEvent): string | undefined =>
 // Both all-day and timed events resolve into the print timezone so their
 // instants align with the timezone-anchored print range. All-day values are
 // date-only, so their time component (if any) is dropped before anchoring.
+// An unreadable value yields an invalid Dayjs instead of reaching `tz`, whose
+// offset lookup throws a RangeError on an Invalid Date.
 const resolveInstant = (
   value: string,
   allDay: boolean,
   timezone: string
-): Dayjs =>
-  allDay ? dayjs.tz(value.split('T')[0], timezone) : dayjs(value).tz(timezone)
+): Dayjs => {
+  const source = allDay ? value.split('T')[0] : value
+  const parsed = dayjs(source)
+  if (!parsed.isValid()) {
+    return parsed
+  }
+  return allDay ? dayjs.tz(source, timezone) : parsed.tz(timezone)
+}
 
 const resolveEnd = (
   event: CalendarEvent,
@@ -31,9 +39,10 @@ const resolveEnd = (
         allDay ? 1 : DEFAULT_DURATION_MINUTES,
         allDay ? 'day' : 'minute'
       )
-  // Guard against malformed events whose end precedes their start, keeping
-  // all-day events at least a full day and timed events a minute-based span.
-  return rawEnd.isAfter(start)
+  // Guard against malformed events whose end is unreadable or precedes their
+  // start, keeping all-day events at least a full day and timed events a
+  // minute-based span.
+  return rawEnd.isValid() && rawEnd.isAfter(start)
     ? rawEnd
     : start.add(
         allDay ? 1 : FALLBACK_DURATION_MINUTES,
@@ -73,6 +82,9 @@ export const selectPrintEvents = (
   events
     .filter(event => Boolean(event.start))
     .map(event => toPrintEvent(event, timezone, noTitle))
+    // An event whose start cannot be read has no place in the schedule; skip
+    // it rather than letting it break the whole print.
+    .filter(event => event.start.isValid())
 
 /** Events overlapping the half-open `[period.start, period.end)` range. */
 export const eventsInPeriod = (
