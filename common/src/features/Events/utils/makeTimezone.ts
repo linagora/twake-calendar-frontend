@@ -1,4 +1,4 @@
-import { findTimezoneData, TimezoneData } from '@common/utils/timezone-data'
+import { findTimezoneData, TimezoneData } from '@common/utils/timezoneLookup'
 import ICAL from 'ical.js'
 import { CalendarEvent } from '@common/types/EventsTypes'
 

@@ -7,7 +7,7 @@ import {
 import {
   findTimezoneAlias,
   findTimezoneData
-} from '@common/utils/timezone-data'
+} from '@common/utils/timezoneLookup'
 import { makeTimezone } from '@common/features/Events/utils/makeTimezone'
 import { CalendarEvent } from '@common/types/EventsTypes'
 

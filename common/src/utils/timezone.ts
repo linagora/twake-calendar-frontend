@@ -6,7 +6,8 @@ import moment from 'moment-timezone'
 import { detectDateTimeFormat } from '@common/components/Event/utils/dateTimeHelpers'
 
 // TIMEZONES data must be imported or defined separately.
-import { findTimezoneAlias, findTimezoneData, TIMEZONES } from './timezone-data'
+import { TIMEZONES } from './timezone-data'
+import { findTimezoneAlias, findTimezoneData } from './timezoneLookup'
 
 export const browserDefaultTimeZone =
   Intl.DateTimeFormat().resolvedOptions().timeZone

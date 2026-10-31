@@ -1,4 +1,4 @@
-import { findTimezoneData } from '@common/utils/timezone-data'
+import { findTimezoneData } from '@common/utils/timezoneLookup'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { makeVevent } from './makeVevent'
 import { makeTimezone } from './makeTimezone'
