@@ -213,16 +213,27 @@ export function prepareUpdatedEvent({
   return newEvent
 }
 
+// A resource is identified by its address: two rooms may share a display
+// name (or have none). The CN is only a fallback for an address-less one.
+function isSameResource(attendee: userAttendee, resource: Resource): boolean {
+  if (attendee.cutype !== 'RESOURCE') return false
+  if (resource?.email) {
+    return (
+      normalizeIdentity(attendee.cal_address) ===
+      normalizeIdentity(resource.email)
+    )
+  }
+  return attendee.cn === (resource?.displayName ?? '')
+}
+
 function mapResourcesToAttendees(
   resources: Resource[],
   existingAttendees: userAttendee[]
 ): userAttendee[] {
   return resources.map(resource => {
-    const displayName = resource?.displayName ?? ''
     const partstat =
-      existingAttendees.find(
-        a => a.cutype === 'RESOURCE' && a.cn === displayName
-      )?.partstat || 'NEEDS-ACTION'
+      existingAttendees.find(a => isSameResource(a, resource))?.partstat ||
+      'NEEDS-ACTION'
 
     return userAttendee.fromResource(resource).withPartStat(partstat)
   })
