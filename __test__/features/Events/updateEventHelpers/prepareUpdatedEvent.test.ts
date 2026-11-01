@@ -5,6 +5,10 @@
 import { prepareUpdatedEvent } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
 
 jest.mock('p-map', () => jest.fn())
+import {
+  resolveAttendeesAndResources,
+  resolveOrganizerEmail
+} from '@common/components/Event/utils/initialValues/attendeeResolvers'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -262,6 +266,115 @@ describe('prepareUpdatedEvent', () => {
         { cn: 'Carol' },
         'cal-address',
         'mailto:carol@example.com'
+      ])
+    })
+  })
+
+  describe('attendee addresses compared as identities (#1903)', () => {
+    const calendar = {
+      id: 'user-cal',
+      owner: { emails: ['user@example.com'] }
+    } as Calendar
+
+    const bob = new userAttendee({
+      cal_address: 'mailto:bob@example.com',
+      partstat: 'ACCEPTED'
+    })
+
+    // Opens the event in the edit form and saves it unchanged
+    const saveUnchanged = (
+      event: CalendarEvent,
+      organizer: userOrganiser
+    ): CalendarEvent => {
+      const { attendees } = resolveAttendeesAndResources(
+        event,
+        resolveOrganizerEmail(event, organizer)
+      )
+      return prepareUpdatedEvent({
+        event,
+        values: { ...baseValues, attendees },
+        organizer,
+        startISO: '2025-01-01T10:00:00.000Z',
+        endISO: '2025-01-01T11:00:00.000Z',
+        timeChanged: false,
+        targetCalendar: calendar,
+        calId: 'user-cal',
+        newCalId: 'user-cal'
+      })
+    }
+
+    const rows = (event: CalendarEvent) =>
+      (event.attendee ?? []).map(a => [a.cal_address, a.partstat, a.rsvp])
+
+    it('keeps an organizer listed in another case once, with their answer', () => {
+      const organizer = new userOrganiser({
+        cn: 'User',
+        cal_address: 'mailto:user@example.com'
+      })
+      const self = new userAttendee({
+        cal_address: 'MAILTO:User@Example.com',
+        partstat: 'ACCEPTED',
+        role: 'CHAIR'
+      })
+      const event = {
+        ...baseEvent,
+        organizer,
+        attendee: [self, bob]
+      } as CalendarEvent
+
+      expect(rows(saveUnchanged(event, organizer))).toEqual([
+        ['mailto:bob@example.com', 'ACCEPTED', 'FALSE'],
+        ['MAILTO:User@Example.com', 'ACCEPTED', 'FALSE']
+      ])
+    })
+
+    it('gives the same attendees when saving again what was saved', () => {
+      const alice = new userOrganiser({
+        cn: 'Alice',
+        cal_address: 'alice@example.com'
+      })
+      const event = {
+        ...baseEvent,
+        attendee: [
+          new userAttendee({
+            cal_address: 'MAILTO:Alice@Example.com',
+            partstat: 'ACCEPTED'
+          }),
+          bob
+        ]
+      } as CalendarEvent
+
+      const firstSave = saveUnchanged(event, alice)
+      const secondSave = saveUnchanged(firstSave, alice)
+
+      expect(rows(firstSave)).toEqual([
+        ['mailto:bob@example.com', 'ACCEPTED', 'FALSE'],
+        ['MAILTO:Alice@Example.com', 'ACCEPTED', 'FALSE']
+      ])
+      expect(rows(secondSave)).toEqual(rows(firstSave))
+    })
+
+    it('keeps the answer of a user listed twice in different cases', () => {
+      const user = new userOrganiser({
+        cn: 'User',
+        cal_address: 'mailto:user@example.com'
+      })
+      const event = {
+        ...baseEvent,
+        attendee: [
+          new userAttendee({
+            cal_address: 'mailto:user@example.com',
+            partstat: 'DELEGATED',
+            rsvp: 'TRUE'
+          }),
+          new userAttendee({ cal_address: 'MAILTO:User@Example.com' }),
+          bob
+        ]
+      } as CalendarEvent
+
+      expect(rows(saveUnchanged(event, user))).toEqual([
+        ['mailto:bob@example.com', 'ACCEPTED', 'FALSE'],
+        ['mailto:user@example.com', 'DELEGATED', 'TRUE']
       ])
     })
   })

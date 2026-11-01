@@ -1,7 +1,10 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUtils'
-import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
+import {
+  findStoredAttendee,
+  updateAttendeesAfterTimeChange
+} from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { eventDavPath } from '@common/features/Calendars/utils/calendarDavPath'
@@ -129,14 +132,35 @@ function keepServerOrganizerParams(
   })
 }
 
+// The form leaves the organizer out of its attendees: a new organizer who
+// was already listed keeps their stored row, hence their answer.
+function withStoredOrganizerRow(
+  baseAttendees: userAttendee[],
+  organizer: userOrganiser,
+  storedAttendees: userAttendee[]
+): userAttendee[] {
+  const storedRow = findStoredAttendee(storedAttendees, organizer.cal_address)
+  const isListed = baseAttendees.some(
+    a =>
+      normalizeIdentity(a.cal_address) ===
+      normalizeIdentity(organizer.cal_address)
+  )
+  return storedRow && !isListed ? [...baseAttendees, storedRow] : baseAttendees
+}
+
 function computeFinalAttendees(
   baseAttendees: userAttendee[],
   organizer: PrepareUpdatedEventParams['organizer'],
-  existingOrganizer: CalendarEvent['organizer']
+  existingOrganizer: CalendarEvent['organizer'],
+  storedAttendees: userAttendee[]
 ): userAttendee[] {
-  if (organizer && organizer.cal_address !== existingOrganizer?.cal_address) {
+  if (
+    organizer &&
+    normalizeIdentity(organizer.cal_address) !==
+      normalizeIdentity(existingOrganizer?.cal_address)
+  ) {
     return rewriteAttendeesForOrganizerChange(
-      baseAttendees,
+      withStoredOrganizerRow(baseAttendees, organizer, storedAttendees),
       existingOrganizer,
       organizer
     )
@@ -172,7 +196,12 @@ export function prepareUpdatedEvent({
     updateAttendeesAfterTimeChange(event, timeChanged, values.attendees)
       .attendee ?? []
   const finalAttendees = shouldSetOrganizer
-    ? computeFinalAttendees(baseAttendees, organizer, event.organizer)
+    ? computeFinalAttendees(
+        baseAttendees,
+        organizer,
+        event.organizer,
+        event.attendee ?? []
+      )
     : []
 
   const newEvent: CalendarEvent = {

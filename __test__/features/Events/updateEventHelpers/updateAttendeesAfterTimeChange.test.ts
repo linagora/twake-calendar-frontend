@@ -210,4 +210,45 @@ describe('updateAttendeesAfterTimeChange', () => {
       expect(result.attendee?.[0].cal_address).toBe('new@example.com')
     })
   })
+
+  describe('organizer listed in another case (#1903)', () => {
+    const selfInOtherCase = new userAttendee({
+      cal_address: 'MAILTO:Organizer@Example.com',
+      partstat: 'ACCEPTED',
+      role: 'CHAIR'
+    })
+    const event = {
+      ...baseEvent,
+      attendee: [selfInOtherCase, mockAttendee]
+    }
+    const organizerRows = (result: CalendarEvent) =>
+      (result.attendee ?? []).filter(
+        a =>
+          a.cal_address.toLowerCase().replace(/^mailto:/, '') ===
+          'organizer@example.com'
+      )
+
+    it('keeps the stored organizer row instead of appending a new one', () => {
+      const result = updateAttendeesAfterTimeChange(event, false, [
+        mockAttendee
+      ])
+
+      expect(organizerRows(result)).toEqual([selfInOtherCase])
+    })
+
+    it('de-duplicates the organizer left among the form attendees', () => {
+      const result = updateAttendeesAfterTimeChange(event, false, [
+        mockAttendee,
+        selfInOtherCase
+      ])
+
+      expect(organizerRows(result)).toEqual([selfInOtherCase])
+    })
+
+    it('does not ask the organizer to answer again when the time changes', () => {
+      const result = updateAttendeesAfterTimeChange(event, true)
+
+      expect(organizerRows(result)[0].partstat).toBe('ACCEPTED')
+    })
+  })
 })

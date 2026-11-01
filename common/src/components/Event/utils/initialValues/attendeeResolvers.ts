@@ -1,6 +1,7 @@
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 
 /**
  * Filters attendees and extracts resources.
@@ -13,10 +14,13 @@ export function resolveAttendeesAndResources(
   selectedResources: { email: string; displayName: string }[]
 } {
   const allAttendees = event.attendee ?? []
+  const organizerIdentity = normalizeIdentity(organizerEmail)
 
   const attendees = allAttendees.filter(
     (a: userAttendee) =>
-      a.cal_address !== organizerEmail && a.cutype !== 'RESOURCE'
+      (!organizerIdentity ||
+        normalizeIdentity(a.cal_address) !== organizerIdentity) &&
+      a.cutype !== 'RESOURCE'
   )
 
   const selectedResources = allAttendees

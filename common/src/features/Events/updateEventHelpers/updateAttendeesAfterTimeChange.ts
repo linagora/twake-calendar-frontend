@@ -1,5 +1,18 @@
 import { userAttendee } from '@common/features/User/models/attendee'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
+
+const isSameIdentity = (a?: string, b?: string): boolean =>
+  normalizeIdentity(a) === normalizeIdentity(b)
+
+// Addresses are identities: "MAILTO:User@Example.com" is "user@example.com".
+// The exact spelling wins when the same identity is listed several times.
+export const findStoredAttendee = (
+  attendees: userAttendee[],
+  addr: string
+): userAttendee | undefined =>
+  attendees.find(a => a?.cal_address === addr) ??
+  attendees.find(a => a && isSameIdentity(a.cal_address, addr))
 
 export const updateAttendeesAfterTimeChange = (
   event: CalendarEvent,
@@ -14,8 +27,10 @@ export const updateAttendeesAfterTimeChange = (
   const markNeedsAction = (att: userAttendee): userAttendee =>
     att.withPartStat('NEEDS-ACTION').withRsvp('TRUE')
 
-  const getExistingOrDefault = (addr: string, fallback: userAttendee) =>
-    attendee.find(a => a?.cal_address === addr) ?? fallback
+  const getExistingOrDefault = (
+    addr: string,
+    fallback: userAttendee
+  ): userAttendee => findStoredAttendee(attendee, addr) ?? fallback
 
   if (attendees) {
     const updatedAttendees = attendees.map(att => {
@@ -37,7 +52,7 @@ export const updateAttendeesAfterTimeChange = (
 
     const deduped = organizerEntry
       ? updatedAttendees.filter(
-          attendee => attendee.cal_address !== organizerAddr
+          attendee => !isSameIdentity(attendee.cal_address, organizerAddr)
         )
       : updatedAttendees
 
@@ -48,7 +63,8 @@ export const updateAttendeesAfterTimeChange = (
   }
 
   const updatedAttendees = attendee.map(att => {
-    if (organizerAddr && att.cal_address === organizerAddr) return att
+    if (organizerAddr && isSameIdentity(att.cal_address, organizerAddr))
+      return att
     return timeChanged ? markNeedsAction(att) : att
   })
 
