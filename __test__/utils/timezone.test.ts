@@ -2,6 +2,7 @@ import {
   convertEventDateTimeToISO,
   isMomentZone,
   isValidTimeZone,
+  resolveKnownTimezone,
   resolveTimezone
 } from '@common/utils/timezone'
 import {
@@ -63,6 +64,17 @@ describe('makeTimezone', () => {
     )
 
     expect(timezone.tzid).toBe('Etc/UTC')
+  })
+})
+
+describe('resolveKnownTimezone', () => {
+  it('keeps a zone known to the browser', () => {
+    expect(resolveKnownTimezone('Europe/Paris')).toBe('Europe/Paris')
+  })
+
+  it('falls back to UTC on a zone unknown to the browser', () => {
+    expect(resolveKnownTimezone('Mars/Olympus_Mons')).toBe('UTC')
+    expect(resolveKnownTimezone('America/Nuidew_York')).toBe('UTC')
   })
 })
 

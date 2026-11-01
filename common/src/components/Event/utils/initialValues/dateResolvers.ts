@@ -2,6 +2,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
 import { DateSelectArg } from '@fullcalendar/core'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
+import { resolveKnownTimezone } from '@common/utils/timezone'
 
 /**
  * Formats API date strings into form-compatible strings.
@@ -10,10 +11,13 @@ export function formatEventDates(
   event: CalendarEvent,
   isAllDay: boolean
 ): { start: string; end: string } {
+  const timezone = event.timezone
+    ? resolveKnownTimezone(event.timezone)
+    : undefined
   const start = event.start
     ? isAllDay
       ? new Date(event.start).toISOString().split('T')[0]
-      : formatLocalDateTime(new Date(event.start), event.timezone)
+      : formatLocalDateTime(new Date(event.start), timezone)
     : ''
 
   if (!event.end) {
@@ -28,7 +32,7 @@ export function formatEventDates(
 
   return {
     start,
-    end: formatLocalDateTime(new Date(event.end), event.timezone)
+    end: formatLocalDateTime(new Date(event.end), timezone)
   }
 }
 
