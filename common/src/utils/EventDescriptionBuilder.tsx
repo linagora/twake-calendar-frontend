@@ -11,6 +11,29 @@ export const SEPARATORS_NEED_HANDLE = [
   '-::~:~::~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~::~:~::-'
 ]
 
+const ZERO_WIDTH_SPACE = '​'
+
+/**
+ * Values written inside the footer (meeting link, attachment names and URIs)
+ * come from the event and may hold a separator, which would end the footer
+ * block early and leave its tail in the description. A zero-width space after
+ * the first character of every occurrence breaks it without altering the
+ * displayed text. Looping covers overlapping occurrences.
+ */
+function neutralizeSeparators(value: string): string {
+  let result = value
+  while (SEPARATORS_NEED_HANDLE.some(separator => result.includes(separator))) {
+    result = SEPARATORS_NEED_HANDLE.reduce(
+      (acc, separator) =>
+        acc
+          .split(separator)
+          .join(separator[0] + ZERO_WIDTH_SPACE + separator.slice(1)),
+      result
+    )
+  }
+  return result
+}
+
 function tryLinkify(html: string): string | null {
   try {
     return linkifyHtml(html, linkifyOptions)
@@ -116,7 +139,7 @@ export class EventDescriptionBuilder {
     let addedContent = ''
 
     if (meetingLink) {
-      addedContent += `${joinText} : ${meetingLink}\n`
+      addedContent += `${joinText} : ${neutralizeSeparators(meetingLink)}\n`
     }
 
     if (hasAttachments) {
@@ -146,7 +169,7 @@ export class EventDescriptionBuilder {
   private buildAttachmentsText(attachmentsText: string): string {
     let content = `\n${attachmentsText} :\n`
     this.attachments.forEach(attachment => {
-      content += `• ${attachment.x_filename}: ${attachment.uri}\n`
+      content += `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparators(attachment.uri)}\n`
     })
     return content
   }
