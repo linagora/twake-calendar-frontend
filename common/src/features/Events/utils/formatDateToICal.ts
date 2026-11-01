@@ -63,21 +63,41 @@ export function formatDateTimeToICal(date: Date, timezone?: string): string {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`
 }
 
+const UTC_UNTIL_FORMAT = 'YYYYMMDDTHHmmss[Z]'
+
+// The server gives UNTIL back as it was stored: a DATE ("2025-04-28") or a
+// DATE-TIME ("2025-04-28T07:00:00Z"), the form RFC 5545 requires for a
+// DTSTART with a TZID.
+function hasTimePart(endDate: string): boolean {
+  return endDate.includes('T')
+}
+
+function hasUtcOffset(endDate: string): boolean {
+  return /(Z|[+-]\d{2}:?\d{2})$/i.test(endDate)
+}
+
+function formatDateTimeUntil(endDate: string, tzid: string): string {
+  const until = hasUtcOffset(endDate)
+    ? moment.utc(endDate, moment.ISO_8601)
+    : moment.tz(endDate, moment.ISO_8601, tzid)
+  return until.utc().format(UTC_UNTIL_FORMAT)
+}
+
 export function formatUntilForRRule(
   endDate: string,
   allday: boolean,
   tzid: string
 ): string {
   if (allday) {
-    return endDate.replace(/-/g, '')
+    return endDate.split('T')[0].replace(/-/g, '')
   }
 
-  // Take the date part of endDate, add end of day, convert to UTC
-  const datePart = endDate
-  const timePart = '23:59:59'
+  // A DATE-TIME UNTIL is kept as is: moving it to the end of the day could
+  // add an occurrence the series did not have.
+  if (hasTimePart(endDate)) {
+    return formatDateTimeUntil(endDate, tzid)
+  }
 
-  return moment
-    .tz(`${datePart}T${timePart}`, tzid)
-    .utc()
-    .format('YYYYMMDDTHHmmss[Z]')
+  // A date picked in the form ends at the end of that day, in the series zone
+  return moment.tz(`${endDate}T23:59:59`, tzid).utc().format(UTC_UNTIL_FORMAT)
 }
