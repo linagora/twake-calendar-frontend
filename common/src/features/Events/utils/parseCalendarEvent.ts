@@ -344,6 +344,14 @@ function processEventDates(
 ): void {
   const eventTimezone = event.timezone
 
+  // RFC 5545 §3.6.1: an all-day event without DTEND nor DURATION lasts one day
+  if (!event.end && event.allday && event.start) {
+    event.end = moment
+      .utc(event.start)
+      .add(moment.duration(duration ?? 'P1D'))
+      .format('YYYY-MM-DD')
+  }
+
   if (!event.end) {
     const start = event.start ? new Date(event.start) : new Date()
     const timeToAdd = duration
