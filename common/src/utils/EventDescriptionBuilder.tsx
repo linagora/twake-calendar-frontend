@@ -169,7 +169,9 @@ export class EventDescriptionBuilder {
   private buildAttachmentsText(attachmentsText: string): string {
     let content = `\n${attachmentsText} :\n`
     this.attachments.forEach(attachment => {
-      content += `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparators(attachment.uri)}\n`
+      content += attachment.hasDisplayableFilename()
+        ? `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparators(attachment.uri)}\n`
+        : `• ${neutralizeSeparators(attachment.uri)}\n`
     })
     return content
   }
