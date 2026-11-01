@@ -235,6 +235,64 @@ describe('prepareUpdatedEvent', () => {
       ])
     })
 
+    it('keeps the SENT-BY of the unchanged organizer', () => {
+      const updatedEvent = prepareUpdatedEvent({
+        event: {
+          ...baseEvent,
+          organizer: new userOrganiser({
+            cn: 'alice alice',
+            cal_address: 'alice@example.com',
+            sentBy: 'assistant@example.com',
+            paramOrder: ['cn', 'sent-by']
+          })
+        } as CalendarEvent,
+        values: baseValues,
+        organizer: new userOrganiser({
+          cn: 'alice alice',
+          cal_address: 'alice@example.com'
+        }),
+        startISO: '2025-01-01T10:00:00.000Z',
+        endISO: '2025-01-01T11:00:00.000Z',
+        timeChanged: false,
+        targetCalendar: attendeeCalendar,
+        calId: 'bob-cal',
+        newCalId: 'bob-cal'
+      })
+
+      expect(updatedEvent.organizer?.asJcal()).toEqual([
+        'organizer',
+        { cn: 'alice alice', 'sent-by': 'mailto:assistant@example.com' },
+        'cal-address',
+        'mailto:alice@example.com'
+      ])
+    })
+
+    it('does not give the stored SENT-BY to a replacement organizer', () => {
+      const updatedEvent = prepareUpdatedEvent({
+        event: {
+          ...baseEvent,
+          organizer: new userOrganiser({
+            cn: 'alice alice',
+            cal_address: 'alice@example.com',
+            sentBy: 'assistant@example.com'
+          })
+        } as CalendarEvent,
+        values: baseValues,
+        organizer: new userOrganiser({
+          cn: 'Carol',
+          cal_address: 'carol@example.com'
+        }),
+        startISO: '2025-01-01T10:00:00.000Z',
+        endISO: '2025-01-01T11:00:00.000Z',
+        timeChanged: false,
+        targetCalendar: attendeeCalendar,
+        calId: 'bob-cal',
+        newCalId: 'bob-cal'
+      })
+
+      expect(updatedEvent.organizer?.sentBy).toBeUndefined()
+    })
+
     it('drops them when the organizer changes', () => {
       const updatedEvent = update(
         new userOrganiser({ cn: 'Carol', cal_address: 'carol@example.com' })

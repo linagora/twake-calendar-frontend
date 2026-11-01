@@ -119,7 +119,9 @@ function keepServerOrganizerParams(
   return new userOrganiser({
     cn: organizer.cn,
     cal_address: organizer.cal_address,
-    sentBy: organizer.sentBy,
+    sentBy: isSameOrganizer
+      ? (organizer.sentBy ?? existingOrganizer?.sentBy)
+      : organizer.sentBy,
     otherParams: isSameOrganizer
       ? (organizer.otherParams ?? existingOrganizer?.otherParams)
       : undefined,
