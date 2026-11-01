@@ -114,3 +114,65 @@ describe('edit save confirmation', () => {
     }
   )
 })
+
+describe('handleUpdateSubmit - stored series starting outside its weekdays (#1908)', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  // Monday 6 January, BYDAY=TU, as other clients may write it
+  const masterEvent = {
+    uid: 'event-1',
+    start: '2025-01-06T10:00:00Z',
+    end: '2025-01-06T11:00:00Z',
+    repetition: { freq: 'weekly', byday: ['TU'] }
+  } as CalendarEvent
+
+  const seriesParams = (
+    values: Partial<EventFormValues> = {}
+  ): HandleUpdateSubmitParams => ({
+    ...params('all'),
+    event: { ...masterEvent, uid: 'event-1/20250107T100000Z' },
+    masterEvent,
+    values: {
+      ...DEFAULT_FORM_VALUES,
+      title: 'Weekly sync',
+      start: '2025-01-06T10:00',
+      end: '2025-01-06T11:00',
+      timezone: 'UTC',
+      repetition: new RepetitionObject({
+        freq: 'weekly',
+        interval: 1,
+        byday: ['TU']
+      }),
+      ...values
+    }
+  })
+
+  it('keeps the stored start on a save changing neither start nor weekdays', async () => {
+    await handleUpdateSubmit(seriesParams())
+
+    expect(submittedValues().start).toBe('2025-01-06T10:00')
+    expect(submittedValues().end).toBe('2025-01-06T11:00')
+  })
+
+  it('realigns the start when the weekdays change', async () => {
+    await handleUpdateSubmit(
+      seriesParams({
+        repetition: new RepetitionObject({
+          freq: 'weekly',
+          interval: 1,
+          byday: ['WE']
+        })
+      })
+    )
+
+    expect(submittedValues().start).toBe('2025-01-08T10:00')
+  })
+
+  it('realigns the start when the start date changes', async () => {
+    await handleUpdateSubmit(
+      seriesParams({ start: '2025-01-13T10:00', end: '2025-01-13T11:00' })
+    )
+
+    expect(submittedValues().start).toBe('2025-01-14T10:00')
+  })
+})
