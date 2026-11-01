@@ -42,6 +42,11 @@ export class EventDescriptionBuilder {
    * every position of a newline run, which is quadratic in the description
    * length (a remote attendee could freeze the UI thread with a description
    * made of one separator preceded by a long run of newlines).
+   *
+   * Separators are paired from the end: `withFooter` appends its block last,
+   * so the last separator closes a block and the one before opens it. A lone
+   * separator left of the footers is then kept as user text, instead of
+   * opening a block that the footer's opening separator would close.
    */
   public removeFooter(): this {
     SEPARATORS_NEED_HANDLE.forEach(separator => {
@@ -53,29 +58,47 @@ export class EventDescriptionBuilder {
   }
 
   private removeFooterSeparator(separator: string): void {
-    const sepLength = separator.length
     let result = ''
     let cursor = 0
 
-    for (;;) {
-      const start = this.text.indexOf(separator, cursor)
-      if (start === -1) break
-      const end = this.text.indexOf(separator, start + sepLength)
-      if (end === -1) break
-
-      let from = start
-      while (from > cursor && this.text[from - 1] === '\n') from--
-      let to = end + sepLength
-      while (to < this.text.length && this.text[to] === '\n') to++
-
+    this.findFooterBlocks(separator).forEach(({ from, to }) => {
       result += this.text.slice(cursor, from)
       // The newline only joins what surrounds the removed block; a footer that
       // opens the description has nothing to join it to.
       if (result) result += '\n'
       cursor = to
-    }
+    })
 
     this.text = (result + this.text.slice(cursor)).trimEnd()
+  }
+
+  /**
+   * Returns the `[from, to)` ranges of the footer blocks, surrounding newlines
+   * included, in text order.
+   */
+  private findFooterBlocks(
+    separator: string
+  ): Array<{ from: number; to: number }> {
+    const sepLength = separator.length
+    const blocks: Array<{ from: number; to: number }> = []
+    let limit = this.text.length
+
+    while (limit >= 2 * sepLength) {
+      const end = this.text.lastIndexOf(separator, limit - sepLength)
+      if (end < sepLength) break
+      const start = this.text.lastIndexOf(separator, end - sepLength)
+      if (start === -1) break
+
+      let from = start
+      while (from > 0 && this.text[from - 1] === '\n') from--
+      let to = end + sepLength
+      while (to < limit && this.text[to] === '\n') to++
+
+      blocks.push({ from, to })
+      limit = from
+    }
+
+    return blocks.reverse()
   }
 
   /**
