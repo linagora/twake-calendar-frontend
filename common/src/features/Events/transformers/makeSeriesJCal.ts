@@ -16,6 +16,7 @@ import {
 } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 import { makeSeriesVtimezones } from './seriesVtimezones'
+import { mergeStoredRrule } from './storedRrule'
 
 const METADATA_FIELDS = [
   'summary',
@@ -298,6 +299,36 @@ const withStoredRecurrenceSet = (
   ] as VCalComponent
 }
 
+// The rule built from the form only holds the parts the form models: merge it
+// with the stored rule so that the other parts are not dropped
+const withStoredRrule = (
+  updatedMaster: VCalComponent,
+  oldMaster: VCalComponent,
+  event: CalendarEvent
+): VCalComponent => {
+  const storedRrule = findFieldValue(oldMaster[1], 'rrule')
+  if (!storedRrule) return updatedMaster
+
+  const [name, props, ...components] = updatedMaster
+  const tz = event.timezone || 'UTC'
+  const rrule = mergeStoredRrule(
+    storedRrule,
+    findFieldValue(props, 'rrule'),
+    event.repetition,
+    {
+      oldStart: parseMoment(findFieldValue(oldMaster[1], 'dtstart'), tz),
+      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz)
+    }
+  )
+
+  const hasRrule = props.some(prop => propName(prop) === 'rrule')
+  const newProps = hasRrule
+    ? props.map(prop => (propName(prop) === 'rrule' ? rrule : prop))
+    : [...props, rrule]
+
+  return [name, newProps, ...components] as VCalComponent
+}
+
 // Helper to check if a vevent is the source override being dragged
 const isSourceOverride = (
   vevent: VCalComponent,
@@ -456,15 +487,14 @@ export const makeSeriesJCal = (
     throw new Error('No master VEVENT found for this series')
   }
 
-  const rrule = findFieldValue(vevents[masterIndex][1], 'rrule')
   const tzid = event.timezone
   const oldMaster = vevents[masterIndex]
 
-  const updatedMaster = makeVevent(event, tzid, true) as VCalComponent
-  const newRrule = findFieldValue(updatedMaster[1], 'rrule')
-  if (!newRrule && rrule) {
-    updatedMaster[1].push(rrule)
-  }
+  const updatedMaster = withStoredRrule(
+    makeVevent(event, tzid, true) as VCalComponent,
+    oldMaster,
+    event
+  )
 
   let finalVevents: VCalComponent[]
 
