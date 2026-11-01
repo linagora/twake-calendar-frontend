@@ -196,4 +196,27 @@ class DeepLinksTest extends TwakeCalendarE2ETest {
         assertThat(page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last().innerText())
             .contains("Recurrent Event");
     }
+
+    @Test
+    @DisplayName("DEEP-13 (#1863, #1864) A /#/ link whose path reads like an authority still starts the app")
+    void anAuthorityLikeHashLinkStillStartsTheApp(Page page, E2EUser user) {
+        LoginPage.loginAs(page, user);
+        String host = java.net.URI.create(page.url()).getHost();
+
+        // #1864: an empty or backslashed host threw "Invalid URL" at start-up; #1863: dot
+        // segments left a "//" path that history.replaceState refused. Both left a blank page.
+        for (String link : new String[] {"/#///#details", "/#/\\#details", "/#//",
+            "/#/.////#details", "/#/a/..//other.example/"}) {
+            page.navigate(link);
+
+            PlaywrightAssertions.assertThat(page.locator(".fc-view-harness"))
+                .isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(30_000));
+            assertThat(java.net.URI.create(page.url()).getHost())
+                .as("the link %s keeps the user on the application", link)
+                .isEqualTo(host);
+            assertThat(java.net.URI.create(page.url()).getRawPath())
+                .as("the link %s is rewritten into a path of the application", link)
+                .doesNotStartWith("//");
+        }
+    }
 }
