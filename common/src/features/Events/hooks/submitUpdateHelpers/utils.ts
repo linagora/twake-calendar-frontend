@@ -247,14 +247,18 @@ export function prepareUpdateData({
 
   const [baseUID, recurrenceId] = event.uid.split('/')
 
-  const { startISO, endISO } = resolveEventISORange({
-    start: values.start,
-    end: values.end,
-    allday: values.allday,
-    timezone: values.timezone,
-    showMore,
-    hasEndDateChanged: values.hasEndDateChanged
-  })
+  const { startISO, endISO } = keepStoredSeconds(
+    event,
+    values.allday,
+    resolveEventISORange({
+      start: values.start,
+      end: values.end,
+      allday: values.allday,
+      timezone: values.timezone,
+      showMore,
+      hasEndDateChanged: values.hasEndDateChanged
+    })
+  )
 
   const referenceEvent =
     typeOfAction === 'all' && masterEvent ? masterEvent : event
@@ -292,14 +296,49 @@ export function prepareUpdateData({
   }
 }
 
+const MINUTE_MS = 60 * 1000
+
+function truncateToMinute(date: string | undefined): number {
+  const time = new Date(date ?? '').getTime()
+  return Math.floor(time / MINUTE_MS) * MINUTE_MS
+}
+
+function isSameMinute(a: string | undefined, b: string | undefined): boolean {
+  return truncateToMinute(a) === truncateToMinute(b)
+}
+
+// The form only holds minutes: when it still shows the stored minute, keep
+// the stored instant so that the seconds of DTSTART/DTEND survive the save.
+function keepStoredBoundary(
+  stored: string | undefined,
+  resolved: string
+): string {
+  return stored && isSameMinute(stored, resolved)
+    ? new Date(stored).toISOString()
+    : resolved
+}
+
+function keepStoredSeconds(
+  event: CalendarEvent,
+  allday: boolean,
+  range: { startISO: string; endISO: string }
+): { startISO: string; endISO: string } {
+  if (allday || event.allday) return range
+  return {
+    startISO: keepStoredBoundary(event.start, range.startISO),
+    endISO: keepStoredBoundary(event.end, range.endISO)
+  }
+}
+
+// Compared at the form's precision: seconds the form cannot show are not a
+// change of time.
 function hasEventTimeChanged(
   event: CalendarEvent,
   startISO: string,
   endISO: string
 ): boolean {
   return (
-    new Date(event.start).getTime() !== new Date(startISO).getTime() ||
-    new Date(event?.end ?? '').getTime() !== new Date(endISO).getTime()
+    !isSameMinute(event.start, startISO) || !isSameMinute(event?.end, endISO)
   )
 }
 
