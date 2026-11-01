@@ -126,6 +126,50 @@ describe('EventDescriptionBuilder', () => {
       expect(html).toContain('• file.pdf: https://example.com/file')
       expect(html).toContain(EVENT_FOOTER_SEPARATOR)
     })
+
+    it('removes a footer whose attachment name holds the separator', () => {
+      const att = [
+        new Attachment('mailto:a@b.co', undefined, EVENT_FOOTER_SEPARATOR)
+      ]
+      const saved = new EventDescriptionBuilder('', att)
+        .withFooter(null)
+        .buildHtml()
+
+      expect(
+        new EventDescriptionBuilder(saved).removeFooter().buildHtml()
+      ).toBe('')
+    })
+
+    it.each(SEPARATORS_NEED_HANDLE)(
+      'removes a footer whose meeting link and attachment URI hold separator %s',
+      separator => {
+        const att = [
+          new Attachment(`https://x/${separator}${separator}`, 'type', 'a.pdf')
+        ]
+        const saved = new EventDescriptionBuilder('Notes', att)
+          .withFooter(`https://visio/${separator.repeat(2)}-_-`)
+          .buildHtml()
+
+        expect(
+          new EventDescriptionBuilder(saved).removeFooter().buildHtml()
+        ).toBe('Notes')
+      }
+    )
+
+    it('writes the same description again on an unchanged save', () => {
+      const att = [
+        new Attachment('mailto:a@b.co', undefined, EVENT_FOOTER_SEPARATOR)
+      ]
+      const saved = new EventDescriptionBuilder('Notes', att)
+        .withFooter(EVENT_FOOTER_SEPARATOR)
+        .buildHtml()
+      const resaved = new EventDescriptionBuilder(saved, att)
+        .removeFooter()
+        .withFooter(EVENT_FOOTER_SEPARATOR)
+        .buildHtml()
+
+      expect(resaved).toBe(saved)
+    })
   })
 
   it('should sanitize HTML', () => {
