@@ -100,6 +100,19 @@ describe('formatEventDates', () => {
     }
   )
 
+  it('formats in UTC a zone the browser does not know', () => {
+    const event = {
+      start: '2025-09-15T10:00:00Z',
+      end: '2025-09-15T11:00:00Z',
+      timezone: 'Mars/Olympus_Mons'
+    } as CalendarEvent
+
+    expect(formatEventDates(event, false)).toEqual({
+      start: '2025-09-15T10:00',
+      end: '2025-09-15T11:00'
+    })
+  })
+
   it('keeps existing events and selected ranges on the right day across the fall DST transition', () => {
     expect(resolveDatesInTimezone('America/New_York')).toEqual({
       formattedEnd: '2026-11-01',

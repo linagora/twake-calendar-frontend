@@ -4,7 +4,7 @@ import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { Valarms } from '@common/types/Valarms'
-import { resolveTimezone } from '@common/utils/timezone'
+import { resolveKnownTimezone } from '@common/utils/timezone'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 
 import {
@@ -50,7 +50,7 @@ export function buildFromExistingEvent({
 }: BuildFromExistingEventParams): Partial<EventFormValues> {
   const isAllDay = event.allday ?? false
   const eventTimezone = event.timezone
-    ? resolveTimezone(event.timezone)
+    ? resolveKnownTimezone(event.timezone)
     : resolvedCalendarTimezone
 
   const { start, end } = formatEventDates(event, isAllDay)
