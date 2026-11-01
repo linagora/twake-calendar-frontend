@@ -67,6 +67,16 @@ export function isValidTimeZone(tzName: unknown): tzName is string {
   }
 }
 
+/**
+ * Resolves a stored TZID to a zone the browser can format in. A TZID unknown
+ * to both the table and Intl (custom VTIMEZONE name, typo, retired zone) falls
+ * back to UTC: the zone moment-timezone read the event's wall clock in.
+ */
+export function resolveKnownTimezone(tzName: string): string {
+  const resolved = resolveTimezone(tzName)
+  return isValidTimeZone(resolved) ? resolved : 'UTC'
+}
+
 export function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined
   return resolveTimezone(tzid)

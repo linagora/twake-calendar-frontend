@@ -1,7 +1,19 @@
 import {
   convertEventDateTimeToISO,
-  isValidTimeZone
+  isValidTimeZone,
+  resolveKnownTimezone
 } from '@common/utils/timezone'
+
+describe('resolveKnownTimezone', () => {
+  it('keeps a zone known to the browser', () => {
+    expect(resolveKnownTimezone('Europe/Paris')).toBe('Europe/Paris')
+  })
+
+  it('falls back to UTC on a zone unknown to the browser', () => {
+    expect(resolveKnownTimezone('Mars/Olympus_Mons')).toBe('UTC')
+    expect(resolveKnownTimezone('America/Nuidew_York')).toBe('UTC')
+  })
+})
 
 describe('isValidTimeZone', () => {
   it('accepts a zone known to the browser', () => {
