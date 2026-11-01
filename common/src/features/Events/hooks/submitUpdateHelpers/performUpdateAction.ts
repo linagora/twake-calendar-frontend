@@ -9,6 +9,7 @@ import { prepareUpdateData } from './utils'
 import { PerformUpdateActionParams, HandleUpdateSubmitParams } from './types'
 import { alignStartToWeekdays } from '@common/features/Events/utils/alignStartToWeekdays'
 import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
+import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUtils'
 
 export async function performUpdateAction(
   params: PerformUpdateActionParams
@@ -65,11 +66,45 @@ export async function performUpdateAction(
   }
 }
 
+function sameWeekdays(
+  left?: string[] | null,
+  right?: string[] | null
+): boolean {
+  const leftDays = [...(left ?? [])].sort()
+  const rightDays = [...(right ?? [])].sort()
+  return (
+    leftDays.length === rightDays.length &&
+    leftDays.every((day, index) => day === rightDays[index])
+  )
+}
+
+// A stored series may start outside its BYDAY days (other clients write it
+// so): moving its start would drop its first occurrence and reset every
+// answer, so only a start or weekdays chosen in the form are realigned
+function keepsStoredWeeklySeries(params: HandleUpdateSubmitParams): boolean {
+  const { values, event, masterEvent, typeOfAction, showMore } = params
+  const stored = typeOfAction === 'all' && masterEvent ? masterEvent : event
+  if (stored.repetition?.freq !== values.repetition?.freq) return false
+  if (!sameWeekdays(stored.repetition?.byday, values.repetition?.byday))
+    return false
+
+  const { startISO } = resolveEventISORange({
+    start: values.start,
+    end: values.end,
+    allday: values.allday,
+    timezone: values.timezone,
+    showMore,
+    hasEndDateChanged: values.hasEndDateChanged
+  })
+  return new Date(stored.start).getTime() === new Date(startISO).getTime()
+}
+
 // A single occurrence keeps its own date, only a series is realigned
 function alignSeriesStart(
   params: HandleUpdateSubmitParams
 ): HandleUpdateSubmitParams {
   if (params.typeOfAction === 'solo') return params
+  if (keepsStoredWeeklySeries(params)) return params
   return { ...params, values: alignStartToWeekdays(params.values) }
 }
 
