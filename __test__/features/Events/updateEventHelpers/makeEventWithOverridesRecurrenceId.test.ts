@@ -317,14 +317,14 @@ describe('makeEventWithOverrides — Windows TZID RECURRENCE-ID (#1884)', () => 
   })
 
   it('does not replace a Windows TZID override of another instant sharing the wall clock', () => {
-    // 03:00 "Eastern Standard Time" == 07:00Z, 03:00 St John's == 05:30Z
+    // 03:00 "Eastern Standard Time" == 07:00Z, not 03:00Z
     const other = windowsOverride(
       'Eastern Standard Time',
       '2033-09-10T03:00:00'
     )
 
     const jCal = makeEventWithOverrides(
-      editedInstance('2033-09-10T03:00:00', 'America/St_Johns'),
+      editedInstance('2033-09-10T03:00:00Z', 'America/St_Johns'),
       [masterVEvent(), other]
     )
 
