@@ -110,6 +110,27 @@ describe('EventDescriptionBuilder', () => {
       expect(builder.buildHtml()).toContain(EVENT_FOOTER_SEPARATOR)
     })
 
+    it('lists an attachment without file name by its URI alone', () => {
+      const attach = new Attachment('https://files.example.com/agenda.pdf')
+      const html = new EventDescriptionBuilder('', [attach])
+        .withFooter(null)
+        .buildHtml()
+      expect(html).not.toContain('undefined')
+      expect(html).toContain('• https://files.example.com/agenda.pdf\n')
+    })
+
+    it('lists an attachment with a blank file name by its URI alone', () => {
+      const attach = new Attachment(
+        'https://files.example.com/agenda.pdf',
+        undefined,
+        '  '
+      )
+      const html = new EventDescriptionBuilder('', [attach])
+        .withFooter(null)
+        .buildHtml()
+      expect(html).toContain('• https://files.example.com/agenda.pdf\n')
+    })
+
     it('should append both meeting link and attachments', () => {
       const text = 'Meeting notes'
       const attach = new Attachment(
