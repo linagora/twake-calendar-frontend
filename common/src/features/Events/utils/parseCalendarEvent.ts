@@ -111,11 +111,10 @@ function parseAttendeeProperty(
   }
 }
 
-function parseRruleProperty(
-  value: VObjectValue,
-  event: Partial<CalendarEvent>
-): void {
-  const ruleValue = value as RepetitionRule
+// The parts of a stored RRULE the event form models
+export function parseRepetitionRule(
+  ruleValue: RepetitionRule
+): RepetitionObject {
   const repData: Partial<RepetitionObject> = {
     freq: ruleValue.freq.toLowerCase()
   }
@@ -145,7 +144,14 @@ function parseRruleProperty(
         : ruleValue.wkst
   }
 
-  event.repetition = new RepetitionObject(repData)
+  return new RepetitionObject(repData)
+}
+
+function parseRruleProperty(
+  value: VObjectValue,
+  event: Partial<CalendarEvent>
+): void {
+  event.repetition = parseRepetitionRule(value as RepetitionRule)
 }
 
 const PROPERTY_PARSERS: Record<
