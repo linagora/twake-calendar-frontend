@@ -11,6 +11,7 @@ import {
   parseCalendarEvent
 } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { formatEventDates } from '@common/components/Event/utils/initialValues/dateResolvers'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
@@ -359,6 +360,44 @@ describe('parseCalendarEvent', () => {
     const endDate = new Date(result.end ?? '')
     const startDate = new Date(result.start)
     expect(endDate.getTime() - startDate.getTime()).toBe(30 * 60 * 1000)
+  })
+
+  it('returns a one day all-day event if end and duration are missing', () => {
+    const rawDataMissing: VObjectProperty[] = [
+      ['uid', {}, 'text', 'event-1'],
+      ['dtstart', {}, 'date', '2022-07-14']
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawDataMissing,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+    expect(result.allday).toBe(true)
+    expect(result.start).toBe('2022-07-14')
+    expect(result.end).toBe('2022-07-15')
+    expect(formatEventDates(result, true)).toEqual({
+      start: '2022-07-14',
+      end: '2022-07-14'
+    })
+  })
+
+  it('returns a date end for an all-day event with a duration', () => {
+    const rawDataMissing: VObjectProperty[] = [
+      ['uid', {}, 'text', 'event-1'],
+      ['dtstart', {}, 'date', '2022-07-14'],
+      ['duration', {}, 'duration', 'P3D']
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawDataMissing,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+    expect(result.allday).toBe(true)
+    expect(result.end).toBe('2022-07-17')
   })
 
   it('parses alarm block correctly', () => {
