@@ -64,6 +64,14 @@ describe('EventDescriptionBuilder', () => {
       expect(builder.buildHtml()).toBe('Meeting notes')
     })
 
+    it('should keep a lone separator left of the footer as user text', () => {
+      const text = `Notes\n${EVENT_FOOTER_SEPARATOR}\nAgenda\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio : a\n\nPlease do not edit this section.\n${EVENT_FOOTER_SEPARATOR}`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe(
+        `Notes\n${EVENT_FOOTER_SEPARATOR}\nAgenda`
+      )
+    })
+
     // Regression guard for the quadratic backtracking the scan-based
     // implementation replaced. No wall-clock assertion: the previous
     // implementation needed ~40s on this input and so blows the suite timeout
@@ -190,6 +198,33 @@ describe('EventDescriptionBuilder', () => {
         .buildHtml()
 
       expect(resaved).toBe(saved)
+    })
+
+    it.each([
+      ['a lone separator', `Notes\n${EVENT_FOOTER_SEPARATOR}\nAgenda`],
+      ['only a separator', `\n${EVENT_FOOTER_SEPARATOR}\n`],
+      [
+        'the opening part of an earlier footer',
+        `Notes\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio : https://meet.example.com/abc-def\n\nAttachments :\n• agenda.pdf: https://example.com/agenda`
+      ]
+    ])('keeps the user text and stays stable when it holds %s', (_, stored) => {
+      const link = 'https://meet.example.com/abc-def'
+
+      // open the form, save, open again, save again
+      const d0 = new EventDescriptionBuilder(stored).removeFooter().buildHtml()
+      const s1 = new EventDescriptionBuilder(d0, [])
+        .withFooter(link)
+        .buildHtml()
+      const d1 = new EventDescriptionBuilder(s1).removeFooter().buildHtml()
+      const s2 = new EventDescriptionBuilder(d1, [])
+        .withFooter(link)
+        .buildHtml()
+
+      expect(d1).toBe(d0)
+      expect(s2).toBe(s1)
+      expect(
+        new EventDescriptionBuilder(s1).removeFooter().buildPlainText()
+      ).not.toContain('Please do not edit this section.')
     })
   })
 
