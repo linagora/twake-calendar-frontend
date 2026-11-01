@@ -15,6 +15,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { filterComponents } from '../transformers/parseFetchedEvent'
 
 export interface MoveEventBetweenCalendarsParams {
@@ -89,17 +90,17 @@ export function rewriteAttendeesForOrganizerChange(
   if (!newOrganizer) {
     return attendees
   }
-  const normalise = (addr: string | undefined): string =>
-    (addr ?? '').toLowerCase()
-  const oldAddr = normalise(oldOrganizer?.cal_address)
-  const newAddr = normalise(newOrganizer.cal_address)
+  const oldAddr = normalizeIdentity(oldOrganizer?.cal_address)
+  const newAddr = normalizeIdentity(newOrganizer.cal_address)
 
   // Remove the old organizer from the attendee list if there is one
-  const filtered = attendees.filter(a => normalise(a.cal_address) !== oldAddr)
+  const filtered = attendees.filter(
+    a => normalizeIdentity(a.cal_address) !== oldAddr
+  )
 
   // Add the new organizer as CHAIR if they are not already listed
   const alreadyPresent = filtered.some(
-    a => normalise(a.cal_address) === newAddr
+    a => normalizeIdentity(a.cal_address) === newAddr
   )
 
   if (!alreadyPresent && newAddr) {
