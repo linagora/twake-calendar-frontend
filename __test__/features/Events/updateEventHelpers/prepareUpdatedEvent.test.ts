@@ -528,4 +528,116 @@ describe('prepareUpdatedEvent', () => {
     expect(alarm?.attendees).toHaveLength(1)
     expect(alarm?.attendees?.[0]?.cal_address).toBe('mailto:owner@example.com')
   })
+
+  describe('resource PARTSTAT (#1904)', () => {
+    const organizer = new userOrganiser({
+      cn: 'User',
+      cal_address: 'mailto:user@example.com'
+    })
+    const targetCalendar = {
+      id: 'cal-1',
+      owner: { emails: ['user@example.com'] }
+    } as Calendar
+
+    function resource(
+      cal_address: string,
+      partstat: string,
+      cn?: string
+    ): userAttendee {
+      return new userAttendee({
+        cal_address,
+        cn,
+        cutype: 'RESOURCE',
+        partstat
+      })
+    }
+
+    function saveUnchanged(
+      attendee: userAttendee[],
+      selectedResources: { email?: string; displayName: string }[]
+    ): CalendarEvent {
+      return prepareUpdatedEvent({
+        event: { ...baseEvent, organizer, attendee },
+        values: { ...baseValues, selectedResources },
+        organizer,
+        startISO: baseEvent.start,
+        endISO: baseEvent.end ?? '',
+        timeChanged: false,
+        targetCalendar,
+        calId: 'cal-1',
+        newCalId: 'cal-1'
+      })
+    }
+
+    function partstatOf(event: CalendarEvent, address: string): string {
+      return (
+        event.attendee.find(a => a.cal_address.endsWith(address))?.partstat ??
+        ''
+      )
+    }
+
+    it('keeps the PARTSTAT of each resource sharing a CN, matched by address', () => {
+      const out = saveUnchanged(
+        [
+          resource('mailto:room-1@example.com', 'ACCEPTED', 'Room 1'),
+          resource('mailto:room-2@example.com', 'DECLINED', 'Room 1')
+        ],
+        [
+          { email: 'room-1@example.com', displayName: 'Room 1' },
+          { email: 'room-2@example.com', displayName: 'Room 1' }
+        ]
+      )
+
+      expect(partstatOf(out, 'room-1@example.com')).toBe('ACCEPTED')
+      expect(partstatOf(out, 'room-2@example.com')).toBe('DECLINED')
+    })
+
+    it('keeps the PARTSTAT of each CN-less resource', () => {
+      const out = saveUnchanged(
+        [
+          resource('mailto:room-1@example.com', 'ACCEPTED'),
+          resource('mailto:room-2@example.com', 'DECLINED')
+        ],
+        [
+          { email: 'room-1@example.com', displayName: '' },
+          { email: 'room-2@example.com', displayName: '' }
+        ]
+      )
+
+      expect(partstatOf(out, 'room-1@example.com')).toBe('ACCEPTED')
+      expect(partstatOf(out, 'room-2@example.com')).toBe('DECLINED')
+    })
+
+    it('matches the resource address case-insensitively', () => {
+      const out = saveUnchanged(
+        [resource('mailto:Room-1@Example.com', 'DECLINED', 'Room 1')],
+        [{ email: 'room-1@example.com', displayName: 'Room 1' }]
+      )
+
+      expect(partstatOf(out, 'room-1@example.com')).toBe('DECLINED')
+    })
+
+    it('falls back on the CN for a resource without address', () => {
+      const out = saveUnchanged(
+        [resource('', 'DECLINED', 'Room 1')],
+        [{ displayName: 'Room 1' }]
+      )
+
+      expect(out.attendee.find(a => a.cutype === 'RESOURCE')?.partstat).toBe(
+        'DECLINED'
+      )
+    })
+
+    it('gives NEEDS-ACTION to a newly added resource', () => {
+      const out = saveUnchanged(
+        [resource('mailto:room-1@example.com', 'ACCEPTED', 'Room 1')],
+        [
+          { email: 'room-1@example.com', displayName: 'Room 1' },
+          { email: 'room-2@example.com', displayName: 'Room 1' }
+        ]
+      )
+
+      expect(partstatOf(out, 'room-2@example.com')).toBe('NEEDS-ACTION')
+    })
+  })
 })
