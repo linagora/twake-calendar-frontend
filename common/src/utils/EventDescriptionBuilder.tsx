@@ -16,22 +16,40 @@ const ZERO_WIDTH_SPACE = '​'
 /**
  * Values written inside the footer (meeting link, attachment names and URIs)
  * come from the event and may hold a separator, which would end the footer
- * block early and leave its tail in the description. A zero-width space after
- * the first character of every occurrence breaks it without altering the
- * displayed text. Looping covers overlapping occurrences.
+ * block early and leave its tail in the description. Every occurrence is
+ * broken by rewriting its first character. Looping covers overlapping
+ * occurrences: each pass rewrites at least one character.
  */
-function neutralizeSeparators(value: string): string {
+function neutralizeSeparatorsWith(
+  value: string,
+  breakFirstChar: (char: string) => string
+): string {
   let result = value
   while (SEPARATORS_NEED_HANDLE.some(separator => result.includes(separator))) {
     result = SEPARATORS_NEED_HANDLE.reduce(
       (acc, separator) =>
         acc
           .split(separator)
-          .join(separator[0] + ZERO_WIDTH_SPACE + separator.slice(1)),
+          .join(breakFirstChar(separator[0]) + separator.slice(1)),
       result
     )
   }
   return result
+}
+
+// A zero-width space after the first character leaves the displayed text as is
+function neutralizeSeparators(value: string): string {
+  return neutralizeSeparatorsWith(value, char => char + ZERO_WIDTH_SPACE)
+}
+
+// A URL must still lead to the same resource: its first character is
+// percent-encoded instead. Separators start with "-", an unreserved character,
+// whose encoded form is equivalent (RFC 3986, section 6.2.2.2).
+function neutralizeSeparatorsInUrl(url: string): string {
+  return neutralizeSeparatorsWith(
+    url,
+    char => '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
+  )
 }
 
 function tryLinkify(html: string): string | null {
@@ -70,6 +88,12 @@ export class EventDescriptionBuilder {
    * so the last separator closes a block and the one before opens it. A lone
    * separator left of the footers is then kept as user text, instead of
    * opening a block that the footer's opening separator would close.
+   *
+   * A pair only bounds a footer when its first line holds a ":" (every footer
+   * starts with a "label : value" line or a URL). Otherwise the closing
+   * separator is user text, e.g. a note another client appended after the
+   * footer, and is kept, so that the note survives and the footer is still
+   * paired with its own opening separator.
    */
   public removeFooter(): this {
     SEPARATORS_NEED_HANDLE.forEach(separator => {
@@ -111,6 +135,10 @@ export class EventDescriptionBuilder {
       if (end < sepLength) break
       const start = this.text.lastIndexOf(separator, end - sepLength)
       if (start === -1) break
+      if (!this.looksLikeFooter(start + sepLength, end)) {
+        limit = end
+        continue
+      }
 
       let from = start
       while (from > 0 && this.text[from - 1] === '\n') from--
@@ -122,6 +150,15 @@ export class EventDescriptionBuilder {
     }
 
     return blocks.reverse()
+  }
+
+  // Whether the first non blank line of text[from, to) holds a ":"
+  private looksLikeFooter(from: number, to: number): boolean {
+    let lineStart = from
+    while (lineStart < to && /\s/.test(this.text[lineStart])) lineStart++
+    const newline = this.text.indexOf('\n', lineStart)
+    const lineEnd = newline === -1 || newline > to ? to : newline
+    return this.text.slice(lineStart, lineEnd).includes(':')
   }
 
   /**
@@ -162,7 +199,7 @@ export class EventDescriptionBuilder {
     let addedContent = ''
 
     if (meetingLink) {
-      addedContent += `${joinText} : ${neutralizeSeparators(meetingLink)}\n`
+      addedContent += `${joinText} : ${neutralizeSeparatorsInUrl(meetingLink)}\n`
     }
 
     if (hasAttachments) {
@@ -193,8 +230,8 @@ export class EventDescriptionBuilder {
     let content = `\n${attachmentsText} :\n`
     this.attachments.forEach(attachment => {
       content += attachment.hasDisplayableFilename()
-        ? `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparators(attachment.uri)}\n`
-        : `• ${neutralizeSeparators(attachment.uri)}\n`
+        ? `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparatorsInUrl(attachment.uri)}\n`
+        : `• ${neutralizeSeparatorsInUrl(attachment.uri)}\n`
     })
     return content
   }

@@ -72,6 +72,14 @@ describe('EventDescriptionBuilder', () => {
       )
     })
 
+    it('should keep a note another client appended after the footer', () => {
+      const text = `Notes\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio : a\n\nPlease do not edit this section.\n${EVENT_FOOTER_SEPARATOR}\nuser note\n${EVENT_FOOTER_SEPARATOR}`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe(
+        `Notes\nuser note\n${EVENT_FOOTER_SEPARATOR}`
+      )
+    })
+
     // Regression guard for the quadratic backtracking the scan-based
     // implementation replaced. No wall-clock assertion: the previous
     // implementation needed ~40s on this input and so blows the suite timeout
@@ -182,6 +190,23 @@ describe('EventDescriptionBuilder', () => {
         expect(
           new EventDescriptionBuilder(saved).removeFooter().buildHtml()
         ).toBe('Notes')
+      }
+    )
+
+    it.each(SEPARATORS_NEED_HANDLE)(
+      'keeps a meeting link and an attachment URI holding separator %s equivalent',
+      separator => {
+        const link = `https://visio/${separator.repeat(2)}-_-`
+        const uri = `https://x/${separator}${separator}`
+        const saved = new EventDescriptionBuilder('Notes', [
+          new Attachment(uri, 'type', 'a.pdf')
+        ])
+          .withFooter(link)
+          .buildHtml()
+
+        expect(saved).not.toContain('\u200B')
+        const urls = saved.match(/https:\/\/\S+/g) ?? []
+        expect(urls.map(url => decodeURIComponent(url))).toEqual([link, uri])
       }
     )
 
