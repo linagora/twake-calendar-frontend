@@ -284,6 +284,37 @@ describe('renderPrintDocument', () => {
     expect(html).toContain('Late call')
   })
 
+  it('places an event late on the day the clocks went back within the grid', () => {
+    const tz = 'Europe/London'
+    const html = renderPrintDocument({
+      periods: buildPrintPeriods(
+        'day',
+        dayjs.tz('2016-10-30', tz).startOf('day'),
+        dayjs.tz('2016-10-30', tz).startOf('day')
+      ),
+      calendars: [
+        {
+          events: selectPrintEvents(
+            [
+              makeEvent({
+                start: '2016-10-30T23:15:00Z',
+                end: '2016-10-30T23:45:00Z',
+                title: 'Late call'
+              })
+            ],
+            tz,
+            LABELS.noTitle
+          )
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    // 23:15 on the local clock, 36px an hour: not 24h15 after midnight
+    expect(html).toContain('top:837.0px;height:18.0px;')
+  })
+
   it('prints an event late on the day the clocks went back', () => {
     const tz = 'Europe/London'
     const html = renderPrintDocument({

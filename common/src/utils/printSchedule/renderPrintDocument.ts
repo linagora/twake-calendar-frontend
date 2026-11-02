@@ -83,15 +83,31 @@ const daysOfPeriod = (period: PrintPeriod): Dayjs[] => {
   return Array.from({ length: 7 }, (_, i) => period.start.add(i, 'day'))
 }
 
+// Where an instant sits on the grid of the day, read on the local clock: a
+// day of a clock change lasts 23 or 25 hours, the grid always 24
+const gridMinutes = (
+  instant: Dayjs,
+  dayStart: Dayjs,
+  dayEnd: Dayjs
+): number => {
+  if (!instant.isAfter(dayStart)) return 0
+  if (!instant.isBefore(dayEnd)) return 24 * 60
+  return instant.hour() * 60 + instant.minute()
+}
+
 const renderTimedEvent = (
   { event, column, columns }: PositionedEvent,
   dayStart: Dayjs,
+  dayEnd: Dayjs,
   { min, max }: HourRange
 ): string => {
   const minMinutes = min * 60
   const maxMinutes = max * 60
-  const startMin = Math.max(minMinutes, event.start.diff(dayStart, 'minute'))
-  const endMin = Math.min(maxMinutes, event.end.diff(dayStart, 'minute'))
+  const startMin = Math.max(
+    minMinutes,
+    gridMinutes(event.start, dayStart, dayEnd)
+  )
+  const endMin = Math.min(maxMinutes, gridMinutes(event.end, dayStart, dayEnd))
   const top = ((startMin - minMinutes) / 60) * HOUR_HEIGHT
   const height = Math.max(16, ((endMin - startMin) / 60) * HOUR_HEIGHT)
   const width = 100 / columns
@@ -120,7 +136,7 @@ const renderDayColumn = (
     event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
   )
   const blocks = layoutTimedEvents(forDay)
-    .map(placement => renderTimedEvent(placement, dayStart, bounds))
+    .map(placement => renderTimedEvent(placement, dayStart, dayEnd, bounds))
     .join('')
 
   return `<div class="tg-col">${blocks}</div>`
