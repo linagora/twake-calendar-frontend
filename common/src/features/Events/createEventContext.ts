@@ -61,7 +61,11 @@ export function createEventContext(
     ? eventAttendee.find(
         person => person.cutype === 'RESOURCE' && person.cn === calendar.name
       )
-    : eventAttendee.find(person => person.cal_address === attendeeEmail)
+    : eventAttendee.find(
+        person =>
+          normalizeIdentity(person.cal_address) ===
+          normalizeIdentity(attendeeEmail)
+      )
 
   const isOrganizer = checkIsOrganizer({
     event,

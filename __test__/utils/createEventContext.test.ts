@@ -53,6 +53,18 @@ describe('createEventContext', () => {
       expect(ctx.currentUserAttendee?.cal_address).toBe('alice@example.com')
     })
 
+    it('finds currentUserAttendee listed with a padded address (#1886)', () => {
+      const event = makeEvent({
+        attendee: [
+          { cal_address: 'mailto: Alice@Example.com', partstat: 'NEEDS-ACTION' }
+        ] as CalendarEvent['attendee']
+      })
+      const ctx = createEventContext(event, calendar, user)
+      expect(ctx.currentUserAttendee?.cal_address).toBe(
+        'mailto: Alice@Example.com'
+      )
+    })
+
     it('returns null currentUserAttendee when user is not an attendee', () => {
       const event = makeEvent({ attendee: [] })
       const ctx = createEventContext(event, calendar, user)

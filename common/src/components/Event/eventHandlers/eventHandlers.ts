@@ -18,6 +18,7 @@ import {
   type AttendeeMatcher
 } from '@common/features/Events/transformers'
 import { PartStat, userAttendee } from '@common/features/User/models/attendee'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -71,13 +72,14 @@ function updateEventAttendees(
 
   return {
     attendee: ((): userAttendee[] => {
-      const userEmailLower = user.email?.toLowerCase()
+      // Same matching as the jCal update: padded or mailto: addresses included
+      const userEmail = normalizeIdentity(user.email)
       const userExists = event.attendee.some(
-        attendee => attendee.cal_address?.toLowerCase() === userEmailLower
+        attendee => normalizeIdentity(attendee.cal_address) === userEmail
       )
 
       const updatedAttendees = event.attendee.map(attendeeData =>
-        attendeeData.cal_address?.toLowerCase() === userEmailLower
+        normalizeIdentity(attendeeData.cal_address) === userEmail
           ? attendeeData.withPartStat(rsvp)
           : attendeeData
       )
