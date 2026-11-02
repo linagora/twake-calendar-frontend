@@ -203,7 +203,7 @@
     },
     "freeBusy": {
       "unknown": "Không thể kiểm tra lịch trống.",
-      "contact": "Không thể kiểm tra lịch trống.",
+      "contact": "Không thể hiển thị lịch của khách này.",
       "busy": "Người này hiện đang bận",
       "busyCalOwner": "Bạn có một sự kiện khác vào thời gian này",
       "free": "Người dùng đang rảnh",

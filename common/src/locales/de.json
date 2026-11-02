@@ -203,7 +203,7 @@
     },
     "freeBusy": {
       "unknown": "Die Verfügbarkeit konnte nicht geprüft werden.",
-      "contact": "Die Verfügbarkeit konnte nicht geprüft werden.",
+      "contact": "Der Kalender dieses Gasts kann nicht angezeigt werden.",
       "busy": "Diese Person ist beschäftigt",
       "busyCalOwner": "Sie haben zu dieser Zeit einen anderen Termin",
       "free": "Der Benutzer ist verfügbar",
