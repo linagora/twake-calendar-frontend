@@ -90,7 +90,14 @@ function keepsStoredWeeklySeries(params: HandleUpdateSubmitParams): boolean {
     showMore,
     hasEndDateChanged: values.hasEndDateChanged
   })
-  return new Date(stored.start).getTime() === new Date(startISO).getTime()
+  // At the form's precision: a stored start with seconds is still kept
+  return toMinute(stored.start) === toMinute(startISO)
+}
+
+const MINUTE_MS = 60 * 1000
+
+function toMinute(iso: string): number {
+  return Math.floor(new Date(iso).getTime() / MINUTE_MS)
 }
 
 // A single occurrence keeps its own date, only a series is realigned

@@ -154,6 +154,15 @@ describe('handleUpdateSubmit - stored series starting outside its weekdays (#190
     expect(submittedValues().end).toBe('2025-01-06T11:00')
   })
 
+  it('keeps a stored start carrying seconds the form cannot show', async () => {
+    await handleUpdateSubmit({
+      ...seriesParams(),
+      masterEvent: { ...masterEvent, start: '2025-01-06T10:00:30Z' }
+    })
+
+    expect(submittedValues().start).toBe('2025-01-06T10:00')
+  })
+
   it('realigns the start when the weekdays change', async () => {
     await handleUpdateSubmit(
       seriesParams({
