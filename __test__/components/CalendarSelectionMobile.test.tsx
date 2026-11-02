@@ -65,12 +65,12 @@ describe('CalendarSelection on a phone-sized screen', () => {
 
   const dismissActionsSheet = async (): Promise<void> => {
     fireEvent.keyDown(
-      await screen.findByRole('button', { name: 'actions.modify' }),
+      await screen.findByRole('menuitem', { name: 'actions.modify' }),
       { key: 'Escape' }
     )
     await waitFor(() =>
       expect(
-        screen.queryByRole('button', { name: 'actions.modify' })
+        screen.queryByRole('menuitem', { name: 'actions.modify' })
       ).not.toBeInTheDocument()
     )
   }
@@ -86,7 +86,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
     )
 
     expect(
-      await screen.findByRole('button', { name: 'actions.modify' })
+      await screen.findByRole('menuitem', { name: 'actions.modify' })
     ).toBeInTheDocument()
   })
 
@@ -95,12 +95,44 @@ describe('CalendarSelection on a phone-sized screen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
 
-    const modify = await screen.findByRole('button', { name: 'actions.modify' })
+    const modify = await screen.findByRole('menuitem', {
+      name: 'actions.modify'
+    })
     await waitFor(() =>
       expect(
-        modify.closest('.MuiDrawer-paper')?.contains(document.activeElement)
+        modify.closest('.MuiPaper-root')?.contains(document.activeElement)
       ).toBe(true)
     )
+  })
+
+  it('names the calendar actions sheet after the calendar', async () => {
+    // twake-mui shows the actions in a bottom sheet below its md breakpoint,
+    // through a matchMedia jsdom lacks
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn()
+    }))
+    try {
+      renderSelection()
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'common.moreOptions' })
+      )
+
+      expect(
+        await screen.findByRole('dialog', {
+          name: 'common.optionsFor(name=Calendar personal)'
+        })
+      ).toBeInTheDocument()
+    } finally {
+      delete (window as { matchMedia?: unknown }).matchMedia
+    }
   })
 
   it('does not toggle the calendar with the click ending a long press', () => {
@@ -137,7 +169,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
       )
 
       expect(
-        await screen.findByRole('button', { name: 'actions.modify' })
+        await screen.findByRole('menuitem', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
       jest.useRealTimers()
@@ -160,7 +192,7 @@ describe('CalendarSelection on a phone-sized screen', () => {
       )
 
       expect(
-        await screen.findByRole('button', { name: 'actions.modify' })
+        await screen.findByRole('menuitem', { name: 'actions.modify' })
       ).toBeInTheDocument()
     } finally {
       jest.useRealTimers()

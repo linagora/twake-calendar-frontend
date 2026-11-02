@@ -80,6 +80,8 @@
     "you": "Вы",
     "select_timezone": "Выберите часовой пояс",
     "moreOptions": "Больше параметров",
+    "optionsFor": "Параметры: %{name}",
+    "moreEvents": "Другие события",
     "search": "Поиск",
     "resource": "Ресурсы",
     "back": "Назад",

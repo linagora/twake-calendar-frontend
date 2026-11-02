@@ -1,17 +1,15 @@
 import type { EventApi, EventClickArg } from '@fullcalendar/core'
 import {
-  List,
-  ListItem,
-  SwipeableDrawer,
-  ListItemButton,
-  ListItemIcon
+  ActionsMenu,
+  ActionsMenuItem,
+  ListItemIcon,
+  ListItemText
 } from '@linagora/twake-mui'
-import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import RepeatIcon from '@mui/icons-material/Repeat'
+import { useI18n } from 'twake-i18n'
 
 interface ViewMoreEventsProps {
   isOpen: boolean
-  onOpen: () => void
   onClose: () => void
   moreEvents: EventApi[]
   handleEventClick: (arg: EventClickArg) => void
@@ -19,41 +17,37 @@ interface ViewMoreEventsProps {
 
 const ViewMoreEvents: React.FC<ViewMoreEventsProps> = ({
   isOpen,
-  onOpen,
   onClose,
   moreEvents,
   handleEventClick
 }: ViewMoreEventsProps) => {
+  const { t } = useI18n()
+
   return (
-    <SwipeableDrawer
-      anchor="bottom"
+    <ActionsMenu
       open={isOpen}
       onClose={onClose}
-      onOpen={onOpen}
+      aria-label={t('common.moreEvents')}
     >
-      <List sx={{ p: 2, overflowY: 'auto' }}>
-        {moreEvents.map((event, index) => (
-          <ListItem key={index} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                onClose()
-                handleEventClick({
-                  event,
-                  jsEvent: { preventDefault: () => {} }
-                } as EventClickArg)
-              }}
-            >
-              <ListItemText primary={event.title} />
-              {event.extendedProps.recurrenceId && (
-                <ListItemIcon>
-                  <RepeatIcon />
-                </ListItemIcon>
-              )}
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </SwipeableDrawer>
+      {moreEvents.map((event, index) => (
+        <ActionsMenuItem
+          key={index}
+          onClick={() =>
+            handleEventClick({
+              event,
+              jsEvent: { preventDefault: () => {} }
+            } as EventClickArg)
+          }
+        >
+          <ListItemText primary={event.title} ellipsis={false} />
+          {event.extendedProps.recurrenceId && (
+            <ListItemIcon>
+              <RepeatIcon />
+            </ListItemIcon>
+          )}
+        </ActionsMenuItem>
+      ))}
+    </ActionsMenu>
   )
 }
 

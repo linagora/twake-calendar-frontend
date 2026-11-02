@@ -80,6 +80,8 @@
     "you": "Bạn",
     "select_timezone": "Chọn múi giờ",
     "moreOptions": "Thêm tùy chọn",
+    "optionsFor": "Tùy chọn cho %{name}",
+    "moreEvents": "Sự kiện khác",
     "search": "Tìm kiếm",
     "resource": "Tài nguyên",
     "back": "Quay lại",

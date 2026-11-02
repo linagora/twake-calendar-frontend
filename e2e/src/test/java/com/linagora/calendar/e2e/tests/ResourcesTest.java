@@ -515,12 +515,12 @@ class ResourcesTest extends TwakeCalendarE2ETest {
         Locator row = page.locator("li").filter(new Locator.FilterOptions().setHasText(room)).first();
         row.hover();
         row.locator("button").last().click();
-        page.locator("[role=menuitem]").first().waitFor();
-        java.util.List<String> menu = page.locator("[role=menuitem]").allInnerTexts();
+        page.locator("[role=menuitem]:visible").first().waitFor();
+        java.util.List<String> menu = page.locator("[role=menuitem]:visible").allInnerTexts();
         assertThat(menu)
             .as("a resource one no longer wants on screen has to be removable from the sidebar")
             .anyMatch(entry -> entry.matches("(?i).*(remove|delete|hide).*"));
-        page.locator("[role=menuitem]")
+        page.locator("[role=menuitem]:visible")
             .filter(new Locator.FilterOptions()
                 .setHasText(java.util.regex.Pattern.compile("remove|delete|hide",
                     java.util.regex.Pattern.CASE_INSENSITIVE)))

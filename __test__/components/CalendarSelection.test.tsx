@@ -366,7 +366,7 @@ describe('CalendarSelection', () => {
     const addButtons = screen.getAllByTestId('MoreHorizIcon')
     fireEvent.click(addButtons[0])
 
-    userEvent.click(screen.getByText(/delete/i))
+    userEvent.click(screen.getByRole('menuitem', { name: /delete/i }))
 
     await waitFor(() =>
       expect(
@@ -398,7 +398,7 @@ describe('CalendarSelection', () => {
     const addButtons = screen.getAllByTestId('MoreHorizIcon')
     fireEvent.click(addButtons[1])
 
-    userEvent.click(screen.getByText(/remove/i))
+    userEvent.click(screen.getByRole('menuitem', { name: /remove/i }))
 
     await waitFor(() =>
       expect(
@@ -438,7 +438,7 @@ describe('CalendarSelection', () => {
 
     fireEvent.click(screen.getAllByTestId('MoreHorizIcon')[0])
 
-    userEvent.click(screen.getByText(/remove/i))
+    userEvent.click(screen.getByRole('menuitem', { name: /remove/i }))
 
     await waitFor(() =>
       expect(
@@ -542,12 +542,12 @@ describe('CalendarSelection', () => {
     )
     const delegatedAccordionSummary = screen
       .getByText('calendar.delegated')
-      .closest('.MuiAccordionSummary-root')
+      .closest('.MuiAccordionSummary-root') as HTMLElement
 
-    fireEvent.click(delegatedAccordionSummary!)
+    fireEvent.click(delegatedAccordionSummary)
     expect(delegatedAccordionSummary).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(delegatedAccordionSummary!)
+    fireEvent.click(delegatedAccordionSummary)
     expect(delegatedAccordionSummary).toHaveAttribute('aria-expanded', 'true')
   })
 
