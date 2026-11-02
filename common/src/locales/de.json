@@ -202,14 +202,14 @@
       }
     },
     "freeBusy": {
-      "unknown": "Der Kalender dieses Gasts kann nicht angezeigt werden.",
-      "contact": "Der Kalender dieses Gasts kann nicht angezeigt werden.",
+      "unknown": "Die Verfügbarkeit konnte nicht geprüft werden.",
+      "contact": "Die Verfügbarkeit konnte nicht geprüft werden.",
       "busy": "Diese Person ist beschäftigt",
       "busyCalOwner": "Sie haben zu dieser Zeit einen anderen Termin",
       "free": "Der Benutzer ist verfügbar",
       "loading": "Status wird geladen",
       "resourceBusy": "Diese Ressource ist bereits gebucht",
-      "resourceUnknown": "Die Verfügbarkeit dieser Ressource kann nicht angezeigt werden."
+      "resourceUnknown": "Die Verfügbarkeit konnte nicht geprüft werden."
     },
     "form": {
       "title": "Titel",
