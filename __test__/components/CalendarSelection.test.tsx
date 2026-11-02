@@ -542,12 +542,12 @@ describe('CalendarSelection', () => {
     )
     const delegatedAccordionSummary = screen
       .getByText('calendar.delegated')
-      .closest('.MuiAccordionSummary-root')
+      .closest('.MuiAccordionSummary-root') as HTMLElement
 
-    fireEvent.click(delegatedAccordionSummary!)
+    fireEvent.click(delegatedAccordionSummary)
     expect(delegatedAccordionSummary).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(delegatedAccordionSummary!)
+    fireEvent.click(delegatedAccordionSummary)
     expect(delegatedAccordionSummary).toHaveAttribute('aria-expanded', 'true')
   })
 
