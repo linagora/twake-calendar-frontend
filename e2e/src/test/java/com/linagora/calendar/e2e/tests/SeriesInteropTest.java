@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -41,10 +42,20 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
     private static final String STAMP = "DTSTAMP:20260101T000000Z";
     private static final String ROMANCE = "Romance Standard Time";
 
-    private final LocalDate today = E2EClock.today();
-    private final LocalDate tomorrow = today.plusDays(1);
-    private final String day0 = Vcal.day(today);
-    private final String day1 = Vcal.day(tomorrow);
+    // Read once the extension started the clock of the test: a field initializer runs before,
+    // on the real date, which may lie outside the week the browser shows
+    private LocalDate today;
+    private LocalDate tomorrow;
+    private String day0;
+    private String day1;
+
+    @BeforeEach
+    void readTheClockOfTheTest() {
+        today = E2EClock.today();
+        tomorrow = today.plusDays(1);
+        day0 = Vcal.day(today);
+        day1 = Vcal.day(tomorrow);
+    }
 
     private static String title(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
