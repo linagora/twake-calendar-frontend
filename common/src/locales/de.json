@@ -132,6 +132,8 @@
     "invalidHex": "Geben Sie eine Farbe wie #1A73E8 ein"
   },
   "event": {
+    "saved": "Termin gespeichert",
+    "savedFor": "Termin für %{date} gespeichert",
     "createEvent": "Erstellen",
     "createInAgenda": "Im Kalender von %{owner} erstellen",
     "updateEvent": "Termin aktualisieren",

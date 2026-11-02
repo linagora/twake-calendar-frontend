@@ -1,3 +1,4 @@
+import { eventSaved } from '../../eventSaveFeedbackSlice'
 import { AppDispatch } from '@common/app/store'
 import {
   clearFetchCache,
@@ -93,6 +94,7 @@ export async function handleConvertRecurringToSingle({
     hasRemovedSeries = true
 
     clearEventFormTempData('update')
+    dispatch(eventSaved(finalNewEvent))
   } catch (err) {
     handleUpdateError({
       error: err,
