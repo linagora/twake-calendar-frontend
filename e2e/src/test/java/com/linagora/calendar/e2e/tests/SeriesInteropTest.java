@@ -339,9 +339,15 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
             assertThat(Ics.overrides(saved))
                 .as("the answer to that occurrence reached the server")
                 .singleElement()
-                .satisfies(override -> assertThat(Vcal.attendeeLines(override, user.email()))
-                    .singleElement()
-                    .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED")));
+                .satisfies(override -> {
+                    // 09:00 in the +01:00 zone: as written, or as the instant for an unknown zone
+                    assertThat(Ics.property(override, "RECURRENCE-ID").orElseThrow())
+                        .as("the override is the one of the answered occurrence")
+                        .isIn(day1 + "T090000", day1 + "T080000Z");
+                    assertThat(Vcal.attendeeLines(override, user.email()))
+                        .singleElement()
+                        .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED"));
+                });
             assertThat(Vcal.attendeeLines(Ics.master(saved), user.email()))
                 .as("the other occurrences are still to be answered")
                 .singleElement()
