@@ -315,6 +315,45 @@ describe('renderPrintDocument', () => {
     expect(html).toContain('top:837.0px;height:18.0px;')
   })
 
+  it('puts two events of the repeated hour side by side', () => {
+    const tz = 'Europe/London'
+    const html = renderPrintDocument({
+      periods: buildPrintPeriods(
+        'day',
+        dayjs.tz('2016-10-30', tz).startOf('day'),
+        dayjs.tz('2016-10-30', tz).startOf('day')
+      ),
+      calendars: [
+        {
+          events: selectPrintEvents(
+            [
+              // 01:30 BST, then 01:30 GMT an hour later
+              makeEvent({
+                uid: 'bst',
+                start: '2016-10-30T00:30:00Z',
+                end: '2016-10-30T00:45:00Z',
+                title: 'Summer time'
+              }),
+              makeEvent({
+                uid: 'gmt',
+                start: '2016-10-30T01:30:00Z',
+                end: '2016-10-30T01:45:00Z',
+                title: 'Winter time'
+              })
+            ],
+            tz,
+            LABELS.noTitle
+          )
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    expect(html).toContain('left:0.00%;width:50.00%;')
+    expect(html).toContain('left:50.00%;width:50.00%;')
+  })
+
   it('prints an event late on the day the clocks went back', () => {
     const tz = 'Europe/London'
     const html = renderPrintDocument({
