@@ -198,6 +198,56 @@ describe('eventDAO', () => {
       expect(await fetchEventJCal(mockEvent)).toEqual(STORED_JCAL)
     })
 
+    it('fetchEventJCal drops the Z SabreDAV appends to a time in a zone it does not know', async () => {
+      // what SabreDAV answers for DTSTART;TZID=toString:20261104T090000
+      ;(api.get as jest.Mock).mockResolvedValue({
+        json: jest.fn().mockResolvedValue([
+          'vcalendar',
+          [],
+          [
+            [
+              'vevent',
+              [
+                [
+                  'dtstart',
+                  { tzid: 'toString' },
+                  'date-time',
+                  '2026-11-04T09:00:00Z'
+                ],
+                [
+                  'exdate',
+                  { tzid: 'toString' },
+                  'date-time',
+                  '2026-11-05T09:00:00Z',
+                  '2026-11-06T09:00:00Z'
+                ],
+                ['dtstamp', {}, 'date-time', '2026-01-01T00:00:00Z']
+              ],
+              []
+            ]
+          ]
+        ])
+      })
+
+      const [, , [vevent]] = (await fetchEventJCal(mockEvent)) as [
+        string,
+        unknown[],
+        VCalComponent[]
+      ]
+
+      expect(vevent[1]).toEqual([
+        ['dtstart', { tzid: 'toString' }, 'date-time', '2026-11-04T09:00:00'],
+        [
+          'exdate',
+          { tzid: 'toString' },
+          'date-time',
+          '2026-11-05T09:00:00',
+          '2026-11-06T09:00:00'
+        ],
+        ['dtstamp', {}, 'date-time', '2026-01-01T00:00:00Z']
+      ])
+    })
+
     it('fetchAllRecurrentVevents keeps the master and its overrides', async () => {
       const vevents = await fetchAllRecurrentVevents(mockEvent)
 
