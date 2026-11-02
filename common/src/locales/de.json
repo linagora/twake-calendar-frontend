@@ -92,6 +92,7 @@
     "participants": "Teilnehmer",
     "noResults": "Keine Termine gefunden",
     "resultsCount": "%{smart_count} Termin gefunden |||| %{smart_count} Termine gefunden",
+    "resultsFor": "%{smart_count} Ergebnis für „%{keyword}“ |||| %{smart_count} Ergebnisse für „%{keyword}“",
     "resultsTitle": "Suchergebnisse",
     "noResultsSubtitle": "Passen Sie Ihre Filter oder Suchbegriffe an.",
     "error": {

@@ -1,3 +1,4 @@
+import SearchResultsHeading from './SearchResultsHeading'
 import { useAppSelector } from '@common/app/hooks'
 import EventPreviewModal from '@common/components/EventPreview'
 import { Box, Typography } from '@linagora/twake-mui'
@@ -23,7 +24,6 @@ import {
 } from '@common/components/Event/utils/eventAccessibleLabel'
 
 const MobileSearchResultsPage: React.FC = () => {
-  const { t } = useI18n()
   const searchResults = useAppSelector(state => state.searchResult)
   const hasSearchParams =
     searchResults.searchParams.search !== '' ||
@@ -47,7 +47,7 @@ const MobileSearchResultsPage: React.FC = () => {
       }}
     >
       <Typography component="h1" sx={visuallyHidden}>
-        {t('search.resultsTitle')}
+        <SearchResultsHeading />
       </Typography>
       <FiltersButtons />
       {displaySearch && (

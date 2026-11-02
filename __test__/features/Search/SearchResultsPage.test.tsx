@@ -1,3 +1,4 @@
+import { defaultSearchParams } from '@common/features/Search/SearchSlice'
 import SearchResultsPage from '@common/features/Search/SearchResultsPage'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -122,7 +123,13 @@ describe('SearchResultsPage', () => {
   it('should show loading spinner when loading', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { loading: true, error: null, hits: 0, results: [] }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        loading: true,
+        error: null,
+        hits: 0,
+        results: []
+      }
     })
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -131,6 +138,7 @@ describe('SearchResultsPage', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
       searchResult: {
+        searchParams: defaultSearchParams,
         loading: false,
         error: 'Network error',
         hits: 0,
@@ -143,7 +151,13 @@ describe('SearchResultsPage', () => {
   it('should show no results message when no hits', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { loading: false, error: null, hits: null, results: [] }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        loading: false,
+        error: null,
+        hits: null,
+        results: []
+      }
     })
     expect(
       screen.getByText('search.noResults', { ignore: '[role="status"]' })
@@ -153,7 +167,13 @@ describe('SearchResultsPage', () => {
   it('announces that nothing was found, once (#1789)', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { loading: false, error: null, hits: 0, results: [] }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        loading: false,
+        error: null,
+        hits: 0,
+        results: []
+      }
     })
 
     expect(screen.getByRole('status')).toHaveTextContent('search.noResults')
@@ -164,7 +184,13 @@ describe('SearchResultsPage', () => {
   it('announces nothing while searching (#1789)', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { loading: true, error: null, hits: 0, results: [] }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        loading: true,
+        error: null,
+        hits: 0,
+        results: []
+      }
     })
 
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
@@ -194,7 +220,11 @@ describe('SearchResultsPage', () => {
 
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { results: mockResults, hits: 2 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 2
+      }
     })
     expect(screen.getByText('search.resultsTitle')).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent(
@@ -204,6 +234,35 @@ describe('SearchResultsPage', () => {
     expect(screen.getByText('Project Review')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+  })
+
+  it('shows the keyword and total hits rather than the loaded result count', () => {
+    renderWithProviders(<SearchResultsPage />, {
+      ...preloadedState,
+      searchResult: {
+        searchParams: { ...defaultSearchParams, search: 'sprint' },
+        loading: false,
+        error: null,
+        results: [],
+        hits: 42
+      }
+    })
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'search.resultsFor(smart_count=42,keyword=sprint)'
+    )
+  })
+
+  it('includes the year for a result outside the current year', () => {
+    const start = `${new Date().getUTCFullYear() + 1}-03-12T10:00:00Z`
+    renderWithProviders(<SearchResultsPage />, {
+      ...preloadedState,
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: [{ data: { uid: 'future', summary: 'Future', start } }],
+        hits: 1
+      }
+    })
+    expect(screen.getByText(formatDay(start))).toBeInTheDocument()
   })
 
   it('should handle events without organizer', () => {
@@ -220,7 +279,11 @@ describe('SearchResultsPage', () => {
 
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { results: mockResults, hits: 1 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 1
+      }
     })
 
     expect(screen.getByText('Untitled Event')).toBeInTheDocument()
@@ -241,7 +304,11 @@ describe('SearchResultsPage', () => {
 
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { results: mockResults, hits: 1 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 1
+      }
     })
 
     expect(screen.getByText('All Day Event')).toBeInTheDocument()
@@ -249,8 +316,12 @@ describe('SearchResultsPage', () => {
 
   const formatDay = (iso: string): string =>
     new Date(iso).toLocaleDateString('en', {
+      weekday: 'short',
       day: '2-digit',
       month: 'short',
+      ...(new Date(iso).getUTCFullYear() !== new Date().getUTCFullYear()
+        ? ({ year: 'numeric' } as const)
+        : {}),
       timeZone: 'UTC'
     })
 
@@ -269,7 +340,11 @@ describe('SearchResultsPage', () => {
 
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { results: mockResults, hits: 1 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 1
+      }
     })
 
     expect(
@@ -295,7 +370,11 @@ describe('SearchResultsPage', () => {
 
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
-      searchResult: { results: mockResults, hits: 1 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 1
+      }
     })
 
     expect(
@@ -321,7 +400,11 @@ describe('SearchResultsPage', () => {
     renderWithProviders(<SearchResultsPage />, {
       ...preloadedState,
       settings: { timeZone: 'America/New_York' },
-      searchResult: { results: mockResults, hits: 1 }
+      searchResult: {
+        searchParams: defaultSearchParams,
+        results: mockResults,
+        hits: 1
+      }
     })
 
     expect(
