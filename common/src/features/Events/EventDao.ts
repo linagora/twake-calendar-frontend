@@ -41,11 +41,44 @@ export async function reportEvent(
  * (reading 'propertyGroups')" — an RSVP on a recurring occurrence then silently
  * did nothing. See #1375.
  */
+/**
+ * SabreDAV writes the DATE-TIME of a zone it does not know (e.g. TZID=toString)
+ * as UTC in jCal, appending a "Z" and keeping the TZID, which RFC 5545 forbids.
+ * Written back as is, the stored `DTSTART;TZID=toString:20261104T090000` turns
+ * into `...T090000Z`, and the scheduling plugin then refuses an attendee's
+ * answer for changing DTSTART. Dropping that "Z" gives back the stored value.
+ */
+function dropUtcSuffixOfZonedTimes(component: VCalComponent): VCalComponent {
+  const [name, props, subComponents] = component
+  const fixedProps = props.map(prop => {
+    const [propName, params, type, ...values] = prop
+    const tzid = (params as Record<string, unknown> | undefined)?.tzid
+    if (type !== 'date-time' || typeof tzid !== 'string' || !tzid) {
+      return prop
+    }
+    return [
+      propName,
+      params,
+      type,
+      ...values.map(value =>
+        typeof value === 'string' ? value.replace(/Z$/i, '') : value
+      )
+    ] as VObjectProperty
+  })
+  return [
+    name,
+    fixedProps,
+    Array.isArray(subComponents)
+      ? subComponents.map(dropUtcSuffixOfZonedTimes)
+      : subComponents
+  ] as VCalComponent
+}
+
 export async function fetchEvent(event: CalendarEvent): Promise<VCalComponent> {
   const response = await api.get(`dav${event.URL}`, {
     headers: { Accept: 'application/calendar+json' }
   })
-  return response.json<VCalComponent>()
+  return dropUtcSuffixOfZonedTimes(await response.json<VCalComponent>())
 }
 
 export async function fetchEventIcs(event: CalendarEvent): Promise<string> {
