@@ -504,3 +504,70 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
     expect(dispatch).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('answering a whole series', () => {
+  const SERIES_JCAL: VCalComponent = [
+    'vcalendar',
+    [],
+    [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'series-uid'],
+          [
+            'dtstart',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-06-17T09:00:00'
+          ],
+          ['rrule', {}, 'recur', { freq: 'DAILY', count: 3 }],
+          [
+            'attendee',
+            { partstat: 'NEEDS-ACTION' },
+            'cal-address',
+            'mailto:me@example.com'
+          ]
+        ],
+        []
+      ]
+    ]
+  ]
+
+  const occurrence = {
+    uid: 'series-uid/2026-06-18T07:00:00Z',
+    recurrenceId: '2026-06-18T07:00:00Z',
+    timezone: 'Europe/Paris',
+    URL: '/calendars/cal-1/series.ics',
+    attendee: [
+      new userAttendee({
+        cal_address: 'me@example.com',
+        partstat: 'NEEDS-ACTION'
+      })
+    ]
+  } as unknown as CalendarEvent
+
+  beforeEach(() => {
+    jest.restoreAllMocks()
+    jest.spyOn(EventDao, 'fetchRecurrentSeries').mockResolvedValue({
+      vevents: JSON.parse(JSON.stringify(SERIES_JCAL[2])) as VCalComponent[],
+      vtimezones: []
+    })
+  })
+
+  it('reports an answer the server refused', async () => {
+    jest
+      .spyOn(EventDao, 'putEvent')
+      .mockResolvedValue({ ok: false, status: 412 } as Response)
+
+    await expect(
+      handleRSVP({
+        dispatch: jest.fn(),
+        calendar: CALENDAR,
+        user: USER,
+        event: occurrence,
+        rsvp: 'ACCEPTED',
+        typeOfAction: 'all'
+      })
+    ).rejects.toThrow('status 412')
+  })
+})

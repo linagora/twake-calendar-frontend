@@ -177,7 +177,13 @@ async function handleAllRSVP({
     undefined,
     vtimezones
   )
-  await putEvent(event, jCal)
+  const response = await putEvent(event, jCal)
+  // A refused answer must not pass for a saved one
+  if (!response.ok) {
+    throw new Error(
+      `RSVP update failed for ${event.URL} with status ${response.status}`
+    )
+  }
 }
 
 function makePartstatMatcher(
