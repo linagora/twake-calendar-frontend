@@ -49,7 +49,16 @@ export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
     : null
 
   return (
-    <ActionsMenu ref={anchorRef} open={Boolean(anchorEl)} onClose={onClose}>
+    <ActionsMenu
+      ref={anchorRef}
+      open={Boolean(anchorEl)}
+      onClose={onClose}
+      aria-label={
+        event.title
+          ? t('common.optionsFor', { name: event.title })
+          : t('common.moreOptions')
+      }
+    >
       {isEditable && (
         <ActionsMenuItem
           onClick={() => {

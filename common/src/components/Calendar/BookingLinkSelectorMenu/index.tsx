@@ -8,6 +8,8 @@ import {
 import { useI18n } from 'twake-i18n'
 
 interface BookingLinkSelectorMenuProps {
+  /** Name of the booking link, which names the menu */
+  name: string
   anchorEl: HTMLElement | null
   open: boolean
   onClose: () => void
@@ -20,6 +22,7 @@ interface BookingLinkSelectorMenuProps {
 export const BookingLinkSelectorMenu: React.FC<
   BookingLinkSelectorMenuProps
 > = ({
+  name,
   anchorEl,
   open,
   onClose,
@@ -33,7 +36,12 @@ export const BookingLinkSelectorMenu: React.FC<
   const anchorRef = useMemo(() => ({ current: anchorEl }), [anchorEl])
 
   return (
-    <ActionsMenu ref={anchorRef} open={open} onClose={onClose}>
+    <ActionsMenu
+      ref={anchorRef}
+      open={open}
+      onClose={onClose}
+      aria-label={t('common.optionsFor', { name })}
+    >
       {onToggleVisibility !== undefined && (
         <ActionsMenuItem onClick={onToggleVisibility}>
           <ListItemText

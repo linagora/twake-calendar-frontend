@@ -105,6 +105,36 @@ describe('CalendarSelection on a phone-sized screen', () => {
     )
   })
 
+  it('names the calendar actions sheet after the calendar', async () => {
+    // twake-mui shows the actions in a bottom sheet below its md breakpoint,
+    // through a matchMedia jsdom lacks
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn()
+    }))
+    try {
+      renderSelection()
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'common.moreOptions' })
+      )
+
+      expect(
+        await screen.findByRole('dialog', {
+          name: 'common.optionsFor(name=Calendar personal)'
+        })
+      ).toBeInTheDocument()
+    } finally {
+      delete (window as { matchMedia?: unknown }).matchMedia
+    }
+  })
+
   it('does not toggle the calendar with the click ending a long press', () => {
     jest.useFakeTimers()
     try {

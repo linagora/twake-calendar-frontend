@@ -6,6 +6,7 @@ import {
   ListItemText
 } from '@linagora/twake-mui'
 import RepeatIcon from '@mui/icons-material/Repeat'
+import { useI18n } from 'twake-i18n'
 
 interface ViewMoreEventsProps {
   isOpen: boolean
@@ -20,8 +21,14 @@ const ViewMoreEvents: React.FC<ViewMoreEventsProps> = ({
   moreEvents,
   handleEventClick
 }: ViewMoreEventsProps) => {
+  const { t } = useI18n()
+
   return (
-    <ActionsMenu open={isOpen} onClose={onClose}>
+    <ActionsMenu
+      open={isOpen}
+      onClose={onClose}
+      aria-label={t('common.moreEvents')}
+    >
       {moreEvents.map((event, index) => (
         <ActionsMenuItem
           key={index}

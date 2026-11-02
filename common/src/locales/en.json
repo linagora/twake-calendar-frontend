@@ -80,6 +80,8 @@
     "you": "You",
     "select_timezone": "Select Timezone",
     "moreOptions": "More options",
+    "optionsFor": "Options for %{name}",
+    "moreEvents": "More events",
     "search": "Search",
     "resource": "Resource",
     "back": "Back",

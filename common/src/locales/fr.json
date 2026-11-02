@@ -80,6 +80,8 @@
     "you": "Vous",
     "select_timezone": "Sélectionner le fuseau horaire",
     "moreOptions": "Plus d'options",
+    "optionsFor": "Options de %{name}",
+    "moreEvents": "Autres événements",
     "search": "Rechercher",
     "resource": "Ressource",
     "back": "Retour",

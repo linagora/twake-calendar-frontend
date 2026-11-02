@@ -80,6 +80,8 @@
     "you": "Tu",
     "select_timezone": "Seleziona fuso orario",
     "moreOptions": "Altre opzioni",
+    "optionsFor": "Opzioni di %{name}",
+    "moreEvents": "Altri eventi",
     "search": "Cerca",
     "resource": "Risorsa",
     "back": "Indietro",

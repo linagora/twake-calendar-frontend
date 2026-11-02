@@ -407,6 +407,7 @@ const BookingLinkChip: React.FC<{
         />
       </ListItem>
       <BookingLinkSelectorMenu
+        name={linkName}
         anchorEl={menuAnchorEl}
         open={menuOpen}
         onClose={handleMenuClose}
@@ -929,6 +930,7 @@ const CalendarSelector: React.FC<{
 
       <CalendarSelectorMenu
         id={id}
+        name={displayName}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}

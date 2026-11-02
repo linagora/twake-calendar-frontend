@@ -9,6 +9,8 @@ import { useI18n } from 'twake-i18n'
 
 interface CalendarSelectorMenuProps {
   id: string
+  /** Name of the calendar, which names the menu */
+  name: string
   anchorEl: HTMLElement | null
   open: boolean
   onClose: () => void
@@ -25,6 +27,7 @@ interface CalendarSelectorMenuProps {
 
 export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   id,
+  name,
   anchorEl,
   open,
   onClose,
@@ -43,7 +46,13 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   const anchorRef = useMemo(() => ({ current: anchorEl }), [anchorEl])
 
   return (
-    <ActionsMenu id={id} ref={anchorRef} open={open} onClose={onClose}>
+    <ActionsMenu
+      id={id}
+      ref={anchorRef}
+      open={open}
+      onClose={onClose}
+      aria-label={t('common.optionsFor', { name })}
+    >
       {onToggleVisibility !== undefined && (
         <ActionsMenuItem onClick={onToggleVisibility}>
           <ListItemText
