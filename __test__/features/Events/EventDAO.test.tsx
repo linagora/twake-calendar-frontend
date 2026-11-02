@@ -11,6 +11,7 @@ import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 import { calendarEventToJCal } from '@common/features/Events/utils'
+import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { api } from '@common/utils/apiUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
@@ -246,6 +247,44 @@ describe('eventDAO', () => {
         ],
         ['dtstamp', {}, 'date-time', '2026-01-01T00:00:00Z']
       ])
+    })
+
+    it('an event in a zone named constructor can be read once its Z is dropped', async () => {
+      ;(api.get as jest.Mock).mockResolvedValue({
+        json: jest.fn().mockResolvedValue([
+          'vcalendar',
+          [],
+          [
+            [
+              'vevent',
+              [
+                ['uid', {}, 'text', 'event1'],
+                [
+                  'dtstart',
+                  { tzid: 'constructor' },
+                  'date-time',
+                  '2026-11-04T09:00:00Z'
+                ],
+                [
+                  'dtend',
+                  { tzid: 'constructor' },
+                  'date-time',
+                  '2026-11-04T10:00:00Z'
+                ]
+              ],
+              []
+            ]
+          ]
+        ])
+      })
+
+      const parsed = parseFetchedEvent(
+        mockEvent,
+        (await fetchEventJCal(mockEvent)) as VCalComponent
+      )
+
+      expect(parsed.start).toBe('2026-11-04T09:00:00.000Z')
+      expect(parsed.end).toBe('2026-11-04T10:00:00.000Z')
     })
 
     it('fetchAllRecurrentVevents keeps the master and its overrides', async () => {

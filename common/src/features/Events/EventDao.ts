@@ -32,16 +32,6 @@ export async function reportEvent(
 }
 
 /**
- * Fetches an event as jCal: the DAV proxy serves `text/calendar` by default, so
- * without this Accept header the client has to parse a raw ICS payload itself.
- *
- * Every read of a calendar object goes through here, on purpose: the same URL
- * used to be GETted both with and without that header, and a jCal answer
- * reaching the ICS parser blew up with "Cannot read properties of undefined
- * (reading 'propertyGroups')" — an RSVP on a recurring occurrence then silently
- * did nothing. See #1375.
- */
-/**
  * SabreDAV writes the DATE-TIME of a zone it does not know (e.g. TZID=toString)
  * as UTC in jCal, appending a "Z" and keeping the TZID, which RFC 5545 forbids.
  * Written back as is, the stored `DTSTART;TZID=toString:20261104T090000` turns
@@ -74,6 +64,16 @@ function dropUtcSuffixOfZonedTimes(component: VCalComponent): VCalComponent {
   ] as VCalComponent
 }
 
+/**
+ * Fetches an event as jCal: the DAV proxy serves `text/calendar` by default, so
+ * without this Accept header the client has to parse a raw ICS payload itself.
+ *
+ * Every read of a calendar object goes through here, on purpose: the same URL
+ * used to be GETted both with and without that header, and a jCal answer
+ * reaching the ICS parser blew up with "Cannot read properties of undefined
+ * (reading 'propertyGroups')" — an RSVP on a recurring occurrence then silently
+ * did nothing. See #1375.
+ */
 export async function fetchEvent(event: CalendarEvent): Promise<VCalComponent> {
   const response = await api.get(`dav${event.URL}`, {
     headers: { Accept: 'application/calendar+json' }
