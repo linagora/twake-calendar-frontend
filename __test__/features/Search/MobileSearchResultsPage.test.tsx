@@ -77,6 +77,22 @@ describe('SearchResultsPage on mobile', () => {
     })
   }
 
+  it('shares the keyword header and uses total hits', () => {
+    renderWithProviders(<SearchResultsPage />, {
+      ...preloadedState,
+      searchResult: {
+        searchParams: { ...defaultSearchParams, search: 'sprint' },
+        loading: false,
+        error: null,
+        results: [],
+        hits: 42
+      }
+    })
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'search.resultsFor(smart_count=42,keyword=sprint)'
+    )
+  })
+
   it('should display the month of the result', () => {
     renderResult({
       summary: 'alpha batch',

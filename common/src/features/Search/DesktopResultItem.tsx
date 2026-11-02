@@ -1,5 +1,6 @@
 import { useAppSelector } from '@common/app/hooks'
 import EventPreviewModal from '@common/components/EventPreview'
+import { Calendar } from '@common/types/CalendarTypes'
 import { defaultColors } from '@common/utils/defaultColors'
 import { Box, useTheme } from '@linagora/twake-mui'
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded'
@@ -23,11 +24,17 @@ import {
   eventAccessibleLabel
 } from '@common/components/Event/utils/eventAccessibleLabel'
 
-export default function DesktopResultItem({
-  eventData
-}: {
+interface DesktopResultItemProps {
   eventData: SearchEventResult
-}): JSX.Element {
+  hasDetails: boolean
+  hasVideo: boolean
+}
+
+export default function DesktopResultItem({
+  eventData,
+  hasDetails,
+  hasVideo
+}: DesktopResultItemProps): JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
   const startDate = new Date(eventData.data.start)
@@ -39,7 +46,6 @@ export default function DesktopResultItem({
         `${eventData.data.userId}/${eventData.data.calendarId}`
       ]
   )
-  const calendarColor = calendar?.color?.light
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
 
   const { openPreview, setOpenPreview, handleOpen, timeZone } = useEventPreview(
@@ -51,16 +57,9 @@ export default function DesktopResultItem({
     <>
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 2,
-          p: 3,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          cursor: 'pointer',
-          '&:hover': { backgroundColor: theme.vars.palette.action.hover },
-          alignItems: 'center',
-          textAlign: 'left'
+          ...rowSx,
+          gridTemplateColumns: gridTemplateColumns(hasDetails, hasVideo),
+          '&:hover': { backgroundColor: theme.vars.palette.action.hover }
         }}
         role="button"
         tabIndex={0}
@@ -75,49 +74,16 @@ export default function DesktopResultItem({
           t
         })}
         onClick={() => void handleOpen()}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            void handleOpen()
-          }
-        }}
+        onKeyDown={onActivateKey(handleOpen)}
       >
-        <Box sx={{ minWidth: '225px', display: 'flex', alignItems: 'center' }}>
-          <RenderDate
-            startDate={startDate}
-            endDate={endDate}
-            allDay={!!eventData.data.allDay}
-            t={t}
-            timeZone={dayZoneOf(!!eventData.data.allDay, timeZone)}
-          />
-          <RenderTime
-            startDate={startDate}
-            endDate={endDate}
-            allDay={!!eventData.data.allDay}
-            t={t}
-            timeZone={timeZone}
-          />
-        </Box>
-        <SquareRoundedIcon
-          style={{
-            color: calendarColor ?? defaultColors[0].light,
-            width: 24,
-            height: 24,
-            flexShrink: 0
-          }}
-        />
-
-        <RenderTitle
-          summary={eventData.data.summary}
-          isRecurrent={!!eventData.data.isRecurrentMaster}
-          t={t}
-        />
-        <RenderOrganizer organizer={eventData.data.organizer} />
-        <RenderLocation text={eventData.data.location} />
-        <RenderDescription text={eventData.data.description} />
-        <RenderVideoJoin
-          t={t}
-          url={eventData.data['x-openpaas-videoconference']}
+        <DesktopResultColumns
+          eventData={eventData}
+          startDate={startDate}
+          endDate={endDate}
+          calendarColor={calendarColorOf(calendar)}
+          timeZone={timeZone}
+          hasDetails={hasDetails}
+          hasVideo={hasVideo}
         />
       </Box>
 
@@ -132,4 +98,124 @@ export default function DesktopResultItem({
       )}
     </>
   )
+}
+
+interface DesktopResultColumnsProps extends DesktopResultItemProps {
+  startDate: Date
+  endDate: Date
+  calendarColor: string
+  timeZone: string
+}
+
+function DesktopResultColumns({
+  eventData,
+  startDate,
+  endDate,
+  calendarColor,
+  timeZone,
+  hasDetails,
+  hasVideo
+}: DesktopResultColumnsProps): JSX.Element {
+  const { t } = useI18n()
+  const allDay = !!eventData.data.allDay
+
+  return (
+    <>
+      <Box sx={dateColumnSx}>
+        <RenderDate
+          startDate={startDate}
+          endDate={endDate}
+          allDay={allDay}
+          t={t}
+          timeZone={dayZoneOf(allDay, timeZone)}
+        />
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <RenderTime
+          startDate={startDate}
+          endDate={endDate}
+          allDay={allDay}
+          t={t}
+          timeZone={timeZone}
+        />
+      </Box>
+      <SquareRoundedIcon style={colorIconStyle(calendarColor)} />
+      <RenderTitle
+        summary={eventData.data.summary}
+        isRecurrent={!!eventData.data.isRecurrentMaster}
+        t={t}
+      />
+      <Box sx={secondaryColumnsSx}>
+        <RenderOrganizer organizer={eventData.data.organizer} />
+      </Box>
+      {hasDetails && (
+        <Box sx={secondaryColumnsSx}>
+          <RenderLocation text={eventData.data.location} />
+          <RenderDescription text={eventData.data.description} />
+        </Box>
+      )}
+      {hasVideo && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <RenderVideoJoin
+            t={t}
+            url={eventData.data['x-openpaas-videoconference']}
+          />
+        </Box>
+      )}
+    </>
+  )
+}
+
+const colorIconStyle = (color: string): React.CSSProperties => ({
+  color,
+  width: 24,
+  height: 24,
+  flexShrink: 0
+})
+
+const gridTemplateColumns = (hasDetails: boolean, hasVideo: boolean): string =>
+  [
+    '130px 120px 24px minmax(240px, 1fr) minmax(80px, 160px)',
+    hasDetails ? 'minmax(80px, 20%)' : '',
+    hasVideo ? '100px' : ''
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+const calendarColorOf = (calendar: Calendar | undefined): string =>
+  calendar?.color?.light ?? defaultColors[0].light
+
+const onActivateKey =
+  (onActivate: () => Promise<void>) =>
+  (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      void onActivate()
+    }
+  }
+
+const rowSx = {
+  display: 'grid',
+  gap: 2,
+  p: 3,
+  borderTop: '1px solid',
+  borderColor: 'divider',
+  cursor: 'pointer',
+  alignItems: 'center',
+  textAlign: 'left'
+}
+
+const dateColumnSx = {
+  width: '130px',
+  flexShrink: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start'
+}
+
+const secondaryColumnsSx = {
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1
 }

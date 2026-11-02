@@ -91,21 +91,24 @@ export const RenderDate: React.FC<DateProps> = ({
 }) => {
   const lastDay = lastDayOf(startDate, endDate, allDay)
   const dayKey = (d: Date): string => formatDateInTimezone(d, timeZone)
+  const yearOf = (date: Date): string =>
+    date.toLocaleDateString('en', { year: 'numeric', timeZone })
+  const currentYear = yearOf(new Date())
+  const formatDay = (date: Date): string =>
+    date.toLocaleDateString(t('locale'), {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      ...(yearOf(date) !== currentYear ? ({ year: 'numeric' } as const) : {}),
+      timeZone
+    })
   return (
     <Typography sx={{ fontSize: '22px', minWidth: '90px' }}>
-      {startDate.toLocaleDateString(t('locale'), {
-        day: '2-digit',
-        month: 'short',
-        timeZone
-      })}
+      {formatDay(startDate)}
       {dayKey(startDate) !== dayKey(lastDay) && (
         <>
           {' - '}
-          {lastDay.toLocaleDateString(t('locale'), {
-            day: '2-digit',
-            month: 'short',
-            timeZone
-          })}
+          {formatDay(lastDay)}
         </>
       )}
     </Typography>
@@ -163,8 +166,8 @@ export const RenderTitle: React.FC<TitleProps> = ({
           display: 'flex',
           flexDirection: 'row',
           gap: 1,
-          minWidth: 0,
-          flex: '0 0 12%',
+          minWidth: '240px',
+          flex: '1 1 30%',
           alignItems: 'center'
         }}
       >
@@ -193,7 +196,7 @@ export const RenderTitle: React.FC<TitleProps> = ({
 
 export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
   if (!organizer?.cn && !organizer?.email) {
-    return <Box sx={{ minWidth: 0, flex: '0 0 20%' }} />
+    return null
   }
 
   const organizerName = organizer.cn || organizer.email
@@ -206,8 +209,8 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
           alignItems: 'center',
           gap: 1,
           minWidth: 0,
-          maxWidth: '15%',
-          marginRight: 3
+          flex: '0 1 auto',
+          maxWidth: '100%'
         }}
       >
         <Avatar
@@ -221,7 +224,6 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            flex: 1,
             minWidth: 0
           }}
         >
@@ -257,7 +259,7 @@ export const RenderText: React.FC<RenderTextProps> = ({ text, sx }) => {
 }
 
 export const RenderLocation: React.FC<{ text?: string }> = ({ text }) => {
-  return <RenderText text={text} sx={{ flex: '0 1 auto', maxWidth: '20%' }} />
+  return <RenderText text={text} sx={{ flex: 1 }} />
 }
 
 export const RenderDescription: React.FC<{ text?: string }> = ({ text }) => {
@@ -266,7 +268,7 @@ export const RenderDescription: React.FC<{ text?: string }> = ({ text }) => {
       text={new EventDescriptionBuilder(text ?? '')
         .removeFooter()
         .buildPlainText()}
-      sx={{ flex: '1 1 0%' }}
+      sx={{ flex: 2 }}
     />
   )
 }
@@ -297,8 +299,10 @@ export const RenderVideoJoin: React.FC<VideoJoinProps> = ({ url, t }) => {
         </Box>
       }
       sx={{
-        flexShrink: 0,
+        flex: '0 1 auto',
         ml: 'auto',
+        minWidth: 0,
+        '& .MuiButton-startIcon': { flexShrink: 0 },
         backgroundColor: theme.vars.palette.action.selected,
         color: theme.vars.palette.text.primary,
         textTransform: 'none',

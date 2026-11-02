@@ -92,6 +92,7 @@
     "participants": "Участники",
     "noResults": "Результаты не найдены",
     "resultsCount": "Найдено событий: %{smart_count}",
+    "resultsFor": "%{smart_count} результат по запросу «%{keyword}» |||| %{smart_count} результата по запросу «%{keyword}» |||| %{smart_count} результатов по запросу «%{keyword}»",
     "resultsTitle": "Результаты поиска",
     "noResultsSubtitle": "Попробуйте изменить фильтры или условия поиска.",
     "error": {
