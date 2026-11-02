@@ -130,8 +130,7 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
         String rrule = Ics.property(Ics.master(saved), "RRULE").orElseThrow();
         assertThat(Ics.rulePart(rrule, "UNTIL").orElseThrow())
             .as("a rename must write the end of the series back, not 'Invalid date' (%s)", rrule)
-            .startsWith(Vcal.day(today.plusDays(2)))
-            .matches("\\d{8}(T\\d{6}Z)?");
+            .isEqualTo(until);
     }
 
     @Test
@@ -335,10 +334,19 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
 
         calendar.openEventOn(title, tomorrow).answer("Yes", THIS_EVENT);
 
-        Awaitility.await().atMost(SAVED).untilAsserted(() ->
-            assertThat(Vcal.attendeeLines(probe.singleEvent(user), user.email()))
+        Awaitility.await().atMost(SAVED).untilAsserted(() -> {
+            String saved = probe.singleEvent(user);
+            assertThat(Ics.overrides(saved))
                 .as("the answer to that occurrence reached the server")
-                .anySatisfy(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED")));
+                .singleElement()
+                .satisfies(override -> assertThat(Vcal.attendeeLines(override, user.email()))
+                    .singleElement()
+                    .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED")));
+            assertThat(Vcal.attendeeLines(Ics.master(saved), user.email()))
+                .as("the other occurrences are still to be answered")
+                .singleElement()
+                .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("NEEDS-ACTION"));
+        });
     }
 
     @Test

@@ -70,31 +70,52 @@ public class Ics {
     }
 
     /**
+     * The parameters and the value of every line of a property, in order. A content line ends
+     * its parameters at the first colon outside a quoted parameter value: the one of
+     * {@code SENT-BY="mailto:assistant@example.com"} is part of the parameters.
+     */
+    private static List<String[]> contentLines(String vevent, String name) {
+        List<String[]> lines = new ArrayList<>();
+        Matcher matcher = Pattern.compile("^" + Pattern.quote(name) + "([;:][^\r\n]*)$", Pattern.MULTILINE)
+            .matcher(vevent);
+        while (matcher.find()) {
+            String rest = matcher.group(1);
+            boolean quoted = false;
+            for (int i = 0; i < rest.length(); i++) {
+                char character = rest.charAt(i);
+                if (character == '"') {
+                    quoted = !quoted;
+                } else if (character == ':' && !quoted) {
+                    lines.add(new String[] {rest.substring(0, i), rest.substring(i + 1)});
+                    break;
+                }
+            }
+        }
+        return lines;
+    }
+
+    /**
      * The raw value of a property, parameters excluded. `RRULE` of a master, `SUMMARY`,
      * `SEQUENCE`... Empty when the property is absent.
      */
     public static Optional<String> property(String vevent, String name) {
-        Matcher matcher = Pattern.compile("^" + Pattern.quote(name) + "(;[^:\r\n]*)?:(.*)$",
-            Pattern.MULTILINE).matcher(vevent);
-        return matcher.find() ? Optional.of(matcher.group(2).trim()) : Optional.empty();
+        return contentLines(vevent, name).stream().findFirst().map(line -> line[1].trim());
     }
 
-    /** The parameters of a property, `TZID=Europe/Paris` and friends. Empty string when none. */
+    /** The parameters of a property, `;TZID=Europe/Paris` and friends. Empty string when none. */
     public static String parameters(String vevent, String name) {
-        Matcher matcher = Pattern.compile("^" + Pattern.quote(name) + "(;[^:\r\n]*)?:", Pattern.MULTILINE)
-            .matcher(vevent);
-        return matcher.find() ? Optional.ofNullable(matcher.group(1)).orElse("") : "";
+        return contentLines(vevent, name).stream().findFirst().map(line -> line[0]).orElse("");
     }
 
     /** Every value of a property that may appear several times, `EXDATE` typically. */
     public static List<String> properties(String vevent, String name) {
-        List<String> values = new ArrayList<>();
-        Matcher matcher = Pattern.compile("^" + Pattern.quote(name) + "(;[^:\r\n]*)?:(.*)$",
-            Pattern.MULTILINE).matcher(vevent);
-        while (matcher.find()) {
-            values.add(matcher.group(2).trim());
-        }
-        return values;
+        return contentLines(vevent, name).stream().map(line -> line[1].trim()).toList();
+    }
+
+    /** The value of a content line, parameters excluded, the colons of quoted parameters skipped. */
+    public static String value(String contentLine) {
+        Matcher name = Pattern.compile("^[A-Za-z0-9-]+").matcher(contentLine);
+        return name.find() ? property(contentLine, name.group()).orElse("") : "";
     }
 
     /** One part of an `RRULE`, `FREQ`, `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`... */

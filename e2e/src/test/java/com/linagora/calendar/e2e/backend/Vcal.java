@@ -83,12 +83,16 @@ public final class Vcal {
             .toList();
     }
 
-    /** Every ATTENDEE line of a VEVENT naming that address, whatever its case. */
+    /**
+     * Every ATTENDEE line of a VEVENT whose address is that one, whatever its case or padding:
+     * the address another parameter (CN...) mentions does not count.
+     */
     public static List<String> attendeeLines(String vevent, String email) {
-        String address = email.toLowerCase(Locale.ROOT);
+        String address = email.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(Ics.unfold(vevent).split("\r?\n"))
-            .filter(line -> line.toUpperCase(Locale.ROOT).startsWith("ATTENDEE"))
-            .filter(line -> line.toLowerCase(Locale.ROOT).replace(" ", "").contains(address))
+            .filter(line -> line.toUpperCase(Locale.ROOT).matches("^ATTENDEE[;:].*"))
+            .filter(line -> address.equals(Ics.value(line).trim()
+                .replaceFirst("(?i)^mailto:", "").trim().toLowerCase(Locale.ROOT)))
             .toList();
     }
 
