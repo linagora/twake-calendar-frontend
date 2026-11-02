@@ -156,8 +156,10 @@ export class EventDescriptionBuilder {
   private looksLikeFooter(from: number, to: number): boolean {
     let lineStart = from
     while (lineStart < to && /\s/.test(this.text[lineStart])) lineStart++
-    const newline = this.text.indexOf('\n', lineStart)
-    const lineEnd = newline === -1 || newline > to ? to : newline
+    // Bounded by the block: an unbounded search would scan the rest of the
+    // text for every rejected pair, quadratic on a text without newlines
+    let lineEnd = lineStart
+    while (lineEnd < to && this.text[lineEnd] !== '\n') lineEnd++
     return this.text.slice(lineStart, lineEnd).includes(':')
   }
 
