@@ -65,6 +65,17 @@ describe('createEventContext', () => {
       )
     })
 
+    it('prefers the row of the exact address to one differing by case', () => {
+      const event = makeEvent({
+        attendee: [
+          { cal_address: 'Alice@example.com', partstat: 'DECLINED' },
+          { cal_address: 'alice@example.com', partstat: 'ACCEPTED' }
+        ] as CalendarEvent['attendee']
+      })
+      const ctx = createEventContext(event, calendar, user)
+      expect(ctx.currentUserAttendee?.partstat).toBe('ACCEPTED')
+    })
+
     it('returns null currentUserAttendee when user is not an attendee', () => {
       const event = makeEvent({ attendee: [] })
       const ctx = createEventContext(event, calendar, user)
