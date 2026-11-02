@@ -1,7 +1,8 @@
+import type { CalendarApi } from '@fullcalendar/core'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import eventSaveFeedbackReducer from '@common/features/Events/eventSaveFeedbackSlice'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { useEventSaveFeedback } from '@common/components/Calendar/hooks/useEventSaveFeedback'
 import {
   eventSaved,
@@ -34,16 +35,25 @@ const renderFeedback = (timezone?: string) =>
     </Provider>
   )
 
+const gotoDate = jest.fn()
+const showEventPreview = jest.fn()
+const calendarRef = { current: { gotoDate } as unknown as CalendarApi }
+let dispatchSpy: jest.SpyInstance
 const saved: SavedEvent = {
   uid: 'event',
   calId: 'calendar',
   start: '2026-10-26T10:00:00Z'
 }
 function Harness({ timezone = 'UTC' }: { timezone?: string }) {
-  const feedback = useEventSaveFeedback(timezone, {
-    start: new Date('2026-10-19T00:00:00Z'),
-    end: new Date('2026-10-26T00:00:00Z')
-  })
+  const feedback = useEventSaveFeedback(
+    calendarRef,
+    timezone,
+    showEventPreview,
+    {
+      start: new Date('2026-10-19T00:00:00Z'),
+      end: new Date('2026-10-26T00:00:00Z')
+    }
+  )
   return feedback
 }
 
@@ -52,6 +62,7 @@ describe('event save feedback', () => {
     store = configureStore({
       reducer: { eventSaveFeedback: eventSaveFeedbackReducer }
     })
+    dispatchSpy = jest.spyOn(store, 'dispatch')
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-10-23T05:30:00Z'))
   })
@@ -93,24 +104,53 @@ describe('event save feedback', () => {
     expect(screen.queryByText('Event saved')).not.toBeInTheDocument()
   })
 
-  it('names an out-of-period event and keeps its confirmation for six seconds', () => {
+  it('shows an outside date for six seconds and navigates only on Show', () => {
     renderFeedback()
     act(() => notifySaved(saved))
     expect(
       screen.getByText('Event saved for Monday, October 26')
     ).toBeInTheDocument()
+    expect(gotoDate).not.toHaveBeenCalled()
+    expect(showEventPreview).not.toHaveBeenCalled()
     act(() => {
       jest.advanceTimersByTime(4000)
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Show' }))
+    expect(gotoDate).toHaveBeenCalledWith(new Date(saved.start))
+    expect(showEventPreview).toHaveBeenCalledWith(
+      {
+        ...saved,
+        allday: undefined
+      },
+      new Date(saved.start)
+    )
     expect(
-      screen.getByText('Event saved for Monday, October 26')
-    ).toBeInTheDocument()
-    act(() => {
-      jest.advanceTimersByTime(2000)
-    })
+      dispatchSpy.mock.calls.some(
+        ([action]) => action.type === '@@router/CALL_HISTORY_METHOD'
+      )
+    ).toBe(false)
     expect(
-      screen.queryByText('Event saved for Monday, October 26')
+      screen.queryByRole('button', { name: 'Show' })
     ).not.toBeInTheDocument()
+  })
+
+  it('passes the occurrence UID directly to the preview without changing routes', () => {
+    renderFeedback()
+    const occurrence = { ...saved, uid: 'event/20261026T100000Z@calendar' }
+    act(() => notifySaved(occurrence))
+    fireEvent.click(screen.getByRole('button', { name: 'Show' }))
+    expect(showEventPreview).toHaveBeenCalledWith(
+      {
+        ...occurrence,
+        allday: undefined
+      },
+      new Date(saved.start)
+    )
+    expect(
+      dispatchSpy.mock.calls.some(
+        ([action]) => action.type === '@@router/CALL_HISTORY_METHOD'
+      )
+    ).toBe(false)
   })
 
   it('restarts the timer for a repeated save of the same event', () => {
@@ -138,7 +178,7 @@ describe('event save feedback', () => {
       jest.advanceTimersByTime(6000)
     })
     expect(
-      screen.queryByText('Event saved for Monday, October 26')
+      screen.queryByRole('button', { name: 'Show' })
     ).not.toBeInTheDocument()
   })
 

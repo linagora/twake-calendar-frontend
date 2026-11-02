@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { AlertColor } from '@linagora/twake-mui'
 import { Alert, Snackbar } from '@linagora/twake-mui'
 
@@ -7,13 +8,15 @@ export function SnackbarAlert({
   message,
   severity = 'success',
   autoHideDuration = 2000,
-  sx
+  sx,
+  action
 }: {
   open: boolean
   setOpen: (o: boolean) => void
   message: string
   severity?: AlertColor
   autoHideDuration?: number
+  action?: ReactNode
   sx?: object
 }): JSX.Element {
   return (
@@ -28,6 +31,7 @@ export function SnackbarAlert({
     >
       <Alert
         severity={severity}
+        action={action}
         onClose={() => setOpen(false)}
         sx={{ width: '100%', ...sx }}
       >

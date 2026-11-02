@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
+import type { CalendarApi } from '@fullcalendar/core'
 import { EventSaveFeedback } from '@common/components/Calendar/EventSaveFeedback'
 import feedbackReducer, {
   eventSaved
@@ -23,7 +24,9 @@ it('shows and expires save feedback without rerendering the sibling calendar', (
       <Provider store={store}>
         <Grid />
         <EventSaveFeedback
+          calendarRef={{ current: null as CalendarApi | null }}
           timezone="UTC"
+          showEventPreview={jest.fn()}
           displayedPeriod={{
             start: new Date('2026-11-02T00:00:00Z'),
             end: new Date('2026-11-09T00:00:00Z')

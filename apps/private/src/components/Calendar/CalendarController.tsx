@@ -1,3 +1,6 @@
+import { setView } from '@common/features/Settings/SettingsSlice'
+import type { SavedEvent } from '@common/features/Events/eventSaveFeedbackSlice'
+import { useOpenSavedEventPreview } from '@common/components/Calendar/hooks/useOpenSavedEventPreview'
 import { EventSaveFeedback } from '@common/components/Calendar/EventSaveFeedback'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import EventPopover from '@common/features/Events/EventModal'
@@ -86,6 +89,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   currentView,
   setCurrentView,
   selectedCalendars,
+  setSelectedCalendars,
   tempUsers,
   setSelectedMiniDate,
   onDateChange,
@@ -193,6 +197,38 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   const [eventDisplayedId, setEventDisplayedId] = useState('')
   const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false)
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState('')
+
+  const showSavedEventPreview = useOpenSavedEventPreview({
+    dispatch,
+    userId,
+    calendarRef,
+    calendarWrapperRef,
+    onOpen: (eventId, calId, anchor) => {
+      setAnchorEl(anchor)
+      setEventDisplayedId(eventId)
+      setEventDisplayedCalId(calId)
+      setEventDisplayedTemp(false)
+      setOpenEventDisplay(true)
+    }
+  })
+  const pendingSavedEvent = useRef<{
+    event: SavedEvent
+    date: Date
+  } | null>(null)
+
+  // Parent effects run after the grid's ref is attached on returning from search.
+  useEffect(() => {
+    if (
+      view !== 'calendar' ||
+      !pendingSavedEvent.current ||
+      !calendarRef.current
+    )
+      return
+    const { event, date } = pendingSavedEvent.current
+    pendingSavedEvent.current = null
+    calendarRef.current.gotoDate(date)
+    void showSavedEventPreview(event)
+  }, [view, calendarRef, showSavedEventPreview])
 
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
@@ -372,8 +408,20 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
       <TimezoneChangeAlert />
       <ImportAlert />
       <EventSaveFeedback
+        calendarRef={calendarRef}
         timezone={timezone}
         displayedPeriod={displayedPeriod}
+        showEventPreview={(event, date) => {
+          if (!selectedCalendars.includes(event.calId)) {
+            setSelectedCalendars([...selectedCalendars, event.calId])
+          }
+          if (view !== 'calendar') {
+            pendingSavedEvent.current = { event, date }
+            dispatch(setView('calendar'))
+          } else {
+            void showSavedEventPreview(event)
+          }
+        }}
       />
       {(isTablet || isMobile) && (
         <Tooltip title={t('tooltip.createEvent')}>

@@ -1,4 +1,7 @@
+import type { MutableRefObject } from 'react'
+import type { CalendarApi } from '@fullcalendar/core'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
+import { Button } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import moment from 'moment-timezone'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
@@ -38,7 +41,9 @@ function formatSavedDate(
 }
 
 export function useEventSaveFeedback(
+  calendarRef: MutableRefObject<CalendarApi | null>,
   timezone: string,
+  showEventPreview: (event: SavedEvent, date: Date) => void,
   displayedPeriod: Period
 ): JSX.Element | null {
   const { t } = useI18n()
@@ -66,6 +71,11 @@ export function useEventSaveFeedback(
     )
   }
 
+  const handleShow = (): void => {
+    calendarRef.current?.gotoDate(date)
+    showEventPreview(notice.event, date)
+    closeNotice()
+  }
   const formattedDate = formatSavedDate(
     date,
     notice.savedAt,
@@ -80,6 +90,16 @@ export function useEventSaveFeedback(
       setOpen={handleSetOpen}
       message={t('event.savedFor', { date: formattedDate })}
       autoHideDuration={6000}
+      action={
+        <Button
+          color="secondary"
+          variant="text"
+          size="small"
+          onClick={handleShow}
+        >
+          {t('actions.show')}
+        </Button>
+      }
     />
   )
 }
