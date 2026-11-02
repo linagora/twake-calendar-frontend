@@ -378,8 +378,9 @@
       "detected": "Votre navigateur indique que vous êtes dans le fuseau horaire %{browserTZ}. Souhaitez-vous mettre à jour votre fuseau horaire ? Vous pourrez le modifier ultérieurement dans les Paramètres."
     },
     "notifications.empty": "Paramètres de notifications à venir",
-    "notifications.email": "Email",
-    "notifications.deliveryMethod": "Mode de réception",
+    "notifications.email": "M’envoyer les rappels par e-mail",
+    "notifications.deliveryMethod": "Rappels",
+    "notifications.emailDesc": "Pour les événements dont le champ « Notification » prévoit un rappel.",
     "alarmEmailsUpdateError": "Échec de la mise à jour du mode de notification par e-mail",
     "displayWeekNumbers": "Afficher le numéro de la semaine",
     "displayWeekNumbersUpdateError": "Échec de la mise à jour de l'affichage du numéro de la semaine",

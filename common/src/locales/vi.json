@@ -378,8 +378,9 @@
       "detected": "Trình duyệt của bạn cho biết bạn đang ở múi giờ %{browserTZ}. Bạn có muốn cập nhật múi giờ của mình không? Bạn có thể thay đổi sau trong Cài đặt."
     },
     "notifications.empty": "Cài đặt thông báo sắp có",
-    "notifications.email": "Email",
-    "notifications.deliveryMethod": "Phương thức gửi",
+    "notifications.email": "Gửi lời nhắc cho tôi qua email",
+    "notifications.deliveryMethod": "Lời nhắc",
+    "notifications.emailDesc": "Áp dụng cho các sự kiện có đặt lời nhắc trong trường “Thông báo”.",
     "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "displayWeekNumbers": "Hiển thị số tuần",
     "displayWeekNumbersUpdateError": "Không cập nhật được cách hiển thị số tuần",

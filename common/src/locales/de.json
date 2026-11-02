@@ -378,8 +378,9 @@
       "detected": "Laut Ihrem Browser befinden Sie sich in der Zeitzone %{browserTZ}. Möchten Sie Ihre Zeitzone aktualisieren? Sie können sie später in den Einstellungen ändern."
     },
     "notifications.empty": "Benachrichtigungseinstellungen sind bald verfügbar",
-    "notifications.email": "E-Mail",
-    "notifications.deliveryMethod": "Zustellungsart",
+    "notifications.email": "Erinnerungen per E-Mail senden",
+    "notifications.deliveryMethod": "Erinnerungen",
+    "notifications.emailDesc": "Für Termine, bei denen im Feld „Benachrichtigung“ eine Erinnerung eingestellt ist.",
     "alarmEmailsUpdateError": "Die Einstellung für E-Mail-Benachrichtigungen konnte nicht aktualisiert werden",
     "displayWeekNumbers": "Kalenderwoche anzeigen",
     "displayWeekNumbersUpdateError": "Die Anzeige der Kalenderwoche konnte nicht aktualisiert werden",
