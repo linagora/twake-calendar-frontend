@@ -96,6 +96,16 @@ describe('selectPrintEvents', () => {
     expect(event.end.format('YYYY-MM-DD')).toBe('2026-03-11')
   })
 
+  it('ends the one-day fallback at local midnight after the clocks went forward', () => {
+    const [event] = selectPrintEvents(
+      [makeEvent({ start: '2016-03-27', end: 'tomorrow', allday: true })],
+      'Europe/London',
+      '(No title)'
+    )
+
+    expect(event.end.toISOString()).toBe('2016-03-27T23:00:00.000Z')
+  })
+
   it('falls back to the default span when a timed end cannot be read', () => {
     const [event] = selectPrintEvents(
       [makeEvent({ start: '2026-03-10T09:00:00Z', end: 'tomorrow' })],

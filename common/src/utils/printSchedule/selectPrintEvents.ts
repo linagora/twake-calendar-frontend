@@ -27,6 +27,14 @@ const resolveInstant = (
   return allDay ? dayjs.tz(source, timezone) : parsed.tz(timezone)
 }
 
+// On a `dayjs.tz` instance `add` keeps the UTC offset of the start, so across
+// a DST change one day later is not local midnight: `startOf` resolves the
+// wall time again in the zone.
+const oneDayLater = (start: Dayjs): Dayjs => start.add(1, 'day').startOf('day')
+
+const fallbackEnd = (start: Dayjs, allDay: boolean, minutes: number): Dayjs =>
+  allDay ? oneDayLater(start) : start.add(minutes, 'minute')
+
 const resolveEnd = (
   event: CalendarEvent,
   start: Dayjs,
@@ -35,19 +43,13 @@ const resolveEnd = (
 ): Dayjs => {
   const rawEnd = event.end
     ? resolveInstant(event.end, allDay, timezone)
-    : start.add(
-        allDay ? 1 : DEFAULT_DURATION_MINUTES,
-        allDay ? 'day' : 'minute'
-      )
+    : fallbackEnd(start, allDay, DEFAULT_DURATION_MINUTES)
   // Guard against malformed events whose end is unreadable or precedes their
   // start, keeping all-day events at least a full day and timed events a
   // minute-based span.
   return rawEnd.isValid() && rawEnd.isAfter(start)
     ? rawEnd
-    : start.add(
-        allDay ? 1 : FALLBACK_DURATION_MINUTES,
-        allDay ? 'day' : 'minute'
-      )
+    : fallbackEnd(start, allDay, FALLBACK_DURATION_MINUTES)
 }
 
 /**
