@@ -229,7 +229,19 @@ describe('renderPrintDocument', () => {
     }
   )
 
+  it.each(['#12345', '#1234567', '#12'])(
+    'writes its own colours for the hexadecimal colour %s of invalid length',
+    color => {
+      expect(renderSchedule(color)).toContain(
+        'background:#5b6b8c;border-left-color:#3f4c66;'
+      )
+    }
+  )
+
   it.each([
+    '#369',
+    '#3699',
+    '#33669980',
     '#336699',
     'red',
     'rgb(51, 102, 153)',
@@ -266,6 +278,37 @@ describe('renderPrintDocument', () => {
         }
       ],
       locale: 'en',
+      labels: LABELS
+    })
+
+    expect(html).toContain('Late call')
+  })
+
+  it('prints an event late on the day the clocks went back', () => {
+    const tz = 'Europe/London'
+    const html = renderPrintDocument({
+      periods: buildPrintPeriods(
+        'day',
+        dayjs.tz('2016-10-30', tz).startOf('day'),
+        dayjs.tz('2016-10-30', tz).startOf('day')
+      ),
+      calendars: [
+        {
+          events: selectPrintEvents(
+            [
+              makeEvent({
+                start: '2016-10-30T23:15:00Z',
+                end: '2016-10-30T23:45:00Z',
+                title: 'Late call'
+              })
+            ],
+            tz,
+            LABELS.noTitle
+          )
+        }
+      ],
+      locale: 'en',
+      layout: 'schedule',
       labels: LABELS
     })
 

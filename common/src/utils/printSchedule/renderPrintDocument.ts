@@ -51,7 +51,7 @@ const esc = (value: string): string =>
 // `url(` would let it add declarations or load a remote resource. Function
 // arguments hold no parenthesis, colon nor semicolon, so they cannot nest.
 const SAFE_COLOR =
-  /^(#[0-9a-f]{3,8}|[a-z]+|(rgba?|hsla?)\([0-9a-z.,%\s/+-]*\))$/i
+  /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|[a-z]+|(rgba?|hsla?)\([0-9a-z.,%\s/+-]*\))$/i
 
 const safeColor = (color?: string): string | undefined => {
   const trimmed = color?.trim()
@@ -113,7 +113,9 @@ const renderDayColumn = (
   bounds: HourRange
 ): string => {
   const dayStart = day.startOf('day')
-  const dayEnd = dayStart.add(1, 'day')
+  // `add` keeps the offset of the day start: `startOf` resolves local
+  // midnight again, which moves on a DST change
+  const dayEnd = dayStart.add(1, 'day').startOf('day')
   const forDay = timed.filter(
     event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
   )
@@ -259,7 +261,9 @@ const renderScheduleDay = (
   locale: string
 ): string => {
   const dayStart = day.startOf('day')
-  const dayEnd = dayStart.add(1, 'day')
+  // `add` keeps the offset of the day start: `startOf` resolves local
+  // midnight again, which moves on a DST change
+  const dayEnd = dayStart.add(1, 'day').startOf('day')
   const dayEvents = periodEvents
     .filter(
       event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
