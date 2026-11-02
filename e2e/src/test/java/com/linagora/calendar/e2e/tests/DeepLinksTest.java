@@ -193,7 +193,7 @@ class DeepLinksTest extends TwakeCalendarE2ETest {
 
         PlaywrightAssertions.assertThat(page.getByText(title).first())
             .isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(30_000));
-        assertThat(page.locator(".MuiPopover-root, [role=dialog]").last().innerText())
+        assertThat(page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last().innerText())
             .contains("Recurrent Event");
     }
 }

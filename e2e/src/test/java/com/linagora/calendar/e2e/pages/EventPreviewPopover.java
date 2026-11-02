@@ -21,11 +21,12 @@ public class EventPreviewPopover {
     }
 
     public String text() {
-        return page.locator(".MuiPopover-root, [role=dialog]").last().innerText();
+        return page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last().innerText();
     }
 
+    /** The preview, as the last popover or dialog on screen: closed menus stay mounted, hidden. */
     public Locator content() {
-        return page.locator(".MuiPopover-root, [role=dialog]").last();
+        return page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last();
     }
 
     public EventFormModal edit() {
@@ -119,7 +120,7 @@ public class EventPreviewPopover {
         for (int index = 0; index < siblings.count(); index++) {
             siblings.nth(index).click();
             page.waitForTimeout(500);
-            if (page.locator("[role=menu], [role=menuitem]").count() > 0) {
+            if (page.locator("[role=menu]:visible, [role=menuitem]:visible").count() > 0) {
                 return this;
             }
         }

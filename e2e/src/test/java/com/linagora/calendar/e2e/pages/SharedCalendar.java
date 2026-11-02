@@ -130,8 +130,8 @@ public class SharedCalendar {
         Locator row = row().first();
         row.hover();
         row.locator("button").last().click();
-        grantee.locator("[role=menuitem]").first().waitFor();
-        List<String> entries = grantee.locator("[role=menuitem]").allInnerTexts();
+        grantee.locator("[role=menuitem]:visible").first().waitFor();
+        List<String> entries = grantee.locator("[role=menuitem]:visible").allInnerTexts();
         grantee.keyboard().press("Escape");
         return entries;
     }

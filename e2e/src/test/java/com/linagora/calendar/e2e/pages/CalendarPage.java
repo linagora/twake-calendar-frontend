@@ -406,20 +406,21 @@ public class CalendarPage {
 
     /**
      * Opens the overflow menu of a sidebar calendar row. The button only shows on hover, so the
-     * row is hovered first.
+     * row is hovered first. Every row keeps its menu mounted while closed, hence the visible
+     * items only.
      */
     public CalendarPage openCalendarMenu(String calendarName) {
         Locator row = page.locator("li:has(label[aria-label='" + calendarName + "'])");
         row.hover();
         row.locator("button").last().click();
-        page.locator("[role=menuitem]").first().waitFor();
+        page.locator("[role=menuitem]:visible").first().waitFor();
         return this;
     }
 
     /** What the overflow menu of a calendar offers. */
     public List<String> calendarMenuEntries(String calendarName) {
         openCalendarMenu(calendarName);
-        List<String> entries = page.locator("[role=menuitem]").allInnerTexts();
+        List<String> entries = page.locator("[role=menuitem]:visible").allInnerTexts();
         page.keyboard().press("Escape");
         return entries;
     }

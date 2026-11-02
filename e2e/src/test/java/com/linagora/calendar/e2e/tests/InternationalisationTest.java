@@ -198,7 +198,7 @@ class InternationalisationTest extends TwakeCalendarE2ETest {
 
         calendar.eventCard(title).first().click();
         Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
-            assertThat(page.locator(".MuiPopover-root, [role=dialog]").last().innerText())
+            assertThat(page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last().innerText())
                 .contains("Événement récurrent")
                 .contains("toutes les semaines"));
     }
