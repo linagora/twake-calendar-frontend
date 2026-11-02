@@ -12,7 +12,7 @@ import {
   parseMoment
 } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
-import { normalizeCalAddress } from '@common/utils/normalizeEmail'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { makeSeriesVtimezones } from './seriesVtimezones'
 
 function isAllDayProp(prop: VObjectProperty | undefined): boolean {
@@ -102,7 +102,7 @@ export function updateSeriesPartstatJCal(
         // Find ATTENDEE properties & Check if this is the target attendee
         if (
           prop[0].toLowerCase() === 'attendee' &&
-          normalizeCalAddress(calAddress) === normalizeCalAddress(attendeeEmail)
+          normalizeIdentity(calAddress) === normalizeIdentity(attendeeEmail)
         ) {
           // Update PARTSTAT parameter
           const params = { ...(prop[1] as Record<string, string>), partstat }

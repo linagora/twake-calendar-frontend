@@ -2,7 +2,7 @@ import {
   VCalComponent,
   VObjectProperty
 } from '@common/features/Calendars/types/CalendarData'
-import { normalizeCalAddress } from '@common/utils/normalizeEmail'
+import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { getTzidParam, sameRecurrence } from './recurrenceInstant'
 
 /**
@@ -86,7 +86,7 @@ export function updateEventPartstatJCal(
           }
 
           const params = (prop[1] ?? {}) as Record<string, string>
-          const calAddress = normalizeCalAddress(prop[3] as string | undefined)
+          const calAddress = normalizeIdentity(prop[3] as string | undefined)
 
           if (matchAttendee(params, calAddress)) {
             matched = true
