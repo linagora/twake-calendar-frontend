@@ -8,6 +8,7 @@ interface CalendarSelectorDesktopMenuProps {
   open: boolean
   onClose: () => void
   onModify: () => void
+  onShare?: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
   onPrint?: () => void
@@ -25,6 +26,7 @@ export const CalendarSelectorDesktopMenu: React.FC<
   open,
   onClose,
   onModify,
+  onShare,
   onDelete,
   onToggleVisibility,
   onPrint,
@@ -61,6 +63,17 @@ export const CalendarSelectorDesktopMenu: React.FC<
       >
         {t('actions.modify')}
       </MenuItem>
+      {onShare !== undefined && <Divider />}
+      {onShare !== undefined && (
+        <MenuItem
+          onClick={() => {
+            onShare()
+            onClose()
+          }}
+        >
+          {t('calendar.share')}
+        </MenuItem>
+      )}
       {onPrint !== undefined && <Divider />}
       {onPrint !== undefined && (
         <MenuItem

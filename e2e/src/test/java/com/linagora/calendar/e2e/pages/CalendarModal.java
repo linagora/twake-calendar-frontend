@@ -119,6 +119,13 @@ public class CalendarModal {
         String before = secretUrl();
         dialog().getByRole(AriaRole.BUTTON,
             new Locator.GetByRoleOptions().setName("Reset").setExact(true)).click();
+        // the reset cuts off every subscriber: the tab asks for a confirmation first
+        Locator confirmation = page.locator("[role=dialog]")
+            .filter(new Locator.FilterOptions().setHasText("Reset the secret URL?"));
+        confirmation.getByRole(AriaRole.BUTTON,
+            new Locator.GetByRoleOptions().setName("Reset").setExact(true)).click();
+        confirmation.waitFor(new Locator.WaitForOptions()
+            .setState(com.microsoft.playwright.options.WaitForSelectorState.DETACHED));
         page.waitForFunction("""
             previous => {
               const field = Array.from(document.querySelectorAll('input'))
@@ -208,8 +215,9 @@ public class CalendarModal {
         Locator selector = accessRow(email).locator("[role=combobox]").first();
         selector.click();
         page.locator("li[role=option]").first().waitFor();
+        // each option prints the right's name, then what it allows on the lines below
         java.util.List<String> options = page.locator("li[role=option]").allInnerTexts()
-            .stream().map(String::trim).toList();
+            .stream().map(text -> text.trim().split("\\R", 2)[0].trim()).toList();
         page.keyboard().press("Escape");
         return options;
     }
