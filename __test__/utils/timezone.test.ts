@@ -114,6 +114,15 @@ describe('convertEventDateTimeToISO', () => {
     expect(result).toBe('2024-03-08T16:00:00.000Z') // UTC-normalized equivalent of Europe/Paris winter time (UTC+1)
   })
 
+  it.each(['constructor', 'toString', 'Not/AZone'])(
+    'reads a floating date-time in the zone %s moment-timezone does not know as UTC',
+    timezone => {
+      expect(convertEventDateTimeToISO('20261104T090000', timezone)).toBe(
+        '2026-11-04T09:00:00.000Z'
+      )
+    }
+  )
+
   it('should leave an already normalized extended ISO string in UTC unchanged', () => {
     const result = convertEventDateTimeToISO('2024-04-05T15:00:00Z', 'UTC')
     expect(result).toBe('2024-04-05T15:00:00Z')

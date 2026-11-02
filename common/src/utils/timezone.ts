@@ -125,8 +125,14 @@ export function convertEventDateTimeToISO(
     return undefined
   }
 
+  // moment-timezone reads an unknown zone as UTC but throws on an inherited
+  // name such as "constructor": read that one as UTC too.
   const format = detectDateTimeFormat(normalized)
-  const momentDate = moment.tz(normalized, format, timezone)
+  const momentDate = moment.tz(
+    normalized,
+    format,
+    isMomentZone(timezone) ? timezone : 'UTC'
+  )
   if (!momentDate.isValid()) {
     console.warn(
       `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${timezone}"`
