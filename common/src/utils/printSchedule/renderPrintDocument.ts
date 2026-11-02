@@ -135,7 +135,10 @@ const renderDayColumn = (
   const forDay = timed.filter(
     event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
   )
-  const blocks = layoutTimedEvents(forDay)
+  const blocks = layoutTimedEvents(forDay, event => ({
+    start: gridMinutes(event.start, dayStart, dayEnd),
+    end: gridMinutes(event.end, dayStart, dayEnd)
+  }))
     .map(placement => renderTimedEvent(placement, dayStart, dayEnd, bounds))
     .join('')
 
