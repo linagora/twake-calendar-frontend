@@ -16,7 +16,7 @@ const PERSONAL_CAL_ID = 'alice/alice'
 const calendar = (id: string): Calendar => ({
   id,
   name: id,
-  link: `/calendars/${id}.json`,
+  link: `/calendars/${id}`,
   owner: { firstname: 'Owner', emails: ['owner@example.com'] },
   color: { light: '#006BD8', dark: '#FFF' },
   visibility: 'private',
@@ -26,7 +26,7 @@ const calendar = (id: string): Calendar => ({
 // As loaded for a member: delegated, read through the member's own instance.
 const teamCalendar = (id: string): Calendar => ({
   ...calendar(id),
-  link: '/calendars/alice/instance1.json',
+  link: '/calendars/alice/instance1',
   delegated: true
 })
 

@@ -18,7 +18,7 @@ const INSTANCE = '/calendars/sharee1/instance1'
 const delegatedCalendar: Calendar = {
   id: OWNER_CAL_ID,
   name: 'Shared by owner',
-  link: `${INSTANCE}.json`,
+  link: `${INSTANCE}`,
   owner: { firstname: 'Owner', emails: ['owner@example.com'] },
   delegated: true,
   color: { light: '#006BD8', dark: '#FFF' },
@@ -80,7 +80,7 @@ describe('reading a calendar shared with the user', () => {
     )
 
     expect(CalendarDAO.fetchCalendar).toHaveBeenCalledWith(
-      expect.objectContaining({ link: `${INSTANCE}.json`, delegated: true }),
+      expect.objectContaining({ link: `${INSTANCE}`, delegated: true }),
       expect.anything(),
       undefined
     )

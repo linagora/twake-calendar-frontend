@@ -55,7 +55,7 @@ describe('Event Full Display — delegated calendar move', () => {
               URL: '/calendar/user1/cal1/event1.ics'
             }
           },
-          link: '/calendar/user1/cal1.json'
+          link: '/calendar/user1/cal1'
         },
         'user2/cal2': {
           id: 'user2/cal2',
@@ -68,7 +68,7 @@ describe('Event Full Display — delegated calendar move', () => {
             name: 'Delegate User'
           },
           events: {},
-          link: '/calendar/user2/cal2.json'
+          link: '/calendar/user2/cal2'
         }
       }
     }

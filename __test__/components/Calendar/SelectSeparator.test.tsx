@@ -8,7 +8,7 @@ import { renderWithProviders } from '../../utils/Renderwithproviders'
 const calendar = (id: string, name: string, delegated: boolean): Calendar =>
   ({
     id,
-    link: `/calendars/${id}.json`,
+    link: `/calendars/${id}`,
     name,
     delegated,
     owner: { firstname: 'Alice', lastname: 'Doe', emails: ['alice@test.com'] },

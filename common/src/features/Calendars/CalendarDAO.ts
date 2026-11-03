@@ -11,7 +11,7 @@ export async function fetchCalendars(
   signal?: AbortSignal
 ): Promise<CalendarList> {
   const calendars = await api
-    .get(`dav/calendars/${userId}.json?${scope}`, {
+    .get(`dav/calendars/${userId}?${scope}`, {
       headers: { Accept: 'application/calendar+json' },
       signal
     })
@@ -39,7 +39,7 @@ export async function fetchCalendar(
   match: { start: string; end: string },
   signal?: AbortSignal
 ): Promise<unknown> {
-  const response = await api(`dav${calendarDavPath(calendar)}.json`, {
+  const response = await api(`dav${calendarDavPath(calendar)}`, {
     method: 'REPORT',
     headers: { Accept: 'application/json, text/plain, */*' },
     body: JSON.stringify({ match }),
@@ -53,7 +53,7 @@ export async function fetchEventByUid(
   uid: string,
   signal?: AbortSignal
 ): Promise<unknown> {
-  const response = await api(`dav/calendars/${userId}.json`, {
+  const response = await api(`dav/calendars/${userId}`, {
     method: 'REPORT',
     headers: { Accept: 'application/json, text/plain, */*' },
     body: JSON.stringify({ uid }),
@@ -118,7 +118,7 @@ export async function fetchCalendarExport(calLink: string): Promise<string> {
 export async function fetchSyncTokenChanges(
   calendar: Calendar
 ): Promise<DavSyncResponse> {
-  const response = await api(`dav${calendarDavPath(calendar)}.json`, {
+  const response = await api(`dav${calendarDavPath(calendar)}`, {
     method: 'REPORT',
     headers: {
       Accept: 'application/json, text/plain, */*'

@@ -608,7 +608,7 @@ describe('CalendarSelection', () => {
   describe('booking link row actions', () => {
     const bookingLink = {
       publicId: 'consult-id',
-      calendarUrl: '/calendars/user1/cal1.json',
+      calendarUrl: '/calendars/user1/cal1',
       durationMinutes: 30,
       active: true,
       autoAccept: false,

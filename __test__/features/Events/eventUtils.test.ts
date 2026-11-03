@@ -1576,7 +1576,7 @@ describe('parseCalendarEvent - delegated calendar URL handling', () => {
     const calendar = {
       id: 'user1/cal1',
       delegated: false,
-      link: '/calendars/user1/cal1.json'
+      link: '/calendars/user1/cal1'
     } as Calendar
 
     it('uses the raw eventURL as-is', () => {
@@ -1594,7 +1594,7 @@ describe('parseCalendarEvent - delegated calendar URL handling', () => {
     const calendar = {
       id: 'user2/cal1',
       delegated: true,
-      link: '/calendars/user2/cal1.json',
+      link: '/calendars/user2/cal1',
       owner: { emails: ['owner@example.com'] }
     } as unknown as Calendar
 

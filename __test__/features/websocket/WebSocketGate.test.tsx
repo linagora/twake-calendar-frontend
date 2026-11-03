@@ -167,12 +167,12 @@ describe('WebSocketGate', () => {
               list: {
                 'owner1/cal1': {
                   id: 'owner1/cal1',
-                  link: '/calendars/sharee1/instance1.json',
+                  link: '/calendars/sharee1/instance1',
                   delegated: true
                 },
                 'sharee1/own': {
                   id: 'sharee1/own',
-                  link: '/calendars/sharee1/own.json'
+                  link: '/calendars/sharee1/own'
                 }
               }
             }

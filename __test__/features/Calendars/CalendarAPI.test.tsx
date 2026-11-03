@@ -32,7 +32,7 @@ describe('Calendar DAO', () => {
     const calendars = await fetchCalendars(mockUserId)
 
     expect(api.get).toHaveBeenCalledWith(
-      `dav/calendars/${mockUserId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
+      `dav/calendars/${mockUserId}?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
       {
         headers: { Accept: 'application/calendar+json' }
       }
@@ -77,11 +77,11 @@ describe('Calendar DAO', () => {
     })
 
     const result = await fetchCalendar(
-      { id: calendarId, link: `/calendars/${calendarId}.json` },
+      { id: calendarId, link: `/calendars/${calendarId}` },
       match
     )
 
-    expect(api).toHaveBeenCalledWith(`dav/calendars/${calendarId}.json`, {
+    expect(api).toHaveBeenCalledWith(`dav/calendars/${calendarId}`, {
       method: 'REPORT',
       headers: {
         Accept: 'application/json, text/plain, */*'
@@ -101,14 +101,14 @@ describe('Calendar DAO', () => {
     await fetchCalendar(
       {
         id: 'owner1/calendar1',
-        link: '/calendars/sharee1/instance1.json',
+        link: '/calendars/sharee1/instance1',
         delegated: true
       },
       match
     )
 
     expect(api).toHaveBeenCalledWith(
-      'dav/calendars/sharee1/instance1.json',
+      'dav/calendars/sharee1/instance1',
       expect.objectContaining({ method: 'REPORT' })
     )
   })
@@ -120,12 +120,12 @@ describe('Calendar DAO', () => {
 
     await fetchSyncTokenChanges({
       id: 'owner1/calendar1',
-      link: '/calendars/sharee1/instance1.json',
+      link: '/calendars/sharee1/instance1',
       delegated: true,
       syncToken: 'token-1'
     } as Calendar)
 
-    expect(api).toHaveBeenCalledWith('dav/calendars/sharee1/instance1.json', {
+    expect(api).toHaveBeenCalledWith('dav/calendars/sharee1/instance1', {
       method: 'REPORT',
       headers: { Accept: 'application/json, text/plain, */*' },
       body: JSON.stringify({ 'sync-token': 'token-1' })
@@ -139,12 +139,12 @@ describe('Calendar DAO', () => {
 
     await fetchSyncTokenChanges({
       id: 'user1/calendar1',
-      link: '/calendars/user1/calendar1.json',
+      link: '/calendars/user1/calendar1',
       syncToken: 'token-1'
     } as Calendar)
 
     expect(api).toHaveBeenCalledWith(
-      'dav/calendars/user1/calendar1.json',
+      'dav/calendars/user1/calendar1',
       expect.objectContaining({ method: 'REPORT' })
     )
   })
@@ -160,7 +160,7 @@ describe('Calendar DAO', () => {
 
     const result = await fetchEventByUid(userId, uid)
 
-    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
+    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}`, {
       method: 'REPORT',
       headers: {
         Accept: 'application/json, text/plain, */*'
@@ -186,9 +186,9 @@ describe('Calendar DAO', () => {
       'caldav:description': 'desc'
     })
 
-    await calendarAction('POST', `/calendars/${userId}.json`, body)
+    await calendarAction('POST', `/calendars/${userId}`, body)
 
-    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
+    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}`, {
       headers: {
         Accept: 'application/json, text/plain, */*'
       },
@@ -198,7 +198,7 @@ describe('Calendar DAO', () => {
   })
 
   it('patch Calendar via calendarAction', async () => {
-    const calLink = '/calendars/calId.json'
+    const calLink = '/calendars/calId'
     const body = JSON.stringify({
       'dav:name': 'new cal',
       'caldav:description': 'desc',
@@ -217,7 +217,7 @@ describe('Calendar DAO', () => {
   })
 
   it('remove Calendar via calendarAction', async () => {
-    const calLink = '/calendars/calId.json'
+    const calLink = '/calendars/calId'
     await calendarAction('DELETE', calLink)
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
@@ -229,7 +229,7 @@ describe('Calendar DAO', () => {
   })
 
   it('get secret link without reset', async () => {
-    const calLink = '/calendars/calId.json'
+    const calLink = '/calendars/calId'
     ;(api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue({ secretLink: 'link' })
     })
@@ -248,7 +248,7 @@ describe('Calendar DAO', () => {
     )
   })
   it('get secret link with reset', async () => {
-    const calLink = '/calendars/calId.json'
+    const calLink = '/calendars/calId'
     ;(api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue('link')
     })
@@ -265,7 +265,7 @@ describe('Calendar DAO', () => {
   })
 
   it('get export data ', async () => {
-    const calLink = '/calendars/calId.json'
+    const calLink = '/calendars/calId'
     ;(api.get as jest.Mock).mockReturnValue({
       text: jest.fn().mockResolvedValue('data')
     })
@@ -289,7 +289,7 @@ describe('Calendar DAO', () => {
         invite: [],
         _links: {
           self: {
-            href: '/calendars/owner123/cal123.json'
+            href: '/calendars/owner123/cal123'
           }
         }
       },
@@ -314,11 +314,11 @@ describe('Calendar DAO', () => {
       remove: []
     }
 
-    await updateDelegationCalendar('/calendars/user/cal1.json', share)
+    await updateDelegationCalendar('/calendars/user/cal1', share)
 
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
-        'dav/calendars/user/cal1.json',
+        'dav/calendars/user/cal1',
         expect.objectContaining({
           body: JSON.stringify({ share })
         })

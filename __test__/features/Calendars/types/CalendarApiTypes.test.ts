@@ -4,14 +4,14 @@ describe('CalDavLink', () => {
   describe('parseCalendarId', () => {
     it('extracts calendar ID from simple path', () => {
       const link = new CalDavLink({
-        self: { href: '/calendars/user123/cal456.json' }
+        self: { href: '/calendars/user123/cal456' }
       })
       expect(link.parseCalendarId()).toBe('user123/cal456')
     })
 
     it('extracts calendar ID from full URL', () => {
       const link = new CalDavLink({
-        self: { href: 'https://example.com/calendars/user123/cal456.json' }
+        self: { href: 'https://example.com/calendars/user123/cal456' }
       })
       expect(link.parseCalendarId()).toBe('user123/cal456')
     })
@@ -33,14 +33,14 @@ describe('CalDavLink', () => {
 
     it('handles complex calendar IDs with multiple slashes', () => {
       const link = new CalDavLink({
-        self: { href: '/calendars/user@domain.com/calendar/shared.json' }
+        self: { href: '/calendars/user@domain.com/calendar/shared' }
       })
       expect(link.parseCalendarId()).toBe('user@domain.com/calendar/shared')
     })
 
     it('handles URL with port', () => {
       const link = new CalDavLink({
-        self: { href: 'https://example.com:8080/calendars/user123/cal456.json' }
+        self: { href: 'https://example.com:8080/calendars/user123/cal456' }
       })
       expect(link.parseCalendarId()).toBe('user123/cal456')
     })
@@ -49,14 +49,14 @@ describe('CalDavLink', () => {
   describe('getFirstSubId', () => {
     it('extracts resource ID from simple path', () => {
       const link = new CalDavLink({
-        self: { href: '/calendars/user123/cal456.json' }
+        self: { href: '/calendars/user123/cal456' }
       })
       expect(link.getFirstSubId()).toBe('user123')
     })
 
     it('extracts resource ID from complex path', () => {
       const link = new CalDavLink({
-        self: { href: '/calendars/user@domain.com/calendar/shared.json' }
+        self: { href: '/calendars/user@domain.com/calendar/shared' }
       })
       expect(link.getFirstSubId()).toBe('user@domain.com')
     })
@@ -73,7 +73,7 @@ describe('CalDavLink', () => {
 
     it('handles full URL', () => {
       const link = new CalDavLink({
-        self: { href: 'https://example.com/calendars/user123/cal456.json' }
+        self: { href: 'https://example.com/calendars/user123/cal456' }
       })
       expect(link.getFirstSubId()).toBe('user123')
     })
@@ -82,7 +82,7 @@ describe('CalDavLink', () => {
   describe('static parseCalendarIdFromHref', () => {
     it('extracts calendar ID from href string', () => {
       expect(
-        CalDavLink.parseCalendarIdFromHref('/calendars/user123/cal456.json')
+        CalDavLink.parseCalendarIdFromHref('/calendars/user123/cal456')
       ).toBe('user123/cal456')
     })
 
@@ -100,7 +100,7 @@ describe('CalDavLink', () => {
   describe('static getFirstIdFromHref', () => {
     it('extracts resource ID from href string', () => {
       expect(
-        CalDavLink.getFirstIdFromHref('/calendars/user123/cal456.json')
+        CalDavLink.getFirstIdFromHref('/calendars/user123/cal456')
       ).toBe('user123')
     })
 
@@ -116,9 +116,9 @@ describe('CalDavLink', () => {
   describe('constructor', () => {
     it('creates instance with data', () => {
       const link = new CalDavLink({
-        self: { href: '/calendars/user/cal.json' }
+        self: { href: '/calendars/user/cal' }
       })
-      expect(link.self?.href).toBe('/calendars/user/cal.json')
+      expect(link.self?.href).toBe('/calendars/user/cal')
     })
 
     it('creates empty instance when no data provided', () => {

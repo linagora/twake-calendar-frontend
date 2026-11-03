@@ -57,7 +57,7 @@ const baseCalendar: Calendar = {
   name: 'My Calendar',
   description: '',
   color: { color: '#0062FF', dark: '#FFF' },
-  link: '/calendars/user1/cal1.json',
+  link: '/calendars/user1/cal1',
   visibility: 'public',
   events: {},
   invite: [],

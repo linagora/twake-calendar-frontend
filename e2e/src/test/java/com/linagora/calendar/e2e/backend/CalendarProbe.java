@@ -192,7 +192,7 @@ public class CalendarProbe {
     /** The default calendar of the user, as the JSON listing of their home describes it. */
     private JsonNode listedDefaultCalendar(E2EUser user) {
         HttpResponse<String> response = execute(user, "GET",
-            "/calendars/" + requireOpenPaasId(user) + ".json?personal=true&withRights=true",
+            "/calendars/" + requireOpenPaasId(user) + "?personal=true&withRights=true",
             null, null, "application/calendar+json");
         if (response.statusCode() != 200) {
             throw new IllegalStateException("Could not list the calendars of " + user.email()
@@ -225,7 +225,7 @@ public class CalendarProbe {
         LocalDate today = E2EClock.today();
         String body = "{\"match\":{\"start\":\"" + today.minusDays(7).format(DAY) + "T000000\","
             + "\"end\":\"" + today.plusDays(7).format(DAY) + "T000000\"}}";
-        return execute(reader, "REPORT", calendarPath + ".json", body, "application/json",
+        return execute(reader, "REPORT", calendarPath, body, "application/json",
             "application/json").statusCode();
     }
 
@@ -270,7 +270,7 @@ public class CalendarProbe {
 
     private String defaultCalendarJsonPath(E2EUser user) {
         String id = requireOpenPaasId(user);
-        return "/calendars/" + id + "/" + id + ".json";
+        return "/calendars/" + id + "/" + id;
     }
 
     private String get(E2EUser user, String href) {

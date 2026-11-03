@@ -75,8 +75,8 @@ class SecurityTest extends TwakeCalendarE2ETest {
         // ask for their collection, and for the events in it, carrying my own token
         Object leaked = page.evaluate(
             "async ({ token, id }) => {"
-            + " const paths = ['/dav/calendars/' + id + '.json',"
-            + "                '/dav/calendars/' + id + '/' + id + '.json'];"
+            + " const paths = ['/dav/calendars/' + id,"
+            + "                '/dav/calendars/' + id + '/' + id];"
             + " const bodies = [];"
             + " for (const path of paths) {"
             + "   const response = await fetch('http://api' + path,"

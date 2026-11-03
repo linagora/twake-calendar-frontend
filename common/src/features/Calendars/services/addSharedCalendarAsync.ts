@@ -76,7 +76,7 @@ export const addSharedCalendarThunk = (
 
       try {
         const body = makeAddSharedCalendarBody(calId, cal)
-        await calendarAction('POST', `/calendars/${userId}.json`, body)
+        await calendarAction('POST', `/calendars/${userId}`, body)
         let ownerData: OpenPaasUserData = {
           id: userId,
           firstname: '',
@@ -100,9 +100,7 @@ export const addSharedCalendarThunk = (
         return {
           calId: new CalDavLink(cal.cal._links).parseCalendarId() ?? calId,
           color: cal.color,
-          link:
-            delegated?._links.self?.href ??
-            `/calendars/${userId}/${calId}.json`,
+          link: delegated?._links.self?.href ?? `/calendars/${userId}/${calId}`,
           desc: cal.cal['caldav:description'] ?? '',
           name: cal.cal['dav:name'] ?? '',
           delegated: !!delegated,
