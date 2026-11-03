@@ -40,6 +40,17 @@ describe('Calendar - Timezone Integration', () => {
     vi.clearAllMocks()
   })
 
+  // Typing filters the ~400 zones down to a few: a role query over all of
+  // them takes seconds, and timed out on a loaded machine
+  const chooseTimeZone = async (city: string): Promise<void> => {
+    fireEvent.click(await screen.findByText(/UTC/i))
+    const autocomplete = await screen.findByRole('combobox')
+    fireEvent.change(autocomplete, { target: { value: city } })
+    fireEvent.click(
+      await screen.findByRole('option', { name: new RegExp(city, 'i') })
+    )
+  }
+
   it('renders TimezoneSelector in week view', async () => {
     renderWithProviders(<CalendarLayout />, baseState)
 
@@ -54,17 +65,7 @@ describe('Calendar - Timezone Integration', () => {
 
     renderWithProviders(<CalendarLayout />, baseState)
 
-    // Find and click timezone selector
-    await waitFor(() => {
-      const timezoneButton = screen.getByText(/UTC/i)
-      fireEvent.click(timezoneButton)
-
-      // Select a different timezone
-      const autocomplete = screen.getByRole('combobox')
-      fireEvent.mouseDown(autocomplete)
-    })
-    const option = await screen.findByRole('option', { name: /tokyo/i })
-    fireEvent.click(option)
+    await chooseTimeZone('Tokyo')
 
     expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Tokyo')
   })
@@ -74,17 +75,7 @@ describe('Calendar - Timezone Integration', () => {
 
     renderWithProviders(<CalendarLayout />, baseState)
 
-    // Find and click timezone selector
-    await waitFor(() => {
-      const timezoneButton = screen.getByText(/UTC/i)
-      fireEvent.click(timezoneButton)
-
-      // Select a different timezone
-      const autocomplete = screen.getByRole('combobox')
-      fireEvent.mouseDown(autocomplete)
-    })
-    const option = await screen.findByRole('option', { name: /jakarta/i })
-    fireEvent.click(option)
+    await chooseTimeZone('Jakarta')
 
     expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Jakarta')
 
