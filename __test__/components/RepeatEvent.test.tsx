@@ -192,10 +192,10 @@ describe('RepeatEvent Component', () => {
     setupRepeatEvent({ freq: 'daily', endDate: '2026-12-30' })
 
     expect(screen.getByTestId('event-repeat-end-date')).toHaveValue(
-      'Wednesday, December 30, 2026'
+      'Wednesday, 30 December 2026'
     )
     expect(screen.getByTestId('event-repeat-end-date-container')).toHaveStyle({
-      width: 'calc(28ch + 40px)',
+      width: 'calc(27ch + 40px)',
       minWidth: '220px'
     })
   })

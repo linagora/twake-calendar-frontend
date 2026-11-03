@@ -52,7 +52,7 @@ describe('BookingSuccessDialog', () => {
     )
 
     expect(screen.getByText(/booking\.success\.subtitle/)).toHaveTextContent(
-      '"date":"Friday, October 30, 2026","time":"09:30"'
+      '"date":"Friday, 30 October 2026","time":"09:30"'
     )
     expect(screen.getByText('(UTC+1) Europe/Paris')).toBeInTheDocument()
   })
@@ -64,7 +64,7 @@ describe('BookingSuccessDialog', () => {
     )
 
     expect(screen.getByText(/booking\.success\.subtitle/)).toHaveTextContent(
-      '"date":"Saturday, October 31, 2026","time":"00:00"'
+      '"date":"Saturday, 31 October 2026","time":"00:00"'
     )
     expect(screen.getByText('(UTC+9) Asia/Tokyo')).toBeInTheDocument()
   })

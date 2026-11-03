@@ -1,6 +1,8 @@
 package com.linagora.calendar.e2e.pages;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -24,6 +26,9 @@ import com.microsoft.playwright.options.WaitUntilState;
 public class CalendarPage {
     /** FullCalendar renders one such element per event, carrying the event uid. */
     public static final String EVENT_CARD = "[data-testid^=event-card]";
+
+    private static final DateTimeFormatter LONG_DATE =
+        DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.ENGLISH);
 
     private final Page page;
 
@@ -255,10 +260,9 @@ public class CalendarPage {
         return page.locator("[data-date='" + day + "']");
     }
 
-    /** The long date format the pickers display: "Monday, August 31, 2026". */
+    /** The long date format the pickers display: "Monday, 31 August 2026". */
     public static String longDate(java.time.LocalDate day) {
-        return day.format(java.time.format.DateTimeFormatter
-            .ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH));
+        return day.format(LONG_DATE);
     }
 
     /** The period the grid currently shows, as the menubar spells it out. */
@@ -295,8 +299,7 @@ public class CalendarPage {
 
     /** The reverse of {@link #longDate}: reads a date back out of a form field. */
     public static java.time.LocalDate parseLongDate(String rendered) {
-        return java.time.LocalDate.parse(rendered, java.time.format.DateTimeFormatter
-            .ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH));
+        return java.time.LocalDate.parse(rendered, LONG_DATE);
     }
 
     /**
