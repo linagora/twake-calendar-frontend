@@ -21,7 +21,7 @@ function renderWithFormIn(
     }
   } as unknown as React.RefObject<EventFormHandle | null>
   const calendarRef = { current: null } as React.RefObject<CalendarApi | null>
-  const setSelectedRange = jest.fn()
+  const setSelectedRange = vi.fn()
 
   const { result } = renderHook(() =>
     useCalendarPreviewSync({ formRef, setSelectedRange, calendarRef })

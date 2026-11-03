@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { useDetectedTimeZoneSync } from '@common/components/Timezone/hooks/useDetectedTimeZoneSync'
 import { setIsBrowserDefaultTimeZone } from '@common/features/Settings/SettingsSlice'
 import { patchConfigurations } from '@common/features/User/UserDao'
@@ -7,11 +8,11 @@ import { act, waitFor } from '@testing-library/react'
 import React from 'react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao', () => {
-  const actual = jest.requireActual('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao', async () => {
+  const actual = await vi.importActual('@common/features/User/UserDao')
   return {
     ...actual,
-    patchConfigurations: jest.fn()
+    patchConfigurations: vi.fn()
   }
 })
 
@@ -44,7 +45,7 @@ describe('useDetectedTimeZoneSync', () => {
   })
 
   beforeEach(() => {
-    ;(patchConfigurations as jest.Mock).mockResolvedValue({ status: 204 })
+    ;(patchConfigurations as Mock).mockResolvedValue({ status: 204 })
   })
 
   it('hands the detected zone to a backend holding another one', async () => {
@@ -93,7 +94,7 @@ describe('useDetectedTimeZoneSync', () => {
 
   it('leaves a zone the user pinned while it was in flight alone', async () => {
     let answerPatch: () => void = () => undefined
-    ;(patchConfigurations as jest.Mock).mockReturnValue(
+    ;(patchConfigurations as Mock).mockReturnValue(
       new Promise(resolve => {
         answerPatch = () => resolve({ status: 204 })
       })

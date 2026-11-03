@@ -1,18 +1,16 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { getEventTimes } from '@common/components/Event/EventChip/EventChipUtils'
 import { EventContentArg } from '@fullcalendar/core'
 import 'moment-timezone'
 
-jest.mock(
-  '@injected/components/Attendees/AttendeeActions',
-  () => ({ AttendeeActions: () => null }),
-  { virtual: true }
-)
+vi.mock('@injected/components/Attendees/AttendeeActions', () => ({
+  AttendeeActions: () => null
+}))
 
-jest.mock('@common/components/Event/EventChip/EventChip', () => ({
+vi.mock('@common/components/Event/EventChip/EventChip', () => ({
   EVENT_DURATION: { SHORT: 15, MEDIUM: 30, LONG: 60 }
 }))
 

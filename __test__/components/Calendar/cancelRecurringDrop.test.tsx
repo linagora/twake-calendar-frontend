@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   createEventHandlers,
   EventHandlersProps
@@ -12,11 +13,11 @@ import { EventResizeDoneArg } from '@fullcalendar/interaction'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/features/Events/EventDao', () => ({
-  fetchEvent: jest.fn()
+vi.mock('@common/features/Events/EventDao', () => ({
+  fetchEvent: vi.fn()
 }))
-jest.mock('@common/features/Events/transformers', () => ({
-  parseFetchedEvent: jest.fn()
+vi.mock('@common/features/Events/transformers', () => ({
+  parseFetchedEvent: vi.fn()
 }))
 
 const calId = 'user1/cal1'
@@ -36,22 +37,22 @@ const occurrence = {
 function setupHandlers(): {
   handlers: ReturnType<typeof createEventHandlers>
   afterChoice: () => AfterChoice
-  dispatch: jest.Mock
+  dispatch: Mock
 } {
-  ;(fetchEvent as jest.Mock).mockResolvedValue({})
-  ;(parseFetchedEvent as jest.Mock).mockReturnValue(occurrence)
+  ;(fetchEvent as Mock).mockResolvedValue({})
+  ;(parseFetchedEvent as Mock).mockReturnValue(occurrence)
   const calendar = {
     id: calId,
     events: { [occurrence.uid]: occurrence }
   } as unknown as Calendar
-  const setAfterChoiceFunc = jest.fn<void, [() => AfterChoice]>()
-  const dispatch = jest.fn()
+  const setAfterChoiceFunc = vi.fn<void, [() => AfterChoice]>()
+  const dispatch = vi.fn()
 
   const handlers = createEventHandlers({
     dispatch,
     calendars: { [calId]: calendar },
-    setSelectedEvent: jest.fn(),
-    setOpenEditModePopup: jest.fn(),
+    setSelectedEvent: vi.fn(),
+    setOpenEditModePopup: vi.fn(),
     setAfterChoiceFunc,
     timezone: 'Europe/Paris'
   } as unknown as EventHandlersProps)
@@ -65,12 +66,12 @@ function setupHandlers(): {
 
 describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('puts a dropped occurrence back where it was', async () => {
     const { handlers, afterChoice, dispatch } = setupHandlers()
-    const revert = jest.fn()
+    const revert = vi.fn()
 
     await handlers.handleEventDrop({
       event: { extendedProps: { uid: occurrence.uid, calId } },
@@ -85,7 +86,7 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
 
   it('puts a resized occurrence back as it was', async () => {
     const { handlers, afterChoice } = setupHandlers()
-    const revert = jest.fn()
+    const revert = vi.fn()
 
     await handlers.handleEventResize({
       event: { extendedProps: { uid: occurrence.uid, calId } },
@@ -100,7 +101,7 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
 
   it('keeps the dropped occurrence where it is once a choice is made', async () => {
     const { handlers, afterChoice, dispatch } = setupHandlers()
-    const revert = jest.fn()
+    const revert = vi.fn()
 
     await handlers.handleEventDrop({
       event: { extendedProps: { uid: occurrence.uid, calId } },
@@ -116,15 +117,15 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
 
 describe('EditModeDialog', () => {
   function renderDialog(): {
-    eventAction: jest.Mock
-    onCancel: jest.Mock
+    eventAction: Mock
+    onCancel: Mock
   } {
-    const eventAction = jest.fn()
-    const onCancel = jest.fn()
+    const eventAction = vi.fn()
+    const onCancel = vi.fn()
     renderWithProviders(
       <EditModeDialog
         type="edit"
-        setOpen={jest.fn()}
+        setOpen={vi.fn()}
         eventAction={eventAction}
         onCancel={onCancel}
       />

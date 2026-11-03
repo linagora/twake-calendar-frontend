@@ -3,7 +3,7 @@ import { mockBrowserWestOfUtc } from '../../../utils/browserWestOfUtc'
 
 describe('formValueWeekday', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   // 2026-11-16 is a Monday

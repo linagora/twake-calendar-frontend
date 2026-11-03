@@ -7,18 +7,18 @@ import feedbackReducer, {
   eventSaved
 } from '@common/features/Events/eventSaveFeedbackSlice'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => (key === 'event.saved' ? 'Event saved' : key)
   })
 }))
 
 it('shows and expires save feedback without rerendering the sibling calendar', () => {
-  jest.useFakeTimers()
+  vi.useFakeTimers()
   const store = configureStore({
     reducer: { eventSaveFeedback: feedbackReducer }
   })
-  const Grid = jest.fn(() => <div>Calendar grid</div>)
+  const Grid = vi.fn(() => <div>Calendar grid</div>)
   try {
     render(
       <Provider store={store}>
@@ -26,7 +26,7 @@ it('shows and expires save feedback without rerendering the sibling calendar', (
         <EventSaveFeedback
           calendarRef={{ current: null as CalendarApi | null }}
           timezone="UTC"
-          showEventPreview={jest.fn()}
+          showEventPreview={vi.fn()}
           displayedPeriod={{
             start: new Date('2026-11-02T00:00:00Z'),
             end: new Date('2026-11-09T00:00:00Z')
@@ -47,11 +47,11 @@ it('shows and expires save feedback without rerendering the sibling calendar', (
     expect(screen.getByText('Event saved')).toBeInTheDocument()
     expect(Grid).toHaveBeenCalledTimes(rendersBeforeSave)
     act(() => {
-      jest.advanceTimersByTime(4000)
+      vi.advanceTimersByTime(4000)
     })
     expect(screen.queryByText('Event saved')).not.toBeInTheDocument()
     expect(Grid).toHaveBeenCalledTimes(rendersBeforeSave)
   } finally {
-    jest.useRealTimers()
+    vi.useRealTimers()
   }
 })

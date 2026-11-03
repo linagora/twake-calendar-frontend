@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest'
 import {
   detectDateTimeFormat,
   convertFormDateTimeToISO,
@@ -63,10 +64,10 @@ describe('dateTimeHelpers', () => {
 
   describe('convertFormDateTimeToISO', () => {
     const originalConsoleWarn = console.warn
-    let consoleWarnSpy: jest.SpyInstance
+    let consoleWarnSpy: MockInstance
 
     beforeEach(() => {
-      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation()
     })
 
     afterEach(() => {

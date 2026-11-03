@@ -3,7 +3,7 @@ import { defaultSearchParams } from '@common/features/Search/SearchSlice'
 import { screen, within } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/useScreenSizeDetection', () => ({
+vi.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: (): { isTooSmall: boolean; isTablet: boolean } => ({
     isTooSmall: true,
     isTablet: false

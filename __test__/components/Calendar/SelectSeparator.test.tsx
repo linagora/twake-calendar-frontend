@@ -20,7 +20,7 @@ describe('Select separators (#1597)', () => {
     renderWithProviders(
       <CalendarSelectField
         calendarid="alice/personal"
-        setCalendarid={jest.fn()}
+        setCalendarid={vi.fn()}
         userPersonalCalendars={[
           calendar('alice/personal', 'Personal', false),
           calendar('bob/team', 'Team A', true)

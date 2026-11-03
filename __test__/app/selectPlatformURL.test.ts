@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'

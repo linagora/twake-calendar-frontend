@@ -6,18 +6,18 @@ import { renderWithProviders } from '../../utils/Renderwithproviders'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { eventSaved } from '@common/features/Events/eventSaveFeedbackSlice'
 
-const mockGotoDate = jest.fn()
-const mockOpenPreview = jest.fn()
-jest.mock('@common/components/Calendar/hooks/useOpenSavedEventPreview', () => ({
+const mockGotoDate = vi.fn()
+const mockOpenPreview = vi.fn()
+vi.mock('@common/components/Calendar/hooks/useOpenSavedEventPreview', () => ({
   useOpenSavedEventPreview: () => mockOpenPreview
 }))
-jest.mock('@common/features/Calendars/useCalendarLoader', () => ({
-  useCalendarDataLoader: jest.fn()
+vi.mock('@common/features/Calendars/useCalendarLoader', () => ({
+  useCalendarDataLoader: vi.fn()
 }))
-jest.mock('@common/features/Search/SearchResultsPage', () => () => (
-  <div>Search results</div>
-))
-jest.mock('@common/components/Calendar/CalendarGrid', () => ({
+vi.mock('@common/features/Search/SearchResultsPage', () => ({
+  default: () => <div>Search results</div>
+}))
+vi.mock('@common/components/Calendar/CalendarGrid', () => ({
   CalendarGrid: ({
     calendarRef
   }: {
@@ -40,14 +40,14 @@ it('mounts the calendar before navigating and opening a saved event from search'
       calendarRef={calendarRef}
       currentDate={new Date()}
       currentView="timeGridWeek"
-      setCurrentView={jest.fn()}
+      setCurrentView={vi.fn()}
       selectedCalendars={['user/calendar']}
-      setSelectedCalendars={jest.fn()}
+      setSelectedCalendars={vi.fn()}
       tempUsers={[]}
-      setTempUsers={jest.fn()}
+      setTempUsers={vi.fn()}
       selectedMiniDate={null}
-      setSelectedMiniDate={jest.fn()}
-      onViewChange={jest.fn()}
+      setSelectedMiniDate={vi.fn()}
+      onViewChange={vi.fn()}
     />
   )
   act(() => {

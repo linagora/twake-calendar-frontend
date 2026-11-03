@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   calendarAction,
   calendarIdFromEventHref,
@@ -14,19 +15,19 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { api } from '@common/utils/apiUtils'
 import { waitFor } from '@testing-library/dom'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 describe('Calendar DAO', () => {
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('fetches calendar list for a user', async () => {
     const mockUserId = 'user123'
     const mockResponse = [{ id: 'calendar1' }, { id: 'calendar2' }]
 
-    ;(api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResponse)
+    ;(api.get as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
     })
 
     const calendars = await fetchCalendars(mockUserId)
@@ -41,8 +42,8 @@ describe('Calendar DAO', () => {
   })
 
   it('drops calendar colors that are not hexadecimal colors', async () => {
-    ;(api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue({
+    ;(api.get as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue({
         _embedded: {
           'dav:calendar': [
             { id: 'safe', 'apple:color': '#A1B2C3' },
@@ -72,8 +73,8 @@ describe('Calendar DAO', () => {
     const match = { start: '2025-07-01', end: '2025-07-31' }
     const mockCalendarData = { events: ['event1', 'event2'] }
 
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockCalendarData)
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(mockCalendarData)
     })
 
     const result = await fetchCalendar(
@@ -94,8 +95,8 @@ describe('Calendar DAO', () => {
 
   it("fetches the events of a delegated calendar through the sharee's instance", async () => {
     const match = { start: '2025-07-01', end: '2025-07-31' }
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue({})
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue({})
     })
 
     await fetchCalendar(
@@ -114,8 +115,8 @@ describe('Calendar DAO', () => {
   })
 
   it("syncs a delegated calendar through the sharee's instance", async () => {
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue({})
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue({})
     })
 
     await fetchSyncTokenChanges({
@@ -133,8 +134,8 @@ describe('Calendar DAO', () => {
   })
 
   it('syncs an own calendar through its own node', async () => {
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue({})
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue({})
     })
 
     await fetchSyncTokenChanges({
@@ -154,8 +155,8 @@ describe('Calendar DAO', () => {
     const uid = 'event-uid'
     const mockResponse = { _embedded: { 'dav:item': [] } }
 
-    ;(api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResponse)
+    ;(api as unknown as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
     })
 
     const result = await fetchEventByUid(userId, uid)
@@ -230,8 +231,8 @@ describe('Calendar DAO', () => {
 
   it('get secret link without reset', async () => {
     const calLink = '/calendars/calId.json'
-    ;(api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue({ secretLink: 'link' })
+    ;(api.get as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue({ secretLink: 'link' })
     })
 
     await expect(fetchSecretLink(calLink, false)).resolves.toEqual({
@@ -249,8 +250,8 @@ describe('Calendar DAO', () => {
   })
   it('get secret link with reset', async () => {
     const calLink = '/calendars/calId.json'
-    ;(api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue('link')
+    ;(api.get as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue('link')
     })
     await fetchSecretLink(calLink, true)
 
@@ -266,8 +267,8 @@ describe('Calendar DAO', () => {
 
   it('get export data ', async () => {
     const calLink = '/calendars/calId.json'
-    ;(api.get as jest.Mock).mockReturnValue({
-      text: jest.fn().mockResolvedValue('data')
+    ;(api.get as Mock).mockReturnValue({
+      text: vi.fn().mockResolvedValue('data')
     })
     await fetchCalendarExport(calLink)
 
@@ -307,7 +308,7 @@ describe('Calendar DAO', () => {
   })
 
   it('updateDelegationCalendar posts to the correct DAV endpoint with the share body', async () => {
-    ;(api.post as jest.Mock).mockResolvedValue({ ok: true })
+    ;(api.post as Mock).mockResolvedValue({ ok: true })
 
     const share = {
       set: [{ 'dav:href': 'mailto:alice@example.com', 'dav:read': true }],

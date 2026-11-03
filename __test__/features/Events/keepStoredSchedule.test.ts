@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { fetchEvent } from '@common/features/Events/EventDao'
 import { keepStoredSchedule } from '@common/features/Events/keepStoredSchedule'
@@ -5,11 +6,11 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 
 // A factory keeps the real DAO out: its api client reads `window` on import,
 // which the node test environment does not provide
-jest.mock('@common/features/Events/EventDao', () => ({
-  fetchEvent: jest.fn()
+vi.mock('@common/features/Events/EventDao', () => ({
+  fetchEvent: vi.fn()
 }))
 
-const mockedFetchEvent = fetchEvent as jest.MockedFunction<typeof fetchEvent>
+const mockedFetchEvent = fetchEvent as MockedFunction<typeof fetchEvent>
 
 // The organizer wrote the event at 11:00-12:00 in Europe/Paris
 const storedJCal = [
@@ -57,7 +58,7 @@ const viewerFormValues = {
 
 describe('keepStoredSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('writes the dates back in the zone of the stored calendar object', async () => {
@@ -82,7 +83,7 @@ describe('keepStoredSchedule', () => {
   })
 
   it('keeps the form values when the stored event cannot be fetched', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     mockedFetchEvent.mockRejectedValue(new Error('network'))
 
     const values = await keepStoredSchedule(viewerFormValues, viewerEvent)

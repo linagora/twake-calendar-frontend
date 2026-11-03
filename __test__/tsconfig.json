@@ -4,7 +4,7 @@
     "composite": true,
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "types": ["jest", "@testing-library/jest-dom"],
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"],
     "paths": {
       "@common/*": ["../common/src/*"],
       "@private/*": ["../apps/private/src/*"],

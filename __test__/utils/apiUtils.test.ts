@@ -1,7 +1,7 @@
-jest.mock('@linagora/twake-websocket', () => ({
+vi.mock('@linagora/twake-websocket', async () => ({
   __esModule: true,
-  ...jest.requireActual('@linagora/twake-websocket'),
-  assertWebSocketAlive: jest.fn()
+  ...(await vi.importActual('@linagora/twake-websocket')),
+  assertWebSocketAlive: vi.fn()
 }))
 
 describe('api client authorization', () => {
@@ -18,7 +18,7 @@ describe('api client authorization', () => {
 
   beforeEach(() => {
     sent.length = 0
-    global.fetch = jest.fn(async (request: Request) => {
+    global.fetch = vi.fn(async (request: Request) => {
       sent.push(request)
       return new Response('{}', { status: 200 })
     }) as unknown as typeof fetch
@@ -28,20 +28,17 @@ describe('api client authorization', () => {
     typeof import('@linagora/twake-oidc')
 
   async function load(): Promise<Loaded> {
-    let module: Loaded | undefined
-    await jest.isolateModulesAsync(async () => {
-      const auth = await import('@linagora/twake-oidc')
-      auth.configureAuth({
-        ssoUrl: 'https://sso.example.com',
-        clientId: 'calendar',
-        scope: 'openid',
-        redirectUri: 'https://calendar-app.example.com/callback',
-        postLogoutRedirectUri: 'https://calendar-app.example.com',
-        apiUrl: window.CALENDAR_BASE_URL
-      })
-      module = { ...auth, ...(await import('@common/utils/apiUtils')) }
+    vi.resetModules()
+    const auth = await import('@linagora/twake-oidc')
+    auth.configureAuth({
+      ssoUrl: 'https://sso.example.com',
+      clientId: 'calendar',
+      scope: 'openid',
+      redirectUri: 'https://calendar-app.example.com/callback',
+      postLogoutRedirectUri: 'https://calendar-app.example.com',
+      apiUrl: window.CALENDAR_BASE_URL
     })
-    return module!
+    return { ...auth, ...(await import('@common/utils/apiUtils')) }
   }
 
   it('sends the access token to the Calendar backend', async () => {

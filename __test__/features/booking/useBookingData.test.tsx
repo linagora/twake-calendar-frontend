@@ -1,13 +1,14 @@
+import type { Mock } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useBookingData } from '@public/features/booking/hooks/useBookingData'
 import { fetchBookingSlots } from '@public/features/booking/BookingDao'
 import { BookingSlotsResponse } from '@common/features/booking/types/BookingTypes'
 
-jest.mock('@public/features/booking/BookingDao', () => ({
-  fetchBookingSlots: jest.fn()
+vi.mock('@public/features/booking/BookingDao', () => ({
+  fetchBookingSlots: vi.fn()
 }))
 
-const mockFetchBookingSlots = fetchBookingSlots as jest.Mock
+const mockFetchBookingSlots = fetchBookingSlots as Mock
 
 const mockResponse: BookingSlotsResponse = {
   durationMinutes: 30,
@@ -28,7 +29,7 @@ const mockResponse: BookingSlotsResponse = {
 
 describe('useBookingData', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('loads booking data for the visible month', async () => {

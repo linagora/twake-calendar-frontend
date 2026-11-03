@@ -16,14 +16,14 @@ describe.each([
   ['SmallNavigationControls', SmallNavigationControls]
 ])('%s', (_name, Controls) => {
   it.each(steps)('names the step of the %s view', (view, step) => {
-    renderWithProviders(<Controls currentView={view} onNavigate={jest.fn()} />)
+    renderWithProviders(<Controls currentView={view} onNavigate={vi.fn()} />)
 
     expect(screen.getByLabelText(`menubar.prev${step}`)).toBeInTheDocument()
     expect(screen.getByLabelText(`menubar.next${step}`)).toBeInTheDocument()
   })
 
   it('falls back to previous and next for an unknown view', () => {
-    renderWithProviders(<Controls currentView="other" onNavigate={jest.fn()} />)
+    renderWithProviders(<Controls currentView="other" onNavigate={vi.fn()} />)
 
     expect(screen.getByLabelText('menubar.prev')).toBeInTheDocument()
     expect(screen.getByLabelText('menubar.next')).toBeInTheDocument()

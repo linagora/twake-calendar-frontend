@@ -2,7 +2,7 @@ import { formatDateInTimezone } from '@common/components/Event/utils/dateTimeFor
 
 describe('formatDateInTimezone', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('formats the day as YYYY-MM-DD in the target timezone', () => {
@@ -19,9 +19,9 @@ describe('formatDateInTimezone', () => {
   })
 
   it('does not rely on the locale pattern of the engine (WebKit en-CA)', () => {
-    jest
-      .spyOn(Intl.DateTimeFormat.prototype, 'format', 'get')
-      .mockReturnValue(() => '10/8/2026')
+    vi.spyOn(Intl.DateTimeFormat.prototype, 'format', 'get').mockReturnValue(
+      () => '10/8/2026'
+    )
 
     expect(
       formatDateInTimezone(new Date('2026-10-08T09:00:00Z'), 'Europe/Paris')

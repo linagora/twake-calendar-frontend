@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { listBookingLinks } from '@common/features/booking/BookingDao'
 import {
   BookingLink,
@@ -13,12 +14,12 @@ import {
   updateBookingLink
 } from '@common/features/booking/BookingDao'
 
-jest.mock('@common/utils/apiUtils', () => ({
+vi.mock('@common/utils/apiUtils', () => ({
   api: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn()
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn()
   }
 }))
 
@@ -43,7 +44,7 @@ const mockBookingLink: BookingLink = {
 
 describe('Private Booking Link API', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('createBookingLink', () => {
@@ -89,9 +90,9 @@ describe('Private Booking Link API', () => {
         ]
       }
 
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           bookingLinkPublicId: '550e8400-e29b-41d4-a716-446655440000'
         })
       })
@@ -114,9 +115,9 @@ describe('Private Booking Link API', () => {
         active: true
       }
 
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           bookingLinkPublicId: '550e8400-e29b-41d4-a716-446655440000'
         })
       })
@@ -138,7 +139,7 @@ describe('Private Booking Link API', () => {
         active: true
       }
 
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -156,7 +157,7 @@ describe('Private Booking Link API', () => {
         active: true
       }
 
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 401
       })
@@ -169,9 +170,9 @@ describe('Private Booking Link API', () => {
 
   describe('listBookingLinks', () => {
     it('should list all booking links', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue([mockBookingLink])
+        json: vi.fn().mockResolvedValue([mockBookingLink])
       })
 
       const result = await listBookingLinks()
@@ -181,9 +182,9 @@ describe('Private Booking Link API', () => {
     })
 
     it('should return empty array when no booking links', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue([])
+        json: vi.fn().mockResolvedValue([])
       })
 
       const result = await listBookingLinks()
@@ -192,7 +193,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (401 - unauthenticated)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 401
       })
@@ -205,9 +206,9 @@ describe('Private Booking Link API', () => {
 
   describe('getBookingLink', () => {
     it('should get booking link by public ID', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue(mockBookingLink)
+        json: vi.fn().mockResolvedValue(mockBookingLink)
       })
 
       const result = await getBookingLink(
@@ -221,9 +222,9 @@ describe('Private Booking Link API', () => {
     })
 
     it('should URL encode the public ID', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue(mockBookingLink)
+        json: vi.fn().mockResolvedValue(mockBookingLink)
       })
 
       await getBookingLink('test/id:with+special')
@@ -234,7 +235,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (400 - invalid UUID)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -245,7 +246,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (401 - unauthenticated)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 401
       })
@@ -256,7 +257,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (404 - not found)', async () => {
-      ;(api.get as jest.Mock).mockResolvedValue({
+      ;(api.get as Mock).mockResolvedValue({
         ok: false,
         status: 404
       })
@@ -274,7 +275,7 @@ describe('Private Booking Link API', () => {
         active: false
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -299,7 +300,7 @@ describe('Private Booking Link API', () => {
         ]
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -316,7 +317,7 @@ describe('Private Booking Link API', () => {
         availabilityRules: null
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -334,7 +335,7 @@ describe('Private Booking Link API', () => {
         description: null
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -351,7 +352,7 @@ describe('Private Booking Link API', () => {
         durationMinutes: -1
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -366,7 +367,7 @@ describe('Private Booking Link API', () => {
         active: false
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -383,7 +384,7 @@ describe('Private Booking Link API', () => {
         active: false
       }
 
-      ;(api.patch as jest.Mock).mockResolvedValue({
+      ;(api.patch as Mock).mockResolvedValue({
         ok: false,
         status: 404
       })
@@ -396,7 +397,7 @@ describe('Private Booking Link API', () => {
 
   describe('deleteBookingLink', () => {
     it('should delete booking link successfully', async () => {
-      ;(api.delete as jest.Mock).mockResolvedValue({
+      ;(api.delete as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -408,7 +409,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should URL encode the public ID', async () => {
-      ;(api.delete as jest.Mock).mockResolvedValue({
+      ;(api.delete as Mock).mockResolvedValue({
         ok: true
       })
 
@@ -420,7 +421,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (400 - invalid UUID)', async () => {
-      ;(api.delete as jest.Mock).mockResolvedValue({
+      ;(api.delete as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -431,7 +432,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (404 - not found)', async () => {
-      ;(api.delete as jest.Mock).mockResolvedValue({
+      ;(api.delete as Mock).mockResolvedValue({
         ok: false,
         status: 404
       })
@@ -444,9 +445,9 @@ describe('Private Booking Link API', () => {
 
   describe('resetBookingLink', () => {
     it('should reset booking link and return new public ID', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           bookingLinkPublicId: '9f4f2166-95c4-4d3e-b421-23dc5e8a1fbb'
         })
       })
@@ -464,7 +465,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (400 - invalid UUID)', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 400
       })
@@ -475,7 +476,7 @@ describe('Private Booking Link API', () => {
     })
 
     it('should throw error when response is not ok (404 - not found)', async () => {
-      ;(api.post as jest.Mock).mockResolvedValue({
+      ;(api.post as Mock).mockResolvedValue({
         ok: false,
         status: 404
       })

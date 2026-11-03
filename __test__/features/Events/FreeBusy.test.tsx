@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import {
   hasFreeBusyConflict,
   useAttendeesFreeBusy
@@ -7,25 +8,25 @@ import * as FreeBusyDao from '@common/features/Events/FreeBusyDao'
 import * as UserDao from '@common/features/User/UserDao'
 import { renderHook, waitFor } from '@testing-library/react'
 
-jest.mock('moment-timezone', () => {
-  const actual = jest.requireActual('moment-timezone')
+vi.mock('moment-timezone', async () => {
+  const actual = await vi.importActual('moment-timezone')
   return actual
 })
 
-jest.mock('@common/features/Events/FreeBusyDao')
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/features/Calendars/CalendarDAO')
+vi.mock('@common/features/Events/FreeBusyDao')
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/features/Calendars/CalendarDAO')
 
-const mockGetUserData = UserDao.fetchUserByEmail as jest.MockedFunction<
+const mockGetUserData = UserDao.fetchUserByEmail as MockedFunction<
   typeof UserDao.fetchUserByEmail
 >
-const mockREPORT = FreeBusyDao.fetchFreeBusyReports as jest.MockedFunction<
+const mockREPORT = FreeBusyDao.fetchFreeBusyReports as MockedFunction<
   typeof FreeBusyDao.fetchFreeBusyReports
 >
-const mockPOST = FreeBusyDao.fetchFreeBusyPost as jest.MockedFunction<
+const mockPOST = FreeBusyDao.fetchFreeBusyPost as MockedFunction<
   typeof FreeBusyDao.fetchFreeBusyPost
 >
-const mockGetCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
+const mockGetCalendars = CalendarDAO.fetchCalendars as MockedFunction<
   typeof CalendarDAO.fetchCalendars
 >
 
@@ -186,7 +187,7 @@ describe('hasFreeBusyConflict', () => {
 
 describe('useAttendeesFreeBusy — Flow B (new attendees)', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockGetCalendars.mockResolvedValue(mockCalendarsResponse as never)
   })
 
@@ -399,7 +400,7 @@ describe('useAttendeesFreeBusy — Flow B (new attendees)', () => {
 })
 
 describe('useAttendeesFreeBusy — Flow A (existing attendees)', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => vi.clearAllMocks())
 
   const existingAttendee = { email: 'carol@example.com', userId: 'user-carol' }
 

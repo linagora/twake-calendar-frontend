@@ -7,9 +7,9 @@ import { fetchEntityById } from '@common/features/User/EntityDAO'
 import { fetchResourceById } from '@common/features/User/ResourceDAO'
 import { fetchUserById } from '@common/features/User/UserDao'
 
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/features/User/ResourceDAO')
-jest.mock('@common/features/User/EntityDAO')
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/ResourceDAO')
+vi.mock('@common/features/User/EntityDAO')
 
 const mockedFetchUserById = fetchUserById
 const mockedFetchResourceById = fetchResourceById
@@ -17,7 +17,7 @@ const mockedFetchEntityById = fetchEntityById
 
 describe('helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('fetchOwnerData', () => {

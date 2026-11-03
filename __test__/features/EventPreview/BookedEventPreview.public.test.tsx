@@ -2,23 +2,23 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { BookedEventPreviewPage } from '@public/components/EventPreview/BookedEventPreview'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: 'en-US'
   })
 }))
 
-jest.mock('react-router', () => ({
+vi.mock('react-router', () => ({
   useParams: () => ({ bookingConfirmationToken: 'token' })
 }))
 
-jest.mock('@common/utils/timezone', () => ({
-  ...jest.requireActual('@common/utils/timezone'),
+vi.mock('@common/utils/timezone', async () => ({
+  ...(await vi.importActual('@common/utils/timezone')),
   browserDefaultTimeZone: 'Europe/Paris'
 }))
 
-jest.mock(
+vi.mock(
   '@public/features/EventPreview/hooks/useFetchBookedEventDetail',
   () => ({
     useFetchBookedEventDetail: () => ({
@@ -35,26 +35,26 @@ jest.mock(
       loading: false,
       error: false,
       errorDetail: undefined,
-      refetch: jest.fn()
+      refetch: vi.fn()
     })
   })
 )
 
-jest.mock('@public/features/booking/BookingDao', () => ({
-  cancelBookedEvent: jest.fn()
+vi.mock('@public/features/booking/BookingDao', () => ({
+  cancelBookedEvent: vi.fn()
 }))
 
-jest.mock('@common/components/Loading/Loading', () => ({
+vi.mock('@common/components/Loading/Loading', () => ({
   Loading: () => null
 }))
 
-jest.mock('@common/components/EventPreview/EventPreviewTitleRow', () => ({
+vi.mock('@common/components/EventPreview/EventPreviewTitleRow', () => ({
   EventPreviewTitleRow: ({ timezone }: { timezone: string }) => (
     <div data-testid="title-row-timezone">{timezone}</div>
   )
 }))
 
-jest.mock('@common/components/Timezone/TimezoneSelector', () => ({
+vi.mock('@common/components/Timezone/TimezoneSelector', () => ({
   TimezoneSelector: ({ value, onChange }: any) => (
     <select
       data-testid="timezone-selector"
@@ -67,23 +67,17 @@ jest.mock('@common/components/Timezone/TimezoneSelector', () => ({
   )
 }))
 
-jest.mock(
-  '@/components/EventPreview/EventPreviewDetails',
-  () => ({ EventPreviewDetails: () => null }),
-  { virtual: true }
-)
+vi.mock('@public/components/EventPreview/EventPreviewDetails', () => ({
+  EventPreviewDetails: () => null
+}))
 
-jest.mock(
-  '@/components/EventPreview/EventStatus',
-  () => ({ EventStatus: () => null }),
-  { virtual: true }
-)
+vi.mock('@public/components/EventPreview/EventStatus', () => ({
+  EventStatus: () => null
+}))
 
-jest.mock(
-  '@/features/booking/components/BookingSuccessDialog',
-  () => ({ SuccessFooter: () => null }),
-  { virtual: true }
-)
+vi.mock('@public/features/booking/components/BookingSuccessDialog', () => ({
+  SuccessFooter: () => null
+}))
 
 describe('BookedEventPreviewPage', () => {
   it('displays the UTC booked event in the browser time zone by default', () => {

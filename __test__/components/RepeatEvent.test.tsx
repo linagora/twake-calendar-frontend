@@ -15,10 +15,10 @@ const baseRepetition: RepetitionObject = {
   endDate: ''
 }
 
-const mockOnClose = jest.fn()
-const mockSetSelectedRange = jest.fn()
+const mockOnClose = vi.fn()
+const mockSetSelectedRange = vi.fn()
 const mockCalendarRef = {
-  current: { select: jest.fn() } as unknown as CalendarApi
+  current: { select: vi.fn() } as unknown as CalendarApi
 }
 
 const preloadedState = {
@@ -65,7 +65,7 @@ function setupRepeatEvent(
   state?: RootState,
   eventStart: string = defaultSelectedRange.startStr
 ) {
-  const setRepetition = jest.fn()
+  const setRepetition = vi.fn()
   renderWithProviders(
     <RepeatEvent
       repetition={{ ...baseRepetition, ...props }}
@@ -82,12 +82,12 @@ async function setupEventPopover(
   selectedRange: DateSelectArg = defaultSelectedRange,
   timeZone = 'UTC'
 ) {
-  jest
-    .spyOn(crypto, 'randomUUID')
-    .mockReturnValue('fixed-uuid-with-correct-format')
+  vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+    'fixed-uuid-with-correct-format'
+  )
   const originalDateResolvedOptions =
     new Intl.DateTimeFormat().resolvedOptions()
-  jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
+  vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
     ...originalDateResolvedOptions,
     timeZone
   })
@@ -126,13 +126,11 @@ async function setupEventPopover(
 async function expectRRule(
   expected: Partial<RepetitionObject>
 ): Promise<{ start: string }> {
-  const spy = jest
-    .spyOn(eventThunks, 'putEvent')
-    .mockImplementation(payload => {
-      const promise = Promise.resolve(payload)
-      ;(promise as any).unwrap = () => promise
-      return () => promise as any
-    })
+  const spy = vi.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
+    const promise = Promise.resolve(payload)
+    ;(promise as any).unwrap = () => promise
+    return () => promise as any
+  })
   const saveButton = screen.getByRole('button', { name: /save/i })
   act(() => fireEvent.click(saveButton))
   await waitFor(() => expect(spy).toHaveBeenCalled())
@@ -144,14 +142,14 @@ async function expectRRule(
 
 describe('RepeatEvent Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.restoreAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.restoreAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('renders with no repetition by default', () => {
@@ -260,7 +258,7 @@ describe('RepeatEvent Component', () => {
     ['', 0],
     ['1000', 1000]
   ])(
-    'flags interval %p as invalid instead of coercing it',
+    'flags interval %j as invalid instead of coercing it',
     (value, expected) => {
       const { setRepetition } = setupRepeatEvent({ freq: 'weekly' })
 
@@ -291,16 +289,15 @@ describe('RepeatEvent Component', () => {
 
 describe('Repeat Event Integration Tests', () => {
   // Increase timeout for all tests in this describe block
-  jest.setTimeout(30000)
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.restoreAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    vi.clearAllMocks()
+    vi.restoreAllMocks()
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('sends correct CalendarEvent payload for daily repeat', async () => {
@@ -340,7 +337,7 @@ describe('Repeat Event Integration Tests', () => {
 
   it('does not save the event when the interval is 0', async () => {
     await setupEventPopover()
-    const spy = jest.spyOn(eventThunks, 'putEvent')
+    const spy = vi.spyOn(eventThunks, 'putEvent')
 
     const intervalInput = screen.getByTestId('repeat-interval')
     fireEvent.change(intervalInput, { target: { value: '0' } })

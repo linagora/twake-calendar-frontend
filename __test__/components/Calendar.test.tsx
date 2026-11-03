@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import * as calendarDetailThunks from '@common/features/Calendars/CalendarSlice'
 import * as servicesModule from '@common/features/Calendars/CalendarSlice'
@@ -7,10 +8,8 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 
-jest.mock('@common/features/User/UserDao')
-const mockedSearchUsers = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
+vi.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
 
 // Test wrapper component to provide calendarRef
 function CalendarTestWrapper() {
@@ -20,10 +19,10 @@ function CalendarTestWrapper() {
 describe('CalendarSelection', () => {
   beforeEach(() => {
     localStorage.clear()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   const today = new Date()
   const start = new Date(today)
@@ -266,7 +265,7 @@ describe('calendar Availability search', () => {
     localStorage.clear()
   })
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
   const preloadedState = {
     user: {
@@ -298,7 +297,7 @@ describe('calendar Availability search', () => {
   }
 
   it('imports temporary calendars when selecting new users', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(servicesModule, 'getTempCalendarsList')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -332,7 +331,7 @@ describe('calendar Availability search', () => {
   })
 
   it('open window with attendees filled after temp search on create event button click', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(servicesModule, 'getTempCalendarsList')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -374,12 +373,12 @@ describe('calendar Availability search', () => {
         expect(screen.getAllByText('event.createEvent')).toHaveLength(2)
         expect(screen.getAllByText(/New User/i)).toHaveLength(2)
       },
-      { timeout: 10000 }
+      { timeout: 20000 }
     )
-  }, 15000)
+  }, 30000)
 
   it('open window with attendees filled after temp search on enter in temp input', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(servicesModule, 'getTempCalendarsList')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -419,12 +418,12 @@ describe('calendar Availability search', () => {
         expect(screen.getAllByText('event.createEvent')).toHaveLength(2)
         expect(screen.getAllByText(/New User/i)).toHaveLength(2)
       },
-      { timeout: 10000 }
+      { timeout: 20000 }
     )
-  }, 15000)
+  }, 30000)
 
   it('BUGFIX: can untoggle all calendar.personal', async () => {
-    jest.spyOn(calendarDetailThunks, 'getCalendarDetail').mockImplementation(
+    vi.spyOn(calendarDetailThunks, 'getCalendarDetail').mockImplementation(
       () =>
         ({
           type: 'getCalendarDetail',
@@ -487,14 +486,14 @@ describe('calendar Availability search', () => {
   })
 
   it('should fetch calendar details for February after navigating to month view and clicking next', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(calendarDetailThunks, 'getCalendarDetail')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         const thunk = () => Object.assign(promise, { unwrap: () => promise })
         return thunk as any
       })
-    jest.useFakeTimers().setSystemTime(new Date('2025-01-01'))
+    vi.useFakeTimers().setSystemTime(new Date('2025-01-01'))
 
     await act(async () =>
       renderWithProviders(<CalendarLayout />, {
@@ -505,7 +504,7 @@ describe('calendar Availability search', () => {
 
     // Advance past debounce so the initial load fires
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -525,7 +524,7 @@ describe('calendar Availability search', () => {
 
     // Advance past debounce so the navigation fetch fires
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -565,7 +564,7 @@ describe('calendar Availability search', () => {
 
   describe('Batch loading and prefetching', () => {
     beforeEach(() => {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     it('loads active calendars in batches of 5', async () => {
@@ -587,7 +586,7 @@ describe('calendar Availability search', () => {
         }
       }
 
-      const spy = jest
+      const spy = vi
         .spyOn(calendarDetailThunks, 'getCalendarDetail')
         .mockImplementation(
           () =>
@@ -642,7 +641,7 @@ describe('calendar Availability search', () => {
         }
       }
 
-      const spy = jest
+      const spy = vi
         .spyOn(calendarDetailThunks, 'getCalendarDetail')
         .mockImplementation(
           () =>
@@ -674,7 +673,7 @@ describe('calendar Availability search', () => {
     })
 
     it('does not make duplicate API calls for same calendar and range', async () => {
-      const spy = jest
+      const spy = vi
         .spyOn(calendarDetailThunks, 'getCalendarDetail')
         .mockImplementation(
           () =>

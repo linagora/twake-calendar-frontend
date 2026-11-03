@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   createEventHandlers,
   EventHandlersProps
@@ -10,15 +11,15 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 import { EventDropArg } from '@fullcalendar/core'
 
-jest.mock('@common/features/Events/EventDao', () => ({
-  fetchEvent: jest.fn()
+vi.mock('@common/features/Events/EventDao', () => ({
+  fetchEvent: vi.fn()
 }))
-jest.mock('@common/features/Events/transformers', () => ({
-  parseFetchedEvent: jest.fn()
+vi.mock('@common/features/Events/transformers', () => ({
+  parseFetchedEvent: vi.fn()
 }))
-jest.mock(
+vi.mock(
   '@common/features/Events/hooks/submitUpdateHelpers/updateActions',
-  () => ({ handleUpdateRecurringSeries: jest.fn() })
+  () => ({ handleUpdateRecurringSeries: vi.fn() })
 )
 
 const calId = 'user1/cal1'
@@ -31,8 +32,8 @@ async function dropAllSeries(
   instance: CalendarEvent,
   deltaDays: number
 ): Promise<Parameters<typeof handleUpdateRecurringSeries>[0]> {
-  ;(fetchEvent as jest.Mock).mockResolvedValue({})
-  ;(parseFetchedEvent as jest.Mock).mockImplementation(
+  ;(fetchEvent as Mock).mockResolvedValue({})
+  ;(parseFetchedEvent as Mock).mockImplementation(
     (_event: CalendarEvent, _response: unknown, isMaster?: boolean) =>
       isMaster ? master : instance
   )
@@ -40,13 +41,13 @@ async function dropAllSeries(
     id: calId,
     events: { [instance.uid]: instance }
   } as unknown as Calendar
-  const setAfterChoiceFunc = jest.fn<void, [() => AfterChoice]>()
+  const setAfterChoiceFunc = vi.fn<void, [() => AfterChoice]>()
 
   const handlers = createEventHandlers({
-    dispatch: jest.fn(),
+    dispatch: vi.fn(),
     calendars: { [calId]: calendar },
-    setSelectedEvent: jest.fn(),
-    setOpenEditModePopup: jest.fn(),
+    setSelectedEvent: vi.fn(),
+    setOpenEditModePopup: vi.fn(),
     setAfterChoiceFunc,
     timezone: 'Europe/Paris'
   } as unknown as EventHandlersProps)
@@ -59,12 +60,12 @@ async function dropAllSeries(
   const afterChoice = setAfterChoiceFunc.mock.calls[0][0]()
   await afterChoice('all')
 
-  return jest.mocked(handleUpdateRecurringSeries).mock.calls[0][0]
+  return vi.mocked(handleUpdateRecurringSeries).mock.calls[0][0]
 }
 
 describe('Dropping an occurrence with "All the events" (#1668)', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('moves the weekdays of an all-day weekly series with the dropped day', async () => {

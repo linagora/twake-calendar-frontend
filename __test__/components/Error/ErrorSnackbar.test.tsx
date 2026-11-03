@@ -34,7 +34,7 @@ describe('ErrorSnackbar', () => {
   })
 
   it('stays until it is dismissed', () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     try {
       const { store } = renderWithProviders(
         <ErrorSnackbar error="Something broke" type="user" />,
@@ -50,12 +50,12 @@ describe('ErrorSnackbar', () => {
       )
 
       act(() => {
-        jest.advanceTimersByTime(10000)
+        vi.advanceTimersByTime(10000)
       })
 
       expect(store.getState().user.error).toBe('Something broke')
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 })

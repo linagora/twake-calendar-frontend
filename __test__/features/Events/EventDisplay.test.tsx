@@ -54,11 +54,11 @@ const sentPartstat = (jCal: VCalComponent): string | undefined => {
 }
 
 describe('Event Preview Display', () => {
-  const mockOnClose = jest.fn()
+  const mockOnClose = vi.fn()
   const day = new Date('2025-01-15T10:00:00.000Z') // Fixed date in UTC: Jan 15, 2025 10:00 AM UTC
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     sessionStorage.clear()
     window.MAIL_SPA_URL = null
   })
@@ -171,7 +171,7 @@ describe('Event Preview Display', () => {
   it('renders correctly event data', () => {
     const originalToLocaleString = Date.prototype.toLocaleString
 
-    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function (
+    vi.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function (
       this: Date,
       locales?: Intl.LocalesArgument,
       options?: Intl.DateTimeFormatOptions
@@ -180,15 +180,13 @@ describe('Event Preview Display', () => {
     })
     const originalToLocaleTimeString = Date.prototype.toLocaleTimeString
 
-    jest
-      .spyOn(Date.prototype, 'toLocaleTimeString')
-      .mockImplementation(function (
-        this: Date,
-        locales?: Intl.LocalesArgument,
-        options?: Intl.DateTimeFormatOptions
-      ) {
-        return originalToLocaleTimeString.call(this, 'en-US', options)
-      })
+    vi.spyOn(Date.prototype, 'toLocaleTimeString').mockImplementation(function (
+      this: Date,
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions
+    ) {
+      return originalToLocaleTimeString.call(this, 'en-US', options)
+    })
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -291,7 +289,7 @@ describe('Event Preview Display', () => {
       />,
       preloadedState
     )
-    const spy = jest
+    const spy = vi
       .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -487,10 +485,8 @@ describe('Event Preview Display', () => {
   })
 
   it('handles RSVP Accept click', async () => {
-    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
-    const spy = jest
-      .spyOn(EventDao, 'putEvent')
-      .mockResolvedValue({} as Response)
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
+    const spy = vi.spyOn(EventDao, 'putEvent').mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -544,10 +540,8 @@ describe('Event Preview Display', () => {
   })
 
   it('handles RSVP Maybe click', async () => {
-    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
-    const spy = jest
-      .spyOn(EventDao, 'putEvent')
-      .mockResolvedValue({} as Response)
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
+    const spy = vi.spyOn(EventDao, 'putEvent').mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -603,10 +597,8 @@ describe('Event Preview Display', () => {
   })
 
   it('handles RSVP Decline click', async () => {
-    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
-    const spy = jest
-      .spyOn(EventDao, 'putEvent')
-      .mockResolvedValue({} as Response)
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
+    const spy = vi.spyOn(EventDao, 'putEvent').mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -749,7 +741,7 @@ describe('Event Preview Display', () => {
   })
   it('message button opens url with attendees as uri and title as subject', () => {
     window.MAIL_SPA_URL = 'test'
-    const mockOpen = jest.fn()
+    const mockOpen = vi.fn()
     window.open = mockOpen
 
     renderWithProviders(
@@ -781,7 +773,7 @@ describe('Event Preview Display', () => {
 
   it('message button closes the more menu', async () => {
     window.MAIL_SPA_URL = 'test'
-    window.open = jest.fn()
+    window.open = vi.fn()
 
     renderWithProviders(
       <EventPreviewModal
@@ -807,7 +799,7 @@ describe('Event Preview Display', () => {
 
   it('message button encodes special characters in event title correctly', () => {
     window.MAIL_SPA_URL = 'test'
-    const mockOpen = jest.fn()
+    const mockOpen = vi.fn()
     window.open = mockOpen
 
     const specialCharState = {
@@ -888,9 +880,9 @@ describe('Event Preview Display', () => {
     end.setHours(11, 0, 0, 0)
 
     beforeEach(() => {
-      jest.clearAllMocks()
-      const dispatch = jest.fn() as AppDispatch
-      jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
+      vi.clearAllMocks()
+      const dispatch = vi.fn() as AppDispatch
+      vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
     })
 
     const createPreloadedState = (
@@ -953,7 +945,7 @@ describe('Event Preview Display', () => {
         'owner@test.com'
       )
 
-      const mockOnClose = jest.fn()
+      const mockOnClose = vi.fn()
       renderWithProviders(
         <EventPreviewModal
           eventId="event1"
@@ -977,7 +969,7 @@ describe('Event Preview Display', () => {
         'organizer@test.com'
       )
 
-      const mockOnClose = jest.fn()
+      const mockOnClose = vi.fn()
       renderWithProviders(
         <EventPreviewModal
           eventId="event1"
@@ -1001,7 +993,7 @@ describe('Event Preview Display', () => {
         'other@test.com' // different organizer
       )
 
-      const mockOnClose = jest.fn()
+      const mockOnClose = vi.fn()
       renderWithProviders(
         <EventPreviewModal
           eventId="event1"
@@ -1057,7 +1049,7 @@ describe('Event Preview Display', () => {
         }
       }
 
-      const mockOnClose = jest.fn()
+      const mockOnClose = vi.fn()
       expect(() => {
         renderWithProviders(
           <EventPreviewModal
@@ -1088,11 +1080,11 @@ describe('Event Preview Display', () => {
   })
 
   describe('Attendee Preview Display', () => {
-    const mockOnClose = jest.fn()
+    const mockOnClose = vi.fn()
     const day = new Date('2025-01-15T10:00:00.000Z')
 
     beforeEach(() => {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
       window.MAIL_SPA_URL = null
     })
 

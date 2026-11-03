@@ -5,8 +5,8 @@ import { getEventByUid } from '@common/features/Calendars/CalendarSlice'
 import { useOpenSavedEventPreview } from '@common/components/Calendar/hooks/useOpenSavedEventPreview'
 import type { SavedEvent } from '@common/features/Events/eventSaveFeedbackSlice'
 
-jest.mock('@common/features/Calendars/CalendarSlice', () => ({
-  getEventByUid: jest.fn(() => ({ type: 'lookupSavedEvent' }))
+vi.mock('@common/features/Calendars/CalendarSlice', () => ({
+  getEventByUid: vi.fn(() => ({ type: 'lookupSavedEvent' }))
 }))
 const saved: SavedEvent = {
   uid: 'event',
@@ -18,8 +18,8 @@ const setup = (
   root: HTMLDivElement | null = null,
   events: EventApi[] = []
 ) => {
-  const dispatch = jest.fn(() => ({ unwrap }))
-  const onOpen = jest.fn()
+  const dispatch = vi.fn(() => ({ unwrap }))
+  const onOpen = vi.fn()
   const { result } = renderHook(() =>
     useOpenSavedEventPreview({
       dispatch: dispatch as unknown as AppDispatch,
@@ -166,7 +166,7 @@ describe('Show saved event preview', () => {
       const chip = document.createElement('a')
       chip.className = 'fc-event'
       chip.dataset.eventId = `${saved.calId}/${saved.uid}`
-      const scroll = jest.fn()
+      const scroll = vi.fn()
       chip.scrollIntoView = scroll
       await act(async () => {
         root.append(chip)
@@ -212,7 +212,7 @@ describe('Show saved event preview', () => {
   })
 
   it('opens without an anchor when no chip becomes visible', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     const root = document.createElement('div')
     const { open, onOpen } = setup(
       async () => ({ calId: saved.calId, events: [saved] }),
@@ -224,12 +224,12 @@ describe('Show saved event preview', () => {
         await Promise.resolve()
       })
       await act(async () => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
         await opening
       })
       expect(onOpen).toHaveBeenCalledWith(saved.uid, saved.calId, null)
     } finally {
-      jest.useRealTimers()
+      vi.useRealTimers()
     }
   })
 

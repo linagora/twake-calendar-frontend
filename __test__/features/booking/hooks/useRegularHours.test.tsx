@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react'
 import { useRegularHours } from '../../../../apps/private/src/features/booking/hooks/useRegularHours'
 import { DayAvailability } from '../../../../apps/private/src/features/booking/components/RegularHoursField/RegularHoursTypes'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, options: any) => options?.defaultValue || key
   })
@@ -18,7 +18,7 @@ describe('useRegularHours', () => {
     workingDays: number[] = [1, 2, 3, 4, 5]
   ) => {
     let rules: DayAvailability[] = [...initialRules]
-    const setRules = jest.fn(cb => {
+    const setRules = vi.fn(cb => {
       rules = typeof cb === 'function' ? cb(rules) : cb
     })
 

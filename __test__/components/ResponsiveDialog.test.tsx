@@ -3,13 +3,13 @@ import { Button, TextField, TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }))
 
 describe('ResponsiveDialog', () => {
-  const mockOnClose = jest.fn()
-  const mockOnExpandToggle = jest.fn()
+  const mockOnClose = vi.fn()
+  const mockOnExpandToggle = vi.fn()
 
   const renderWithTheme = (ui: React.ReactElement) => {
     return render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>)

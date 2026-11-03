@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 import {
   EventDescriptionBuilder,
@@ -9,9 +9,11 @@ import {
 import { Attachment } from '@common/types/Attachment'
 
 // Mock DOMPurify as done in descriptionUtils.test.ts
-jest.mock('dompurify', () => {
-  return jest.requireActual('dompurify')(window)
-})
+vi.mock('dompurify', async () => ({
+  default: (
+    await vi.importActual<typeof import('dompurify')>('dompurify')
+  ).default(window)
+}))
 
 describe('EventDescriptionBuilder', () => {
   beforeEach(() => {

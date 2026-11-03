@@ -2,6 +2,7 @@ import { RootState } from '@common/app/store'
 import EventPreviewModal from '@common/components/EventPreview'
 import EventPopover from '@common/features/Events/EventModal'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import * as appHooks from '@common/app/hooks'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 const day = new Date()
@@ -62,14 +63,18 @@ const preloadedState = {
 } as unknown as RootState
 
 describe('EventPopover', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('renders with event data', () => {
     renderWithProviders(
       <EventPopover
         anchorEl={null}
         open={true}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         selectedRange={null}
-        setSelectedRange={jest.fn()}
+        setSelectedRange={vi.fn()}
         calendarRef={{ current: null }}
         event={
           preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
@@ -82,8 +87,11 @@ describe('EventPopover', () => {
     expect(screen.getByDisplayValue(/Test Event/i)).toBeInTheDocument()
   })
 
-  it('saves duplicated event when Save is clicked', () => {
-    const onClose = jest.fn()
+  it('saves duplicated event when Save is clicked', async () => {
+    const onClose = vi.fn()
+    // Only the submit/close path matters here: keep the save thunk from
+    // leaking async work into the next test
+    vi.spyOn(appHooks, 'useAppDispatch').mockReturnValue(vi.fn() as never)
 
     renderWithProviders(
       <EventPopover
@@ -91,12 +99,14 @@ describe('EventPopover', () => {
         open={true}
         onClose={onClose}
         selectedRange={null}
-        setSelectedRange={jest.fn()}
+        setSelectedRange={vi.fn()}
         calendarRef={{ current: null }}
-        event={
-          preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
-            .event1
-        }
+        event={{
+          ...preloadedState.calendars.list['667037022b752d0026472254/cal1']
+            .events.event1,
+          // The form refuses to submit an event ending before it starts
+          end: new Date(day.getTime() + 3600000).toISOString()
+        }}
       />,
       preloadedState
     )
@@ -106,7 +116,7 @@ describe('EventPopover', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
 
-    waitFor(() => expect(onClose).toHaveBeenCalled())
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
   })
 })
 
@@ -117,7 +127,7 @@ describe('EventDisplayModal', () => {
         eventId="event1"
         calId="667037022b752d0026472254/cal1"
         open={true}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />,
       preloadedState
     )

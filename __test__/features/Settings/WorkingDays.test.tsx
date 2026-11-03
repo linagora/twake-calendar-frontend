@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import settingsReducer from '@common/features/Settings/SettingsSlice'
 import userReducer, {
@@ -9,7 +10,7 @@ import '@testing-library/jest-dom'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@common/utils/apiUtils')
+vi.mock('@common/utils/apiUtils')
 
 const basePreloadedState = {
   user: {
@@ -47,8 +48,8 @@ const basePreloadedState = {
 
 describe('Working Days and Business Hours Settings', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
+    vi.clearAllMocks()
+    ;(api.patch as Mock).mockResolvedValue({ status: 204 })
   })
 
   describe('Initial rendering', () => {
@@ -137,7 +138,7 @@ describe('Working Days and Business Hours Settings', () => {
     })
 
     it('rolls back workingDays if API call fails', async () => {
-      ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+      ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
       const { store } = renderWithProviders(
         <SettingsPage />,
@@ -235,7 +236,7 @@ describe('Working Days and Business Hours Settings', () => {
     })
 
     it('debounces API call when multiple days are clicked rapidly', async () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
 
       renderWithProviders(<SettingsPage />, basePreloadedState)
 
@@ -250,24 +251,24 @@ describe('Working Days and Business Hours Settings', () => {
       expect(api.patch).not.toHaveBeenCalled()
 
       // Advance timers past debounce threshold
-      jest.runAllTimers()
+      vi.runAllTimers()
 
       await waitFor(() => {
         expect(api.patch).toHaveBeenCalledTimes(1)
       })
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('sends businessHours as array to API with Sunday in ISO-8601 format (7)', async () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
 
       renderWithProviders(<SettingsPage />, basePreloadedState)
 
       const sundayButton = screen.getByRole('button', { name: /sunday/i })
       fireEvent.click(sundayButton)
 
-      jest.runAllTimers()
+      vi.runAllTimers()
 
       await waitFor(() => {
         expect(api.patch).toHaveBeenCalledWith(
@@ -296,7 +297,7 @@ describe('Working Days and Business Hours Settings', () => {
         )
       })
 
-      const coreModule = (api.patch as jest.Mock).mock.calls[0][1].json.find(
+      const coreModule = (api.patch as Mock).mock.calls[0][1].json.find(
         (m: { name: string }) => m.name === 'core'
       )
       const businessHoursConfig = coreModule.configurations.find(
@@ -305,12 +306,12 @@ describe('Working Days and Business Hours Settings', () => {
       const patchedDays = businessHoursConfig.value[0].daysOfWeek
       expect(patchedDays).not.toContain(0)
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('rolls back businessHours if API call fails', async () => {
-      jest.useFakeTimers()
-      ;(api.patch as jest.Mock).mockRejectedValue(new Error('API Error'))
+      vi.useFakeTimers()
+      ;(api.patch as Mock).mockRejectedValue(new Error('API Error'))
 
       const { store } = renderWithProviders(
         <SettingsPage />,
@@ -320,7 +321,7 @@ describe('Working Days and Business Hours Settings', () => {
       const sundayButton = screen.getByRole('button', { name: /sunday/i })
       fireEvent.click(sundayButton)
 
-      jest.runAllTimers()
+      vi.runAllTimers()
 
       await waitFor(
         () => {
@@ -337,7 +338,7 @@ describe('Working Days and Business Hours Settings', () => {
         ).toBeInTheDocument()
       })
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 

@@ -13,7 +13,7 @@ describe('DateTimeSummary', () => {
     timezone: 'Europe/Paris',
     repetition: new RepetitionObject(),
     showEndDate: false,
-    onClick: jest.fn()
+    onClick: vi.fn()
   }
 
   it('separates the date from the time range in its accessible name', () => {

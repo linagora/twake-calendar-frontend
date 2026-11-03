@@ -16,8 +16,8 @@ describe('MobileMenubar', () => {
         currentView={CALENDAR_VIEWS.timeGridWeek}
         dateLabel={dateLabel}
         shortDateLabel={shortDateLabel}
-        handleNavigation={jest.fn()}
-        onOpenSidebar={jest.fn()}
+        handleNavigation={vi.fn()}
+        onOpenSidebar={vi.fn()}
       />,
       { settings: { view: 'calendar' } }
     )
@@ -39,15 +39,15 @@ describe('MobileMenubar', () => {
   })
 
   const mockViewportWidth = (width: number): void => {
-    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: /max-width: 359/.test(query) && width < 360,
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn()
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
     }))
   }
 
@@ -75,10 +75,10 @@ describe('MobileMenubar', () => {
     it('falls back to the short title when the full one overflows (#1763)', () => {
       mockViewportWidth(390)
       // two lines of room, and a full title that needs three
-      const scrollHeight = jest
+      const scrollHeight = vi
         .spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
         .mockReturnValue(60)
-      const clientHeight = jest
+      const clientHeight = vi
         .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
         .mockReturnValue(40)
       // a browser reports the size of an observed element right away
