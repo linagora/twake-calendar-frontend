@@ -18,6 +18,8 @@ import { Attachment } from '@common/types/Attachment'
 import { AlarmData, VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { getTzidParam } from '@common/features/Events/transformers/recurrenceInstant'
+import { occurrenceKey } from './occurrenceKey'
 
 const KNOWN_PROPS = new Set([
   'uid',
@@ -55,6 +57,7 @@ function safeString(value: VObjectValue): string {
 
 interface PropertyContext {
   recurrenceId?: string
+  recurrenceTzid?: string
   duration?: string
 }
 
@@ -221,6 +224,9 @@ const PROPERTY_PARSERS: Record<
   },
   'recurrence-id': (params, value, event, context) => {
     context.recurrenceId = safeString(value)
+    context.recurrenceTzid = getTzidParam(
+      params as Record<string, unknown> | undefined
+    )
   },
   exdate: (params, value, event) => {
     if (!event.exdates) event.exdates = []
@@ -261,12 +267,15 @@ function parseEventProperty(
   }
 }
 
+// The occurrence is keyed by its instant, while its recurrenceId keeps the
+// stored value: the write paths match it back against the stored override.
 function processEventUid(
   event: Partial<CalendarEvent>,
-  recurrenceId?: string
+  recurrenceId?: string,
+  recurrenceTzid?: string
 ): void {
   if (recurrenceId && event.uid) {
-    event.uid = `${event.uid}/${recurrenceId}`
+    event.uid = `${event.uid}/${occurrenceKey(recurrenceId, recurrenceTzid, event.timezone)}`
     event.recurrenceId = recurrenceId
   }
 }
@@ -410,7 +419,7 @@ export function parseCalendarEvent({
     event.timezone = timezoneOfTheCalendarObject
   }
 
-  processEventUid(event, context.recurrenceId)
+  processEventUid(event, context.recurrenceId, context.recurrenceTzid)
 
   const alarms = parseAlarms(valarms)
   if (alarms?.hasAlarms()) {

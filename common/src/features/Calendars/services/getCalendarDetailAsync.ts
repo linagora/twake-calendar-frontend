@@ -13,6 +13,14 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
+// An expanded REPORT gives every occurrence a RECURRENCE-ID, the first one
+// included. A series master with its RRULE is the stored object sent back
+// unexpanded, when the occurrences of the range were all moved out of it: shown,
+// it would put a moved occurrence back at its former place. See #1862.
+function isUnexpandedMaster(event: CalendarEvent): boolean {
+  return !!event.repetition?.freq && !event.recurrenceId
+}
+
 export const getCalendarDetailThunk = (
   create: ReducerCreators<CalendarState>
 ) =>
@@ -53,12 +61,14 @@ export const getCalendarDetailThunk = (
 
         const items = calendar._embedded?.['dav:item']
         const events: CalendarEvent[] = Array.isArray(items)
-          ? items.flatMap((item: CalendarItem) =>
-              extractCalendarEvents(item, {
-                cal: calendarStored,
-                color: calendarStored.color
-              })
-            )
+          ? items
+              .flatMap((item: CalendarItem) =>
+                extractCalendarEvents(item, {
+                  cal: calendarStored,
+                  color: calendarStored.color
+                })
+              )
+              .filter(event => !isUnexpandedMaster(event))
           : []
 
         return { calId, events, calType, syncToken }
