@@ -6,9 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -38,15 +36,9 @@ import com.microsoft.playwright.options.WaitForSelectorState;
  */
 class PastRecurrenceTest extends TwakeCalendarE2ETest {
 
-    private static final DateTimeFormatter LONG_DATE =
-        DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
 
     private static String title(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
-    }
-
-    private static String longDate(LocalDate date) {
-        return date.format(LONG_DATE);
     }
 
     private void awaitAttached(Locator locator) {
@@ -90,7 +82,7 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         var edited = calendar.openEvent(title).edit(THIS_EVENT).expand();
 
         assertThat(edited.startTime()).isEqualTo("17:45");
-        assertThat(edited.startDate()).isEqualTo(longDate(twoWeeksLater));
+        assertThat(edited.startDate()).isEqualTo(CalendarPage.longDate(twoWeeksLater));
         assertThat(edited.timezone()).contains("Europe/Paris");
     }
 

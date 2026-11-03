@@ -21,15 +21,13 @@ import com.microsoft.playwright.TimeoutError;
 class DatePickerField {
     private static final DateTimeFormatter MONTH_LABEL =
         DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
-    private static final DateTimeFormatter FIELD_VALUE =
-        DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
     private static final int ATTEMPTS = 4;
 
     static void pick(Page page, Locator field, LocalDate date) {
         // checking a radio re-renders the panel around this field: let it settle before reading
         field.waitFor(new Locator.WaitForOptions()
             .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
-        String expected = date.format(FIELD_VALUE);
+        String expected = CalendarPage.longDate(date);
         for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
             if (expected.equals(field.inputValue())) {
                 return;

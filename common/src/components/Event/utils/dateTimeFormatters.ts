@@ -113,7 +113,7 @@ export function getRoundedCurrentTime(): Date {
 }
 
 /** Long date display format for date pickers */
-export const LONG_DATE_FORMAT = 'dddd, MMMM D, YYYY'
+export const LONG_DATE_FORMAT = 'dddd, D MMMM YYYY'
 
 const LOCALIZED_LONG_DATE_FORMATS: Record<string, string> = {
   fr: 'dddd D MMMM YYYY',
@@ -134,7 +134,7 @@ export function getLongDateFormat(locale?: string): string {
 }
 
 /** Date display format without the weekday */
-export const DATE_FORMAT = 'MMMM D, YYYY'
+export const DATE_FORMAT = 'D MMMM YYYY'
 
 const LOCALIZED_DATE_FORMATS: Record<string, string> = {
   fr: 'D MMMM YYYY',
