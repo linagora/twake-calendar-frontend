@@ -204,14 +204,14 @@
       }
     },
     "freeBusy": {
-      "unknown": "Impossibile mostrare il calendario di questo invitato.",
+      "unknown": "Impossibile verificare la disponibilità.",
       "contact": "Impossibile mostrare il calendario di questo invitato.",
       "busy": "Questa persona è occupata",
       "busyCalOwner": "Hai un altro evento a quest'ora",
       "free": "L'utente è disponibile",
       "loading": "Caricamento dello stato",
       "resourceBusy": "Questa risorsa è già prenotata",
-      "resourceUnknown": "Impossibile mostrare la disponibilità di questa risorsa."
+      "resourceUnknown": "Impossibile verificare la disponibilità."
     },
     "form": {
       "title": "Titolo",

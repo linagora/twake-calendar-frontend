@@ -204,14 +204,14 @@
       }
     },
     "freeBusy": {
-      "unknown": "Không thể hiển thị lịch của khách này.",
+      "unknown": "Không thể kiểm tra lịch trống.",
       "contact": "Không thể hiển thị lịch của khách này.",
       "busy": "Người này hiện đang bận",
       "busyCalOwner": "Bạn có một sự kiện khác vào thời gian này",
       "free": "Người dùng đang rảnh",
       "loading": "Đang tải trạng thái",
       "resourceBusy": "Tài nguyên này đã được đặt",
-      "resourceUnknown": "Không thể hiển thị lịch của tài nguyên này."
+      "resourceUnknown": "Không thể kiểm tra lịch trống."
     },
     "form": {
       "title": "Tiêu đề",

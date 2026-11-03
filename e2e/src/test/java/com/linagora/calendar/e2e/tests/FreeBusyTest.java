@@ -34,7 +34,7 @@ import com.microsoft.playwright.Page;
  */
 class FreeBusyTest extends TwakeCalendarE2ETest {
     private static final String BUSY = "This person is busy";
-    private static final String UNKNOWN = "Can't show this guest's calendar.";
+    private static final String UNKNOWN = "Availability couldn't be checked.";
     private static final String FREE = "";
 
     private static String unique(String prefix) {

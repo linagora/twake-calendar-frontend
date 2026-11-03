@@ -204,14 +204,14 @@
       }
     },
     "freeBusy": {
-      "unknown": "Can't show this guest's calendar.",
+      "unknown": "Availability couldn't be checked.",
       "contact": "Can't show this guest's calendar.",
       "busy": "This person is busy",
       "busyCalOwner": "You have another event at this time",
       "free": "User is free",
       "loading": "Status is loading",
       "resourceBusy": "This resource is already booked",
-      "resourceUnknown": "Can't show this resource's availability."
+      "resourceUnknown": "Availability couldn't be checked."
     },
     "form": {
       "title": "Title",
