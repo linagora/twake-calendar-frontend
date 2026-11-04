@@ -10,7 +10,7 @@
     "@linagora/twake-oidc": "^1.1.0",
     "@mui/icons-material": "^9.0.1",
     "@mui/x-date-pickers": "^9",
-    "@sentry/react": "^8.55.1",
+    "@sentry/react": "^11.10.0",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
