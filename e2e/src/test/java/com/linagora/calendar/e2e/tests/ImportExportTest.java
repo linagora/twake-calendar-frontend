@@ -46,7 +46,8 @@ class ImportExportTest extends TwakeCalendarE2ETest {
     }
 
     private void importInto(CalendarPage calendar, String file) {
-        importTab(calendar).importFile(fixture(file)).startImport();
+        CalendarModal.importRetryingDroppedRequests(() ->
+            importTab(calendar).importFile(fixture(file)));
     }
 
     /** Fetches an address the interface published, without any browser involved. */
@@ -167,7 +168,8 @@ class ImportExportTest extends TwakeCalendarE2ETest {
         calendar.addCalendar().name(other).create();
         calendar.showCalendar(other);
 
-        importTab(calendar).importFile(fixture("simple.ics")).importTo(other).startImport();
+        CalendarModal.importRetryingDroppedRequests(() ->
+            importTab(calendar).importFile(fixture("simple.ics")).importTo(other));
 
         // read the destination back through its own export: the imported dates are fixed and
         // need not fall in the week the grid happens to show

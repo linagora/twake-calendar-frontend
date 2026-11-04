@@ -540,7 +540,10 @@ class SharingTest extends TwakeCalendarE2ETest {
         assertThat(borrowed.tabs())
             .as("a right to write into a calendar is a right to import into it")
             .anyMatch(tab -> tab.contains("Import"));
-        borrowed.tab("Import").importFile(Ics.fixture("simple.ics")).startImport();
+        borrowed.close();
+        CalendarModal.importRetryingDroppedRequests(() ->
+            new CalendarPage(matePage).modifyCalendarMatching(user.uid())
+                .tab("Import").importFile(Ics.fixture("simple.ics")));
         Awaitility.await().atMost(Duration.ofMillis(PROPAGATION_MS)).untilAsserted(() ->
             assertThat(probe.eventSummaries(user))
                 .as("what the delegate imported belongs in the owner's calendar")
