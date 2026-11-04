@@ -1,5 +1,10 @@
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
-import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
+import {
+  isMomentZone,
+  readWallClock,
+  resolveTimezone,
+  storedTimezone
+} from '@common/utils/timezone'
 import moment from 'moment-timezone'
 import { getTzidParam } from '../transformers/recurrenceInstant'
 
@@ -22,9 +27,13 @@ export function parseMoment(
   fallbackTimezone: string
 ): moment.Moment | null {
   if (!prop || typeof prop[3] !== 'string') return null
-  const tzid = knownZone(getTzidParam(prop[1]), fallbackTimezone)
+  const tzidParam = getTzidParam(prop[1])
+  // A TZID only defined by a stored VTIMEZONE is read with it
+  const tzid = storedTimezone(tzidParam)
+    ? (tzidParam as string)
+    : knownZone(tzidParam, fallbackTimezone)
   const val = prop[3]
-  const m = val.endsWith('Z') ? moment.utc(val) : moment.tz(val, tzid)
+  const m = val.endsWith('Z') ? moment.utc(val) : readWallClock(val, tzid)
   return m.isValid() ? m : null
 }
 
