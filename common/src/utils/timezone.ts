@@ -4,6 +4,7 @@
 import ICAL from 'ical.js'
 import moment from 'moment-timezone'
 import { detectDateTimeFormat } from '@common/components/Event/utils/dateTimeHelpers'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 
 // TIMEZONES data must be imported or defined separately.
 import { TIMEZONES } from './timezone-data'
@@ -95,6 +96,77 @@ export function resolveTimezoneId(tzid?: string): string | undefined {
   return resolveTimezone(tzid)
 }
 
+function vtimezoneTzid([, props]: VCalComponent): string | undefined {
+  const tzid = props.find(([k]) => k.toLowerCase() === 'tzid')?.[3]
+  return typeof tzid === 'string' && tzid ? tzid : undefined
+}
+
+function toIcalTimezone(vtimezone: VCalComponent): ICAL.Timezone | undefined {
+  try {
+    return new ICAL.Timezone(new ICAL.Component(vtimezone as unknown[]))
+  } catch {
+    return undefined
+  }
+}
+
+// The TZID registered for the VTIMEZONE, if it is a custom one
+function registerCustomTimezone(vtimezone: VCalComponent): string[] {
+  const tzid = vtimezoneTzid(vtimezone)
+  if (!tzid || isMomentZone(tzid) || ICAL.TimezoneService.has(tzid)) {
+    return []
+  }
+  const zone = toIcalTimezone(vtimezone)
+  if (!zone) {
+    return []
+  }
+  ICAL.TimezoneService.register(zone, tzid)
+  return [tzid]
+}
+
+/**
+ * Runs `fn` with the custom zones of a calendar object known to ical.js: a
+ * VTIMEZONE whose TZID is neither a moment zone nor a registered one ("Customized
+ * Time Zone" from Outlook, for example) defines the only offset its values can
+ * be read and written in. The zones are registered for the time of the call
+ * only: another object may define the same TZID otherwise, and a write that
+ * does not carry the stored VTIMEZONE must keep writing such a zone as UTC.
+ */
+export function withStoredTimezones<T>(
+  vtimezones: VCalComponent[],
+  fn: () => T
+): T {
+  const registered = vtimezones.flatMap(registerCustomTimezone)
+  try {
+    return fn()
+  } finally {
+    registered.forEach(tzid => ICAL.TimezoneService.remove(tzid))
+  }
+}
+
+function icalTimezone(timezone: string): ICAL.Timezone | undefined {
+  const zone = ICAL.TimezoneService.get(timezone)
+  return zone instanceof ICAL.Timezone ? zone : undefined
+}
+
+function wallClockInZoneToISO(
+  wallClock: moment.Moment,
+  zone: ICAL.Timezone
+): string {
+  const time = new ICAL.Time(
+    {
+      year: wallClock.year(),
+      month: wallClock.month() + 1,
+      day: wallClock.date(),
+      hour: wallClock.hours(),
+      minute: wallClock.minutes(),
+      second: wallClock.seconds(),
+      isDate: false
+    },
+    zone
+  )
+  return new Date(time.toUnixTime() * 1000).toISOString()
+}
+
 export function convertEventDateTimeToISO(
   datetime: string | undefined,
   timezone: string,
@@ -125,21 +197,24 @@ export function convertEventDateTimeToISO(
     return undefined
   }
 
-  // moment-timezone reads an unknown zone as UTC but throws on an inherited
-  // name such as "constructor": read that one as UTC too.
+  // A zone moment-timezone does not know is read with its ical.js definition
+  // (a stored VTIMEZONE, see withStoredTimezones), and as UTC without one.
+  // moment-timezone throws on an inherited name such as "constructor".
   const format = detectDateTimeFormat(normalized)
-  const momentDate = moment.tz(
-    normalized,
-    format,
-    isMomentZone(timezone) ? timezone : 'UTC'
-  )
+  const knownZone = isMomentZone(timezone)
+  const customZone = knownZone ? undefined : icalTimezone(timezone)
+  const momentDate = customZone
+    ? moment.utc(normalized, format)
+    : moment.tz(normalized, format, knownZone ? timezone : 'UTC')
   if (!momentDate.isValid()) {
     console.warn(
       `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${timezone}"`
     )
     return undefined
   }
-  return momentDate.toISOString()
+  return customZone
+    ? wallClockInZoneToISO(momentDate, customZone)
+    : momentDate.toISOString()
 }
 
 export function getTimezoneOffset(

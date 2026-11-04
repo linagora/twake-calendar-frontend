@@ -1,5 +1,6 @@
 import moment from 'moment-timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
+import { withStoredTimezones } from '@common/utils/timezone'
 import {
   VCalComponent,
   VObjectProperty,
@@ -490,8 +491,14 @@ export const makeSeriesJCal = (
   const tzid = event.timezone
   const oldMaster = vevents[masterIndex]
 
+  // The stored VTIMEZONEs are written back: a custom zone keeps its TZID and
+  // wall clock instead of being written as UTC
+  const storedVtimezones = options.storedVtimezones ?? []
   const updatedMaster = withStoredRrule(
-    makeVevent(event, tzid, true) as VCalComponent,
+    withStoredTimezones(
+      storedVtimezones,
+      () => makeVevent(event, tzid, true) as VCalComponent
+    ),
     oldMaster,
     event
   )
@@ -519,7 +526,7 @@ export const makeSeriesJCal = (
 
   const vtimezones = makeSeriesVtimezones(
     finalVevents,
-    options.storedVtimezones ?? [],
+    storedVtimezones,
     () =>
       makeTimezone(findTimezoneData(event.timezone), event).component
         .jCal as VCalComponent
