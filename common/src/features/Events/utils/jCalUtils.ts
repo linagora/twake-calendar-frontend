@@ -29,13 +29,16 @@ export function parseMoment(
 }
 
 // A Windows or alias TZID (Outlook writes "Romance Standard Time") resolves to
-// its IANA zone: moment.tz reads a name it does not know as UTC
+// its IANA zone: moment.tz reads a name it does not know as UTC. The fallback
+// comes from received data too: one moment.tz throws on ("constructor",
+// "__proto__") is read as UTC as well
 export function knownZone(
   tzid: string | undefined,
   fallbackTimezone: string
 ): string {
   const resolved = tzid ? resolveTimezone(tzid) : undefined
-  return isMomentZone(resolved) ? resolved : fallbackTimezone
+  if (isMomentZone(resolved)) return resolved
+  return isMomentZone(fallbackTimezone) ? fallbackTimezone : 'UTC'
 }
 
 export function parseInstant(
