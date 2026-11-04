@@ -84,13 +84,15 @@ function findOverrideIndex(
     return -1
   }
   const storedIds = vevents.map(findRecurrenceId)
-  const isSameInstant = (storedId: VObjectProperty | undefined): boolean =>
-    storedId !== undefined &&
-    sameRecurrence(
-      { value: storedId[3], tzid: getTzidParam(storedId[1]) },
-      { value: id },
-      updatedEvent.timezone
-    )
+  const isSameInstant =
+    (zone: string | undefined) =>
+    (storedId: VObjectProperty | undefined): boolean =>
+      storedId !== undefined &&
+      sameRecurrence(
+        { value: storedId[3], tzid: getTzidParam(storedId[1]) },
+        { value: id },
+        zone
+      )
   const exactIndexes = /Z$/.test(id)
     ? []
     : storedIds.flatMap((storedId, index) =>
@@ -100,12 +102,16 @@ function findOverrideIndex(
     return exactIndexes[0]
   }
   if (exactIndexes.length > 1) {
+    const inEventZone = isSameInstant(updatedEvent.timezone)
     return (
-      exactIndexes.find(index => isSameInstant(storedIds[index])) ??
+      exactIndexes.find(index => inEventZone(storedIds[index])) ??
       exactIndexes[0]
     )
   }
-  return storedIds.findIndex(isSameInstant)
+  // A stored value without TZID is read in the zone of the series (#1938)
+  return storedIds.findIndex(
+    isSameInstant(seriesZone(vevents) ?? updatedEvent.timezone)
+  )
 }
 
 // The RECURRENCE-ID of a new override designates the original occurrence and
@@ -143,6 +149,18 @@ function findMasterDtstart(
 ): VObjectProperty | undefined {
   const master = vevents.find(vevent => !findRecurrenceId(vevent))
   return master?.[1].find(([k]) => k.toLowerCase() === 'dtstart')
+}
+
+// The zone a stored value without TZID is read in: the zone of the series, not
+// the zone picked in the form, which an edit may have changed. A floating
+// master is expanded in UTC by the server. See #1938.
+function seriesZone(vevents: VCalComponent[]): string | undefined {
+  const master = vevents.find(vevent => !findRecurrenceId(vevent))
+  if (!master) {
+    return undefined
+  }
+  const dtstart = master[1].find(([k]) => k.toLowerCase() === 'dtstart')
+  return getTzidParam(dtstart?.[1]) ?? 'UTC'
 }
 
 function preserveRecurrenceId(
