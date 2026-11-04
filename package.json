@@ -35,7 +35,7 @@
     "dompurify": "^3.4.13",
     "html-react-parser": "^6.1.7",
     "ical.js": "^2.2.0",
-    "ky": "^1.8.1",
+    "ky": "^2.2.0",
     "lodash": "^4.17.23",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
