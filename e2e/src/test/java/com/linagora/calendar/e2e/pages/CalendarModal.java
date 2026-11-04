@@ -1,13 +1,43 @@
 package com.linagora.calendar.e2e.pages;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Request;
+import com.microsoft.playwright.Response;
+import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
 /** The calendar dialog: creating one, and the Settings, Access and Import tabs of an existing one. */
 public class CalendarModal {
+    private static final String UPLOAD_PATH = "/api/files";
+    private static final String IMPORT_PATH = "/api/import";
+    private static final double IMPORT_ANSWER_MS = 30_000;
+    private static final int IMPORT_ATTEMPTS = 3;
+
     private final Page page;
+
+    /**
+     * Imports, again when a request of the import was dropped (see {@link #startImport()}).
+     *
+     * <p>{@code preparedImport} opens the Import tab and picks the file, and the target if need
+     * be: the dialog closes on every attempt. Importing again is harmless: the events carry
+     * their UID, and the side service writes them under it.
+     */
+    public static void importRetryingDroppedRequests(Supplier<CalendarModal> preparedImport) {
+        for (int attempt = 1; attempt <= IMPORT_ATTEMPTS; attempt++) {
+            if (preparedImport.get().startImport()) {
+                return;
+            }
+        }
+        throw new AssertionError("the requests of the import were dropped "
+            + IMPORT_ATTEMPTS + " times in a row");
+    }
 
     CalendarModal(Page page) {
         this.page = page;
@@ -268,10 +298,57 @@ public class CalendarModal {
             new Locator.GetByRoleOptions().setName("Import").setExact(true));
     }
 
-    /** Starts the import and waits for the dialog to give an answer, whichever it is. */
-    public CalendarModal startImport() {
-        importButton().click();
-        return this;
+    /**
+     * Starts the import and waits until the browser has an answer to it, whichever it is.
+     *
+     * <p>The front uploads the file, asks the side service to import it, and closes the dialog
+     * without waiting: neither request is retried. Chromium drops the requests in flight
+     * whenever a network interface of the host comes or goes -- any container started on a
+     * shared CI agent, see {@link LoginPage} -- and a dropped one leaves nothing imported and
+     * nothing to wait for: the test then waits a minute for events that never come.
+     *
+     * @return false when a request of the import was dropped, for the caller to import again;
+     * true once the import is answered, an HTTP refusal included (some tests import files the
+     * product must refuse)
+     */
+    public boolean startImport() {
+        AtomicBoolean answered = new AtomicBoolean();
+        AtomicReference<String> dropped = new AtomicReference<>();
+        Consumer<Response> onResponse = response -> {
+            if (isImportRequest(response.request())
+                && (response.url().contains(IMPORT_PATH) || !response.ok())) {
+                answered.set(true);
+            }
+        };
+        Consumer<Request> onFailure = request -> {
+            if (isImportRequest(request)) {
+                dropped.set(request.url() + ": " + request.failure());
+            }
+        };
+        page.onResponse(onResponse);
+        page.onRequestFailed(onFailure);
+        try {
+            importButton().click();
+            page.waitForCondition(() -> answered.get() || dropped.get() != null,
+                new Page.WaitForConditionOptions().setTimeout(IMPORT_ANSWER_MS));
+        } catch (TimeoutError e) {
+            // no answer, but nothing seen dropped either: let the caller's own wait judge
+            System.out.println("[e2e] the import got no answer within " + IMPORT_ANSWER_MS + " ms");
+            return true;
+        } finally {
+            page.offResponse(onResponse);
+            page.offRequestFailed(onFailure);
+        }
+        if (!answered.get()) {
+            System.out.println("[e2e] a request of the import was dropped: " + dropped.get());
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isImportRequest(Request request) {
+        return "POST".equals(request.method())
+            && (request.url().contains(UPLOAD_PATH) || request.url().contains(IMPORT_PATH));
     }
 
     public void create() {
