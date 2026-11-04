@@ -44,6 +44,30 @@ describe('scrubSensitiveData', () => {
       ).toBe('user [email] and [email] not found')
     })
 
+    it('masks email addresses with non-ASCII characters', () => {
+      for (const address of [
+        'a@bücher.de',
+        'ünal@bücher.de',
+        'ünal@例え.jp',
+        'josé@example.fr',
+        'josé@example.fr',
+        'δοκιμή@παράδειγμα.δοκιμή'
+      ]) {
+        const scrubbed = scrubText(`invite ${address} failed`)
+        expect(scrubbed).toBe('invite [email] failed')
+      }
+    })
+
+    it('masks every address of a run of non-ASCII addresses', () => {
+      const scrubbed = scrubText('       a@bücher.deünal@bücher.dea@bücher.de')
+      expect(scrubbed).not.toContain('bücher')
+      expect(scrubbed).not.toContain('a@')
+    })
+
+    it('masks a URL encoded non-ASCII address', () => {
+      expect(scrubText('?attendee=ünal%40例え.jp')).toBe('?attendee=[email]')
+    })
+
     it('does not mask words merely ending like a parameter name', () => {
       expect(scrubText('barcode=12')).toBe('barcode=12')
       expect(scrubText('?u=a%3Fbarcode%3D12')).toBe('?u=a%3Fbarcode%3D12')
