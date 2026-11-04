@@ -46,6 +46,28 @@ describe('scrubSensitiveData', () => {
 
     it('does not mask words merely ending like a parameter name', () => {
       expect(scrubText('barcode=12')).toBe('barcode=12')
+      expect(scrubText('?u=a%3Fbarcode%3D12')).toBe('?u=a%3Fbarcode%3D12')
+    })
+
+    it('masks a credential in a percent-encoded nested URL', () => {
+      const secret = 'oK7iXAAAAAAAAAAAAAAAps0lylkdlvivvr'
+      for (const text of [
+        `?return=https%3A%2F%2Fcal.example%2Fcb%3Fsession_state%3D${secret}`,
+        `&redirect_uri=https%3A%2F%2Fcal.example%2Fcb%3Fx%3D1%26jwt%3D${secret}`,
+        ` next=https%3A%2F%2Fcal.example%2Fcb%3FCODE%3D${secret}`
+      ]) {
+        expect(scrubText(text)).not.toContain(secret)
+      }
+    })
+
+    it('masks an encoded value up to the next encoded separator only', () => {
+      expect(
+        scrubText(
+          '?return=https%3A%2F%2Fcal.example%2Fcb%3Fstate%3Dab%2Fcd%26iss%3Dsso%23top'
+        )
+      ).toBe(
+        '?return=https%3A%2F%2Fcal.example%2Fcb%3Fstate%3D[Filtered]%26iss%3Dsso%23top'
+      )
     })
   })
 
