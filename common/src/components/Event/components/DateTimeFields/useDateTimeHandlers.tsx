@@ -166,7 +166,11 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     const newEnd = toDateTime(endDate, newTimeStr)
     const currentStart = toDateTime(startDate, startTime)
 
-    initialDurationRef.current = newEnd.diff(currentStart, 'minute')
+    // An end before the start is invalid: keep the last valid duration so a
+    // later start change does not apply a negative one
+    if (!newEnd.isBefore(currentStart)) {
+      initialDurationRef.current = newEnd.diff(currentStart, 'minute')
+    }
     onEndTimeChange(newTimeStr)
   }
 
