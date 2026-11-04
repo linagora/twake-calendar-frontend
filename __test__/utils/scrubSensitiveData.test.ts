@@ -49,6 +49,18 @@ describe('scrubSensitiveData', () => {
       expect(scrubText('?u=a%3Fbarcode%3D12')).toBe('?u=a%3Fbarcode%3D12')
     })
 
+    it('does not mask hyphenated names ending like a parameter name', () => {
+      expect(scrubText('?status-code=200')).toBe('?status-code=200')
+      expect(scrubText('?u=a%3Fstatus-code%3D200')).toBe(
+        '?u=a%3Fstatus-code%3D200'
+      )
+    })
+
+    it('masks a parameter at the start of the text', () => {
+      expect(scrubText('jwt=eyJ.a.b')).toBe('jwt=[Filtered]')
+      expect(scrubText('jwt%3DeyJ')).toBe('jwt%3D[Filtered]')
+    })
+
     it('masks a credential in a percent-encoded nested URL', () => {
       const secret = 'oK7iXAAAAAAAAAAAAAAAps0lylkdlvivvr'
       for (const text of [
