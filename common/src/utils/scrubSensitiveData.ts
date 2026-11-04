@@ -22,14 +22,18 @@ const SENSITIVE_PARAMS = [
   'session_state'
 ]
 
+// Start of text or a character that cannot belong to a parameter name, so that
+// `barcode=` or `status-code=` are not taken for `code=`.
+const NAME_BOUNDARY = '^|[^\\w-]'
+
 const SENSITIVE_PARAM_REGEX = new RegExp(
-  `([?&#;]|\\b)(${SENSITIVE_PARAMS.join('|')})=[^&#\\s"'<>]*`,
+  `(${NAME_BOUNDARY})(${SENSITIVE_PARAMS.join('|')})=[^&#\\s"'<>]*`,
   'gi'
 )
 // The same parameters inside a percent-encoded nested URL (redirect_uri,
 // return...): `%3Fjwt%3D<value>`, the value ending at the next encoded `&`/`#`.
 const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
-  `(%3F|%26|%23|%3B|\\b)(${SENSITIVE_PARAMS.join('|')})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
+  `(%3F|%26|%23|%3B|${NAME_BOUNDARY})(${SENSITIVE_PARAMS.join('|')})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
   'gi'
 )
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
