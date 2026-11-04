@@ -115,6 +115,14 @@ const unmodelledParts = (stored: RuleValues): RuleValues =>
     ])
   )
 
+// The DTSTART written carries the series zone, while the stored UNTIL matched
+// the stored DTSTART: a floating one is floating, against RFC 5545 once DTSTART
+// has a TZID. The form UNTIL has the value type the written DTSTART asks for.
+const untilOfForm = (stored: RuleValues, edited: RuleValues): RuleValues =>
+  stored.until !== undefined && edited.until !== undefined
+    ? { until: edited.until }
+    : {}
+
 const withValue = (
   [name, params, type]: VObjectProperty,
   value: RuleValues
@@ -125,7 +133,8 @@ const withValue = (
  * COUNT, UNTIL, BYDAY and WKST: rebuilding the rule from it alone would drop
  * BYSETPOS, BYMONTH, BYHOUR... of a series written by another client, and
  * change its occurrences.
- * - the form left the rule alone: the stored rule is written back
+ * - the form left the rule alone: the stored rule is written back, with the
+ *   UNTIL of the form, in the value type of the DTSTART written
  * - the form changed the rule but kept its frequency: the parts it does not
  *   model are kept on top of the form rule
  * - the form changed the frequency: the user picked another kind of rule
@@ -142,7 +151,10 @@ export const mergeStoredRrule = (
   const edited = formRrule[3] as unknown as RuleValues
 
   if (formLeavesRuleAlone(stored, repetition)) {
-    return withValue(storedRrule, followStart(stored, starts))
+    return withValue(storedRrule, {
+      ...followStart(stored, starts),
+      ...untilOfForm(stored, edited)
+    })
   }
   if (!sameFreq(stored, edited)) return formRrule
 
