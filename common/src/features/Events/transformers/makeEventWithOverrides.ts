@@ -74,15 +74,28 @@ function findOverrideIndex(
   if (exactIndex !== -1) {
     return exactIndex
   }
+  const fallbackZone = seriesZone(vevents) ?? updatedEvent.timezone
   return storedIds.findIndex(
     storedId =>
       storedId &&
       sameRecurrence(
         { value: storedId[3], tzid: getTzidParam(storedId[1]) },
         { value: id },
-        updatedEvent.timezone
+        fallbackZone
       )
   )
+}
+
+// The zone a stored value without TZID is read in: the zone of the series, not
+// the zone picked in the form, which an edit may have changed. A floating
+// master is expanded in UTC by the server. See #1938.
+function seriesZone(vevents: VCalComponent[]): string | undefined {
+  const master = vevents.find(vevent => !findRecurrenceId(vevent))
+  if (!master) {
+    return undefined
+  }
+  const dtstart = master[1].find(([k]) => k.toLowerCase() === 'dtstart')
+  return getTzidParam(dtstart?.[1]) ?? 'UTC'
 }
 
 function preserveRecurrenceId(

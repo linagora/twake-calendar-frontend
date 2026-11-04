@@ -332,8 +332,8 @@ describe('makeEventWithOverrides — Windows TZID RECURRENCE-ID (#1884)', () => 
     expect(listOverrides(jCal)[0]).toEqual(other)
   })
 
-  it('reads an unknown TZID in the event timezone rather than as a bare wall clock', () => {
-    // "toString" resolves to no zone: 12:15 is read in Europe/Paris (10:15Z)
+  it('reads an unknown TZID in the series timezone rather than as a bare wall clock', () => {
+    // "toString" resolves to no zone: 12:15 is read in Europe/Ulyanovsk (08:15Z)
     const other = windowsOverride('toString', '2030-06-04T12:15:00')
 
     const jCal = makeEventWithOverrides(
@@ -431,5 +431,90 @@ describe('makeEventWithOverrides — VTIMEZONEs of the series (#1881)', () => {
     )
     expect(new Set(tzids).size).toBe(tzids.length)
     expect(vtimezones(jCal)).toContainEqual(storedVtimezone)
+  })
+})
+
+describe('makeEventWithOverrides — floating override after a zone change (#1938)', () => {
+  function floatingMaster(): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        ['dtstart', {}, 'date-time', '2022-08-02T09:45:00'],
+        ['duration', {}, 'duration', 'PT1H'],
+        ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+        ['summary', {}, 'text', 'Weekly sync']
+      ],
+      []
+    ]
+  }
+
+  function floatingOverride(): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        ['recurrence-id', {}, 'date-time', '2022-08-09T09:45:00'],
+        ['dtstart', {}, 'date-time', '2022-08-09T10:00:00'],
+        ['duration', {}, 'duration', 'PT1H'],
+        ['summary', {}, 'text', 'Weekly sync (moved)']
+      ],
+      []
+    ]
+  }
+
+  function editedOccurrence(
+    recurrenceId: string,
+    timezone: string
+  ): CalendarEvent {
+    return {
+      uid: `series-1/${recurrenceId}`,
+      recurrenceId,
+      timezone,
+      start: '2022-08-09T12:00:00.000Z',
+      end: '2022-08-09T13:00:00.000Z',
+      attendee: [],
+      title: 'Weekly sync, edited'
+    } as unknown as CalendarEvent
+  }
+
+  function propertyOf(
+    vevent: VCalComponent,
+    name: string
+  ): VObjectProperty | undefined {
+    return vevent[1].find(([k]) => k === name)
+  }
+
+  it.each(['Europe/Paris', 'Romance Standard Time'])(
+    'replaces a floating override when the zone is changed to %s in the form',
+    timezone => {
+      // The REPORT expands the floating series in UTC: 09:45 is 09:45Z
+      const jCal = makeEventWithOverrides(
+        editedOccurrence('2022-08-09T09:45:00Z', timezone),
+        [floatingMaster(), floatingOverride()]
+      )
+
+      const overrides = listOverrides(jCal)
+      expect(overrides).toHaveLength(1)
+      expect(propertyOf(overrides[0], 'recurrence-id')).toEqual([
+        'recurrence-id',
+        {},
+        'date-time',
+        '2022-08-09T09:45:00'
+      ])
+      expect(propertyOf(overrides[0], 'summary')?.[3]).toBe(
+        'Weekly sync, edited'
+      )
+    }
+  )
+
+  it('does not replace a floating override of another occurrence', () => {
+    const jCal = makeEventWithOverrides(
+      editedOccurrence('2022-08-16T09:45:00Z', 'Europe/Paris'),
+      [floatingMaster(), floatingOverride()]
+    )
+
+    expect(listOverrides(jCal)).toHaveLength(2)
+    expect(listOverrides(jCal)[0]).toEqual(floatingOverride())
   })
 })
