@@ -26,6 +26,12 @@ const SENSITIVE_PARAM_REGEX = new RegExp(
   `([?&#;]|\\b)(${SENSITIVE_PARAMS.join('|')})=[^&#\\s"'<>]*`,
   'gi'
 )
+// The same parameters inside a percent-encoded nested URL (redirect_uri,
+// return...): `%3Fjwt%3D<value>`, the value ending at the next encoded `&`/`#`.
+const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
+  `(%3F|%26|%23|%3B|\\b)(${SENSITIVE_PARAMS.join('|')})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
+  'gi'
+)
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
 const EMAIL_REGEX = /[A-Z0-9._%+-]+(?:@|%40)[A-Z0-9.-]+\.[A-Z]{2,}/gi
 
@@ -38,6 +44,7 @@ const MAX_DEPTH = 10
 export function scrubText(text: string): string {
   return text
     .replace(SENSITIVE_PARAM_REGEX, `$1$2=${FILTERED}`)
+    .replace(ENCODED_SENSITIVE_PARAM_REGEX, `$1$2%3D${FILTERED}`)
     .replace(BOOKING_TOKEN_PATH_REGEX, `$1${FILTERED}`)
     .replace(EMAIL_REGEX, EMAIL_MASK)
 }
