@@ -59,6 +59,9 @@ function findRecurrenceId(vevent: VCalComponent): VObjectProperty | undefined {
 // whatever zone the event is written in after the edit. Reading it in the zone
 // of the edited event (the DTSTART zone of a moved override, or the zone picked
 // in the form) designates another instant and missed the override. See #1882.
+// Several overrides written by clients in other zones can share that wall-clock
+// value under different TZIDs: the one read in the zone of the event is the
+// edited occurrence, not the first one. See #1939.
 function findOverrideIndex(
   vevents: VCalComponent[],
   updatedEvent: CalendarEvent
@@ -68,21 +71,28 @@ function findOverrideIndex(
     return -1
   }
   const storedIds = vevents.map(findRecurrenceId)
-  const exactIndex = /Z$/.test(id)
-    ? -1
-    : storedIds.findIndex(storedId => storedId?.[3] === id)
-  if (exactIndex !== -1) {
-    return exactIndex
-  }
-  return storedIds.findIndex(
-    storedId =>
-      storedId &&
-      sameRecurrence(
-        { value: storedId[3], tzid: getTzidParam(storedId[1]) },
-        { value: id },
-        updatedEvent.timezone
+  const isSameInstant = (storedId: VObjectProperty | undefined): boolean =>
+    storedId !== undefined &&
+    sameRecurrence(
+      { value: storedId[3], tzid: getTzidParam(storedId[1]) },
+      { value: id },
+      updatedEvent.timezone
+    )
+  const exactIndexes = /Z$/.test(id)
+    ? []
+    : storedIds.flatMap((storedId, index) =>
+        storedId?.[3] === id ? [index] : []
       )
-  )
+  if (exactIndexes.length === 1) {
+    return exactIndexes[0]
+  }
+  if (exactIndexes.length > 1) {
+    return (
+      exactIndexes.find(index => isSameInstant(storedIds[index])) ??
+      exactIndexes[0]
+    )
+  }
+  return storedIds.findIndex(isSameInstant)
 }
 
 function preserveRecurrenceId(

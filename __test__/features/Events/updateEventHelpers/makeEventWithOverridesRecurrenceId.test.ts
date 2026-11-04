@@ -433,3 +433,85 @@ describe('makeEventWithOverrides — VTIMEZONEs of the series (#1881)', () => {
     expect(vtimezones(jCal)).toContainEqual(storedVtimezone)
   })
 })
+
+describe('makeEventWithOverrides — overrides sharing a wall-clock RECURRENCE-ID (#1939)', () => {
+  const prop = (v: VCalComponent, name: string): VObjectProperty | undefined =>
+    (v[1] as VObjectProperty[]).find(([k]) => k === name)
+
+  const master: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['dtstart', { tzid: 'Europe/Paris' }, 'date-time', '2025-03-24T09:00:00'],
+      ['duration', {}, 'duration', 'PT1H'],
+      ['rrule', {}, 'recur', { freq: 'DAILY', byhour: [9, 14] }],
+      ['summary', {}, 'text', 'Shift']
+    ],
+    []
+  ]
+  // 14:00 Dhaka == 08:00Z, the 09:00 Paris occurrence
+  const dhaka: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      [
+        'recurrence-id',
+        { tzid: 'Asia/Dhaka' },
+        'date-time',
+        '2025-03-25T14:00:00'
+      ],
+      ['dtstart', { tzid: 'Asia/Dhaka' }, 'date-time', '2025-03-25T15:00:00'],
+      ['duration', {}, 'duration', 'PT1H'],
+      ['summary', {}, 'text', 'Morning shift, moved by an attendee']
+    ],
+    []
+  ]
+  // 14:00 Paris == 13:00Z
+  const paris: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      [
+        'recurrence-id',
+        { tzid: 'Europe/Paris' },
+        'date-time',
+        '2025-03-25T14:00:00'
+      ],
+      ['dtstart', { tzid: 'Europe/Paris' }, 'date-time', '2025-03-25T14:30:00'],
+      ['duration', {}, 'duration', 'PT1H'],
+      ['summary', {}, 'text', 'Afternoon shift']
+    ],
+    []
+  ]
+  // The Paris override, its TZID dropped by parseFetchedEvent
+  const edited = {
+    uid: 'series-1/2025-03-25T14:00:00',
+    recurrenceId: '2025-03-25T14:00:00',
+    timezone: 'Europe/Paris',
+    start: '2025-03-25T13:30:00.000Z',
+    end: '2025-03-25T14:30:00.000Z',
+    attendee: [],
+    title: 'Afternoon shift, edited'
+  } as unknown as CalendarEvent
+
+  it.each([
+    ['Dhaka', [master, dhaka, paris]],
+    ['Paris', [master, paris, dhaka]]
+  ])(
+    'replaces the override read in the zone of the event (%s stored first)',
+    (_, stored) => {
+      const overrides = listOverrides(
+        makeEventWithOverrides(edited, structuredClone(stored))
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(dhaka)
+      const parisOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Europe/Paris'
+      )
+      expect(prop(parisOut as VCalComponent, 'summary')?.[3]).toBe(
+        'Afternoon shift, edited'
+      )
+    }
+  )
+})
