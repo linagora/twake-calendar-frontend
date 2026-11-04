@@ -13,6 +13,12 @@ export const SEPARATORS_NEED_HANDLE = [
 
 const ZERO_WIDTH_SPACE = '​'
 
+// Each pass removes at least two separators; the bound keeps a description
+// made of many separators linear instead of quadratic
+const MAX_FOOTER_REMOVAL_PASSES = 8
+
+type FooterBlock = { from: number; to: number }
+
 /**
  * Values written inside the footer (meeting link, attachment names and URIs)
  * come from the event and may hold a separator, which would end the footer
@@ -94,11 +100,24 @@ export class EventDescriptionBuilder {
    * separator is user text, e.g. a note another client appended after the
    * footer, and is kept, so that the note survives and the footer is still
    * paired with its own opening separator.
+   *
+   * That ":" alone is ambiguous: a note between two separators appended after
+   * the footer may hold one too, and would then claim the footer's closing
+   * separator. Pairs shaped the way `withFooter` writes them (a blank line
+   * then a last notice line) are therefore removed first; the ":" heuristic
+   * only applies between them, e.g. to footers written by older versions.
+   *
+   * Removing a block joins the separators around it, which may form a new
+   * pair: the removal is repeated until the text no longer changes, so that
+   * the form shows what a save would keep.
    */
   public removeFooter(): this {
     SEPARATORS_NEED_HANDLE.forEach(separator => {
-      if (this.text.includes(separator)) {
+      for (let pass = 0; pass < MAX_FOOTER_REMOVAL_PASSES; pass++) {
+        if (!this.text.includes(separator)) return
+        const before = this.text
         this.removeFooterSeparator(separator)
+        if (this.text === before) return
       }
     })
     return this
@@ -121,27 +140,54 @@ export class EventDescriptionBuilder {
 
   /**
    * Returns the `[from, to)` ranges of the footer blocks, surrounding newlines
-   * included, in text order.
+   * included, in text order: the blocks shaped like a `withFooter` one, then
+   * the blocks that only look like a footer in the gaps between them.
    */
-  private findFooterBlocks(
-    separator: string
-  ): Array<{ from: number; to: number }> {
-    const sepLength = separator.length
-    const blocks: Array<{ from: number; to: number }> = []
-    let limit = this.text.length
+  private findFooterBlocks(separator: string): FooterBlock[] {
+    const written = this.findBlocksIn(
+      separator,
+      0,
+      this.text.length,
+      (from, to) =>
+        this.looksLikeFooter(from, to) && this.endsWithNotice(from, to)
+    )
+    const gapStarts = [0, ...written.map(block => block.to)]
+    const gapEnds = [...written.map(block => block.from), this.text.length]
 
-    while (limit >= 2 * sepLength) {
+    return gapStarts.flatMap((gapStart, index) => [
+      ...this.findBlocksIn(separator, gapStart, gapEnds[index], (from, to) =>
+        this.looksLikeFooter(from, to)
+      ),
+      ...written.slice(index, index + 1)
+    ])
+  }
+
+  /**
+   * Pairs the separators of text[lowerBound, upperBound) from the end and
+   * returns, in text order, the blocks whose content is accepted by isFooter.
+   */
+  private findBlocksIn(
+    separator: string,
+    lowerBound: number,
+    upperBound: number,
+    isFooter: (from: number, to: number) => boolean
+  ): FooterBlock[] {
+    const sepLength = separator.length
+    const blocks: FooterBlock[] = []
+    let limit = upperBound
+
+    while (limit - lowerBound >= 2 * sepLength) {
       const end = this.text.lastIndexOf(separator, limit - sepLength)
-      if (end < sepLength) break
+      if (end < lowerBound + sepLength) break
       const start = this.text.lastIndexOf(separator, end - sepLength)
-      if (start === -1) break
-      if (!this.looksLikeFooter(start + sepLength, end)) {
+      if (start < lowerBound) break
+      if (!isFooter(start + sepLength, end)) {
         limit = end
         continue
       }
 
       let from = start
-      while (from > 0 && this.text[from - 1] === '\n') from--
+      while (from > lowerBound && this.text[from - 1] === '\n') from--
       let to = end + sepLength
       while (to < limit && this.text[to] === '\n') to++
 
@@ -150,6 +196,20 @@ export class EventDescriptionBuilder {
     }
 
     return blocks.reverse()
+  }
+
+  // Whether text[from, to) ends with a blank line then a single non blank
+  // line, the "do not edit" notice `withFooter` closes its block with
+  private endsWithNotice(from: number, to: number): boolean {
+    let lineEnd = to
+    while (lineEnd > from && /\s/.test(this.text[lineEnd - 1])) lineEnd--
+    let lineStart = lineEnd
+    while (lineStart > from && this.text[lineStart - 1] !== '\n') lineStart--
+    return (
+      lineStart < lineEnd &&
+      lineStart - 2 >= from &&
+      this.text[lineStart - 2] === '\n'
+    )
   }
 
   // Whether the first non blank line of text[from, to) holds a ":"

@@ -82,6 +82,51 @@ describe('EventDescriptionBuilder', () => {
       )
     })
 
+    it('removes the footer in one pass when separators follow it', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const description =
+        `Agenda\n\n${sep}\nJoin Visio : https://visio.example.org/x\n\n` +
+        `Please do not edit this section.\n${sep}\nNote: room 4\n${sep}\n${sep}`
+
+      const once = new EventDescriptionBuilder(description)
+        .removeFooter()
+        .buildHtml()
+      const twice = new EventDescriptionBuilder(once).removeFooter().buildHtml()
+
+      expect(once).toBe(`Agenda\nNote: room 4\n${sep}\n${sep}`)
+      expect(twice).toBe(once)
+    })
+
+    it('keeps a note followed by the legacy separator after the footer', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const legacySeparator = SEPARATORS_NEED_HANDLE[1]
+      const description =
+        `Agenda\n\n${sep}\nJoin Visio : a\n\nPlease do not edit this section.\n` +
+        `${sep}\n${legacySeparator}\n${sep}`
+
+      const once = new EventDescriptionBuilder(description)
+        .removeFooter()
+        .buildHtml()
+
+      expect(once).toBe(`Agenda\n${legacySeparator}\n${sep}`)
+      expect(new EventDescriptionBuilder(once).removeFooter().buildHtml()).toBe(
+        once
+      )
+    })
+
+    it('is idempotent when footers without notice follow each other', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const description = `Agenda\n${sep}\na: b\n${sep}\nc: d\n${sep}\n${sep}`
+
+      const once = new EventDescriptionBuilder(description)
+        .removeFooter()
+        .buildHtml()
+
+      expect(new EventDescriptionBuilder(once).removeFooter().buildHtml()).toBe(
+        once
+      )
+    })
+
     // Regression guard for the quadratic backtracking the scan-based
     // implementation replaced. No wall-clock assertion: the previous
     // implementation needed ~40s on this input and so blows the suite timeout
