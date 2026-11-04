@@ -7,7 +7,8 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import {
   convertEventDateTimeToISO,
-  resolveTimezoneId
+  resolveTimezoneId,
+  withStoredTimezones
 } from '@common/utils/timezone'
 import ICAL from 'ical.js'
 
@@ -120,23 +121,26 @@ export function parseFetchedEvent(
   const timezoneFromVTimezone = resolveTimezoneFromVTimezone(vtimezones)
   const timezoneFromUtcValue = isUtcDtstart(targetVevent) ? 'UTC' : undefined
 
-  const eventjson = parseCalendarEvent({
-    data: targetVevent[1],
-    color: event.color ?? {},
-    calendar: { id: event?.calId } as Calendar,
-    eventURL: event.URL,
-    valarms: filterComponents(targetVevent, 'valarm')
+  // A custom zone is only defined by its VTIMEZONE: read the instants with it
+  return withStoredTimezones(vtimezones, () => {
+    const eventjson = parseCalendarEvent({
+      data: targetVevent[1],
+      color: event.color ?? {},
+      calendar: { id: event?.calId } as Calendar,
+      eventURL: event.URL,
+      valarms: filterComponents(targetVevent, 'valarm')
+    })
+
+    const finalTimezone =
+      timezoneFromDtstart ??
+      timezoneFromVTimezone ??
+      timezoneFromUtcValue ??
+      eventjson.timezone ??
+      'UTC'
+
+    eventjson.timezone = finalTimezone
+    applyTimezoneToDateFields(eventjson, finalTimezone)
+
+    return { ...event, ...eventjson, timezone: finalTimezone }
   })
-
-  const finalTimezone =
-    timezoneFromDtstart ??
-    timezoneFromVTimezone ??
-    timezoneFromUtcValue ??
-    eventjson.timezone ??
-    'UTC'
-
-  eventjson.timezone = finalTimezone
-  applyTimezoneToDateFields(eventjson, finalTimezone)
-
-  return { ...event, ...eventjson, timezone: finalTimezone }
 }
