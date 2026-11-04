@@ -129,7 +129,9 @@ describe('EventSearchBar', () => {
   it('should render search icon button initially', () => {
     renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole('button')
+    const searchButton = screen.getByRole('button', {
+      name: 'tooltip.searchEventsOrCalendars'
+    })
     expect(searchButton).toBeInTheDocument()
   })
 

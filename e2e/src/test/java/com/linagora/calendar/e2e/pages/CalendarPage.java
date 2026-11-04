@@ -886,7 +886,8 @@ public class CalendarPage {
     }
 
     public SettingsPage openSettings() {
-        page.getByLabel("Settings", new Page.GetByLabelOptions().setExact(true)).click();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Settings").setExact(true)).click();
+        page.getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions().setName("Settings").setExact(true)).click();
         return new SettingsPage(page).waitUntilOpen();
     }
 

@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Сочетания клавиш",
+    "showList": "Показать сочетания клавиш"
+  },
   "locale": "ru-ru",
   "calendar": {
     "personal": "Личные",

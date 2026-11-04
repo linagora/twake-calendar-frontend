@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Scorciatoie da tastiera",
+    "showList": "Mostra le scorciatoie da tastiera"
+  },
   "locale": "it-it",
   "calendar": {
     "personal": "I miei calendari",
