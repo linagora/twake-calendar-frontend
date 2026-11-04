@@ -3,11 +3,13 @@ import {
   VCalComponent
 } from '@common/features/Calendars/types/CalendarData'
 import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
+import { mergeStoredRrule } from '@common/features/Events/transformers/storedRrule'
 import { parseRepetitionRule } from '@common/features/Events/utils/parseCalendarEvent'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject, RepetitionOptions } from '@common/types/Repetition'
 import ICAL from 'ical.js'
+import moment from 'moment-timezone'
 
 const masterOf = (rule: RepetitionRule, start: string, end: string) =>
   [
@@ -249,5 +251,55 @@ describe('makeSeriesJCal keeps the rule parts the form does not model (#1899)', 
         '2025-03-13T18:30:00'
       ])
     })
+  })
+})
+
+describe('a floating UNTIL on a series edit (#1948)', () => {
+  const weekly = { freq: 'WEEKLY', until: '2025-11-04T09:00:00' }
+
+  it('writes a UTC UNTIL when the form leaves the rule alone', () => {
+    const repetition = formRepetition(weekly)
+    const start = moment.tz('2025-10-07T09:00:00', 'Europe/Paris')
+
+    const [, , , rule] = mergeStoredRrule(
+      ['rrule', {}, 'recur', weekly],
+      repetition.asJcal(),
+      repetition,
+      { oldStart: start, newStart: start }
+    )
+
+    expect(rule).toEqual({ freq: 'WEEKLY', until: '20251104T080000Z' })
+  })
+
+  it('writes a UTC UNTIL next to the TZID DTSTART of a floating series', () => {
+    const floatingSeries = [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        ['dtstart', {}, 'date-time', '2025-10-07T09:00:00'],
+        ['dtend', {}, 'date-time', '2025-10-07T10:00:00'],
+        ['rrule', {}, 'recur', weekly],
+        ['summary', {}, 'text', 'Weekly sync']
+      ],
+      []
+    ] as VCalComponent
+
+    const jCal = makeSeriesJCal(
+      [floatingSeries],
+      eventOf(
+        formRepetition(weekly),
+        '2025-10-07T07:00:00.000Z',
+        '2025-10-07T08:00:00.000Z'
+      ),
+      { removeOverrides: false }
+    )
+
+    expect(master(jCal)[1].find(([k]) => k === 'dtstart')).toEqual([
+      'dtstart',
+      { tzid: 'Europe/Paris' },
+      'date-time',
+      '2025-10-07T09:00:00'
+    ])
+    expect(ruleOf(jCal)).toEqual({ ...weekly, until: '20251104T080000Z' })
   })
 })
