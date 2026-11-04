@@ -9,7 +9,11 @@ import {
 } from '@common/features/User/UserSlice'
 import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { CallbackResume } from '@private/features/User/LoginCallback'
-import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
+import {
+  completeLogin,
+  LoginRequiredError,
+  startLogin
+} from '@linagora/twake-oidc'
 import { render, screen, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -35,6 +39,7 @@ vi.mock('@common/app/hooks', () => ({
 vi.mock('@linagora/twake-oidc', async () => ({
   ...(await vi.importActual('@linagora/twake-oidc')),
   completeLogin: vi.fn(),
+  startLogin: vi.fn(),
   LoginRequiredError: class extends Error {
     constructor(readonly returnTo: string) {
       super('The SSO needs the user to sign in')
@@ -176,13 +181,14 @@ describe('CallbackResume', () => {
     expect(sessionStorage.getItem('userData')).toBeNull()
   })
 
-  it('should go home when no sign-in is pending', async () => {
+  it('signs in again when no sign-in is pending', async () => {
     ;(completeLogin as Mock).mockResolvedValue(null)
     renderWithProviders(<CallbackResume />)
 
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(replace('/'))
+      expect(startLogin).toHaveBeenCalledTimes(1)
     })
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/'))
   })
 
   it('returns to the embed route the sign in started from', async () => {

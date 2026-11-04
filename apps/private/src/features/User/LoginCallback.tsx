@@ -9,7 +9,11 @@ import {
 } from '@common/features/User/UserSlice'
 import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
 import { twakeSpace } from '@common/features/Embed/twakeSpace'
-import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
+import {
+  completeLogin,
+  LoginRequiredError,
+  startLogin
+} from '@linagora/twake-oidc'
 import { Stack, Typography } from '@linagora/twake-mui'
 import { useEffect, useRef, useState } from 'react'
 import { replace } from 'redux-first-history'
@@ -54,10 +58,10 @@ export const CallbackResume: React.FC = () => {
         // Hands the tokens to the API client before resolving
         const data = await completeLogin()
 
-        // No sign-in pending: the callback page was reloaded or opened directly
+        // No sign-in pending: the callback page was reloaded or opened
+        // directly. The app skipped the sign-in on this page, so start it here.
         if (!data) {
-          dispatch(setAppLoading(false))
-          dispatch(replace('/'))
+          await startLogin()
           return
         }
 
