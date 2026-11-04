@@ -435,6 +435,38 @@ describe('prepareUpdatedEvent', () => {
         ['mailto:user@example.com', 'DELEGATED', 'TRUE']
       ])
     })
+
+    it('writes a new organizer listed twice once, as when they already were the organizer (#1943)', () => {
+      const alice = new userOrganiser({
+        cn: 'Alice',
+        cal_address: 'mailto:alice@example.com'
+      })
+      const event = {
+        ...baseEvent,
+        organizer: { cn: 'User', cal_address: 'mailto:user@example.com' },
+        attendee: [
+          new userAttendee({
+            cal_address: 'MAILTO:Alice@Example.com',
+            partstat: 'ACCEPTED'
+          }),
+          new userAttendee({
+            cal_address: 'mailto:alice@example.com',
+            partstat: 'DECLINED',
+            rsvp: 'TRUE'
+          }),
+          bob
+        ]
+      } as CalendarEvent
+
+      const firstSave = saveUnchanged(event, alice)
+      const secondSave = saveUnchanged(firstSave, alice)
+
+      expect(rows(firstSave)).toEqual([
+        ['mailto:bob@example.com', 'ACCEPTED', 'FALSE'],
+        ['mailto:alice@example.com', 'DECLINED', 'TRUE']
+      ])
+      expect(rows(secondSave)).toEqual(rows(firstSave))
+    })
   })
 
   it('sets alarm attendees and summary at VAlarm construction time', () => {
