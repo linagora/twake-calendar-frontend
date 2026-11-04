@@ -11,7 +11,7 @@ updates:
       # -oidc, ...): one pull request for all of them, majors included
       twake:
         patterns:
-          - "@linagora/*"
+          - '@linagora/*'
       # every other dependency: minor and patch updates in one pull request,
       # each major update in its own
       minor-and-patch:
