@@ -195,25 +195,27 @@ describe('DateTimeFields', () => {
   })
 
   describe('after an end time before the start', () => {
+    // Like DateTimeExpanded, each end callback rebuilds the whole end from
+    // the values of its render
     const StatefulFields = () => {
-      const [values, setValues] = useState({
-        startDate: '2026-10-26',
-        startTime: '17:00',
+      const [startDate, setStartDate] = useState('2026-10-26')
+      const [startTime, setStartTime] = useState('17:00')
+      const [end, setEnd] = useState({
         endDate: '2026-10-26',
         endTime: '18:00'
       })
-      const update = (patch: Partial<typeof values>) =>
-        setValues(previous => ({ ...previous, ...patch }))
       return (
         <DateTimeFields
           {...defaultProps}
-          {...values}
-          onStartDateChange={startDate => update({ startDate })}
-          onStartTimeChange={startTime => update({ startTime })}
+          startDate={startDate}
+          startTime={startTime}
+          {...end}
+          onStartDateChange={setStartDate}
+          onStartTimeChange={setStartTime}
           onEndDateChange={(endDate, endTime) =>
-            update(endTime ? { endDate, endTime } : { endDate })
+            setEnd({ endDate, endTime: endTime ?? end.endTime })
           }
-          onEndTimeChange={endTime => update({ endTime })}
+          onEndTimeChange={endTime => setEnd({ ...end, endTime })}
         />
       )
     }
@@ -253,6 +255,19 @@ describe('DateTimeFields', () => {
         )
       )
       expect(screen.getByTestId('end-time-input')).toHaveValue('18:00')
+    })
+
+    it('keeps the last valid duration when the end time equals the start', async () => {
+      typeTime('end-time-input', '17:00')
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('17:00')
+      )
+
+      typeTime('start-time-input', '05:09')
+
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('06:09')
+      )
     })
   })
 
