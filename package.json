@@ -14,7 +14,7 @@
     "@fullcalendar/timegrid": "^6.1.17",
     "@linagora/twake-bar": "^1.1.1",
     "@linagora/twake-css": "^1.1.0",
-    "@linagora/twake-icons": "^2.14.0",
+    "@linagora/twake-icons": "^3.0.0",
     "@linagora/twake-mui": "^19.1.1",
     "@linagora/twake-oidc": "^1.1.0",
     "@linagora/twake-sdk": "^1.2.0",
