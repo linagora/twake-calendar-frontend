@@ -42,8 +42,11 @@ const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
 // Unicode classes: internationalized mailboxes and domains (ünal@例え.jp) are
 // masked too. \p{M} keeps combining marks (decomposed accents, Indic scripts).
+// A match only starts at the beginning of a run of local part characters:
+// starting inside the run would scan the rest of it again at every position,
+// in time quadratic in its length.
 const EMAIL_REGEX =
-  /[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)[\p{L}\p{M}\p{N}.-]+\.[\p{L}\p{M}]{2,}/giu
+  /(?<![\p{L}\p{M}\p{N}._%+-])[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)[\p{L}\p{M}\p{N}.-]+\.[\p{L}\p{M}]{2,}/giu
 
 const MAX_DEPTH = 10
 
