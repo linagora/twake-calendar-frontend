@@ -10,7 +10,7 @@
     "@fullcalendar/interaction": "^6.1.22",
     "@fullcalendar/list": "^6.1.22",
     "@fullcalendar/moment-timezone": "^6.1.22",
-    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/react": "^7.1.3",
     "@fullcalendar/timegrid": "^6.1.22",
     "@linagora/twake-bar": "^1.1.2",
     "@linagora/twake-css": "^1.1.0",
