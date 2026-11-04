@@ -72,6 +72,19 @@ describe('scrubSensitiveData', () => {
       }
     })
 
+    it('masks a parameter whose name is percent-encoded', () => {
+      const secret = 'oK7iXAAAAAAAAAAAAAAAps0lylkdlvivvr'
+      for (const text of [
+        `?return=https%3A%2F%2Fcal.example%2Fcb%3F%6Awt%3D${secret}`,
+        `?return=https%3A%2F%2Fcal.example%2Fcb%3F%4A%57%54%3D${secret}`,
+        `?access%5Ftoken=${secret}`,
+        `?%63ode=${secret}`
+      ]) {
+        expect(scrubText(text)).not.toContain(secret)
+      }
+      expect(scrubText('?bar%63ode=12')).toBe('?bar%63ode=12')
+    })
+
     it('masks an encoded value up to the next encoded separator only', () => {
       expect(
         scrubText(
