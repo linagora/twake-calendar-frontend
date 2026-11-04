@@ -1,6 +1,9 @@
 import moment from 'moment-timezone'
-import ICAL from 'ical.js'
-import { isMomentZone } from '@common/utils/timezone'
+import {
+  isMomentZone,
+  storedTimezone,
+  wallClockOf
+} from '@common/utils/timezone'
 
 // All-day dates travel as UTC midnight: reading them in the zone of the
 // browser moves them to the previous day when that zone is behind UTC.
@@ -18,39 +21,9 @@ export function formatDateTimeToICal(date: Date, timezone?: string): string {
       return momentDate.format('YYYY-MM-DDTHH:mm:ss')
     }
 
-    // Fallback: use ICAL.js which has all timezones registered
-    try {
-      const tz = ICAL.TimezoneService.get(timezone)
-      if (tz) {
-        const icalTime = new ICAL.Time(
-          {
-            year: date.getUTCFullYear(),
-            month: date.getUTCMonth() + 1,
-            day: date.getUTCDate(),
-            hour: date.getUTCHours(),
-            minute: date.getUTCMinutes(),
-            second: date.getUTCSeconds(),
-            isDate: false
-          },
-          ICAL.Timezone.utcTimezone
-        )
-        const converted = icalTime.convertToZone(tz)
-        return (
-          [
-            String(converted.year).padStart(4, '0'),
-            pad(converted.month),
-            pad(converted.day)
-          ].join('-') +
-          'T' +
-          [
-            pad(converted.hour),
-            pad(converted.minute),
-            pad(converted.second)
-          ].join(':')
-        )
-      }
-    } catch {
-      // fall through to UTC
+    // A zone only defined by a stored VTIMEZONE (see withStoredTimezones)
+    if (storedTimezone(timezone)) {
+      return wallClockOf(moment.utc(date), timezone)
     }
   }
 
