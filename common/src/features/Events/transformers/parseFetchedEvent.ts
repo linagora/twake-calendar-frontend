@@ -7,6 +7,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import {
   convertEventDateTimeToISO,
+  isMomentZone,
   resolveTimezoneId,
   withStoredTimezones
 } from '@common/utils/timezone'
@@ -45,6 +46,18 @@ function resolveTimezoneFromVTimezone(
     return undefined
   }
   return resolveTimezoneId(tzidProp[3] as string) ?? undefined
+}
+
+// A custom VTIMEZONE (one moment-timezone does not know) next to a UTC DTSTART
+// does not define the zone of the event: the series would otherwise be
+// rewritten in that zone, and its occurrences move across its DST changes
+function vtimezoneOfTheEvent(
+  timezoneFromVTimezone: string | undefined,
+  timezoneFromUtcValue: string | undefined
+): string | undefined {
+  return timezoneFromUtcValue && !isMomentZone(timezoneFromVTimezone)
+    ? undefined
+    : timezoneFromVTimezone
 }
 
 function findDtstart(targetVevent: VCalComponent): VObjectProperty | undefined {
@@ -118,8 +131,11 @@ export function parseFetchedEvent(
   // made a drag and drop rewrite the event in it (#1547), where the grid and
   // the form, which trust DTSTART first, kept the zone of the event.
   const timezoneFromDtstart = resolveTimezoneFromDtstartTzid(targetVevent)
-  const timezoneFromVTimezone = resolveTimezoneFromVTimezone(vtimezones)
   const timezoneFromUtcValue = isUtcDtstart(targetVevent) ? 'UTC' : undefined
+  const timezoneFromVTimezone = vtimezoneOfTheEvent(
+    resolveTimezoneFromVTimezone(vtimezones),
+    timezoneFromUtcValue
+  )
 
   // A custom zone is only defined by its VTIMEZONE: read the instants with it
   return withStoredTimezones(vtimezones, () => {
