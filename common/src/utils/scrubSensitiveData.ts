@@ -27,7 +27,11 @@ const SENSITIVE_PARAM_REGEX = new RegExp(
   'gi'
 )
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
-const EMAIL_REGEX = /[A-Z0-9._%+-]+(?:@|%40)[A-Z0-9.-]+\.[A-Z]{2,}/gi
+// A match only starts at the beginning of a run of local part characters:
+// starting inside the run would scan the rest of it again at every position,
+// in time quadratic in its length.
+const EMAIL_REGEX =
+  /(?<![A-Z0-9._%+-])[A-Z0-9._%+-]+(?:@|%40)[A-Z0-9.-]+\.[A-Z]{2,}/gi
 
 const MAX_DEPTH = 10
 

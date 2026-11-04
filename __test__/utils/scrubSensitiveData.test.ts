@@ -44,6 +44,31 @@ describe('scrubSensitiveData', () => {
       ).toBe('user [email] and [email] not found')
     })
 
+    it('masks an email address with a long local part', () => {
+      expect(scrubText(`to ${'a.'.repeat(100)}b@gouv.fr`)).toBe('to [email]')
+    })
+
+    it('masks several URL encoded addresses in a single run', () => {
+      expect(scrubText('attendees=x;a%40b.fr%2Cc%40d.fr')).toBe(
+        'attendees=x;[email]'
+      )
+    })
+
+    it('scrubs a long run without an address in linear time', () => {
+      for (const unit of ['a.', '-', 'a', '%', '%40', 'a%40', 'x@a.']) {
+        const text = unit.repeat(Math.floor(65536 / unit.length))
+        const t0 = performance.now()
+        scrubText(text)
+        expect(performance.now() - t0).toBeLessThan(200)
+      }
+    })
+
+    it('scrubs a long URL without an address in linear time', () => {
+      const t0 = performance.now()
+      scrubDeep({ request: { url: 'a.'.repeat(32768) } })
+      expect(performance.now() - t0).toBeLessThan(200)
+    })
+
     it('does not mask words merely ending like a parameter name', () => {
       expect(scrubText('barcode=12')).toBe('barcode=12')
     })
