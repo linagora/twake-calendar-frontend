@@ -8,6 +8,18 @@ import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
 
 const INTENT_REQUEST_TIMEOUT_MS = 30000
+const PICKER_READY_TIMEOUT_MS = 30000
+
+// cozy-interapp always creates the intent on this fixed path.
+const INTENT_CREATION_PATH = '/intents'
+
+// Asks the stack to add a session code to the service URL, which signs the
+// picker frame in to the Drive: without it, a browser with no Drive session
+// gets the Drive login page, which cannot be framed.
+const withSessionCode = (method: string, path: string): string =>
+  method === 'POST' && path === INTENT_CREATION_PATH
+    ? `${INTENT_CREATION_PATH}?force_session_id=true`
+    : path
 
 /**
  * The fetch cozy-interapp sends its intent requests with: the SDK client signs
@@ -16,7 +28,7 @@ const INTENT_REQUEST_TIMEOUT_MS = 30000
 export const makeIntentFetch =
   (sdk: Sdk) =>
   (method: string, path: string, body?: unknown): Promise<unknown> =>
-    sdk.fetchJSON(path, {
+    sdk.fetchJSON(withSessionCode(method, path), {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
@@ -90,6 +102,24 @@ function createPickerCancellation(): PickerCancellation {
   return cancellation
 }
 
+interface ReadyDeadline {
+  expired: Promise<never>
+  clear: () => void
+}
+
+// Fails a picker that never becomes ready, e.g. a frame the browser refused
+// to display, instead of letting it load forever.
+function createReadyDeadline(onExpired: () => void): ReadyDeadline {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const expired = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      onExpired()
+      reject(new Error('Tdrive picker did not become ready in time'))
+    }, PICKER_READY_TIMEOUT_MS)
+  })
+  return { expired, clear: () => clearTimeout(timer) }
+}
+
 interface StartTdrivePickerOptions {
   platformURL: string
   idToken: string
@@ -146,11 +176,13 @@ async function startTdrivePicker({
     throw new Error('Picker container is not mounted')
   }
 
+  const readyDeadline = createReadyDeadline(() => intentRef.current?.stop())
   const startedIntent = intent.start(containerRef.current, {
     onReady: () => {
       console.info('Tdrive picker iframe loaded')
     },
     onReadyToUse: () => {
+      readyDeadline.clear()
       readyCallbackRef.current?.()
     }
   })
@@ -169,8 +201,9 @@ async function startTdrivePicker({
   // A stopped intent never settles: let cancellation end the wait.
   const result = await Promise.race([
     startedIntent,
-    cancellationRef.whenCancelled
-  ])
+    cancellationRef.whenCancelled,
+    readyDeadline.expired
+  ]).finally(readyDeadline.clear)
 
   if (cancellationRef.cancelled) {
     return []

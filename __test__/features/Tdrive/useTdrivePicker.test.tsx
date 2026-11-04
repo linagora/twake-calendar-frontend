@@ -377,6 +377,61 @@ describe('useTdrivePicker', () => {
 
     expect(mockStop).toHaveBeenCalledTimes(1)
   })
+
+  describe('when the picker never becomes ready', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      mockStart.mockImplementation(() => new Promise(() => {}))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('reports the failure and stops the intent', async () => {
+      const { result } = renderHook(
+        () => useTdrivePicker({ onFilesSelected: vi.fn() }),
+        { wrapper: createWrapper(defaultUserState) }
+      )
+
+      mountContainer(result)
+      act(() => {
+        void result.current.openPicker()
+      })
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30000)
+      })
+
+      expect(result.current.isOpen).toBe(false)
+      expect(result.current.openPickerError).toBe('tdrivePickerFailed')
+      expect(mockStop).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not fail a picker that became ready', async () => {
+      mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
+        onReadyToUse?.()
+        return new Promise(() => {})
+      })
+
+      const { result } = renderHook(
+        () => useTdrivePicker({ onFilesSelected: vi.fn() }),
+        { wrapper: createWrapper(defaultUserState) }
+      )
+
+      mountContainer(result)
+      act(() => {
+        void result.current.openPicker()
+      })
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(60000)
+      })
+
+      expect(result.current.isOpen).toBe(true)
+      expect(result.current.openPickerError).toBeNull()
+      expect(mockStop).not.toHaveBeenCalled()
+    })
+  })
 })
 
 describe('makeIntentFetch', () => {
@@ -390,12 +445,24 @@ describe('makeIntentFetch', () => {
 
     expect(response).toEqual({ data: { id: 'intent-1' } })
     expect(fetchJSON).toHaveBeenCalledWith(
-      '/intents',
+      '/intents?force_session_id=true',
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { type: 'io.cozy.intents' } })
       })
+    )
+  })
+
+  it('asks for a session code only when creating the intent', async () => {
+    const fetchJSON = vi.fn().mockResolvedValue({})
+    const intentFetch = makeIntentFetch({ fetchJSON } as unknown as Sdk)
+
+    await intentFetch('POST', '/intents/intent-1/permissions', {})
+
+    expect(fetchJSON).toHaveBeenCalledWith(
+      '/intents/intent-1/permissions',
+      expect.objectContaining({ method: 'POST' })
     )
   })
 
