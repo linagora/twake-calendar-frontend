@@ -27,7 +27,10 @@ const SENSITIVE_PARAM_REGEX = new RegExp(
   'gi'
 )
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
-const EMAIL_REGEX = /[A-Z0-9._%+-]+(?:@|%40)[A-Z0-9.-]+\.[A-Z]{2,}/gi
+// Unicode classes: internationalized mailboxes and domains (ünal@例え.jp) are
+// masked too. \p{M} keeps combining marks (decomposed accents, Indic scripts).
+const EMAIL_REGEX =
+  /[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)[\p{L}\p{M}\p{N}.-]+\.[\p{L}\p{M}]{2,}/giu
 
 const MAX_DEPTH = 10
 
