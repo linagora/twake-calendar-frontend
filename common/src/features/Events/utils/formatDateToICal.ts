@@ -1,6 +1,7 @@
 import moment from 'moment-timezone'
 import {
   isMomentZone,
+  readWallClock,
   storedTimezone,
   wallClockOf
 } from '@common/utils/timezone'
@@ -49,10 +50,18 @@ function hasUtcOffset(endDate: string): boolean {
   return /(Z|[+-]\d{2}:?\d{2})$/i.test(endDate)
 }
 
+// A wall clock of the series zone; a custom one is read with its stored
+// VTIMEZONE (see withStoredTimezones)
+function readUntilWallClock(wallClock: string, tzid: string): moment.Moment {
+  return storedTimezone(tzid)
+    ? readWallClock(wallClock, tzid)
+    : moment.tz(wallClock, moment.ISO_8601, tzid)
+}
+
 function formatDateTimeUntil(endDate: string, tzid: string): string {
   const until = hasUtcOffset(endDate)
     ? moment.utc(endDate, moment.ISO_8601)
-    : moment.tz(endDate, moment.ISO_8601, tzid)
+    : readUntilWallClock(endDate, tzid)
   return until.utc().format(UTC_UNTIL_FORMAT)
 }
 
@@ -72,5 +81,7 @@ export function formatUntilForRRule(
   }
 
   // A date picked in the form ends at the end of that day, in the series zone
-  return moment.tz(`${endDate}T23:59:59`, tzid).utc().format(UTC_UNTIL_FORMAT)
+  return readUntilWallClock(`${endDate}T23:59:59`, tzid)
+    .utc()
+    .format(UTC_UNTIL_FORMAT)
 }

@@ -163,6 +163,29 @@ interface ZoneChange {
 
 const DAY_MS = 24 * 3600 * 1000
 
+// Undocumented members of ical.js Timezone, checked against ical.js 2.2.1
+interface ZoneInternals {
+  changes: ZoneChange[]
+  _ensureCoverage(year: number): void
+}
+
+function zoneInternals(zone: ICAL.Timezone): ZoneInternals | undefined {
+  const internals = zone as unknown as Partial<
+    Record<keyof ZoneInternals, unknown>
+  >
+  return typeof internals._ensureCoverage === 'function' &&
+    Array.isArray(internals.changes)
+    ? zone
+    : undefined
+}
+
+// The public ical.js API, which reads the UTC clock as a local one: only off
+// for the hour that follows a change of offset
+function publicOffsetAtInstant(zone: ICAL.Timezone, instantMs: number): number {
+  const utcClock = ICAL.Time.fromJSDate(new Date(instantMs), true)
+  return zone.utcOffset(utcClock) * 1000
+}
+
 /**
  * The UTC offset (in ms) of a stored zone at an instant. ical.js only answers
  * that for a local time, and Time#convertToZone reads the UTC clock as a local
@@ -170,12 +193,9 @@ const DAY_MS = 24 * 3600 * 1000
  */
 function offsetAtInstant(zone: ICAL.Timezone, instantMs: number): number {
   if (zone === ICAL.Timezone.utcTimezone) return 0
-  const year = new Date(instantMs).getUTCFullYear()
-  const internals = zone as unknown as {
-    changes: ZoneChange[]
-    _ensureCoverage(year: number): void
-  }
-  internals._ensureCoverage(year + 1)
+  const internals = zoneInternals(zone)
+  if (!internals) return publicOffsetAtInstant(zone, instantMs)
+  internals._ensureCoverage(new Date(instantMs).getUTCFullYear() + 1)
   const changes = internals.changes
   if (!changes.length) return 0
   // The last change at or before the instant (the changes are sorted)

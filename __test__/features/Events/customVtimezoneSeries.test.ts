@@ -1,11 +1,16 @@
 import ICAL from 'ical.js'
+import moment from 'moment-timezone'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
-import { formatDateTimeToICal } from '@common/features/Events/utils/formatDateToICal'
+import {
+  formatDateTimeToICal,
+  formatUntilForRRule
+} from '@common/features/Events/utils/formatDateToICal'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import {
   convertEventDateTimeToISO,
+  wallClockOf,
   withStoredTimezones
 } from '@common/utils/timezone'
 
@@ -95,6 +100,88 @@ describe('a series in a zone only defined by its VTIMEZONE', () => {
       )
     } finally {
       ICAL.TimezoneService.remove(TZID)
+    }
+  })
+})
+
+describe('a UTC series next to a custom VTIMEZONE', () => {
+  const UTC_ICS = ICS.replace(
+    `DTSTART;TZID=${TZID}:20250818T100000`,
+    'DTSTART:20250818T090000Z'
+  ).replace(`DTEND;TZID=${TZID}:20250818T110000`, 'DTEND:20250818T100000Z')
+
+  it('stays in UTC', () => {
+    const master = parseFetchedEvent(
+      { calId: 'user/cal' } as CalendarEvent,
+      ICAL.parse(UTC_ICS) as VCalComponent,
+      true
+    )
+
+    expect(master.timezone).toBe('UTC')
+    expect(new Date(master.start).toISOString()).toBe(
+      '2025-08-18T09:00:00.000Z'
+    )
+  })
+
+  it('keeps a UTC wall clock on an "All the events" edit', () => {
+    const jcal = ICAL.parse(UTC_ICS) as VCalComponent
+    const master = parseFetchedEvent(
+      { calId: 'user/cal' } as CalendarEvent,
+      jcal,
+      true
+    )
+
+    const out = makeSeriesJCal(
+      components(jcal, 'vevent'),
+      { ...master, title: 'Renamed', uid: 'series-1' },
+      {
+        removeOverrides: false,
+        storedVtimezones: components(jcal, 'vtimezone')
+      }
+    )
+
+    const vevent = new ICAL.Component(out as unknown[]).getFirstSubcomponent(
+      'vevent'
+    ) as ICAL.Component
+    const dtstart = vevent.getFirstProperty('dtstart') as ICAL.Property
+    expect(dtstart.getParameter('tzid')).toBe('UTC')
+    expect(dtstart.toJSON()[3]).toBe('2025-08-18T09:00:00')
+  })
+})
+
+describe('the end date of a series in a custom zone', () => {
+  const vtimezones = components(ICAL.parse(ICS) as VCalComponent, 'vtimezone')
+
+  it('ends at the end of that day in the stored zone', () => {
+    expect(
+      withStoredTimezones(vtimezones, () =>
+        formatUntilForRRule('2025-09-15', false, TZID)
+      )
+    ).toBe('20250915T225959Z')
+  })
+
+  it('reads a floating DATE-TIME end in the stored zone', () => {
+    expect(
+      withStoredTimezones(vtimezones, () =>
+        formatUntilForRRule('2025-09-15T10:00:00', false, TZID)
+      )
+    ).toBe('20250915T090000Z')
+  })
+})
+
+describe('a stored zone without the expected ical.js internals', () => {
+  const NAME = 'Zone with renamed internals'
+
+  it('falls back to the public utcOffset API', () => {
+    const zone = Object.create(ICAL.Timezone.prototype) as ICAL.Timezone
+    Object.assign(zone, { utcOffset: () => 3600 })
+    ICAL.TimezoneService.register(zone, NAME)
+    try {
+      expect(wallClockOf(moment.utc('2025-08-18T09:00:00Z'), NAME)).toBe(
+        '2025-08-18T10:00:00'
+      )
+    } finally {
+      ICAL.TimezoneService.remove(NAME)
     }
   })
 })
