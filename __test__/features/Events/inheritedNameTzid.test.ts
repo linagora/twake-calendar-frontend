@@ -29,6 +29,17 @@ describe.each(['constructor', '__proto__'])('a stored TZID %s', tzid => {
     ).toBe('2025-03-24T11:00:00.000Z')
   })
 
+  it('is read as UTC when it is the series zone too', () => {
+    expect(knownZone(tzid, tzid)).toBe('UTC')
+    expect(knownZone(undefined, tzid)).toBe('UTC')
+    expect(
+      parseMoment(
+        ['dtend', { tzid }, 'date-time', '2025-03-24T12:00:00'],
+        tzid
+      )?.toISOString()
+    ).toBe('2025-03-24T12:00:00.000Z')
+  })
+
   it('does not break the occurrence matching', () => {
     expect(() =>
       sameRecurrence(
