@@ -1,6 +1,10 @@
 import moment from 'moment-timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
-import { withStoredTimezones } from '@common/utils/timezone'
+import {
+  readWallClock,
+  wallClockOf,
+  withStoredTimezones
+} from '@common/utils/timezone'
 import {
   VCalComponent,
   VObjectProperty,
@@ -178,9 +182,10 @@ const updateValarmComponents = (
 }
 
 // Wall clock reading of an instant in the given zone, as the epoch of that
-// same reading in UTC, so that a delta between two readings ignores DST
+// same reading in UTC, so that a delta between two readings ignores DST. A
+// custom zone is read with its stored VTIMEZONE (see withStoredTimezones)
 const wallClockMs = (instant: moment.Moment, tz: string): number =>
-  moment.utc(instant.clone().tz(tz).format(WALL_CLOCK_FORMAT)).valueOf()
+  moment.utc(wallClockOf(instant, tz)).valueOf()
 
 const shiftWallClockValue = (
   value: VObjectValue,
@@ -190,13 +195,11 @@ const shiftWallClockValue = (
   if (typeof value !== 'string') return value
   const isUtc = value.endsWith('Z')
   // A TZID or floating value already is a wall clock reading
-  const wallClock = isUtc
-    ? moment.utc(value).tz(tz).format(WALL_CLOCK_FORMAT)
-    : value
+  const wallClock = isUtc ? wallClockOf(moment.utc(value), tz) : value
   const shifted = moment.utc(wallClock).add(shiftMs, 'ms')
   if (!isUtc) return shifted.format(WALL_CLOCK_FORMAT)
 
-  const instant = moment.tz(shifted.format(WALL_CLOCK_FORMAT), tz)
+  const instant = readWallClock(shifted.format(WALL_CLOCK_FORMAT), tz)
   return instant.utc().format(`${WALL_CLOCK_FORMAT}[Z]`)
 }
 
@@ -344,7 +347,7 @@ const isSourceOverride = (
   const srcTzid = sourceTimezone || 'UTC'
   const srcMs = sourceRecurrenceId.endsWith('Z')
     ? moment.utc(sourceRecurrenceId).valueOf()
-    : moment.tz(sourceRecurrenceId, srcTzid).valueOf()
+    : readWallClock(sourceRecurrenceId, srcTzid).valueOf()
 
   return ridMs === srcMs
 }
@@ -492,26 +495,23 @@ export const makeSeriesJCal = (
   const oldMaster = vevents[masterIndex]
 
   // The stored VTIMEZONEs are written back: a custom zone keeps its TZID and
-  // wall clock instead of being written as UTC
+  // wall clock instead of being written as UTC. The master, the shift of the
+  // series and the overrides it moves are all computed with them
   const storedVtimezones = options.storedVtimezones ?? []
-  const updatedMaster = withStoredRrule(
-    withStoredTimezones(
-      storedVtimezones,
-      () => makeVevent(event, tzid, true) as VCalComponent
-    ),
-    oldMaster,
-    event
-  )
+  const finalVevents = withStoredTimezones(storedVtimezones, () => {
+    const updatedMaster = withStoredRrule(
+      makeVevent(event, tzid, true) as VCalComponent,
+      oldMaster,
+      event
+    )
 
-  let finalVevents: VCalComponent[]
-
-  if (removeOverrides) {
-    // When date/timezone/repeat rules changed, remove all override instances
-    finalVevents = [updatedMaster]
-  } else {
+    if (removeOverrides) {
+      // When date/timezone/repeat rules changed, remove all override instances
+      return [updatedMaster]
+    }
     // Otherwise keep override instances and update their metadata
     const seriesTz = tzid || 'UTC'
-    finalVevents = updateVeventsPreservingOverrides({
+    return updateVeventsPreservingOverrides({
       vevents,
       oldMaster,
       updatedMaster,
@@ -522,7 +522,7 @@ export const makeSeriesJCal = (
         : NO_SHIFT,
       tz: seriesTz
     })
-  }
+  })
 
   const vtimezones = makeSeriesVtimezones(
     finalVevents,

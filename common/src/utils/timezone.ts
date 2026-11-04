@@ -148,23 +148,128 @@ function icalTimezone(timezone: string): ICAL.Timezone | undefined {
   return zone instanceof ICAL.Timezone ? zone : undefined
 }
 
+// A change of offset of an ical.js zone; its date is the UTC instant of the
+// change (ical.js converts the local onsets of the observances to UTC)
+interface ZoneChange {
+  year: number
+  month: number
+  day: number
+  hour: number
+  minute: number
+  second: number
+  utcOffset: number
+  prevUtcOffset: number
+}
+
+const DAY_MS = 24 * 3600 * 1000
+
+/**
+ * The UTC offset (in ms) of a stored zone at an instant. ical.js only answers
+ * that for a local time, and Time#convertToZone reads the UTC clock as a local
+ * one: it keeps the old offset for an hour after each change.
+ */
+function offsetAtInstant(zone: ICAL.Timezone, instantMs: number): number {
+  if (zone === ICAL.Timezone.utcTimezone) return 0
+  const year = new Date(instantMs).getUTCFullYear()
+  const internals = zone as unknown as {
+    changes: ZoneChange[]
+    _ensureCoverage(year: number): void
+  }
+  internals._ensureCoverage(year + 1)
+  const changes = internals.changes
+  if (!changes.length) return 0
+  // The last change at or before the instant (the changes are sorted)
+  let low = 0
+  let high = changes.length
+  while (low < high) {
+    const middle = (low + high) >> 1
+    if (changeInstant(changes[middle]) <= instantMs) low = middle + 1
+    else high = middle
+  }
+  return (low ? changes[low - 1].utcOffset : changes[0].prevUtcOffset) * 1000
+}
+
+const changeInstant = (change: ZoneChange): number =>
+  Date.UTC(
+    change.year,
+    change.month - 1,
+    change.day,
+    change.hour,
+    change.minute,
+    change.second
+  )
+
+/**
+ * The instant (epoch ms) of a wall clock, given as the epoch of the same
+ * reading in UTC, in a stored zone. As RFC 5545 3.3.5 requires, a time that
+ * occurs twice is its first occurrence, and a time skipped by a change is read
+ * with the offset before the change.
+ */
+function wallClockInZoneToMs(wallClockMs: number, zone: ICAL.Timezone): number {
+  const offsetBefore = offsetAtInstant(zone, wallClockMs - DAY_MS)
+  const offsetAfter = offsetAtInstant(zone, wallClockMs + DAY_MS)
+  const valid = [offsetBefore, offsetAfter]
+    .map(offset => wallClockMs - offset)
+    .filter(instant => wallClockMs - offsetAtInstant(zone, instant) === instant)
+  return valid.length ? Math.min(...valid) : wallClockMs - offsetBefore
+}
+
 function wallClockInZoneToISO(
   wallClock: moment.Moment,
   zone: ICAL.Timezone
 ): string {
-  const time = new ICAL.Time(
-    {
-      year: wallClock.year(),
-      month: wallClock.month() + 1,
-      day: wallClock.date(),
-      hour: wallClock.hours(),
-      minute: wallClock.minutes(),
-      second: wallClock.seconds(),
-      isDate: false
-    },
-    zone
+  const wallClockMs = Date.UTC(
+    wallClock.year(),
+    wallClock.month(),
+    wallClock.date(),
+    wallClock.hours(),
+    wallClock.minutes(),
+    wallClock.seconds()
   )
-  return new Date(time.toUnixTime() * 1000).toISOString()
+  return new Date(wallClockInZoneToMs(wallClockMs, zone)).toISOString()
+}
+
+/**
+ * The ical.js definition of a zone moment-timezone does not know, while a
+ * stored VTIMEZONE defines it (see withStoredTimezones).
+ */
+export function storedTimezone(
+  timezone: string | undefined
+): ICAL.Timezone | undefined {
+  if (!timezone || isMomentZone(timezone)) return undefined
+  return icalTimezone(timezone)
+}
+
+const WALL_CLOCK_FORMAT = 'YYYY-MM-DDTHH:mm:ss'
+
+/**
+ * The instant of a wall clock value ("2025-08-18T10:00:00") in `timezone`,
+ * with the offset of the zone at that instant. A stored custom zone is read
+ * with its VTIMEZONE; any other zone with moment-timezone, as before.
+ */
+export function readWallClock(
+  wallClock: string,
+  timezone: string
+): moment.Moment {
+  const zone = storedTimezone(timezone)
+  if (!zone) return moment.tz(wallClock, timezone)
+  const asUtc = moment.utc(wallClock)
+  if (!asUtc.isValid()) return asUtc
+  const instantMs = wallClockInZoneToMs(asUtc.valueOf(), zone)
+  return moment.utc(instantMs).utcOffset((asUtc.valueOf() - instantMs) / 60000)
+}
+
+/**
+ * The wall clock reading of an instant in `timezone`. A stored custom zone is
+ * converted with its VTIMEZONE; any other zone with moment-timezone.
+ */
+export function wallClockOf(instant: moment.Moment, timezone: string): string {
+  const zone = storedTimezone(timezone)
+  if (!zone) return instant.clone().tz(timezone).format(WALL_CLOCK_FORMAT)
+  const instantMs = instant.valueOf()
+  return moment
+    .utc(instantMs + offsetAtInstant(zone, instantMs))
+    .format(WALL_CLOCK_FORMAT)
 }
 
 export function convertEventDateTimeToISO(
