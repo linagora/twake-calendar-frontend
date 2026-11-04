@@ -26,14 +26,17 @@ const SENSITIVE_PARAMS = [
 // `barcode=` or `status-code=` are not taken for `code=`.
 const NAME_BOUNDARY = '^|[^\\w-]'
 
+// Each character of a name may be percent-encoded (`%6Awt` decodes to `jwt`).
+const SENSITIVE_NAMES = SENSITIVE_PARAMS.map(acceptEncodedCharacters).join('|')
+
 const SENSITIVE_PARAM_REGEX = new RegExp(
-  `(${NAME_BOUNDARY})(${SENSITIVE_PARAMS.join('|')})=[^&#\\s"'<>]*`,
+  `(${NAME_BOUNDARY})(${SENSITIVE_NAMES})=[^&#\\s"'<>]*`,
   'gi'
 )
 // The same parameters inside a percent-encoded nested URL (redirect_uri,
 // return...): `%3Fjwt%3D<value>`, the value ending at the next encoded `&`/`#`.
 const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
-  `(%3F|%26|%23|%3B|${NAME_BOUNDARY})(${SENSITIVE_PARAMS.join('|')})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
+  `(%3F|%26|%23|%3B|${NAME_BOUNDARY})(${SENSITIVE_NAMES})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
   'gi'
 )
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
@@ -85,6 +88,18 @@ export function scrubDeep<T>(value: T, key = '', depth = 0): T {
     result[entryKey] = scrubDeep(entryValue, entryKey, depth + 1)
   }
   return result as T
+}
+
+function acceptEncodedCharacters(name: string): string {
+  return [...name].map(acceptEncodedCharacter).join('')
+}
+
+// Names match case-insensitively, so do their encoded letters: `%4A` or `%6A`.
+function acceptEncodedCharacter(character: string): string {
+  const encodings = [
+    ...new Set([character.toLowerCase(), character.toUpperCase()])
+  ].map(variant => `%${variant.charCodeAt(0).toString(16)}`)
+  return `(?:${[character, ...encodings].join('|')})`
 }
 
 function isUrlKey(key: string): boolean {
