@@ -1,0 +1,127 @@
+# Opens (or refreshes) a pull request whenever linagora/twake-ui or
+# linagora/twake-libs publishes a new version of a package we depend on.
+#
+# The @linagora/* dependencies of every package.json are grouped by the
+# repository npm reports for them, one pull request per source repository.
+# Each range is moved to the latest version, keeping its "^" / "~" / exact
+# style, and package-lock.json is updated accordingly. Major versions are
+# included: the pull request is where breaking changes get caught.
+#
+# Triggers:
+#  - schedule: polls the npm registry, no secret needed upstream;
+#  - repository_dispatch ("twake-ui-released" / "twake-libs-released"):
+#    lets the upstream repositories notify us right after a release;
+#  - workflow_dispatch: manual run.
+#
+# Each pull request always lives on the same branch, so a newer release
+# updates the pending pull request instead of opening another one.
+name: Bump twake packages
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  repository_dispatch:
+    types: [twake-ui-released, twake-libs-released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bump-twake-packages
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        source: [twake-ui, twake-libs]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Point the ${{ matrix.source }} dependencies to their latest version
+        id: bump
+        env:
+          SOURCE: ${{ matrix.source }}
+        run: |
+          set -euo pipefail
+          manifests=$(git ls-files 'package.json' '*/package.json')
+          deps=$(jq -r '[.dependencies, .devDependencies] | map(select(.)) | add // {} | keys[]
+                        | select(startswith("@linagora/"))' $manifests | sort -u)
+
+          changes=""
+          versions=""
+          for pkg in $deps; do
+            repo=$(npm view "$pkg" repository.url 2>/dev/null || true)
+            [[ "$repo" =~ github\.com/linagora/$SOURCE(\.git)?$ ]] || continue
+            latest=$(npm view "$pkg" version)
+            bumped=false
+            for manifest in $manifests; do
+              for section in dependencies devDependencies; do
+                current=$(jq -r --arg s "$section" --arg p "$pkg" '.[$s][$p] // empty' "$manifest")
+                [ -n "$current" ] || continue
+                # keep the range style: ^x.y.z, ~x.y.z or an exact x.y.z
+                case "$current" in
+                  '^'*) prefix='^' ;;
+                  '~'*) prefix='~' ;;
+                  *) prefix='' ;;
+                esac
+                range="$prefix$latest"
+                [ "$current" != "$range" ] || continue
+                tmp=$(mktemp)
+                jq --arg s "$section" --arg p "$pkg" --arg r "$range" '.[$s][$p] = $r' "$manifest" > "$tmp"
+                mv "$tmp" "$manifest"
+                changes+="| \`$pkg\` | \`$manifest\` | \`$current\` | \`$range\` |"$'\n'
+                bumped=true
+              done
+            done
+            if $bumped; then
+              versions+="${versions:+, }$pkg@$latest"
+            fi
+          done
+
+          if [ -z "$changes" ]; then
+            echo "$SOURCE dependencies are up to date"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+          {
+            echo "Bumps the [$SOURCE](https://github.com/linagora/$SOURCE/releases) packages to their latest version."
+            echo
+            echo "| Package | Manifest | From | To |"
+            echo "| --- | --- | --- | --- |"
+            printf '%s' "$changes"
+            echo
+            echo "_Opened by the \`bump-twake-packages\` workflow._"
+          } > "$RUNNER_TEMP/pr-body.md"
+
+      - name: Open or update the pull request
+        if: steps.bump.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # A pull request opened with GITHUB_TOKEN does not trigger GitHub
+          # Actions workflows: set TWAKE_BOT_TOKEN (a PAT or GitHub App token)
+          # if the bot pull requests must run an Actions CI.
+          token: ${{ secrets.TWAKE_BOT_TOKEN || github.token }}
+          branch: bot/bump-${{ matrix.source }}
+          base: ${{ github.event.repository.default_branch }}
+          add-paths: |
+            *package.json
+            package-lock.json
+          commit-message: 'chore(deps): bump ${{ steps.bump.outputs.versions }}'
+          title: 'chore(deps): bump ${{ steps.bump.outputs.versions }}'
+          body-path: ${{ runner.temp }}/pr-body.md
+          delete-branch: true
