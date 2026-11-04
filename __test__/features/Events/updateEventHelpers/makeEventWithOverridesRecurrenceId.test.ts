@@ -346,6 +346,88 @@ describe('makeEventWithOverrides — Windows TZID RECURRENCE-ID (#1884)', () => 
   })
 })
 
+describe('makeEventWithOverrides — RECURRENCE-ID of a new override (#1945)', () => {
+  function weeklySeries(dtstart: VObjectProperty): VCalComponent {
+    return [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        dtstart,
+        ['duration', {}, 'duration', 'PT1H'],
+        ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+        ['summary', {}, 'text', 'Weekly sync']
+      ],
+      []
+    ]
+  }
+
+  // 2022-11-06T06:15:00Z is the second 01:15 of that night in New York
+  const editedInNewYork = {
+    uid: 'series-1/2022-11-06T06:15:00Z',
+    recurrenceId: '2022-11-06T06:15:00Z',
+    timezone: 'America/New_York',
+    start: '2022-11-06T08:00:00.000Z',
+    end: '2022-11-06T09:00:00.000Z',
+    attendee: [],
+    title: 'Weekly sync, edited'
+  } as unknown as CalendarEvent
+
+  function recurrenceIdOf(jCal: VCalComponent): VObjectProperty | undefined {
+    return (listOverrides(jCal)[0][1] as VObjectProperty[]).find(
+      ([k]) => k === 'recurrence-id'
+    )
+  }
+
+  it('writes the RECURRENCE-ID of a UTC series in UTC, not in the zone of the form', () => {
+    const jCal = makeEventWithOverrides(editedInNewYork, [
+      weeklySeries(['dtstart', {}, 'date-time', '2022-08-07T06:15:00Z'])
+    ])
+
+    expect(recurrenceIdOf(jCal)).toEqual([
+      'recurrence-id',
+      {},
+      'date-time',
+      '2022-11-06T06:15:00Z'
+    ])
+  })
+
+  it('writes the RECURRENCE-ID in the zone of the series', () => {
+    const jCal = makeEventWithOverrides(editedInNewYork, [
+      weeklySeries([
+        'dtstart',
+        { tzid: 'Europe/Paris' },
+        'date-time',
+        '2022-08-07T08:15:00'
+      ])
+    ])
+
+    expect(recurrenceIdOf(jCal)).toEqual([
+      'recurrence-id',
+      { tzid: 'Europe/Paris' },
+      'date-time',
+      '2022-11-06T07:15:00'
+    ])
+  })
+
+  it('writes in UTC an instant the wall clock of the series zone does not designate', () => {
+    const jCal = makeEventWithOverrides(editedInNewYork, [
+      weeklySeries([
+        'dtstart',
+        { tzid: 'America/New_York' },
+        'date-time',
+        '2022-08-07T02:15:00'
+      ])
+    ])
+
+    expect(recurrenceIdOf(jCal)).toEqual([
+      'recurrence-id',
+      {},
+      'date-time',
+      '2022-11-06T06:15:00Z'
+    ])
+  })
+})
+
 describe('makeEventWithOverrides — VTIMEZONEs of the series (#1881)', () => {
   const updatedInstance = {
     uid: 'series-1',
