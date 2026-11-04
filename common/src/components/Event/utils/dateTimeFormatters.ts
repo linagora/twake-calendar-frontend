@@ -6,6 +6,7 @@ import 'dayjs/locale/de'
 import 'dayjs/locale/it'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/vi'
+import moment from 'moment-timezone'
 import { getTimezoneOffset } from '@common/utils/timezone'
 
 /**
@@ -34,16 +35,42 @@ export function formatLocalDateTime(date: Date, timeZone?: string): string {
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+type DateTimeParts = Record<
+  'year' | 'month' | 'day' | 'hour' | 'minute',
+  string
+>
+
 /**
- * Read the numeric date/time fields of a Date as seen in a timezone.
- * Relies on formatToParts: the layout returned by format() depends on the
- * engine's CLDR data (WebKit renders 'en-CA' as MM/DD/YYYY), so it must
- * never be parsed.
+ * Read the wall clock of a Date in a timezone with moment-timezone, the tz
+ * database the event parser and convertFormDateTimeToISO use: reading it with
+ * the browser's Intl data instead makes an unchanged form save move the event
+ * whenever both databases disagree on the zone's offset (#1937). Intl is only
+ * kept for zones moment-timezone does not know.
  */
 function getDateTimePartsInTimezone(
   date: Date,
   timeZone: string
-): Record<'year' | 'month' | 'day' | 'hour' | 'minute', string> {
+): DateTimeParts {
+  if (!moment.tz.zone(timeZone)) {
+    return getIntlDateTimePartsInTimezone(date, timeZone)
+  }
+  const [year, month, day, hour, minute] = moment
+    .tz(date, timeZone)
+    .format('YYYY-MM-DD-HH-mm')
+    .split('-')
+  return { year, month, day, hour, minute }
+}
+
+/**
+ * Intl fallback: read the numeric date/time fields of a Date as seen in a timezone.
+ * Relies on formatToParts: the layout returned by format() depends on the
+ * engine's CLDR data (WebKit renders 'en-CA' as MM/DD/YYYY), so it must
+ * never be parsed.
+ */
+function getIntlDateTimePartsInTimezone(
+  date: Date,
+  timeZone: string
+): DateTimeParts {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
