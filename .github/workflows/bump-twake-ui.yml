@@ -1,0 +1,107 @@
+# Opens (or refreshes) a pull request whenever linagora/twake-ui publishes
+# a new version of @linagora/twake-mui or @linagora/twake-icons.
+#
+# Every package.json that depends on them gets the range "^<latest>" and
+# package-lock.json is updated accordingly. Major versions are included:
+# the pull request is where breaking changes get caught.
+#
+# Triggers:
+#  - schedule: polls the npm registry, no secret needed in twake-ui;
+#  - repository_dispatch (type "twake-ui-released"): lets twake-ui notify us
+#    right after a release, if it is given a token for this repository;
+#  - workflow_dispatch: manual run.
+#
+# The pull request always lives on the same branch, so a newer release
+# updates the pending pull request instead of opening another one.
+name: Bump twake-ui
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  repository_dispatch:
+    types: [twake-ui-released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bump-twake-ui
+  cancel-in-progress: false
+
+env:
+  PACKAGES: '@linagora/twake-mui @linagora/twake-icons'
+  PR_BRANCH: bot/bump-twake-ui
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Point the twake-ui dependencies to their latest version
+        id: bump
+        run: |
+          set -euo pipefail
+          changes=""
+          for pkg in $PACKAGES; do
+            latest=$(npm view "$pkg" version)
+            range="^$latest"
+            for manifest in $(git ls-files 'package.json' '*/package.json'); do
+              for section in dependencies devDependencies; do
+                current=$(jq -r --arg s "$section" --arg p "$pkg" '.[$s][$p] // empty' "$manifest")
+                if [ -n "$current" ] && [ "$current" != "$range" ]; then
+                  tmp=$(mktemp)
+                  jq --arg s "$section" --arg p "$pkg" --arg r "$range" '.[$s][$p] = $r' "$manifest" > "$tmp"
+                  mv "$tmp" "$manifest"
+                  changes+="| \`$pkg\` | \`$manifest\` | \`$current\` | \`$range\` |"$'\n'
+                fi
+              done
+            done
+          done
+          if [ -z "$changes" ]; then
+            echo "twake-ui dependencies are up to date"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+          versions=""
+          for pkg in $PACKAGES; do
+            versions+="${versions:+, }$pkg@$(npm view "$pkg" version)"
+          done
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+          {
+            echo "Bumps the [twake-ui](https://github.com/linagora/twake-ui/releases) packages to their latest version."
+            echo
+            echo "| Package | Manifest | From | To |"
+            echo "| --- | --- | --- | --- |"
+            printf '%s' "$changes"
+            echo
+            echo "_Opened by the \`bump-twake-ui\` workflow._"
+          } > "$RUNNER_TEMP/pr-body.md"
+
+      - name: Open or update the pull request
+        if: steps.bump.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # A pull request opened with GITHUB_TOKEN does not trigger the
+          # GitHub Actions CI: set TWAKE_UI_BOT_TOKEN (a PAT or GitHub App
+          # token) to get the CI run on the bot pull requests.
+          token: ${{ secrets.TWAKE_UI_BOT_TOKEN || github.token }}
+          branch: ${{ env.PR_BRANCH }}
+          base: ${{ github.event.repository.default_branch }}
+          add-paths: |
+            *package.json
+            package-lock.json
+          commit-message: 'chore(deps): bump ${{ steps.bump.outputs.versions }}'
+          title: 'chore(deps): bump ${{ steps.bump.outputs.versions }}'
+          body-path: ${{ runner.temp }}/pr-body.md
+          delete-branch: true
