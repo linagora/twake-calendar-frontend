@@ -76,8 +76,9 @@ const formLeavesRuleAlone = (
   )
 }
 
-// A new time of day moves every time part by the same amount, unless the rule
-// already produces the new time
+// A new time of day moves every time part by the same amount, even when the
+// rule already lists the new value: the RECURRENCE-IDs, EXDATEs and RDATEs
+// move by the whole shift, and the occurrences have to move along (#1949)
 const followTimeOfDay = (
   rule: RuleValues,
   { oldStart, newStart }: SeriesStarts
@@ -85,9 +86,7 @@ const followTimeOfDay = (
   TIME_PARTS.reduce((acc, { part, modulo, read }) => {
     if (acc[part] == null || !oldStart || !newStart) return acc
     const values = asList(acc[part])
-    const newValue = read(newStart)
-    if (values.includes(newValue)) return acc
-    const delta = newValue - read(oldStart)
+    const delta = read(newStart) - read(oldStart)
     const moved = values.map(v => (((v + delta) % modulo) + modulo) % modulo)
     return { ...acc, [part]: fromList(acc[part], moved) }
   }, rule)
