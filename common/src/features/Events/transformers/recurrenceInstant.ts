@@ -86,7 +86,7 @@ function hasDefiniteZone(
  * back to the lenient string comparison instead of trusting a system-local
  * instant).
  */
-function definiteInstant(
+export function definiteInstant(
   value: unknown,
   tzid?: string,
   fallbackTz?: string
