@@ -1,4 +1,8 @@
 {
+  "shortcuts": {
+    "title": "Tastenkombinationen",
+    "showList": "Tastenkombinationen anzeigen"
+  },
   "locale": "de-de",
   "calendar": {
     "personal": "Meine Kalender",

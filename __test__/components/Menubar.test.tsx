@@ -1,3 +1,4 @@
+import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { Menubar } from '@common/components/Menubar/Menubar'
 import '@testing-library/jest-dom'
@@ -24,6 +25,23 @@ describe('Menubar', () => {
   afterEach(() => {
     document.body.classList.remove('fullscreen-view')
     delete window.ENABLE_REFRESH_BUTTON
+  })
+
+  it('opens and focuses search when requested by the calendar shortcut', async () => {
+    renderWithProviders(
+      <Menubar
+        calendarRef={{ current: null }}
+        onRefresh={() => {}}
+        onToggleSidebar={() => {}}
+        currentDate={new Date('2024-04-15')}
+        currentView={CALENDAR_VIEWS.timeGridWeek}
+      />,
+      preloadedState
+    )
+    fireEvent(window, new Event(OPEN_CALENDAR_SEARCH))
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText('common.search')).toHaveFocus()
+    )
   })
 
   it('has navigation controls element with correct class', () => {
@@ -154,6 +172,10 @@ describe('Menubar', () => {
     )
 
     fireEvent.click(screen.getByLabelText('menubar.settings'))
+    expect(
+      screen.getByRole('menuitem', { name: 'shortcuts.title' })
+    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('menuitem', { name: 'menubar.settings' }))
 
     await waitFor(() => {
       const state = store.getState()

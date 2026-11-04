@@ -1,3 +1,4 @@
+import { navigateCalendar } from './navigateCalendar'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
@@ -64,23 +65,7 @@ export const Menubar: React.FC<MenubarProps> = ({
   const handleNavigation = (action: 'prev' | 'next' | 'today'): void => {
     if (!calendarRef.current) return
     dispatch(setView('calendar'))
-    switch (action) {
-      case 'prev':
-        calendarRef.current.prev()
-        break
-      case 'next':
-        calendarRef.current.next()
-        break
-      case 'today':
-        calendarRef.current.today()
-        break
-    }
-
-    // Notify parent about date change after navigation
-    if (onDateChange) {
-      const newDate = calendarRef.current.getDate()
-      onDateChange(newDate)
-    }
+    navigateCalendar(calendarRef.current, action, onDateChange)
   }
 
   const handleViewChange = (view: string): void => {

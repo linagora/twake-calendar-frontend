@@ -1,3 +1,4 @@
+import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { useAppDispatch } from '@common/app/hooks'
 import Tooltip from '@common/components/Tooltip'
 import { clearSearch } from '@common/features/Search/SearchSlice'
@@ -7,7 +8,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import MenuIcon from '@mui/icons-material/Menu'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import SearchIcon from '@mui/icons-material/Search'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { SmallNavigationControls } from './components/SmallNavigationControls'
 import { SharedMenubarProps } from './Menubar'
@@ -25,6 +26,11 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   const dispatch = useAppDispatch()
 
   const [openEventSearch, setOpenEventSearch] = useState(false)
+  useEffect(() => {
+    const openSearch = (): void => setOpenEventSearch(true)
+    window.addEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+    return () => window.removeEventListener(OPEN_CALENDAR_SEARCH, openSearch)
+  }, [])
   const handleBackClick = (event: React.MouseEvent): void => {
     event.stopPropagation()
     event.preventDefault()

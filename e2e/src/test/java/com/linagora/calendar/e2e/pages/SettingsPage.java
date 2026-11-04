@@ -5,7 +5,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Request;
 import com.microsoft.playwright.options.AriaRole;
 
-/** The settings panel, reachable from the user menu. */
+/** The settings panel, reachable from the menubar settings menu. */
 public class SettingsPage {
     private final Page page;
 
@@ -14,7 +14,7 @@ public class SettingsPage {
     }
 
     SettingsPage waitUntilOpen() {
-        languageSelector().waitFor();
+        page.locator("main.settings-layout").waitFor();
         awaitUserConfigurationLoaded();
         return this;
     }
