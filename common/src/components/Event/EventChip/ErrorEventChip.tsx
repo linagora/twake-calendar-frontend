@@ -1,5 +1,5 @@
 import { EventErrorHandler } from '@common/components/Error/EventErrorHandler'
-import { EventContentArg } from '@fullcalendar/core'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import { Card, Typography } from '@linagora/twake-mui'
 import { useEffect, useRef } from 'react'
 
@@ -8,7 +8,7 @@ export function ErrorEventChip({
   errorHandler,
   error
 }: {
-  event: EventContentArg['event']
+  event: EventDisplayInfo['event']
   errorHandler: EventErrorHandler
   error: unknown
 }) {

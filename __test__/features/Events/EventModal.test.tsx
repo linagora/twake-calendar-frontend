@@ -4,7 +4,7 @@ import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { api } from '@common/utils/apiUtils'
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -118,7 +118,7 @@ describe('EventPopover', () => {
     end: new Date('2025-07-18T10:00'),
     allDay: false,
     resource: undefined
-  } as unknown as DateSelectArg
+  } as unknown as DateSelectInfo
 
   const renderPopover = (
     selectedRange = defaultSelectedRange,
@@ -209,7 +209,7 @@ describe('EventPopover', () => {
       start: new Date('2026-07-20T10:00'),
       end: new Date('2026-07-20T12:00'),
       allDay: false
-    } as unknown as DateSelectArg)
+    } as unknown as DateSelectInfo)
 
     // Expand to show date/time inputs (normal mode shows DateTimeSummary)
     fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
@@ -573,7 +573,7 @@ describe('EventPopover', () => {
         start: new Date('2025-07-18'),
         end: new Date('2025-07-19'),
         allDay: true
-      } as unknown as DateSelectArg
+      } as unknown as DateSelectInfo
 
       renderPopover(selectedRange)
       fireEvent.click(
@@ -594,7 +594,7 @@ describe('EventPopover', () => {
         start: new Date('2025-07-18'),
         end: new Date('2025-07-21'),
         allDay: true
-      } as unknown as DateSelectArg
+      } as unknown as DateSelectInfo
 
       renderPopover(selectedRange)
       fireEvent.click(
@@ -623,7 +623,7 @@ describe('EventPopover', () => {
         start: new Date('2025-07-18T09:00'),
         end: new Date('2025-07-18T10:00'),
         allDay: false
-      } as unknown as DateSelectArg
+      } as unknown as DateSelectInfo
 
       renderPopover(selectedRange)
       fireEvent.click(
@@ -650,7 +650,7 @@ describe('EventPopover', () => {
         start: new Date('2025-07-18T09:00'),
         end: new Date('2025-07-20T10:00'),
         allDay: false
-      } as unknown as DateSelectArg
+      } as unknown as DateSelectInfo
 
       renderPopover(selectedRange)
       fireEvent.click(
@@ -677,7 +677,7 @@ describe('EventPopover', () => {
         start: new Date('2025-07-18T09:00'),
         end: new Date('2025-07-20T10:00'),
         allDay: false
-      } as unknown as DateSelectArg
+      } as unknown as DateSelectInfo
 
       renderPopover(selectedRange)
       fireEvent.click(

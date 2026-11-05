@@ -4,7 +4,7 @@ import {
   createViewHandlers,
   ViewHandlersProps
 } from '@common/components/Calendar/handlers/viewHandlers'
-import { CalendarApi, EventInput } from '@fullcalendar/core'
+import { CalendarApi, EventInput } from '@fullcalendar/react'
 import { getInitialCalendarView } from '../utils/calendarUtils'
 
 export const useSyncCalendarView = (

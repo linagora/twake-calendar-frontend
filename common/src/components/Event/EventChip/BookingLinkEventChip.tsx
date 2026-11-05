@@ -142,7 +142,7 @@ export const BookingLinkEventChip: React.FC<EventChipProps> = ({ arg }) => {
   const color =
     (colors as { light: string; dark: string } | undefined)?.dark ||
     (colors as { light: string; dark: string } | undefined)?.light ||
-    event.backgroundColor ||
+    event.color ||
     defaultColors[0].light
   return (
     <BaseBookingLinkChip

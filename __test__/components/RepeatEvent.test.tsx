@@ -3,7 +3,7 @@ import RepeatEvent from '@common/components/Event/EventRepeat'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
 import { RepetitionObject } from '@common/types/Repetition'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 import { mockBrowserWestOfUtc } from '../utils/browserWestOfUtc'
@@ -58,7 +58,7 @@ const defaultSelectedRange = {
   end: new Date('2025-07-18T10:00'),
   allDay: false,
   resource: undefined
-} as unknown as DateSelectArg
+} as unknown as DateSelectInfo
 
 function setupRepeatEvent(
   props?: Partial<RepetitionObject>,
@@ -79,7 +79,7 @@ function setupRepeatEvent(
 }
 
 async function setupEventPopover(
-  selectedRange: DateSelectArg = defaultSelectedRange,
+  selectedRange: DateSelectInfo = defaultSelectedRange,
   timeZone = 'UTC'
 ) {
   vi.spyOn(crypto, 'randomUUID').mockReturnValue(
@@ -433,7 +433,7 @@ describe('Repeat Event Integration Tests', () => {
         start: new Date(2026, 10, 16),
         end: new Date(2026, 10, 17),
         allDay: true
-      } as unknown as DateSelectArg,
+      } as unknown as DateSelectInfo,
       'America/New_York'
     )
 

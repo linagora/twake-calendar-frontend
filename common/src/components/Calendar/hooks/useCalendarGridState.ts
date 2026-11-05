@@ -10,7 +10,7 @@ import {
   extractEvents,
   eventToFullCalendarFormat
 } from '../utils/calendarUtils'
-import { CalendarApi, EventInput } from '@fullcalendar/core'
+import { CalendarApi, EventInput } from '@fullcalendar/react'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { EventErrorHandler } from '@common/components/Error/EventErrorHandler'
 import type { RootState } from '@common/app/store'

@@ -1,6 +1,6 @@
 import type { AppIconProps } from '@common/components/Menubar/Menubar'
 import type { MutableRefObject } from 'react'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 
 export {}
 

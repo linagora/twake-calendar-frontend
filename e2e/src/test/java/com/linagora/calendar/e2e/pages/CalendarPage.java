@@ -245,7 +245,7 @@ public class CalendarPage {
     /** FullCalendar view class, e.g. {@code fc-dayGridMonth-view}. */
     public String currentViewClass() {
         return String.valueOf(page.evaluate(
-            "() => document.querySelector('.fc-view-harness').firstElementChild.className"));
+            "() => document.querySelector('.fc-view-harness').className"));
     }
 
     /** The date range currently displayed, as the column headers spell it. */

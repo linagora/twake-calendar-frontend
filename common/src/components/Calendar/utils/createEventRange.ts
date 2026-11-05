@@ -1,4 +1,4 @@
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import moment from 'moment-timezone'
 import { CALENDAR_VIEWS } from './constants'
 
@@ -9,7 +9,7 @@ export function buildCreateEventRange(
   now: Date = new Date(),
   workingDays?: number[],
   displayedEnd?: Date
-): DateSelectArg | null {
+): DateSelectInfo | null {
   if (!displayedDate || !Object.values(CALENDAR_VIEWS).includes(currentView)) {
     return null
   }
@@ -51,5 +51,5 @@ export function buildCreateEventRange(
     startStr: start.format(),
     endStr: eventEnd.format(),
     allDay: false
-  } as DateSelectArg
+  } as DateSelectInfo
 }

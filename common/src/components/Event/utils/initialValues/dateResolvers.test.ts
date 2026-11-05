@@ -1,6 +1,6 @@
 import { buildFromSelectedRange, formatEventDates } from './dateResolvers'
 import type { CalendarEvent } from '@common/types/EventsTypes'
-import type { DateSelectArg } from '@fullcalendar/core'
+import type { DateSelectInfo } from '@fullcalendar/react'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 
@@ -9,14 +9,14 @@ const allDayRanges = [
   ['the spring DST transition', '2026-03-07', '2026-03-09', '2026-03-08']
 ] as const
 
-function selectedRange(start: string, end: string): DateSelectArg {
+function selectedRange(start: string, end: string): DateSelectInfo {
   return {
     start: new Date(start),
     end: new Date(end),
     startStr: start,
     endStr: end,
     allDay: true
-  } as DateSelectArg
+  } as DateSelectInfo
 }
 
 function resolveDatesInTimezone(timezone: string): {

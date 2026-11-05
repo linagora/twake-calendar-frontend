@@ -1,4 +1,4 @@
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import {
   MutableRefObject,
   TouchEvent,

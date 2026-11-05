@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import moment from 'moment-timezone'
 import { CALENDAR_VIEWS, isListView } from '../utils/constants'
-import { EventInput } from '@fullcalendar/core'
+import { EventInput } from '@fullcalendar/react'
 
 export const useHiddenDays = (
   hideWorkingDays: boolean,

@@ -1,4 +1,4 @@
-import type { EventApi, EventClickArg } from '@fullcalendar/core'
+import type { EventApi, EventClickInfo } from '@fullcalendar/react'
 import {
   ActionsMenu,
   ActionsMenuItem,
@@ -12,7 +12,7 @@ interface ViewMoreEventsProps {
   isOpen: boolean
   onClose: () => void
   moreEvents: EventApi[]
-  handleEventClick: (arg: EventClickArg) => void
+  handleEventClick: (arg: EventClickInfo) => void
 }
 
 const ViewMoreEvents: React.FC<ViewMoreEventsProps> = ({
@@ -36,7 +36,7 @@ const ViewMoreEvents: React.FC<ViewMoreEventsProps> = ({
             handleEventClick({
               event,
               jsEvent: { preventDefault: () => {} }
-            } as EventClickArg)
+            } as EventClickInfo)
           }
         >
           <ListItemText primary={event.title} ellipsis={false} />
