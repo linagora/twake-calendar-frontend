@@ -205,8 +205,10 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
         page.waitForTimeout(3000);
 
         Object scrollTop = page.evaluate(
-            "() => { const s = document.querySelector('.fc-timegrid-body :has(> :has(> .calendar-time-lane))')?.parentElement"
-            + "; return s ? s.scrollTop : -1; }");
+            "() => { let scroller = document.querySelector('.fc-timegrid-body .calendar-time-lane');"
+            + " while (scroller && getComputedStyle(scroller).overflowY !== 'auto') {"
+            + "   scroller = scroller.parentElement;"
+            + " } return scroller?.scrollTop ?? -1; }");
         assertThat(((Number) scrollTop).doubleValue())
             .as("midnight is never what the user wants to see first")
             .isGreaterThan(0);
