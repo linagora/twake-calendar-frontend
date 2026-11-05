@@ -364,6 +364,35 @@ function parseAlarms(valarms: unknown): Valarms | undefined {
   return alarms.length ? Valarms.fromList(alarms) : undefined
 }
 
+// A wall clock is read in the zone of the event, not of the browser
+function readStartInstant(start?: string, timezone?: string): Date {
+  if (!start) return new Date()
+  return new Date(
+    (timezone && convertEventDateTimeToISO(start, timezone)) ||
+      normalizeBasicDateTime(start)
+  )
+}
+
+function computeMissingEnd(
+  start?: string,
+  timezone?: string,
+  duration?: string
+): string | undefined {
+  const startInstant = readStartInstant(start, timezone)
+  // A start the client cannot read (a second 60...) gives no end to compute
+  if (isNaN(startInstant.getTime())) return start
+
+  const timeToAdd = duration
+    ? moment.duration(duration).asMilliseconds()
+    : moment.duration(30, 'minutes').asMilliseconds()
+  const artificialEnd = new Date(startInstant.getTime() + timeToAdd)
+  // The instant itself: a wall clock in the hour repeated at the end of
+  // summer time would be read back as its first occurrence
+  return timezone
+    ? artificialEnd.toISOString()
+    : formatDateTimeToICal(artificialEnd)
+}
+
 function processEventDates(
   event: Partial<CalendarEvent>,
   duration?: string
@@ -379,28 +408,7 @@ function processEventDates(
   }
 
   if (!event.end) {
-    // A wall clock is read in the zone of the event, not of the browser
-    const start = event.start
-      ? new Date(
-          (eventTimezone &&
-            convertEventDateTimeToISO(event.start, eventTimezone)) ||
-            normalizeBasicDateTime(event.start)
-        )
-      : new Date()
-    const timeToAdd = duration
-      ? moment.duration(duration).asMilliseconds()
-      : moment.duration(30, 'minutes').asMilliseconds()
-    const artificialEnd = new Date(start.getTime() + timeToAdd)
-    if (isNaN(start.getTime())) {
-      // A start the client cannot read (a second 60...) gives no end to compute
-      event.end = event.start
-    } else {
-      // The instant itself: a wall clock in the hour repeated at the end of
-      // summer time would be read back as its first occurrence
-      event.end = eventTimezone
-        ? artificialEnd.toISOString()
-        : formatDateTimeToICal(artificialEnd, eventTimezone)
-    }
+    event.end = computeMissingEnd(event.start, eventTimezone, duration)
   }
 
   if (!event.allday && eventTimezone) {
