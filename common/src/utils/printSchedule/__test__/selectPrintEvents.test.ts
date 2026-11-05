@@ -143,3 +143,56 @@ describe('eventsInPeriod', () => {
     expect(inRange.map(e => e.uid)).toEqual(['in'])
   })
 })
+
+describe('eventsInPeriod with a date in a two-digit year', () => {
+  const timezone = 'Europe/Paris'
+  const firstDays = {
+    start: dayjs.tz('2026-07-01', timezone),
+    end: dayjs.tz('2026-07-03', timezone)
+  }
+
+  it('finds an event that started long before the period', () => {
+    const events = selectPrintEvents(
+      [
+        makeEvent({
+          start: '0026-07-05T10:00:00Z',
+          end: '2026-07-10T10:00:00Z'
+        })
+      ],
+      timezone,
+      '(No title)'
+    )
+
+    expect(eventsInPeriod(events, firstDays)).toHaveLength(1)
+  })
+
+  it('does not find an event of the same days in year 26', () => {
+    const events = selectPrintEvents(
+      [
+        makeEvent({
+          start: '0026-07-01T10:00:00Z',
+          end: '0026-07-01T11:00:00Z'
+        })
+      ],
+      timezone,
+      '(No title)'
+    )
+
+    expect(eventsInPeriod(events, firstDays)).toHaveLength(0)
+  })
+
+  it('treats an end in year 26 as an end before the start', () => {
+    const printEvent = toPrintEvent(
+      makeEvent({
+        start: '2026-07-05T10:00:00Z',
+        end: '0026-07-20T10:00:00Z'
+      }),
+      timezone,
+      '(No title)'
+    )
+
+    expect(printEvent.end.valueOf() - printEvent.start.valueOf()).toBe(
+      30 * 60000
+    )
+  })
+})
