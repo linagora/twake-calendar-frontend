@@ -1,7 +1,7 @@
 import './dayjsSetup'
 import { Dayjs } from 'dayjs'
 import { PositionedEvent, layoutTimedEvents } from './layout'
-import { eventsInPeriod } from './selectPrintEvents'
+import { eventsInPeriod, overlapsRange } from './selectPrintEvents'
 import {
   PrintCalendar,
   PrintEvent,
@@ -90,8 +90,8 @@ const gridMinutes = (
   dayStart: Dayjs,
   dayEnd: Dayjs
 ): number => {
-  if (!instant.isAfter(dayStart)) return 0
-  if (!instant.isBefore(dayEnd)) return 24 * 60
+  if (instant.valueOf() <= dayStart.valueOf()) return 0
+  if (instant.valueOf() >= dayEnd.valueOf()) return 24 * 60
   return instant.hour() * 60 + instant.minute()
 }
 
@@ -132,9 +132,7 @@ const renderDayColumn = (
   // `add` keeps the offset of the day start: `startOf` resolves local
   // midnight again, which moves on a DST change
   const dayEnd = dayStart.add(1, 'day').startOf('day')
-  const forDay = timed.filter(
-    event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
-  )
+  const forDay = timed.filter(event => overlapsRange(event, dayStart, dayEnd))
   const blocks = layoutTimedEvents(forDay, event => ({
     start: gridMinutes(event.start, dayStart, dayEnd),
     end: gridMinutes(event.end, dayStart, dayEnd)
@@ -173,9 +171,7 @@ const renderTimeGrid = (
       const dayStart = day.startOf('day')
       const dayEnd = dayStart.add(1, 'day')
       const chips = allDay
-        .filter(
-          event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
-        )
+        .filter(event => overlapsRange(event, dayStart, dayEnd))
         .map(event => chip(event, false))
         .join('')
       return `<div class="tg-allday-col">${chips}</div>`
@@ -229,9 +225,7 @@ const renderMonthGrid = (
       const dayEnd = dayStart.add(1, 'day')
       const outside = day.month() !== period.start.month() ? ' mg-outside' : ''
       const chips = periodEvents
-        .filter(
-          event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
-        )
+        .filter(event => overlapsRange(event, dayStart, dayEnd))
         .sort((a, b) => a.start.valueOf() - b.start.valueOf())
         .map(event => chip(event, true))
         .join('')
@@ -284,9 +278,7 @@ const renderScheduleDay = (
   // midnight again, which moves on a DST change
   const dayEnd = dayStart.add(1, 'day').startOf('day')
   const dayEvents = periodEvents
-    .filter(
-      event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
-    )
+    .filter(event => overlapsRange(event, dayStart, dayEnd))
     .sort((a, b) => {
       if (a.allDay !== b.allDay) return a.allDay ? -1 : 1
       return a.start.valueOf() - b.start.valueOf()

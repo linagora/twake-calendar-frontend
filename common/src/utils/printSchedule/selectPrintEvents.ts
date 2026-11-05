@@ -47,7 +47,7 @@ const resolveEnd = (
   // Guard against malformed events whose end is unreadable or precedes their
   // start, keeping all-day events at least a full day and timed events a
   // minute-based span.
-  return rawEnd.isValid() && rawEnd.isAfter(start)
+  return rawEnd.isValid() && rawEnd.valueOf() > start.valueOf()
     ? rawEnd
     : fallbackEnd(start, allDay, FALLBACK_DURATION_MINUTES)
 }
@@ -88,11 +88,22 @@ export const selectPrintEvents = (
     // it rather than letting it break the whole print.
     .filter(event => event.start.isValid())
 
+/**
+ * True when an event overlaps the half-open `[start, end)` range. It compares
+ * the instants: on a zoned instance, isBefore and isAfter go through a wall
+ * clock read back from a two-digit year (year 26 in `7/5/26`), in another
+ * century than the instant.
+ */
+export const overlapsRange = (
+  event: Pick<PrintEvent, 'start' | 'end'>,
+  start: Dayjs,
+  end: Dayjs
+): boolean =>
+  event.start.valueOf() < end.valueOf() && event.end.valueOf() > start.valueOf()
+
 /** Events overlapping the half-open `[period.start, period.end)` range. */
 export const eventsInPeriod = (
   events: PrintEvent[],
   period: Pick<PrintPeriod, 'start' | 'end'>
 ): PrintEvent[] =>
-  events.filter(
-    event => event.start.isBefore(period.end) && event.end.isAfter(period.start)
-  )
+  events.filter(event => overlapsRange(event, period.start, period.end))
