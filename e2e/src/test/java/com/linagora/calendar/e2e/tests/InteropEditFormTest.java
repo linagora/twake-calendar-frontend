@@ -309,10 +309,13 @@ class InteropEditFormTest extends TwakeCalendarE2ETest {
             assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
         String saved = Ics.event(probe.singleEvent(user));
         assertThat(Ics.property(saved, "DTSTART")).hasValue(day + "T100000");
+        assertThat(Ics.parameters(saved, "DTSTART")).contains("TZID=America/New_York");
         assertThat(Ics.property(saved, "DTEND").map(end -> end.equals(day + "T110000"))
             .or(() -> Ics.property(saved, "DURATION").map("PT1H"::equals)))
             .as("the event still lasts one hour:\n%s", saved)
             .hasValue(true);
+        Ics.property(saved, "DTEND").ifPresent(end ->
+            assertThat(Ics.parameters(saved, "DTEND")).contains("TZID=America/New_York"));
     }
 
     @Test

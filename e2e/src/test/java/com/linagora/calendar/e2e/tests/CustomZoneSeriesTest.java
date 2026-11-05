@@ -58,6 +58,10 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
     }
 
+    private static String byDay(LocalDate date) {
+        return date.getDayOfWeek().name().substring(0, 2);
+    }
+
     private void awaitAttached(Locator locator) {
         locator.first().waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
     }
@@ -113,8 +117,8 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
     @DisplayName("CUSTOM-ZONE-02 (#1941) Dragging a whole series across midnight of its zone moves its weekday")
     void aDragAcrossMidnightOfTheZoneMovesTheWeekday(Page page, E2EUser user, CalendarProbe probe) {
         String title = title("Late series");
-        // Wednesday 22:00 at UTC-11 is Thursday morning for the browser: the drag stays within one
-        // day of the grid and of UTC, and only the zone of the series sees it reach the next day
+        // 22:00 at UTC-11 is the next morning for the browser: the drag stays within one day of
+        // the grid and of UTC, and only the zone of the series sees it reach the next day
         CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
             Vcal.fixedZone(CUSTOM_ZONE, "-1100"), """
             BEGIN:VEVENT
@@ -122,10 +126,10 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             %s
             DTSTART;TZID=%s:%sT220000
             DTEND;TZID=%s:%sT223000
-            RRULE:FREQ=WEEKLY;BYDAY=WE;COUNT=3
+            RRULE:FREQ=WEEKLY;BYDAY=%s;COUNT=3
             SUMMARY:%s
             END:VEVENT
-            """.formatted(UUID.randomUUID(), STAMP, CUSTOM_ZONE, day0, CUSTOM_ZONE, day0, title)));
+            """.formatted(UUID.randomUUID(), STAMP, CUSTOM_ZONE, day0, CUSTOM_ZONE, day0, byDay(today), title)));
         LocalDateTime dropped = tomorrow.atTime(13, 0).atZone(E2EClock.BROWSER_ZONE)
             .withZoneSameInstant(ZoneOffset.ofHours(-11)).toLocalDateTime();
 
@@ -137,8 +141,8 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             assertThat(Ics.property(master, "DTSTART")).hasValue(dropped.format(LOCAL_DATE_TIME));
             assertThat(Ics.parameters(master, "DTSTART")).contains("TZID=" + CUSTOM_ZONE);
             assertThat(Ics.rulePart(Ics.property(master, "RRULE").orElseThrow(), "BYDAY"))
-                .as("in the zone of the series, the occurrences now fall on Thursday")
-                .hasValue("TH");
+                .as("in the zone of the series, the occurrences now fall on the weekday of the drop")
+                .hasValue(byDay(dropped.toLocalDate()));
         });
     }
 
