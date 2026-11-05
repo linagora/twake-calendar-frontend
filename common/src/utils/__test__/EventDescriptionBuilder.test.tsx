@@ -114,6 +114,40 @@ describe('EventDescriptionBuilder', () => {
       )
     })
 
+    it('keeps a user paragraph between separators before a footer without notice', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const description = `${sep}\nContext: keep\n\nNotes\n${sep}\nJoin Visio: a\n${sep}`
+
+      const once = new EventDescriptionBuilder(description)
+        .removeFooter()
+        .buildHtml()
+
+      expect(once).toBe(`${sep}\nContext: keep\n\nNotes`)
+      expect(new EventDescriptionBuilder(once).removeFooter().buildHtml()).toBe(
+        once
+      )
+    })
+
+    it('recognizes the notice of a footer saved in another language', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const description =
+        `Agenda\n\n${sep}\nRejoindre : a\n\n` +
+        `Veuillez ne pas modifier cette section.\n${sep}\nNote: room 4\n${sep}`
+
+      expect(
+        new EventDescriptionBuilder(description).removeFooter().buildHtml()
+      ).toBe(`Agenda\nNote: room 4\n${sep}`)
+    })
+
+    it('removes a footer closed by an unknown notice', () => {
+      const sep = EVENT_FOOTER_SEPARATOR
+      const description = `Agenda\n\n${sep}\nJoin Visio : a\n\nOld notice.\n${sep}`
+
+      expect(
+        new EventDescriptionBuilder(description).removeFooter().buildHtml()
+      ).toBe('Agenda')
+    })
+
     it('is idempotent when footers without notice follow each other', () => {
       const sep = EVENT_FOOTER_SEPARATOR
       const description = `Agenda\n${sep}\na: b\n${sep}\nc: d\n${sep}\n${sep}`
