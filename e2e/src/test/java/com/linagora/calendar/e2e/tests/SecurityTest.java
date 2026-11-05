@@ -13,8 +13,10 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
+import com.linagora.calendar.e2e.backend.Vcal;
 import com.linagora.calendar.e2e.docker.BearerTokens;
 import com.linagora.calendar.e2e.docker.BrowserLog;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.docker.RuntimeConfig;
 import com.linagora.calendar.e2e.pages.CalendarPage;
@@ -259,5 +261,37 @@ class SecurityTest extends TwakeCalendarE2ETest {
         assertThat(page.evaluate(open, ticket))
             .as("a ticket already spent is not a standing key to the event stream")
             .isEqualTo(Boolean.FALSE);
+    }
+
+    @Test
+    @DisplayName("SEC-16 (#1994, #1979) A description keeps no link to an unknown scheme, nor data-* or aria-* attributes")
+    void aDescriptionKeepsNoUnknownSchemeNorPlantedAttribute(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = title("Planted");
+        String day = Vcal.day(E2EClock.today());
+        probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%s
+            DTSTAMP:20260101T000000Z
+            DTSTART:%sT080000Z
+            DTEND:%sT090000Z
+            SUMMARY:%s
+            DESCRIPTION:<a href="el66:x" data-planted="link">Linked text</a> <b data-planted="bold" aria-label="planted">Bold text</b>
+            END:VEVENT
+            """.formatted(UUID.randomUUID(), day, day, title)));
+        calendar.reload();
+        awaitAttached(calendar.eventCard(title));
+
+        calendar.openEvent(title).showMore();
+        page.getByText("Bold text").first().waitFor();
+
+        assertThat(page.locator("a[href^='el66:']").count())
+            .as("a scheme outside the allowlist is no active link, digit or not")
+            .isZero();
+        assertThat(page.locator("[data-planted]").count())
+            .as("the preview looks data-event-id up across the page: a remote author must not plant it")
+            .isZero();
+        assertThat(page.locator("[aria-label='planted']").count()).isZero();
+        assertThat(page.getByText("Linked text").count()).as("the text itself stays").isPositive();
     }
 }

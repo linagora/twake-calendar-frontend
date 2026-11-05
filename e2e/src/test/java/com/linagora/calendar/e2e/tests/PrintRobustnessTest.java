@@ -14,6 +14,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.backend.Vcal;
 import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -103,5 +104,36 @@ class PrintRobustnessTest extends TwakeCalendarE2ETest {
         assertThat(printed.locator("body").innerText())
             .as("one event another client broke must not cost the user the whole printout")
             .contains(fine);
+    }
+
+    @Test
+    @DisplayName("PRINT-ROBUST-03 (#1982) An event started in the year 26 is printed on the days it covers")
+    void aStartInATwoDigitYearIsNotReadAsThisCentury(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        LocalDate today = E2EClock.today();
+        // read as this century, its start falls after the printed days, and it is left out
+        LocalDate typoDay = today.plusDays(5);
+        String typoStart = "%04d%02d%02d".formatted(typoDay.getYear() % 100, typoDay.getMonthValue(),
+            typoDay.getDayOfMonth());
+        String title = title("Mistyped year");
+        String uid = UUID.randomUUID().toString();
+        probe.putEvent(user, uid, Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%s
+            DTSTAMP:20260101T000000Z
+            DTSTART:%sT100000Z
+            DTEND:%sT100000Z
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(uid, typoStart, Vcal.day(today.plusDays(10)), title)));
+
+        Frame printed = calendar.printCalendar(OWN_CALENDAR)
+            .scale("Day").layout("Schedule")
+            .startDate(today).endDate(today.plusDays(2))
+            .print();
+
+        assertThat(printed.locator("body").innerText())
+            .as("the event runs from long ago until after these days: dates compare as instants")
+            .contains(title);
     }
 }
