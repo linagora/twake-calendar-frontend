@@ -3,13 +3,11 @@ import {
   VCalComponent
 } from '@common/features/Calendars/types/CalendarData'
 import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
-import { mergeStoredRrule } from '@common/features/Events/transformers/storedRrule'
 import { parseRepetitionRule } from '@common/features/Events/utils/parseCalendarEvent'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject, RepetitionOptions } from '@common/types/Repetition'
 import ICAL from 'ical.js'
-import moment from 'moment-timezone'
 
 const masterOf = (rule: RepetitionRule, start: string, end: string) =>
   [
@@ -251,150 +249,5 @@ describe('makeSeriesJCal keeps the rule parts the form does not model (#1899)', 
         '2025-03-13T18:30:00'
       ])
     })
-  })
-
-  describe('BYHOUR already listing the new hour (#1949)', () => {
-    const twiceDaily = { freq: 'DAILY', count: 5, byhour: [17, 8] }
-    const override = [
-      'vevent',
-      [
-        ['uid', {}, 'text', 'series-1'],
-        [
-          'recurrence-id',
-          { tzid: 'Europe/Paris' },
-          'date-time',
-          '2025-03-12T17:00:00'
-        ],
-        [
-          'dtstart',
-          { tzid: 'Europe/Paris' },
-          'date-time',
-          '2025-03-12T17:00:00'
-        ],
-        ['dtend', { tzid: 'Europe/Paris' }, 'date-time', '2025-03-12T17:30:00'],
-        ['summary', {}, 'text', 'Room B'],
-        ['sequence', {}, 'integer', 1]
-      ],
-      []
-    ] as VCalComponent
-    const series = [
-      masterOf(twiceDaily, '2025-03-11T16:00:00', '2025-03-11T16:30:00'),
-      override
-    ]
-
-    it('moves BYHOUR by the same amount as the overrides', () => {
-      const jCal = makeSeriesJCal(
-        series,
-        eventOf(
-          formRepetition(twiceDaily),
-          '2025-03-11T16:00:00.000Z',
-          '2025-03-11T16:30:00.000Z'
-        ),
-        { removeOverrides: false, followTimeChange: true }
-      )
-
-      expect(ruleOf(jCal)).toEqual({ ...twiceDaily, byhour: [18, 9] })
-      const recurrenceId = vevents(jCal)
-        .flatMap(([, props]) => props)
-        .find(([k]) => k === 'recurrence-id')![3]
-      expect(recurrenceId).toEqual('2025-03-12T18:00:00')
-      expect(occurrences(jCal)).toContain(recurrenceId)
-    })
-
-    it('moves the occurrences by the shift the user asked', () => {
-      const morningAndNoon = { freq: 'DAILY', count: 3, byhour: [8, 12] }
-      const stored = masterOf(
-        morningAndNoon,
-        '2025-03-11T09:00:00',
-        '2025-03-11T10:00:00'
-      )
-      const jCal = makeSeriesJCal(
-        [stored],
-        eventOf(
-          formRepetition(morningAndNoon),
-          '2025-03-11T07:30:00.000Z',
-          '2025-03-11T08:30:00.000Z'
-        ),
-        { removeOverrides: false, followTimeChange: true }
-      )
-
-      const thirtyMinutesEarlier = (time: string) =>
-        moment(time).subtract(30, 'minutes').format('YYYY-MM-DDTHH:mm:ss')
-
-      expect(ruleOf(jCal)).toEqual({ ...morningAndNoon, byhour: [7, 11] })
-      expect(occurrences(jCal)).toEqual(
-        occurrences(['vcalendar', [], [stored]] as VCalComponent).map(
-          thirtyMinutesEarlier
-        )
-      )
-    })
-  })
-})
-
-describe('a floating UNTIL on a series edit (#1948)', () => {
-  const weekly = { freq: 'WEEKLY', until: '2025-11-04T09:00:00' }
-
-  it('writes a UTC UNTIL when the form leaves the rule alone', () => {
-    const repetition = formRepetition(weekly)
-    const start = moment.tz('2025-10-07T09:00:00', 'Europe/Paris')
-
-    const [, , , rule] = mergeStoredRrule(
-      ['rrule', {}, 'recur', weekly],
-      repetition.asJcal(),
-      repetition,
-      { oldStart: start, newStart: start, zone: 'Europe/Paris' }
-    )
-
-    expect(rule).toEqual({ freq: 'WEEKLY', until: '20251104T080000Z' })
-  })
-
-  it('writes a UTC UNTIL next to the TZID DTSTART of a floating series', () => {
-    const floatingSeries = [
-      'vevent',
-      [
-        ['uid', {}, 'text', 'series-1'],
-        ['dtstart', {}, 'date-time', '2025-10-07T09:00:00'],
-        ['dtend', {}, 'date-time', '2025-10-07T10:00:00'],
-        ['rrule', {}, 'recur', weekly],
-        ['summary', {}, 'text', 'Weekly sync']
-      ],
-      []
-    ] as VCalComponent
-
-    const jCal = makeSeriesJCal(
-      [floatingSeries],
-      eventOf(
-        formRepetition(weekly),
-        '2025-10-07T07:00:00.000Z',
-        '2025-10-07T08:00:00.000Z'
-      ),
-      { removeOverrides: false }
-    )
-
-    expect(master(jCal)[1].find(([k]) => k === 'dtstart')).toEqual([
-      'dtstart',
-      { tzid: 'Europe/Paris' },
-      'date-time',
-      '2025-10-07T09:00:00'
-    ])
-    expect(ruleOf(jCal)).toEqual({ ...weekly, until: '20251104T080000Z' })
-  })
-})
-
-describe('parseRepetitionRule count', () => {
-  it.each(['/', '5DTEND', '', '1.5', '-2', 0])(
-    'leaves out the count %j',
-    count => {
-      const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
-      expect(parseRepetitionRule(rule).occurrences).toBeFalsy()
-    }
-  )
-
-  it.each([
-    [5, 5],
-    ['5', 5]
-  ])('reads the count %j as a number', (count, expected) => {
-    const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
-    expect(parseRepetitionRule(rule).occurrences).toBe(expected)
   })
 })

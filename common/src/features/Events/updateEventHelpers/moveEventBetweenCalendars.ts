@@ -8,7 +8,6 @@ import { fetchAllRecurrentVevents } from '@common/features/Events/EventDao'
 import { parseCalendarEvent } from '@common/features/Events/utils'
 import { encodeDavSegment } from '@linagora/twake-utils'
 import { eventDavPath } from '@common/features/Calendars/utils/calendarDavPath'
-import { findStoredAttendee } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -95,25 +94,20 @@ export function rewriteAttendeesForOrganizerChange(
   const newAddr = normalizeIdentity(newOrganizer.cal_address)
 
   // Remove the old organizer from the attendee list if there is one
-  const withoutOldOrganizer = attendees.filter(
+  const filtered = attendees.filter(
     a => normalizeIdentity(a.cal_address) !== oldAddr
   )
 
-  if (!newAddr) {
-    return withoutOldOrganizer
-  }
-
-  // The new organizer is listed once and last, as when they already were the
-  // organizer: the exact spelling wins over the other rows of their identity.
-  // Add them as CHAIR if they are not already listed.
-  const organizerRow =
-    findStoredAttendee(withoutOldOrganizer, newOrganizer.cal_address) ??
-    userAttendee.fromOrganizer(newOrganizer)
-  const others = withoutOldOrganizer.filter(
-    a => normalizeIdentity(a.cal_address) !== newAddr
+  // Add the new organizer as CHAIR if they are not already listed
+  const alreadyPresent = filtered.some(
+    a => normalizeIdentity(a.cal_address) === newAddr
   )
 
-  return [...others, organizerRow]
+  if (!alreadyPresent && newAddr) {
+    filtered.push(userAttendee.fromOrganizer(newOrganizer))
+  }
+
+  return filtered
 }
 
 export async function moveEventBetweenCalendars({

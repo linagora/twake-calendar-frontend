@@ -22,34 +22,12 @@ const SENSITIVE_PARAMS = [
   'session_state'
 ]
 
-// Start of text or a character that cannot belong to a parameter name, so that
-// `barcode=` or `status-code=` are not taken for `code=`.
-const NAME_BOUNDARY = '^|[^\\w-]'
-
-// Each character of a name may be percent-encoded (`%6Awt` decodes to `jwt`).
-const SENSITIVE_NAMES = SENSITIVE_PARAMS.map(acceptEncodedCharacters).join('|')
-
 const SENSITIVE_PARAM_REGEX = new RegExp(
-  `(${NAME_BOUNDARY})(${SENSITIVE_NAMES})=[^&#\\s"'<>]*`,
-  'gi'
-)
-// The same parameters inside a percent-encoded nested URL (redirect_uri,
-// return...): `%3Fjwt%3D<value>`, the value ending at the next encoded `&`/`#`.
-const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
-  `(%3F|%26|%23|%3B|${NAME_BOUNDARY})(${SENSITIVE_NAMES})%3D(?:[^&#\\s"'<>%]|%(?!26|23)[0-9A-F]{2})*`,
+  `([?&#;]|\\b)(${SENSITIVE_PARAMS.join('|')})=[^&#\\s"'<>]*`,
   'gi'
 )
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
-// Unicode classes: internationalized mailboxes and domains (ünal@例え.jp) are
-// masked too. \p{M} keeps combining marks (decomposed accents, Indic scripts).
-// A match only starts at the beginning of a run of local part characters:
-// starting inside the run would scan the rest of it again at every position,
-// in time quadratic in its length.
-// A domain only accepts percent-encoded non-ASCII bytes (%80 to %FF, UTF-8): the
-// encoded separators (%40, %2C...) still end it, which keeps the scan linear and
-// what follows the address unmasked.
-const EMAIL_REGEX =
-  /(?<![\p{L}\p{M}\p{N}._%+-])[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/giu
+const EMAIL_REGEX = /[A-Z0-9._%+-]+(?:@|%40)[A-Z0-9.-]+\.[A-Z]{2,}/gi
 
 const MAX_DEPTH = 10
 
@@ -60,7 +38,6 @@ const MAX_DEPTH = 10
 export function scrubText(text: string): string {
   return text
     .replace(SENSITIVE_PARAM_REGEX, `$1$2=${FILTERED}`)
-    .replace(ENCODED_SENSITIVE_PARAM_REGEX, `$1$2%3D${FILTERED}`)
     .replace(BOOKING_TOKEN_PATH_REGEX, `$1${FILTERED}`)
     .replace(EMAIL_REGEX, EMAIL_MASK)
 }
@@ -97,18 +74,6 @@ export function scrubDeep<T>(value: T, key = '', depth = 0): T {
     result[entryKey] = scrubDeep(entryValue, entryKey, depth + 1)
   }
   return result as T
-}
-
-function acceptEncodedCharacters(name: string): string {
-  return [...name].map(acceptEncodedCharacter).join('')
-}
-
-// Names match case-insensitively, so do their encoded letters: `%4A` or `%6A`.
-function acceptEncodedCharacter(character: string): string {
-  const encodings = [
-    ...new Set([character.toLowerCase(), character.toUpperCase()])
-  ].map(variant => `%${variant.charCodeAt(0).toString(16)}`)
-  return `(?:${[character, ...encodings].join('|')})`
 }
 
 function isUrlKey(key: string): boolean {

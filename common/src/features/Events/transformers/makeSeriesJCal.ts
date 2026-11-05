@@ -1,14 +1,6 @@
 import moment from 'moment-timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
 import {
-  isMomentZone,
-  readWallClock,
-  resolveTimezone,
-  storedTimezone,
-  wallClockOf,
-  withStoredTimezones
-} from '@common/utils/timezone'
-import {
   VCalComponent,
   VObjectProperty,
   VObjectValue
@@ -19,12 +11,10 @@ import {
   makeVevent,
   findFieldValue,
   getFieldValues,
-  knownZone,
   parseMoment,
   parseInstant
 } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
-import { getTzidParam } from './recurrenceInstant'
 import { makeSeriesVtimezones } from './seriesVtimezones'
 import { mergeStoredRrule } from './storedRrule'
 
@@ -187,10 +177,9 @@ const updateValarmComponents = (
 }
 
 // Wall clock reading of an instant in the given zone, as the epoch of that
-// same reading in UTC, so that a delta between two readings ignores DST. A
-// custom zone is read with its stored VTIMEZONE (see withStoredTimezones)
+// same reading in UTC, so that a delta between two readings ignores DST
 const wallClockMs = (instant: moment.Moment, tz: string): number =>
-  moment.utc(wallClockOf(instant, tz)).valueOf()
+  moment.utc(instant.clone().tz(tz).format(WALL_CLOCK_FORMAT)).valueOf()
 
 const shiftWallClockValue = (
   value: VObjectValue,
@@ -200,39 +189,14 @@ const shiftWallClockValue = (
   if (typeof value !== 'string') return value
   const isUtc = value.endsWith('Z')
   // A TZID or floating value already is a wall clock reading
-  const wallClock = isUtc ? wallClockOf(moment.utc(value), tz) : value
+  const wallClock = isUtc
+    ? moment.utc(value).tz(tz).format(WALL_CLOCK_FORMAT)
+    : value
   const shifted = moment.utc(wallClock).add(shiftMs, 'ms')
   if (!isUtc) return shifted.format(WALL_CLOCK_FORMAT)
 
-  const instant = readWallClock(shifted.format(WALL_CLOCK_FORMAT), tz)
+  const instant = moment.tz(shifted.format(WALL_CLOCK_FORMAT), tz)
   return instant.utc().format(`${WALL_CLOCK_FORMAT}[Z]`)
-}
-
-// The shift is measured in the zone of the series: a value in another zone moves
-// by it there, and stays written in its own zone. Moved in its own wall clock, it
-// would not follow the occurrence across a change of offset only one zone has.
-const shiftInSeriesZone = (
-  value: string,
-  shiftMs: number,
-  ownZone: string,
-  seriesZone: string
-): string => {
-  const instant = readWallClock(value, ownZone)
-  if (!instant.isValid()) return value
-  const shifted = moment
-    .utc(wallClockOf(instant, seriesZone))
-    .add(shiftMs, 'ms')
-    .format(WALL_CLOCK_FORMAT)
-  return wallClockOf(readWallClock(shifted, seriesZone), ownZone)
-}
-
-// A zone a value can be read in: known to moment-timezone, or defined by a
-// stored VTIMEZONE (see withStoredTimezones)
-const readableZone = (tzid: string | undefined): string | undefined => {
-  if (!tzid) return undefined
-  const zone = resolveTimezone(tzid)
-  if (isMomentZone(zone)) return zone
-  return storedTimezone(tzid) ? tzid : undefined
 }
 
 // Shift every value of a DATE-TIME property (EXDATE may hold several)
@@ -243,21 +207,11 @@ const shiftDateTimeProp = (
 ): VObjectProperty => {
   const [name, params, type, ...values] = prop
   if (shiftMs === 0 || type !== 'date-time') return prop
-  const seriesZone = readableZone(tz)
-  const ownZone = readableZone(getTzidParam(params))
   return [
     name,
     params,
     type,
-    ...values.map(value =>
-      ownZone &&
-      seriesZone &&
-      ownZone !== seriesZone &&
-      typeof value === 'string' &&
-      !value.endsWith('Z')
-        ? shiftInSeriesZone(value, shiftMs, ownZone, seriesZone)
-        : shiftWallClockValue(value, shiftMs, tz)
-    )
+    ...values.map(value => shiftWallClockValue(value, shiftMs, tz))
   ] as VObjectProperty
 }
 
@@ -363,8 +317,7 @@ const withStoredRrule = (
     event.repetition,
     {
       oldStart: parseMoment(findFieldValue(oldMaster[1], 'dtstart'), tz),
-      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz),
-      zone: storedTimezone(tz) ? tz : knownZone(tz, 'UTC')
+      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz)
     }
   )
 
@@ -390,7 +343,7 @@ const isSourceOverride = (
   const srcTzid = sourceTimezone || 'UTC'
   const srcMs = sourceRecurrenceId.endsWith('Z')
     ? moment.utc(sourceRecurrenceId).valueOf()
-    : readWallClock(sourceRecurrenceId, srcTzid).valueOf()
+    : moment.tz(sourceRecurrenceId, srcTzid).valueOf()
 
   return ridMs === srcMs
 }
@@ -537,24 +490,21 @@ export const makeSeriesJCal = (
   const tzid = event.timezone
   const oldMaster = vevents[masterIndex]
 
-  // The stored VTIMEZONEs are written back: a custom zone keeps its TZID and
-  // wall clock instead of being written as UTC. The master, the shift of the
-  // series and the overrides it moves are all computed with them
-  const storedVtimezones = options.storedVtimezones ?? []
-  const finalVevents = withStoredTimezones(storedVtimezones, () => {
-    const updatedMaster = withStoredRrule(
-      makeVevent(event, tzid, true) as VCalComponent,
-      oldMaster,
-      event
-    )
+  const updatedMaster = withStoredRrule(
+    makeVevent(event, tzid, true) as VCalComponent,
+    oldMaster,
+    event
+  )
 
-    if (removeOverrides) {
-      // When date/timezone/repeat rules changed, remove all override instances
-      return [updatedMaster]
-    }
+  let finalVevents: VCalComponent[]
+
+  if (removeOverrides) {
+    // When date/timezone/repeat rules changed, remove all override instances
+    finalVevents = [updatedMaster]
+  } else {
     // Otherwise keep override instances and update their metadata
     const seriesTz = tzid || 'UTC'
-    return updateVeventsPreservingOverrides({
+    finalVevents = updateVeventsPreservingOverrides({
       vevents,
       oldMaster,
       updatedMaster,
@@ -565,11 +515,11 @@ export const makeSeriesJCal = (
         : NO_SHIFT,
       tz: seriesTz
     })
-  })
+  }
 
   const vtimezones = makeSeriesVtimezones(
     finalVevents,
-    storedVtimezones,
+    options.storedVtimezones ?? [],
     () =>
       makeTimezone(findTimezoneData(event.timezone), event).component
         .jCal as VCalComponent

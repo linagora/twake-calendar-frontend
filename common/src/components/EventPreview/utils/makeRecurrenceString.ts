@@ -67,11 +67,6 @@ const getEndConditionText = (
     })
   }
   if (repetition.endDate) {
-    // An UNTIL the client cannot read (a second 60...) leaves the end
-    // condition out of the sentence, instead of "until Invalid Date"
-    if (isNaN(new Date(repetition.endDate).getTime())) {
-      return undefined
-    }
     return t('eventPreview.until', {
       date: new Date(repetition.endDate).toLocaleDateString(t('locale'), {
         year: 'numeric',

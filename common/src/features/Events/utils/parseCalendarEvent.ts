@@ -1,7 +1,4 @@
-import {
-  convertEventDateTimeToISO,
-  normalizeBasicDateTime
-} from '@common/utils/timezone'
+import { convertEventDateTimeToISO } from '@common/utils/timezone'
 import moment from 'moment-timezone'
 import { Calendar } from '@common/types/CalendarTypes'
 import {
@@ -134,10 +131,8 @@ export function parseRepetitionRule(
     repData.endDate = ruleValue.until
   }
 
-  // A COUNT that is not a positive integer gives no end condition
-  const count = Number(ruleValue.count)
-  if (Number.isInteger(count) && count > 0) {
-    repData.occurrences = count
+  if (ruleValue.count) {
+    repData.occurrences = ruleValue.count
   }
 
   if (ruleValue.interval) {
@@ -159,12 +154,6 @@ function parseRruleProperty(
   value: VObjectValue,
   event: Partial<CalendarEvent>
 ): void {
-  // A rule without FREQ cannot be expanded: the event stays readable, without
-  // a repetition, instead of being dropped from the grid
-  if (typeof (value as Partial<RepetitionRule> | null)?.freq !== 'string') {
-    console.error('Ignoring an RRULE without FREQ', { uid: event.uid })
-    return
-  }
   event.repetition = parseRepetitionRule(value as RepetitionRule)
 }
 
@@ -364,35 +353,6 @@ function parseAlarms(valarms: unknown): Valarms | undefined {
   return alarms.length ? Valarms.fromList(alarms) : undefined
 }
 
-// A wall clock is read in the zone of the event, not of the browser
-function readStartInstant(start?: string, timezone?: string): Date {
-  if (!start) return new Date()
-  return new Date(
-    (timezone && convertEventDateTimeToISO(start, timezone)) ||
-      normalizeBasicDateTime(start)
-  )
-}
-
-function computeMissingEnd(
-  start?: string,
-  timezone?: string,
-  duration?: string
-): string | undefined {
-  const startInstant = readStartInstant(start, timezone)
-  // A start the client cannot read (a second 60...) gives no end to compute
-  if (isNaN(startInstant.getTime())) return start
-
-  const timeToAdd = duration
-    ? moment.duration(duration).asMilliseconds()
-    : moment.duration(30, 'minutes').asMilliseconds()
-  const artificialEnd = new Date(startInstant.getTime() + timeToAdd)
-  // The instant itself: a wall clock in the hour repeated at the end of
-  // summer time would be read back as its first occurrence
-  return timezone
-    ? artificialEnd.toISOString()
-    : formatDateTimeToICal(artificialEnd)
-}
-
 function processEventDates(
   event: Partial<CalendarEvent>,
   duration?: string
@@ -408,7 +368,12 @@ function processEventDates(
   }
 
   if (!event.end) {
-    event.end = computeMissingEnd(event.start, eventTimezone, duration)
+    const start = event.start ? new Date(event.start) : new Date()
+    const timeToAdd = duration
+      ? moment.duration(duration).asMilliseconds()
+      : moment.duration(30, 'minutes').asMilliseconds()
+    const artificialEnd = new Date(start.getTime() + timeToAdd)
+    event.end = formatDateTimeToICal(artificialEnd, eventTimezone)
   }
 
   if (!event.allday && eventTimezone) {

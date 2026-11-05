@@ -1,5 +1,4 @@
 import moment from 'moment-timezone'
-import { readWallClock, wallClockOf } from '@common/utils/timezone'
 import {
   RepetitionRule,
   VObjectProperty
@@ -47,8 +46,6 @@ const DAY_PARTS = [
 export interface SeriesStarts {
   oldStart: moment.Moment | null
   newStart: moment.Moment | null
-  // The zone of the series: the day and time of the starts are read in it
-  zone: string
 }
 
 const asList = (value: unknown): number[] =>
@@ -79,9 +76,8 @@ const formLeavesRuleAlone = (
   )
 }
 
-// A new time of day moves every time part by the same amount, even when the
-// rule already lists the new value: the RECURRENCE-IDs, EXDATEs and RDATEs
-// move by the whole shift, and the occurrences have to move along (#1949)
+// A new time of day moves every time part by the same amount, unless the rule
+// already produces the new time
 const followTimeOfDay = (
   rule: RuleValues,
   { oldStart, newStart }: SeriesStarts
@@ -89,7 +85,9 @@ const followTimeOfDay = (
   TIME_PARTS.reduce((acc, { part, modulo, read }) => {
     if (acc[part] == null || !oldStart || !newStart) return acc
     const values = asList(acc[part])
-    const delta = read(newStart) - read(oldStart)
+    const newValue = read(newStart)
+    if (values.includes(newValue)) return acc
+    const delta = newValue - read(oldStart)
     const moved = values.map(v => (((v + delta) % modulo) + modulo) % modulo)
     return { ...acc, [part]: fromList(acc[part], moved) }
   }, rule)
@@ -110,50 +108,6 @@ const followStartDay = (
 const followStart = (rule: RuleValues, starts: SeriesStarts): RuleValues =>
   followStartDay(followTimeOfDay(rule, starts), starts)
 
-const WALL_CLOCK_FORMAT = 'YYYY-MM-DDTHH:mm:ss'
-const END_OF_DAY = '23:59:59'
-
-const timeOfDayMs = (m: moment.Moment): number =>
-  m.valueOf() - m.clone().startOf('day').valueOf()
-
-// A new time of day on the same day moves the occurrences by that wall clock
-// amount: a DATE-TIME UNTIL has to move along, or it cuts off the last one (or
-// lets in the one that follows). A DATE UNTIL and the end of the day, which the
-// form writes for a picked date, still bound the same occurrences.
-const followUntil = (
-  rule: RuleValues,
-  { oldStart, newStart, zone }: SeriesStarts
-): RuleValues => {
-  const { until } = rule
-  if (typeof until !== 'string' || !until.includes('T')) return rule
-  if (!oldStart || !newStart) return rule
-  const before = moment.utc(wallClockOf(oldStart, zone))
-  const after = moment.utc(wallClockOf(newStart, zone))
-  const delta = timeOfDayMs(after) - timeOfDayMs(before)
-  if (!delta || !before.isSame(after, 'day')) return rule
-
-  const isUtc = until.endsWith('Z')
-  const instant = isUtc ? moment.utc(until) : readWallClock(until, zone)
-  if (!instant.isValid()) return rule
-  const wallClock = moment.utc(wallClockOf(instant, zone))
-  if (wallClock.format('HH:mm:ss') === END_OF_DAY) return rule
-
-  const movedWallClock = wallClock.add(delta, 'ms').format(WALL_CLOCK_FORMAT)
-  const extended = until.includes('-')
-  if (!isUtc) {
-    return {
-      ...rule,
-      until: extended ? movedWallClock : movedWallClock.replace(/[-:]/g, '')
-    }
-  }
-  return {
-    ...rule,
-    until: readWallClock(movedWallClock, zone)
-      .utc()
-      .format(extended ? 'YYYY-MM-DDTHH:mm:ss[Z]' : 'YYYYMMDDTHHmmss[Z]')
-  }
-}
-
 const unmodelledParts = (stored: RuleValues): RuleValues =>
   Object.fromEntries(
     UNMODELLED_PARTS.filter(part => stored[part] != null).map(part => [
@@ -161,14 +115,6 @@ const unmodelledParts = (stored: RuleValues): RuleValues =>
       stored[part]
     ])
   )
-
-// The DTSTART written carries the series zone, while the stored UNTIL matched
-// the stored DTSTART: a floating one is floating, against RFC 5545 once DTSTART
-// has a TZID. The form UNTIL has the value type the written DTSTART asks for.
-const untilOfForm = (stored: RuleValues, edited: RuleValues): RuleValues =>
-  stored.until !== undefined && edited.until !== undefined
-    ? { until: edited.until }
-    : {}
 
 const withValue = (
   [name, params, type]: VObjectProperty,
@@ -180,8 +126,7 @@ const withValue = (
  * COUNT, UNTIL, BYDAY and WKST: rebuilding the rule from it alone would drop
  * BYSETPOS, BYMONTH, BYHOUR... of a series written by another client, and
  * change its occurrences.
- * - the form left the rule alone: the stored rule is written back, with the
- *   UNTIL of the form, in the value type of the DTSTART written
+ * - the form left the rule alone: the stored rule is written back
  * - the form changed the rule but kept its frequency: the parts it does not
  *   model are kept on top of the form rule
  * - the form changed the frequency: the user picked another kind of rule
@@ -197,20 +142,8 @@ export const mergeStoredRrule = (
   const stored = lowerCaseKeys(storedRrule[3] as unknown as RuleValues)
   const edited = formRrule[3] as unknown as RuleValues
 
-  // A stored rule without FREQ is read as no repetition: only the form has one
-  if (typeof stored.freq !== 'string') return formRrule
-
   if (formLeavesRuleAlone(stored, repetition)) {
-    return withValue(
-      storedRrule,
-      followUntil(
-        {
-          ...followStart(stored, starts),
-          ...untilOfForm(stored, edited)
-        },
-        starts
-      )
-    )
+    return withValue(storedRrule, followStart(stored, starts))
   }
   if (!sameFreq(stored, edited)) return formRrule
 

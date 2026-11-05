@@ -53,60 +53,6 @@ describe('sanitizeUtils', () => {
       )
     })
 
-    it('should remove data-* and aria-* attributes', () => {
-      expect(sanitizeHtml('<b data-x="1" aria-label="other">Hello</b>')).toBe(
-        '<b>Hello</b>'
-      )
-
-      const link = document.createElement('div')
-      link.innerHTML = sanitizeHtml(
-        '<a href="https://example.com" data-event-id="twake-draft-event">x</a>'
-      )
-      expect(link.querySelector('a')?.hasAttribute('data-event-id')).toBe(false)
-      expect(link.querySelector('a')?.getAttribute('href')).toBe(
-        'https://example.com'
-      )
-    })
-
-    it.each([
-      'el66:x',
-      'ps8://visio.exam',
-      'foo:x',
-      'javascript:alert(1)',
-      'JAVASCRIPT:alert(1)',
-      'java\tscript:alert(1)',
-      ' javascript:alert(1)',
-      'j4vascript:alert(1)',
-      'data:text/html,x',
-      'vbscript:x',
-      'file:///etc/passwd',
-      'blob:https://example.com/x'
-    ])('should drop the link scheme of %j', href => {
-      const link = document.createElement('div')
-      link.innerHTML = sanitizeHtml(`<a href="${href}">y</a>`)
-      expect(link.querySelector('a')?.hasAttribute('href')).toBe(false)
-      expect(link.textContent).toBe('y')
-    })
-
-    it.each([
-      'https://example.com/a1:b',
-      'http://example.com',
-      'ftp://example.com',
-      'mailto:a@b.co',
-      'tel:+33123',
-      'matrix:r/room',
-      '/relative1:x',
-      './a1:b',
-      'relative/a:b',
-      'page1?a=b:c',
-      '#top1',
-      '?q=1:2'
-    ])('should keep the href %s', href => {
-      const link = document.createElement('div')
-      link.innerHTML = sanitizeHtml(`<a href="${href}">y</a>`)
-      expect(link.querySelector('a')?.getAttribute('href')).toBe(href)
-    })
-
     it('should open links without a target in a new tab', () => {
       const input = '<a href="https://example.com">link</a>'
       expect(sanitizeHtml(input)).toBe(

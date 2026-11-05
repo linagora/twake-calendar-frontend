@@ -11,25 +11,6 @@ import { RepetitionObject } from '@common/types/Repetition'
 const LOCALES = { de, en, es, fr, it: italian, ru, vi: vietnamese }
 
 describe('makeRecurrenceString', () => {
-  it('leaves out an UNTIL that cannot be read', () => {
-    const t = (key: string, params?: Record<string, unknown>): string => {
-      if (key === 'locale') return 'en-US'
-      return params?.date ? `until ${String(params.date)}` : key
-    }
-
-    const sentence = makeRecurrenceString({
-      repetition: {
-        freq: 'daily',
-        endDate: '2026-12-31T23:59:60Z'
-      } as RepetitionObject,
-      t,
-      startText: ''
-    })
-
-    expect(sentence).not.toContain('until')
-    expect(sentence).not.toContain('Invalid Date')
-  })
-
   const freqUnits: Record<string, string> = {
     daily: 'days',
     weekly: 'weeks',

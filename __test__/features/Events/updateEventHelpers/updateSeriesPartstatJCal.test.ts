@@ -4,10 +4,7 @@ import {
   getVeventEndInstant,
   isPastRecurrenceException
 } from '@common/features/Events/transformers/updateSeriesPartstatJCal'
-import {
-  VCalComponent,
-  VObjectProperty
-} from '@common/features/Calendars/types/CalendarData'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
 describe('updateSeriesPartstatJCal', () => {
@@ -494,68 +491,6 @@ describe('updateSeriesPartstatJCal', () => {
       )
       expect(vtimezones).toContainEqual(storedVtimezone)
       expect(tzidsOf(out)).toHaveLength(2)
-    })
-  })
-
-  // moment-timezone throws on a zone named like an Object.prototype property,
-  // and the series zone is the fallback of every date without a usable TZID.
-  // See #1950.
-  describe.each(['constructor', '__proto__'])('with a series zone %s', tzid => {
-    const attendee: VObjectProperty = [
-      'attendee',
-      { partstat: 'NEEDS-ACTION' },
-      'cal-address',
-      'mailto:user@example.com'
-    ]
-    const master: VCalComponent = [
-      'vevent',
-      [
-        ['uid', {}, 'text', 'proto-zone-series'],
-        ['dtstart', { tzid }, 'date-time', '2025-03-17T09:00:00'],
-        ['dtend', { tzid }, 'date-time', '2025-03-17T10:00:00'],
-        ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
-        attendee
-      ],
-      []
-    ]
-    const override: VCalComponent = [
-      'vevent',
-      [
-        ['uid', {}, 'text', 'proto-zone-series'],
-        ['recurrence-id', { tzid }, 'date-time', '2025-03-24T09:00:00'],
-        ['dtstart', { tzid }, 'date-time', '2025-03-24T11:00:00'],
-        ['dtend', { tzid }, 'date-time', '2025-03-24T12:00:00'],
-        attendee
-      ],
-      []
-    ]
-    // what parseFetchedEvent(…, true) reads: the TZID of DTSTART
-    const event: CalendarEvent = {
-      ...baseEvent,
-      uid: 'proto-zone-series',
-      start: '2025-03-17T09:00:00Z',
-      end: '2025-03-17T10:00:00Z',
-      timezone: tzid
-    }
-
-    it('answers the master and the upcoming overrides', () => {
-      const out = updateSeriesPartstatJCal(
-        [master, override],
-        event,
-        targetEmail,
-        'ACCEPTED',
-        Date.UTC(2025, 0, 1)
-      )
-
-      const vevents = (out[2] as VCalComponent[]).filter(
-        ([name]) => name === 'vevent'
-      )
-      expect(vevents).toHaveLength(2)
-      vevents.forEach(vevent =>
-        expect(
-          vevent[1].find(([name]) => name === 'attendee')?.[1].partstat
-        ).toBe('ACCEPTED')
-      )
     })
   })
 })

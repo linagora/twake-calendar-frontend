@@ -166,11 +166,8 @@ export async function handleUpdateRecurringSeries(
 
   // Overrides and EXDATEs designate occurrences: they survive as long as the
   // series keeps the same occurrences, possibly at another time of the day
-  const staysOnSeriesDay =
-    params.seriesDayChanged === undefined
-      ? startsOnSeriesDay(values, seriesEvent)
-      : !params.seriesDayChanged
-  const keepsOccurrences = staysOnSeriesDay && !changes.recurrenceChanged
+  const keepsOccurrences =
+    startsOnSeriesDay(values, seriesEvent) && !changes.recurrenceChanged
 
   if (keepsOccurrences) {
     await handleUpdateRecurringSeriesKeepingOverrides({

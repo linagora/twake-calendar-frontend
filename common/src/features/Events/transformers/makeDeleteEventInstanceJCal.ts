@@ -11,7 +11,6 @@ import {
 } from '@common/features/Events/utils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
 import moment from 'moment-timezone'
 import { incrementSequenceNumber } from './makeSeriesJCal'
@@ -22,9 +21,7 @@ import { makeSeriesVtimezones } from './seriesVtimezones'
 // sameRecurrence only compares instants in zones moment knows: resolve a
 // Windows TZID to its IANA zone, keep an unresolvable one as-is
 function ianaTzid(tzid: string | undefined): string | undefined {
-  if (!tzid) return tzid
-  const resolved = resolveTimezone(tzid)
-  return isMomentZone(resolved) ? resolved : tzid
+  return tzid && knownZone(tzid, tzid)
 }
 
 export function makeDeleteEventInstanceJCal(

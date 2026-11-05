@@ -1,5 +1,5 @@
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
-import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
+import { resolveTimezone } from '@common/utils/timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
 import ICAL from 'ical.js'
 import { getTzidParam } from './recurrenceInstant'
@@ -22,26 +22,6 @@ function usedTzids(vevents: VCalComponent[]): Set<string> {
 function tzidOf([, props]: VCalComponent): string | undefined {
   const tzid = props.find(([k]) => k.toLowerCase() === 'tzid')?.[3]
   return typeof tzid === 'string' && tzid ? tzid : undefined
-}
-
-/**
- * The IANA zone a VTIMEZONE names for a TZID moment-timezone does not know, in
- * its X-LIC-LOCATION: this is how the server reads such a TZID (sabre-vobject,
- * GuessFromLicEntry).
- */
-export function vtimezoneLocation(
-  tzid: string,
-  storedVtimezones: VCalComponent[]
-): string | undefined {
-  const vtimezone = storedVtimezones.find(stored => tzidOf(stored) === tzid)
-  const location = vtimezone?.[1].find(
-    ([k]) => k.toLowerCase() === 'x-lic-location'
-  )?.[3]
-  if (typeof location !== 'string') {
-    return undefined
-  }
-  const zone = resolveTimezone(location)
-  return isMomentZone(zone) ? zone : undefined
 }
 
 /**

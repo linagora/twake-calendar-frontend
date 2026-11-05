@@ -5,10 +5,6 @@ const DOMPurify =
     ? dompurify(window)
     : dompurify
 
-// The schemes DOMPurify allows by default, and the URLs without a scheme
-const ALLOWED_LINKS =
-  /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|matrix):|(?![a-z][a-z0-9+.-]*:))/i
-
 if (typeof DOMPurify?.addHook === 'function') {
   // Every link of a description opens in a new tab, without access to the
   // calendar window and without leaking its URL.
@@ -58,15 +54,6 @@ export function sanitizeHtml(htmlText: string): string {
       // target and rel are not taken from the description: its author could
       // otherwise point a link at the embedding portal (target="_top").
       ALLOWED_ATTR: ['href'],
-      // ALLOWED_ATTR does not limit these two families. A data-event-id would
-      // be found by the lookups of the app, an aria-label would be announced
-      // instead of the text on screen.
-      ALLOW_DATA_ATTR: false,
-      ALLOW_ARIA_ATTR: false,
-      // The default of DOMPurify takes "el66:x" for a relative URL, where the
-      // browser reads the scheme el66: a scheme is told the way the URL parser
-      // does, digits included.
-      ALLOWED_URI_REGEXP: ALLOWED_LINKS,
       KEEP_CONTENT: true
     })
   }
