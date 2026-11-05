@@ -11,6 +11,7 @@ import {
   makeVevent,
   findFieldValue,
   getFieldValues,
+  knownZone,
   parseMoment,
   parseInstant
 } from '@common/features/Events/utils'
@@ -317,7 +318,8 @@ const withStoredRrule = (
     event.repetition,
     {
       oldStart: parseMoment(findFieldValue(oldMaster[1], 'dtstart'), tz),
-      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz)
+      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz),
+      zone: knownZone(tz, 'UTC')
     }
   )
 

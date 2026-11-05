@@ -46,6 +46,8 @@ const DAY_PARTS = [
 export interface SeriesStarts {
   oldStart: moment.Moment | null
   newStart: moment.Moment | null
+  // The zone of the series: the day and time of the starts are read in it
+  zone: string
 }
 
 const asList = (value: unknown): number[] =>
@@ -108,6 +110,54 @@ const followStartDay = (
 const followStart = (rule: RuleValues, starts: SeriesStarts): RuleValues =>
   followStartDay(followTimeOfDay(rule, starts), starts)
 
+const WALL_CLOCK_FORMAT = 'YYYY-MM-DDTHH:mm:ss'
+const END_OF_DAY = '23:59:59'
+
+const timeOfDayMs = (m: moment.Moment): number =>
+  m.valueOf() - m.clone().startOf('day').valueOf()
+
+// A new time of day on the same day moves the occurrences by that wall clock
+// amount: a DATE-TIME UNTIL has to move along, or it cuts off the last one (or
+// lets in the one that follows). A DATE UNTIL and the end of the day, which the
+// form writes for a picked date, still bound the same occurrences.
+const followUntil = (
+  rule: RuleValues,
+  { oldStart, newStart, zone }: SeriesStarts
+): RuleValues => {
+  const { until } = rule
+  if (typeof until !== 'string' || !until.includes('T')) return rule
+  if (!oldStart || !newStart) return rule
+  const before = moment.utc(oldStart.clone().tz(zone).format(WALL_CLOCK_FORMAT))
+  const after = moment.utc(newStart.clone().tz(zone).format(WALL_CLOCK_FORMAT))
+  const delta = timeOfDayMs(after) - timeOfDayMs(before)
+  if (!delta || !before.isSame(after, 'day')) return rule
+
+  const isUtc = until.endsWith('Z')
+  const instant = isUtc ? moment.utc(until) : moment.tz(until, zone)
+  if (!instant.isValid()) return rule
+  const wallClock = instant.clone().tz(zone)
+  if (wallClock.format('HH:mm:ss') === END_OF_DAY) return rule
+
+  const movedWallClock = moment
+    .utc(wallClock.format(WALL_CLOCK_FORMAT))
+    .add(delta, 'ms')
+    .format(WALL_CLOCK_FORMAT)
+  const extended = until.includes('-')
+  if (!isUtc) {
+    return {
+      ...rule,
+      until: extended ? movedWallClock : movedWallClock.replace(/[-:]/g, '')
+    }
+  }
+  return {
+    ...rule,
+    until: moment
+      .tz(movedWallClock, zone)
+      .utc()
+      .format(extended ? 'YYYY-MM-DDTHH:mm:ss[Z]' : 'YYYYMMDDTHHmmss[Z]')
+  }
+}
+
 const unmodelledParts = (stored: RuleValues): RuleValues =>
   Object.fromEntries(
     UNMODELLED_PARTS.filter(part => stored[part] != null).map(part => [
@@ -143,7 +193,10 @@ export const mergeStoredRrule = (
   const edited = formRrule[3] as unknown as RuleValues
 
   if (formLeavesRuleAlone(stored, repetition)) {
-    return withValue(storedRrule, followStart(stored, starts))
+    return withValue(
+      storedRrule,
+      followUntil(followStart(stored, starts), starts)
+    )
   }
   if (!sameFreq(stored, edited)) return formRrule
 
