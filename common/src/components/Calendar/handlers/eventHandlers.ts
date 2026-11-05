@@ -16,7 +16,14 @@ import {
   userAttendee,
   UserAttendeeOptions
 } from '@common/features/User/models/attendee'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { Calendar } from '@common/types/CalendarTypes'
+import {
+  readWallClock,
+  storedTimezone,
+  wallClockOf,
+  withStoredTimezones
+} from '@common/utils/timezone'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
@@ -62,7 +69,32 @@ const momentInEventZone = (
   date: string,
   timezone: string,
   allday?: boolean
-): moment.Moment => (allday ? moment.utc(date) : moment.tz(date, timezone))
+): moment.Moment => {
+  if (allday) return moment.utc(date)
+  if (!storedTimezone(timezone)) return moment.tz(date, timezone)
+  // A zone only its stored VTIMEZONE defines: moment.tz would read it as UTC
+  return /(Z|[+-]\d{2}:?\d{2})$/.test(date)
+    ? moment.utc(date)
+    : readWallClock(date, timezone)
+}
+
+// The days between two instants, in the zone of the event
+const dayShiftInEventZone = (
+  from: moment.Moment,
+  to: moment.Moment,
+  timezone: string,
+  allday?: boolean
+): number => {
+  const zone = allday ? 'UTC' : timezone
+  const dayOf = (instant: moment.Moment): moment.Moment =>
+    moment.utc(wallClockOf(instant, zone)).startOf('day')
+  return dayOf(to).diff(dayOf(from), 'days')
+}
+
+const vtimezonesOf = (jcal: unknown): VCalComponent[] => {
+  const components = (jcal as VCalComponent | undefined)?.[2] ?? []
+  return components.filter(([name]) => name === 'vtimezone')
+}
 
 export const createEventHandlers = (
   props: EventHandlersProps
@@ -278,36 +310,48 @@ export const createEventHandlers = (
     const master = parseFetchedEvent(masterEventToFetch, response, true)
 
     const masterTz = master.timezone || timezone
-    const instanceDefaultStart = momentInEventZone(
-      event.recurrenceId ?? event.start,
-      masterTz,
-      master.allday
-    )
-
-    const seriesDeltaMs =
-      moment(computedNewStart).valueOf() - instanceDefaultStart.valueOf()
-
-    const originalMasterStart = momentInEventZone(
-      master.start,
-      masterTz,
-      master.allday
-    )
-    const masterStart = originalMasterStart.clone().add(seriesDeltaMs, 'ms')
-    const masterEnd = master.end
-      ? momentInEventZone(master.end, masterTz, master.allday).add(
-          seriesDeltaMs,
-          'ms'
+    // A zone only its VTIMEZONE defines is read with it (see #1941)
+    const { masterStart, masterEnd, seriesDayShift } = withStoredTimezones(
+      vtimezonesOf(response),
+      () => {
+        const instanceDefaultStart = momentInEventZone(
+          event.recurrenceId ?? event.start,
+          masterTz,
+          master.allday
         )
-      : momentInEventZone(master.start, masterTz, master.allday)
-          .add(seriesDeltaMs, 'ms')
-          .add(moment(computedNewEnd).diff(moment(computedNewStart)))
 
-    // The weekdays of the rule are read in the zone of DTSTART: they move
-    // by as many days as DTSTART does there.
-    const seriesDayShift = masterStart
-      .clone()
-      .startOf('day')
-      .diff(originalMasterStart.clone().startOf('day'), 'days')
+        const seriesDeltaMs =
+          moment(computedNewStart).valueOf() - instanceDefaultStart.valueOf()
+
+        const originalMasterStart = momentInEventZone(
+          master.start,
+          masterTz,
+          master.allday
+        )
+        const start = originalMasterStart.clone().add(seriesDeltaMs, 'ms')
+        const end = master.end
+          ? momentInEventZone(master.end, masterTz, master.allday).add(
+              seriesDeltaMs,
+              'ms'
+            )
+          : momentInEventZone(master.start, masterTz, master.allday)
+              .add(seriesDeltaMs, 'ms')
+              .add(moment(computedNewEnd).diff(moment(computedNewStart)))
+
+        return {
+          masterStart: start,
+          masterEnd: end,
+          // The weekdays of the rule are read in the zone of DTSTART: they
+          // move by as many days as DTSTART does there.
+          seriesDayShift: dayShiftInEventZone(
+            originalMasterStart,
+            start,
+            masterTz,
+            master.allday
+          )
+        }
+      }
+    )
     const shiftedRepetition =
       master.repetition &&
       new RepetitionObject({
@@ -344,7 +388,8 @@ export const createEventHandlers = (
       eventId: event.uid,
       getSeriesInstances: () => getSeriesInstances(calendar, master.uid),
       recurrenceId: event.recurrenceId,
-      dropSourceOverride: true
+      dropSourceOverride: true,
+      seriesDayChanged: seriesDayShift !== 0
     })
   }
 
