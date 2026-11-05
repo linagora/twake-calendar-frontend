@@ -1,4 +1,7 @@
-import { convertEventDateTimeToISO } from '@common/utils/timezone'
+import {
+  convertEventDateTimeToISO,
+  normalizeBasicDateTime
+} from '@common/utils/timezone'
 import moment from 'moment-timezone'
 import { Calendar } from '@common/types/CalendarTypes'
 import {
@@ -374,12 +377,19 @@ function processEventDates(
   }
 
   if (!event.end) {
-    const start = event.start ? new Date(event.start) : new Date()
+    const start = event.start
+      ? new Date(normalizeBasicDateTime(event.start))
+      : new Date()
     const timeToAdd = duration
       ? moment.duration(duration).asMilliseconds()
       : moment.duration(30, 'minutes').asMilliseconds()
-    const artificialEnd = new Date(start.getTime() + timeToAdd)
-    event.end = formatDateTimeToICal(artificialEnd, eventTimezone)
+    // A start the client cannot read (a second 60...) gives no end to compute
+    event.end = isNaN(start.getTime())
+      ? event.start
+      : formatDateTimeToICal(
+          new Date(start.getTime() + timeToAdd),
+          eventTimezone
+        )
   }
 
   if (!event.allday && eventTimezone) {
