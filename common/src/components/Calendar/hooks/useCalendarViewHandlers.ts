@@ -33,7 +33,7 @@ export const useSyncCalendarView = (
 
 export const useWebKitSizeSync = (
   calendarRef: React.RefObject<CalendarApi | null>,
-  calendarWrapperRef: React.RefObject<HTMLDivElement> | undefined,
+  calendarWrapperRef: React.RefObject<HTMLDivElement | null> | undefined,
   sortedSelectedCalendars: string[] | undefined,
   fullCalendarEvents: EventInput[] | undefined
 ): void => {

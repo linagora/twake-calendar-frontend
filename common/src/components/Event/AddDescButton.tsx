@@ -19,7 +19,7 @@ export function AddDescButton({
   showMore: boolean
   description: string
   setDescription: (d: string) => void
-}): JSX.Element {
+}): React.JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const inputSize = useResponsiveInputSize()

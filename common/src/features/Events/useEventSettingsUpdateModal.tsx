@@ -22,7 +22,7 @@ export function useEventSettingsUpdateModal(
   userPersonalCalendars: Calendar[]
   showMore: boolean
   setShowMore: React.Dispatch<React.SetStateAction<boolean>>
-  formRef: React.RefObject<EventFormHandle>
+  formRef: React.RefObject<EventFormHandle | null>
   effectiveEvent: CalendarEvent | undefined | null
   initialValues: ReturnType<typeof useBuildInitialValues>
   handleClose: () => void

@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
 import { User } from '@common/components/Attendees/types'

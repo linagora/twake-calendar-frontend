@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {

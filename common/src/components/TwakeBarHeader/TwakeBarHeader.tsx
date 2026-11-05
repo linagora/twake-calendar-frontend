@@ -46,7 +46,7 @@ const handleLogOut = (): void => void logOut()
  * Without a platform, or when the token exchange fails, it shows calendar's
  * apps and user instead.
  */
-export const TwakeBarHeader = (): JSX.Element | null => {
+export const TwakeBarHeader = (): React.JSX.Element | null => {
   const isAppLoading = useAppSelector(selectIsAppLoading)
   const platformURL = useAppSelector(selectPlatformURL)
   const user = useAppSelector(selectUser)

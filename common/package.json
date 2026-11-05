@@ -39,7 +39,7 @@
     "p-map": "^7.1.1",
     "react": "^19.3.1",
     "react-colorful": "^5.8.1",
-    "react-dom": "^18.2.0",
+    "react-dom": "^19.3.1",
     "react-error-boundary": "^6.1.6",
     "react-redux": "^9.3.1",
     "react-router": "^7.18.4",

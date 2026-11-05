@@ -9,7 +9,7 @@ export const useEventLocation = ({
   isOpen: boolean
   hasClickedLocationSection: boolean
   setHasClickedLocationSection: (hasClicked: boolean) => void
-  locationInputRef: React.RefObject<HTMLInputElement>
+  locationInputRef: React.RefObject<HTMLInputElement | null>
 }): void => {
   // Reset location click state when modal closes
   useEffect(() => {

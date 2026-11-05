@@ -62,7 +62,7 @@ function isAllDayTap(x: number, y: number): string | null {
 export function useTouchListener(
   handleDateSelect: (selectInfo: DateSelectArg | null) => void,
   isTouch: boolean,
-  wrapperRef: RefObject<HTMLDivElement>,
+  wrapperRef: RefObject<HTMLDivElement | null>,
   timezone: string
 ): void {
   useEffect(() => {

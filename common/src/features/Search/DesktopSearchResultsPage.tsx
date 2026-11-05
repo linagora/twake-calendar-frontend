@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import SearchResultsHeading from './SearchResultsHeading'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Box, IconButton, Typography } from '@linagora/twake-mui'

@@ -23,7 +23,7 @@ export function EventPreviewAttendees({
   allAttendees,
   organizer,
   organizerSentBy
-}: EventPreviewAttendeesProps): JSX.Element {
+}: EventPreviewAttendeesProps): React.JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
 
@@ -91,7 +91,7 @@ export function EventPreviewAttendees({
     (organizer ? 1 : 0) + attendeesWithoutOrganizer.length
   const resourcesCount = resources.length
 
-  const renderParticipantsList = (): JSX.Element => (
+  const renderParticipantsList = (): React.JSX.Element => (
     <Box
       sx={{
         display: 'flex',
@@ -123,7 +123,7 @@ export function EventPreviewAttendees({
     </Box>
   )
 
-  const renderResourcesList = (): JSX.Element => (
+  const renderResourcesList = (): React.JSX.Element => (
     <Box
       sx={{
         display: 'flex',

@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import EventPreviewModal from '@common/components/EventPreview'
 import { Calendar } from '@common/types/CalendarTypes'

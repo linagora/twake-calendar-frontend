@@ -30,7 +30,7 @@ describe('useParseToken', () => {
     children
   }: {
     children: React.ReactNode
-  }): JSX.Element => (
+  }): React.JSX.Element => (
     <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
   )
 
@@ -45,7 +45,7 @@ describe('useParseToken', () => {
       children
     }: {
       children: React.ReactNode
-    }): JSX.Element => (
+    }): React.JSX.Element => (
       <MemoryRouter initialEntries={[`/?jwt=${token}`]}>
         {children}
       </MemoryRouter>
@@ -91,7 +91,7 @@ describe('useParseToken', () => {
       children
     }: {
       children: React.ReactNode
-    }): JSX.Element => (
+    }): React.JSX.Element => (
       <MemoryRouter initialEntries={['/?jwt=invalid-jwt-token']}>
         {children}
       </MemoryRouter>
