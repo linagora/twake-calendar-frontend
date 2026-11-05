@@ -1,4 +1,5 @@
 import { PickerValue } from '@mui/x-date-pickers/internals'
+import { Dayjs } from 'dayjs'
 import React from 'react'
 import {
   dtDate,
@@ -82,6 +83,22 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     })
   }, [startDate, endDate, startTime, endTime, getCurrentDuration])
 
+  // Both end parts go in a single callback when both change: the second of
+  // two callbacks would rebuild the end from the stale other part
+  const moveEnd = (newEnd: Dayjs): void => {
+    const newEndDate = dtDate(newEnd)
+    const newEndTime = dtTime(newEnd)
+    const hasDateChanged = newEndDate !== endDate
+    const hasTimeChanged = !allday && newEndTime !== endTime
+
+    if (hasDateChanged && hasTimeChanged) {
+      onEndDateChange(newEndDate, newEndTime)
+      return
+    }
+    if (hasDateChanged) onEndDateChange(newEndDate)
+    if (hasTimeChanged) onEndTimeChange(newEndTime)
+  }
+
   const handleStartDateChange = (value: PickerValue): void => {
     if (!value?.isValid()) return
 
@@ -92,16 +109,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     onStartDateChange(newDateStr)
 
     const newStart = toDateTime(newDateStr, startTime)
-    const newEnd = newStart.add(duration, durationUnit)
-
-    applyDateTimeUpdate({
-      newDate: dtDate(newEnd),
-      newTime: dtTime(newEnd),
-      currentDate: endDate,
-      currentTime: endTime,
-      onDateChange: onEndDateChange,
-      onTimeChange: allday ? undefined : onEndTimeChange
-    })
+    moveEnd(newStart.add(duration, durationUnit))
   }
 
   const handleStartTimeChange = (value: PickerValue): void => {
@@ -114,19 +122,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     onStartTimeChange(newTimeStr)
 
     const newStart = toDateTime(startDate, newTimeStr)
-    const newEnd = newStart.add(duration, 'minute')
-
-    const newEndDate = dtDate(newEnd)
-    const newEndTime = dtTime(newEnd)
-    const hasDateChanged = newEndDate !== endDate
-    const hasTimeChanged = newEndTime !== endTime
-
-    if (hasDateChanged && hasTimeChanged) {
-      onEndDateChange(newEndDate, newEndTime)
-      return
-    }
-    if (hasDateChanged) onEndDateChange(newEndDate)
-    if (!allday && hasTimeChanged) onEndTimeChange(newEndTime)
+    moveEnd(newStart.add(duration, 'minute'))
   }
 
   const handleEndDateChange = (value: PickerValue): void => {
@@ -166,7 +162,11 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     const newEnd = toDateTime(endDate, newTimeStr)
     const currentStart = toDateTime(startDate, startTime)
 
-    initialDurationRef.current = newEnd.diff(currentStart, 'minute')
+    // An end not after the start is invalid: keep the last valid duration so
+    // a later start change does not apply a negative or empty one
+    if (newEnd.isAfter(currentStart)) {
+      initialDurationRef.current = newEnd.diff(currentStart, 'minute')
+    }
     onEndTimeChange(newTimeStr)
   }
 

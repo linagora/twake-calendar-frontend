@@ -5,6 +5,7 @@ import {
 import { InvalidTimeInputProvider } from '@common/components/Event/components/DateTimeFields/InvalidTimeInputContext'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 
 vi.mock('twake-i18n', () => ({
   useI18n: () => ({
@@ -191,6 +192,83 @@ describe('DateTimeFields', () => {
     // Start time should NOT be automatically adjusted when end time changes
     expect(mockHandlers.onStartTimeChange).not.toHaveBeenCalled()
     expect(mockHandlers.onStartDateChange).not.toHaveBeenCalled()
+  })
+
+  describe('after an end time before the start', () => {
+    // Like DateTimeExpanded, each end callback rebuilds the whole end from
+    // the values of its render
+    const StatefulFields = () => {
+      const [startDate, setStartDate] = useState('2026-10-26')
+      const [startTime, setStartTime] = useState('17:00')
+      const [end, setEnd] = useState({
+        endDate: '2026-10-26',
+        endTime: '18:00'
+      })
+      return (
+        <DateTimeFields
+          {...defaultProps}
+          startDate={startDate}
+          startTime={startTime}
+          {...end}
+          onStartDateChange={setStartDate}
+          onStartTimeChange={setStartTime}
+          onEndDateChange={(endDate, endTime) =>
+            setEnd({ endDate, endTime: endTime ?? end.endTime })
+          }
+          onEndTimeChange={endTime => setEnd({ ...end, endTime })}
+        />
+      )
+    }
+
+    const typeTime = (testId: string, value: string) => {
+      const input = screen.getByTestId(testId)
+      fireEvent.change(input, { target: { value } })
+      fireEvent.blur(input)
+    }
+
+    beforeEach(async () => {
+      await act(async () => render(<StatefulFields />))
+      typeTime('end-time-input', '10:00')
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('10:00')
+      )
+    })
+
+    it('keeps the last valid duration when the start time changes', async () => {
+      typeTime('start-time-input', '05:09')
+
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('06:09')
+      )
+      expect(screen.getByTestId('end-date-input')).toHaveValue(
+        'Monday, 26 October 2026'
+      )
+    })
+
+    it('keeps the last valid duration when the start date changes', async () => {
+      await userEvent.click(screen.getByTestId('start-date-input'))
+      await userEvent.click(screen.getByRole('gridcell', { name: '20' }))
+
+      await waitFor(() =>
+        expect(screen.getByTestId('end-date-input')).toHaveValue(
+          'Tuesday, 20 October 2026'
+        )
+      )
+      expect(screen.getByTestId('end-time-input')).toHaveValue('18:00')
+    })
+
+    it('keeps the last valid duration when the end time equals the start', async () => {
+      typeTime('end-time-input', '17:00')
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('17:00')
+      )
+
+      typeTime('start-time-input', '05:09')
+
+      await waitFor(() =>
+        expect(screen.getByTestId('end-time-input')).toHaveValue('06:09')
+      )
+    })
   })
 
   it('moves START backward properly when END date jumps before START date', async () => {
