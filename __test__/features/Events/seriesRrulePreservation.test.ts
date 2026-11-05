@@ -342,7 +342,7 @@ describe('a floating UNTIL on a series edit (#1948)', () => {
       ['rrule', {}, 'recur', weekly],
       repetition.asJcal(),
       repetition,
-      { oldStart: start, newStart: start }
+      { oldStart: start, newStart: start, zone: 'Europe/Paris' }
     )
 
     expect(rule).toEqual({ freq: 'WEEKLY', until: '20251104T080000Z' })
