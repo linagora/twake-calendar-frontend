@@ -2,6 +2,7 @@ import moment from 'moment-timezone'
 import { findTimezoneData } from '@common/utils/timezoneLookup'
 import {
   readWallClock,
+  storedTimezone,
   wallClockOf,
   withStoredTimezones
 } from '@common/utils/timezone'
@@ -16,6 +17,7 @@ import {
   makeVevent,
   findFieldValue,
   getFieldValues,
+  knownZone,
   parseMoment,
   parseInstant
 } from '@common/features/Events/utils'
@@ -321,7 +323,8 @@ const withStoredRrule = (
     event.repetition,
     {
       oldStart: parseMoment(findFieldValue(oldMaster[1], 'dtstart'), tz),
-      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz)
+      newStart: parseMoment(findFieldValue(props, 'dtstart'), tz),
+      zone: storedTimezone(tz) ? tz : knownZone(tz, 'UTC')
     }
   )
 
