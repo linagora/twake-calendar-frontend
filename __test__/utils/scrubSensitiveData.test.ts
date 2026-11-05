@@ -68,6 +68,19 @@ describe('scrubSensitiveData', () => {
       expect(scrubText('?attendee=ünal%40例え.jp')).toBe('?attendee=[email]')
     })
 
+    it('masks an address whose domain is percent-encoded UTF-8', () => {
+      expect(scrubText('?attendee=%C3%BCnal%40b%C3%BCcher.de')).toBe(
+        '?attendee=[email]'
+      )
+      expect(scrubText('?attendee=a%40%E4%BE%8B.%E6%97%A5%E6%9C%AC')).toBe(
+        '?attendee=[email]'
+      )
+    })
+
+    it('stops an encoded address at the encoded separator after it', () => {
+      expect(scrubText('?to=a%40b%C3%BC.de%2Cnote')).toBe('?to=[email]%2Cnote')
+    })
+
     it('masks an email address with a long local part', () => {
       expect(scrubText(`to ${'a.'.repeat(100)}b@gouv.fr`)).toBe('to [email]')
     })
@@ -79,7 +92,17 @@ describe('scrubSensitiveData', () => {
     })
 
     it('scrubs a long run without an address in linear time', () => {
-      for (const unit of ['a.', '-', 'a', '%', '%40', 'a%40', 'x@a.']) {
+      for (const unit of [
+        'a.',
+        '-',
+        'a',
+        '%',
+        '%40',
+        'a%40',
+        'x@a.',
+        'a%40%C3%BC',
+        'x%40a.%C3'
+      ]) {
         const text = unit.repeat(Math.floor(65536 / unit.length))
         const t0 = performance.now()
         scrubText(text)
