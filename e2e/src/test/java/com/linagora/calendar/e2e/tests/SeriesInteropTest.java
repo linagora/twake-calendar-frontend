@@ -5,8 +5,14 @@ import static com.linagora.calendar.e2e.pages.EventFormModal.Scope.THIS_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.zone.ZoneOffsetTransition;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -41,6 +47,7 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
     private static final Duration SAVED = Duration.ofSeconds(30);
     private static final String STAMP = "DTSTAMP:20260101T000000Z";
     private static final String ROMANCE = "Romance Standard Time";
+    private static final DateTimeFormatter UTC_DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
 
     // Read once the extension started the clock of the test: a field initializer runs before,
     // on the real date, which may lie outside the week the browser shows
@@ -403,5 +410,239 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
                 .as("patched in place, not regenerated from the form, which drops what it does not model")
                 .contains("X-E2E-CUSTOM:kept-across-answers");
         });
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-12 (#1978) Moving a series later moves its DATE-TIME UNTIL, and keeps its last occurrence")
+    void movingASeriesLaterKeepsItsLastOccurrence(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Until moved");
+        LocalDate last = today.plusDays(2);
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
+            Vcal.centralEuropeanZone("Europe/Paris"), """
+            BEGIN:VEVENT
+            UID:%s
+            %s
+            DTSTART;TZID=Europe/Paris:%sT090000
+            DTEND;TZID=Europe/Paris:%sT100000
+            RRULE:FREQ=DAILY;UNTIL=%s
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(UUID.randomUUID(), STAMP, day0, day0, utc(last.atTime(9, 0).atZone(paris)), title)));
+
+        EventFormModal form = calendar.openEventOn(title, today).edit(ALL_EVENTS).expand();
+        form.startTime("10:00");
+        form.save();
+
+        Awaitility.await().atMost(SAVED).untilAsserted(() -> {
+            String rrule = Ics.property(Ics.master(probe.singleEvent(user)), "RRULE").orElseThrow();
+            assertThat(Ics.rulePart(rrule, "UNTIL"))
+                .as("the UNTIL is the start of the last occurrence, which moved to 10:00 (%s)", rrule)
+                .hasValue(utc(last.atTime(10, 0).atZone(paris)));
+        });
+        calendar.reload();
+        awaitAttached(calendar.eventCardOn(title, last));
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-13 (#1948) A floating series given a TZID writes its UNTIL in UTC")
+    void aFloatingSeriesWritesAUtcUntil(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Floating until");
+        String day2 = Vcal.day(today.plusDays(2));
+        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%s
+            %s
+            DTSTART:%sT090000
+            DTEND:%sT100000
+            RRULE:FREQ=DAILY;UNTIL=%sT090000
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(UUID.randomUUID(), STAMP, day0, day0, day2, title)));
+
+        String master = Ics.master(renameAndAwait(calendar.openEventOn(title, today).edit(ALL_EVENTS),
+            user, probe, title("Floating renamed")));
+
+        assertThat(Ics.parameters(master, "DTSTART")).contains("TZID=");
+        String rrule = Ics.property(master, "RRULE").orElseThrow();
+        assertThat(Ics.rulePart(rrule, "UNTIL").orElseThrow())
+            .as("RFC 5545: next to a DTSTART with a TZID, the UNTIL is in UTC (%s)", rrule)
+            .startsWith(day2)
+            .endsWith("Z");
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-14 (#1949) Moving a series to an hour its BYHOUR lists moves BYHOUR with its overrides")
+    void movingToAListedHourMovesByHour(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Twice daily");
+        String moved = title("Room B");
+        String uid = UUID.randomUUID().toString();
+        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
+            Vcal.centralEuropeanZone("Europe/Paris"), """
+            BEGIN:VEVENT
+            UID:%1$s
+            %2$s
+            DTSTART;TZID=Europe/Paris:%3$sT100000
+            DTEND;TZID=Europe/Paris:%3$sT103000
+            RRULE:FREQ=DAILY;COUNT=5;BYHOUR=11,8
+            SUMMARY:%4$s
+            END:VEVENT
+            BEGIN:VEVENT
+            UID:%1$s
+            %2$s
+            RECURRENCE-ID;TZID=Europe/Paris:%5$sT110000
+            DTSTART;TZID=Europe/Paris:%5$sT110000
+            DTEND;TZID=Europe/Paris:%5$sT113000
+            SUMMARY:%6$s
+            END:VEVENT
+            """.formatted(uid, STAMP, day0, title, day1, moved)));
+
+        EventFormModal form = calendar.openEventOn(title, today).edit(ALL_EVENTS).expand();
+        form.startTime("11:00");
+        form.save();
+
+        Awaitility.await().atMost(SAVED).untilAsserted(() -> {
+            String saved = probe.singleEvent(user);
+            String master = Ics.master(saved);
+            assertThat(Ics.property(master, "DTSTART")).hasValue(day0 + "T110000");
+            assertThat(Ics.rulePart(Ics.property(master, "RRULE").orElseThrow(), "BYHOUR").orElseThrow().split(","))
+                .as("every occurrence moves by the hour the user asked")
+                .containsExactlyInAnyOrder("12", "9");
+            assertThat(Ics.overrides(saved))
+                .as("the override stays on an occurrence the moved rule generates")
+                .singleElement()
+                .satisfies(override -> assertThat(Ics.property(override, "RECURRENCE-ID"))
+                    .hasValue(day1 + "T120000"));
+        });
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-15 (#1938) After a zone change, editing a floating override replaces it")
+    void aZoneChangeReplacesAFloatingOverride(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Floating weekly");
+        String moved = title("Floating moved");
+        String uid = UUID.randomUUID().toString();
+        CalendarPage calendar = seed(page, user, probe, moved, Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%1$s
+            %2$s
+            DTSTART:%3$sT094500
+            DURATION:PT1H
+            RRULE:FREQ=DAILY;COUNT=3
+            SUMMARY:%4$s
+            END:VEVENT
+            BEGIN:VEVENT
+            UID:%1$s
+            %2$s
+            RECURRENCE-ID:%5$sT094500
+            DTSTART:%5$sT100000
+            DURATION:PT1H
+            SUMMARY:%6$s
+            END:VEVENT
+            """.formatted(uid, STAMP, day0, title, day1, moved)));
+
+        String renamed = title("Floating edited");
+        EventFormModal form = calendar.openEventOn(moved, tomorrow).edit(THIS_EVENT).expand();
+        form.title(renamed);
+        form.timezone("Asia/Tokyo");
+        form.save();
+
+        Awaitility.await().atMost(SAVED).untilAsserted(() ->
+            assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
+        assertThat(Ics.overrides(probe.singleEvent(user)))
+            .as("a second override of the occurrence is a duplicate RECURRENCE-ID")
+            .singleElement()
+            .satisfies(override -> {
+                assertThat(Ics.property(override, "SUMMARY")).hasValue(renamed);
+                assertThat(Ics.property(override, "RECURRENCE-ID").orElseThrow()).startsWith(day1);
+            });
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-16 (#1945) An occurrence in the hour the autumn change repeats keeps its instant")
+    void anOccurrenceInTheRepeatedHourKeepsItsInstant(Page page, E2EUser user, CalendarProbe probe) {
+        Instant clocksGoBack = nextAutumnChange(ZoneId.of("America/New_York"));
+        // 15 minutes after the change: the second 01:15 of that night in New York
+        Instant occurrence = clocksGoBack.plus(Duration.ofMinutes(15));
+        ZonedDateTime first = occurrence.atZone(ZoneOffset.UTC).minusWeeks(2);
+        LocalDate occurrenceDay = occurrence.atZone(E2EClock.BROWSER_ZONE).toLocalDate();
+        String title = title("Repeated hour");
+
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%s
+            %s
+            DTSTART:%s
+            DURATION:PT1H
+            RRULE:FREQ=WEEKLY;COUNT=4
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(UUID.randomUUID(), STAMP, utc(first), title)));
+        calendar.reload();
+        calendar.goToDate(occurrenceDay);
+        awaitAttached(calendar.eventCardOn(title, occurrenceDay));
+
+        String renamed = title("Repeated hour edited");
+        EventFormModal form = calendar.openEventOn(title, occurrenceDay).edit(THIS_EVENT).expand();
+        form.title(renamed);
+        form.timezone("America/New_York");
+        form.save();
+
+        Awaitility.await().atMost(SAVED).untilAsserted(() ->
+            assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
+        assertThat(Ics.overrides(probe.singleEvent(user)))
+            .singleElement()
+            .satisfies(override -> assertThat(Ics.property(override, "RECURRENCE-ID"))
+                .as("01:15 in New York would designate the first 01:15, an hour before this occurrence")
+                .hasValue(utc(occurrence.atZone(ZoneOffset.UTC))));
+    }
+
+    @Test
+    @DisplayName("SERIES-INTEROP-17 (#1950) A whole series with a moved occurrence in a zone named constructor can be accepted")
+    void aSeriesWithAnOverrideInAZoneNamedConstructorCanBeAccepted(Page page, E2EUser user,
+                                                                   E2EUserFactory users, CalendarProbe probe) {
+        E2EUser organizer = users.newUser("organizer");
+        String title = title("Constructor series");
+        String uid = UUID.randomUUID().toString();
+        // no VTIMEZONE: moment-timezone looks the lowercase name up in a plain object
+        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
+            dailyMaster(uid, "constructor", title, invited(organizer, user)), """
+            BEGIN:VEVENT
+            UID:%s
+            %s
+            RECURRENCE-ID;TZID=constructor:%sT090000
+            DTSTART;TZID=constructor:%sT110000
+            DTEND;TZID=constructor:%sT120000
+            SUMMARY:%s
+            %s
+            END:VEVENT
+            """.formatted(uid, STAMP, day1, day1, day1, title("Constructor moved"), invited(organizer, user))));
+
+        calendar.openEventOn(title, today).answer("Yes", ALL_EVENTS);
+
+        Awaitility.await().atMost(SAVED).untilAsserted(() -> {
+            String saved = probe.singleEvent(user);
+            assertThat(Ics.vevents(saved))
+                .as("the answer reached the server, on the series and on the moved occurrence")
+                .hasSize(2)
+                .allSatisfy(vevent -> assertThat(Vcal.attendeeLines(vevent, user.email()))
+                    .singleElement()
+                    .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED")));
+        });
+    }
+
+    private static String utc(ZonedDateTime instant) {
+        return instant.withZoneSameInstant(ZoneOffset.UTC).format(UTC_DATE_TIME);
+    }
+
+    /** The next time the clocks of the zone go back, from today on. */
+    private Instant nextAutumnChange(ZoneId zone) {
+        Instant from = today.atStartOfDay(zone).toInstant();
+        ZoneOffsetTransition transition = zone.getRules().nextTransition(from);
+        while (transition.isGap()) {
+            transition = zone.getRules().nextTransition(transition.getInstant());
+        }
+        return transition.getInstant();
     }
 }

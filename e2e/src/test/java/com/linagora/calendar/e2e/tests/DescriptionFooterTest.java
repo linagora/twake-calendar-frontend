@@ -135,4 +135,35 @@ class DescriptionFooterTest extends TwakeCalendarE2ETest {
             .as("an unchanged description is written the same way again")
             .isEqualTo(firstSave);
     }
+
+    @Test
+    @DisplayName("FOOTER-04 (#1942) A footer followed by more separators leaves the form, and the note after it stays")
+    void separatorsAfterTheFooterDoNotBringItBack(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Trailing");
+        CalendarPage calendar = seed(page, user, probe, title, """
+            DESCRIPTION:Agenda\\n\\n%1$s\\nJoin Visio : https://visio.example.org/x\\n\\n%2$s\\n%1$s\\nNote: room 4\\n%1$s\\n%1$s"""
+            .formatted(SEPARATOR, FOOTER_NOTICE));
+
+        EventFormModal form = calendar.openEvent(title).edit();
+        assertThat(form.description())
+            .as("the user gets their own text back, not the footer")
+            .contains("Agenda").contains("Note: room 4")
+            .doesNotContain(FOOTER_NOTICE).doesNotContain("Join Visio");
+        form.cancel();
+    }
+
+    @Test
+    @DisplayName("FOOTER-05 (#1942) A user paragraph between separators stays before a footer without notice")
+    void aUserParagraphStaysBeforeAFooterWithoutNotice(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Paired");
+        CalendarPage calendar = seed(page, user, probe, title, """
+            DESCRIPTION:%1$s\\nContext: keep\\n\\nNotes\\n%1$s\\nJoin Visio: https://visio.example.org/x\\n%1$s"""
+            .formatted(SEPARATOR));
+
+        EventFormModal form = calendar.openEvent(title).edit();
+        assertThat(form.description())
+            .contains("Context: keep").contains("Notes")
+            .doesNotContain("Join Visio");
+        form.cancel();
+    }
 }
