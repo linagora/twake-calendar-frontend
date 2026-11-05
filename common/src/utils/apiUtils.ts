@@ -1,5 +1,5 @@
 import { addAuthorization, redirectOnUnauthorized } from '@linagora/twake-oidc'
-import ky, { type KyInstance, type KyRequest } from 'ky'
+import ky, { type KyInstance } from 'ky'
 import { assertWebSocketAlive, getRetryDelay } from '@linagora/twake-websocket'
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
@@ -17,7 +17,7 @@ const RETRY_CONFIG = {
 const RETRIED_METHODS = ['get', 'head', 'options', 'trace']
 
 export const api: KyInstance = ky.extend({
-  prefixUrl: window.CALENDAR_BASE_URL,
+  prefix: window.CALENDAR_BASE_URL,
   retry: {
     limit: RETRY_CONFIG.maxRetries,
     methods: RETRIED_METHODS,
@@ -30,8 +30,8 @@ export const api: KyInstance = ky.extend({
   },
   hooks: {
     beforeRequest: [
-      addAuthorization,
-      async (request: KyRequest): Promise<void> => {
+      ({ request }) => addAuthorization(request),
+      async ({ request }) => {
         if (MUTATING_METHODS.has(request.method)) {
           await assertWebSocketAlive()
         }
@@ -49,7 +49,10 @@ export const api: KyInstance = ky.extend({
       }
     ],
 
-    afterResponse: [redirectOnUnauthorized]
+    afterResponse: [
+      ({ request, options, response }) =>
+        redirectOnUnauthorized(request, options, response)
+    ]
   }
 })
 
