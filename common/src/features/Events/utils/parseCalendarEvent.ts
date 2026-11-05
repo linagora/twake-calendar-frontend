@@ -131,8 +131,10 @@ export function parseRepetitionRule(
     repData.endDate = ruleValue.until
   }
 
-  if (ruleValue.count) {
-    repData.occurrences = ruleValue.count
+  // A COUNT that is not a positive integer gives no end condition
+  const count = Number(ruleValue.count)
+  if (Number.isInteger(count) && count > 0) {
+    repData.occurrences = count
   }
 
   if (ruleValue.interval) {

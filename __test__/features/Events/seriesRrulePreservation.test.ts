@@ -251,3 +251,21 @@ describe('makeSeriesJCal keeps the rule parts the form does not model (#1899)', 
     })
   })
 })
+
+describe('parseRepetitionRule count', () => {
+  it.each(['/', '5DTEND', '', '1.5', '-2', 0])(
+    'leaves out the count %j',
+    count => {
+      const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
+      expect(parseRepetitionRule(rule).occurrences).toBeFalsy()
+    }
+  )
+
+  it.each([
+    [5, 5],
+    ['5', 5]
+  ])('reads the count %j as a number', (count, expected) => {
+    const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
+    expect(parseRepetitionRule(rule).occurrences).toBe(expected)
+  })
+})
