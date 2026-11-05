@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import type { MutableRefObject } from 'react'
 import type { CalendarApi } from '@fullcalendar/core'
 import type { SavedEvent } from '@common/features/Events/eventSaveFeedbackSlice'

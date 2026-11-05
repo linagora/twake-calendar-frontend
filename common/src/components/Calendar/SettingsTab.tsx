@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { canAdministerCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import { Calendar } from '@common/types/CalendarTypes'

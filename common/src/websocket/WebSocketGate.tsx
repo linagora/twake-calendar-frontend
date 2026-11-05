@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { api } from '@common/utils/apiUtils'
 import { useI18n } from 'twake-i18n'

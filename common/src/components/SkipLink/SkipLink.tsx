@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { Box } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 

@@ -57,7 +57,7 @@ export const AttendanceValidation: React.FC<AttendanceValidationProps> = ({
   const renderButton = (
     rsvpValue: PartStat,
     linkUrl: string | undefined
-  ): JSX.Element => {
+  ): React.JSX.Element => {
     const isCurrentlyActive = currentUserPartstat === rsvpValue
     const isThisLoading = clickedValue === rsvpValue
     const shouldShowActive =

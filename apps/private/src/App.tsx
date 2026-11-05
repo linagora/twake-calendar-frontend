@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import * as Sentry from '@sentry/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { type ErrorInfo, Suspense, useEffect, useMemo } from 'react'

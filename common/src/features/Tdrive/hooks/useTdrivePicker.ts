@@ -37,7 +37,7 @@ export const makeIntentFetch =
 
 interface UseTdrivePickerReturn {
   isOpen: boolean
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   openPickerError: string | null
   openPicker: () => Promise<void>
   closePicker: () => void

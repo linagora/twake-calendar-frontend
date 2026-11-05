@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { SearchCalendarsDialog } from '@common/components/Calendar/RegisterCalendars/SearchCalendarsDialog'
 import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
 import { act, screen } from '@testing-library/react'

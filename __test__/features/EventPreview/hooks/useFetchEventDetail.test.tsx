@@ -36,7 +36,7 @@ describe('useFetchEventDetail', () => {
     children
   }: {
     children: React.ReactNode
-  }): JSX.Element => (
+  }): React.JSX.Element => (
     <I18nContext.Provider value={i18nContextValue}>
       {children}
     </I18nContext.Provider>

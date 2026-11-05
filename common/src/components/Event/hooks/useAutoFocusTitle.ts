@@ -7,7 +7,7 @@ const isNotTestEnv = process.env.NODE_ENV !== 'test'
 export const useFocusTitleOnOpen = (
   isOpen: boolean,
   eventId: string | null | undefined,
-  titleInputRef: React.RefObject<HTMLInputElement>
+  titleInputRef: React.RefObject<HTMLInputElement | null>
 ): void => {
   useEffect(() => {
     const isNewEventOpen = isOpen && !eventId
@@ -22,7 +22,7 @@ export const useFocusTitleOnOpen = (
 function useFocusTitleOnToggle(
   isOpen: boolean,
   showMore: boolean,
-  titleInputRef: React.RefObject<HTMLInputElement>
+  titleInputRef: React.RefObject<HTMLInputElement | null>
 ): void {
   const prevShowMoreRef = useRef<boolean | undefined>(undefined)
 
@@ -50,7 +50,7 @@ export const useAutoFocusTitle = ({
 }: {
   isOpen: boolean
   eventId?: string | null
-  titleInputRef: React.RefObject<HTMLInputElement>
+  titleInputRef: React.RefObject<HTMLInputElement | null>
   showMore: boolean
 }): void => {
   useFocusTitleOnOpen(isOpen, eventId, titleInputRef)

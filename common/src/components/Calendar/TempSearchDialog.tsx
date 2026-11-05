@@ -29,7 +29,7 @@ export default function TempSearchDialog({
   setTempUsers,
   handleToggleEventPreview,
   onClose
-}: TempSearchDialogProps): JSX.Element {
+}: TempSearchDialogProps): React.JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
   const isMobileSearchOpen = useAppSelector(

@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import type { MutableRefObject } from 'react'
 import type { CalendarApi } from '@fullcalendar/core'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'

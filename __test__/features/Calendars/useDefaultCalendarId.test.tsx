@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { CalendarSelectField } from '@common/components/Event/fields/CalendarSelectField'
 import { useDefaultCalendarId } from '@common/features/Calendars/hooks/useDefaultCalendarId'
 import { useAppSelector } from '@common/app/hooks'
