@@ -53,6 +53,21 @@ describe('sanitizeUtils', () => {
       )
     })
 
+    it('should remove data-* and aria-* attributes', () => {
+      expect(sanitizeHtml('<b data-x="1" aria-label="other">Hello</b>')).toBe(
+        '<b>Hello</b>'
+      )
+
+      const link = document.createElement('div')
+      link.innerHTML = sanitizeHtml(
+        '<a href="https://example.com" data-event-id="twake-draft-event">x</a>'
+      )
+      expect(link.querySelector('a')?.hasAttribute('data-event-id')).toBe(false)
+      expect(link.querySelector('a')?.getAttribute('href')).toBe(
+        'https://example.com'
+      )
+    })
+
     it('should open links without a target in a new tab', () => {
       const input = '<a href="https://example.com">link</a>'
       expect(sanitizeHtml(input)).toBe(

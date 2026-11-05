@@ -54,6 +54,11 @@ export function sanitizeHtml(htmlText: string): string {
       // target and rel are not taken from the description: its author could
       // otherwise point a link at the embedding portal (target="_top").
       ALLOWED_ATTR: ['href'],
+      // ALLOWED_ATTR does not limit these two families. A data-event-id would
+      // be found by the lookups of the app, an aria-label would be announced
+      // instead of the text on screen.
+      ALLOW_DATA_ATTR: false,
+      ALLOW_ARIA_ATTR: false,
       KEEP_CONTENT: true
     })
   }
