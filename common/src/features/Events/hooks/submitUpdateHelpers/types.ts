@@ -25,6 +25,9 @@ export interface RecurringUpdateContext extends UpdateHelperContext {
   // Dragging an occurrence moves the series: that occurrence then follows
   // the series, even if it had been customized
   dropSourceOverride?: boolean
+  // The caller knows the series left its day: it has read that day in the zone
+  // of the series, with a stored VTIMEZONE this context does not carry
+  seriesDayChanged?: boolean
 }
 
 export interface PerformUpdateActionParams {

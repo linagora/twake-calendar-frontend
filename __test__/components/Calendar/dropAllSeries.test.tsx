@@ -30,9 +30,13 @@ type AfterChoice = (type: 'solo' | 'all' | undefined) => Promise<void>
 async function dropAllSeries(
   master: CalendarEvent,
   instance: CalendarEvent,
-  deltaDays: number
+  deltaDays: number,
+  { milliseconds = 0, response = {} } = {} as {
+    milliseconds?: number
+    response?: unknown
+  }
 ): Promise<Parameters<typeof handleUpdateRecurringSeries>[0]> {
-  ;(fetchEvent as Mock).mockResolvedValue({})
+  ;(fetchEvent as Mock).mockResolvedValue(response)
   ;(parseFetchedEvent as Mock).mockImplementation(
     (_event: CalendarEvent, _response: unknown, isMaster?: boolean) =>
       isMaster ? master : instance
@@ -54,7 +58,7 @@ async function dropAllSeries(
 
   await handlers.handleEventDrop({
     event: { extendedProps: { uid: instance.uid, calId } },
-    delta: { years: 0, months: 0, days: deltaDays, milliseconds: 0 }
+    delta: { years: 0, months: 0, days: deltaDays, milliseconds }
   } as unknown as EventDropArg)
 
   const afterChoice = setAfterChoiceFunc.mock.calls[0][0]()
@@ -133,5 +137,110 @@ describe('Dropping an occurrence with "All the events" (#1668)', () => {
     )
     expect(params.values.repetition.byday).toEqual(['SU', 'TU'])
     expect(params.newEvent.repetition?.byday).toEqual(['SU', 'TU'])
+  })
+
+  describe('in a zone only the VTIMEZONE of the object defines (#1941)', () => {
+    const HOUR_MS = 60 * 60 * 1000
+    const CUSTOM_ZONE = 'Customized Time Zone'
+    // UTC-5 all year
+    const response = [
+      'vcalendar',
+      [],
+      [
+        [
+          'vtimezone',
+          [['tzid', {}, 'text', CUSTOM_ZONE]],
+          [
+            [
+              'standard',
+              [
+                ['dtstart', {}, 'date-time', '1970-01-01T00:00:00'],
+                ['tzoffsetfrom', {}, 'utc-offset', '-05:00'],
+                ['tzoffsetto', {}, 'utc-offset', '-05:00']
+              ],
+              []
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    const seriesAt = (
+      masterStart: string,
+      instanceStart: string
+    ): [CalendarEvent, CalendarEvent] => {
+      const master = {
+        uid: 'series',
+        calId,
+        title: 'Weekly',
+        allday: false,
+        repetition: new RepetitionObject({
+          freq: 'weekly',
+          interval: 1,
+          occurrences: 3,
+          byday: ['MO']
+        }),
+        timezone: CUSTOM_ZONE,
+        start: masterStart,
+        end: new Date(Date.parse(masterStart) + HOUR_MS).toISOString()
+      } as CalendarEvent
+      const instance = {
+        ...master,
+        uid: 'series/20260824',
+        start: instanceStart,
+        end: new Date(Date.parse(instanceStart) + HOUR_MS).toISOString(),
+        recurrenceId: instanceStart
+      } as CalendarEvent
+      return [master, instance]
+    }
+
+    it('moves the weekdays when the move crosses midnight in that zone', async () => {
+      const [master, instance] = seriesAt(
+        '2026-08-17T05:00:00.000Z', // Monday 00:00 in the zone
+        '2026-08-24T05:00:00.000Z'
+      )
+
+      const params = await dropAllSeries(master, instance, 0, {
+        milliseconds: -HOUR_MS,
+        response
+      })
+
+      expect(params.values.start).toBe('2026-08-17T04:00:00.000Z')
+      expect(params.values.repetition.byday).toEqual(['SU'])
+      expect(params.seriesDayChanged).toBe(true)
+    })
+
+    it('keeps the weekdays when the move only crosses midnight in UTC', async () => {
+      const [master, instance] = seriesAt(
+        '2026-08-18T01:00:00.000Z', // Monday 20:00 in the zone
+        '2026-08-25T01:00:00.000Z'
+      )
+
+      const params = await dropAllSeries(master, instance, 0, {
+        milliseconds: -2 * HOUR_MS,
+        response
+      })
+
+      expect(params.values.start).toBe('2026-08-17T23:00:00.000Z')
+      expect(params.values.repetition.byday).toEqual(['MO'])
+      expect(params.seriesDayChanged).toBe(false)
+    })
+
+    it('reads a wall clock recurrence id in that zone', async () => {
+      const [master, instance] = seriesAt(
+        '2026-08-17T05:00:00.000Z',
+        '2026-08-24T05:00:00.000Z'
+      )
+
+      const params = await dropAllSeries(
+        master,
+        { ...instance, recurrenceId: '2026-08-24T00:00:00' },
+        0,
+        { milliseconds: HOUR_MS, response }
+      )
+
+      expect(params.values.start).toBe('2026-08-17T06:00:00.000Z')
+      expect(params.seriesDayChanged).toBe(false)
+    })
   })
 })
