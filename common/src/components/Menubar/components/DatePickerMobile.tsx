@@ -105,7 +105,6 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
   const handlePickDate = (newDate: PickerValue): void => {
     onChangeDate(newDate)
     onCloseDatePicker()
-    calendarRef.current?.updateSize?.()
   }
 
   return (
