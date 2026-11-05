@@ -142,6 +142,9 @@ export const mergeStoredRrule = (
   const stored = lowerCaseKeys(storedRrule[3] as unknown as RuleValues)
   const edited = formRrule[3] as unknown as RuleValues
 
+  // A stored rule without FREQ is read as no repetition: only the form has one
+  if (typeof stored.freq !== 'string') return formRrule
+
   if (formLeavesRuleAlone(stored, repetition)) {
     return withValue(storedRrule, followStart(stored, starts))
   }

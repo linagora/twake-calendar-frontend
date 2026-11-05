@@ -154,6 +154,12 @@ function parseRruleProperty(
   value: VObjectValue,
   event: Partial<CalendarEvent>
 ): void {
+  // A rule without FREQ cannot be expanded: the event stays readable, without
+  // a repetition, instead of being dropped from the grid
+  if (typeof (value as Partial<RepetitionRule> | null)?.freq !== 'string') {
+    console.error('Ignoring an RRULE without FREQ', { uid: event.uid })
+    return
+  }
   event.repetition = parseRepetitionRule(value as RepetitionRule)
 }
 
