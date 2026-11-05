@@ -79,13 +79,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   }, [dateLabel, showsShortLabel])
 
   const onToggleDatePicker = (): void => {
-    setOpenDatePicker(prev => {
-      const newState = !prev
-      setTimeout(() => {
-        calendarRef.current?.updateSize?.()
-      }, 0)
-      return newState
-    })
+    setOpenDatePicker(prev => !prev)
   }
 
   const handleBackClick = (event: React.MouseEvent): void => {
