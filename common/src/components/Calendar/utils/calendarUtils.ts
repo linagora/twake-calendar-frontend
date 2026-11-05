@@ -228,7 +228,7 @@ export const eventToFullCalendarFormat = ({
         pending,
         t
       })
-    ) as EventInput[]
+    )
 }
 
 interface ExtractEventsOptions {
