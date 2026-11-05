@@ -45,8 +45,11 @@ const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
 // A match only starts at the beginning of a run of local part characters:
 // starting inside the run would scan the rest of it again at every position,
 // in time quadratic in its length.
+// A domain only accepts percent-encoded non-ASCII bytes (%80 to %FF, UTF-8): the
+// encoded separators (%40, %2C...) still end it, which keeps the scan linear and
+// what follows the address unmasked.
 const EMAIL_REGEX =
-  /(?<![\p{L}\p{M}\p{N}._%+-])[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)[\p{L}\p{M}\p{N}.-]+\.[\p{L}\p{M}]{2,}/giu
+  /(?<![\p{L}\p{M}\p{N}._%+-])[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/giu
 
 const MAX_DEPTH = 10
 
