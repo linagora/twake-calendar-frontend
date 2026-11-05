@@ -5,9 +5,10 @@ import {
 } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { makeTimezone, makeVevent } from '@common/features/Events/utils'
+import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 import { getTzidParam, sameRecurrence } from './recurrenceInstant'
-import { makeSeriesVtimezones } from './seriesVtimezones'
+import { makeSeriesVtimezones, vtimezoneLocation } from './seriesVtimezones'
 
 export function makeEventWithOverrides(
   updatedEvent: CalendarEvent,
@@ -20,7 +21,11 @@ export function makeEventWithOverrides(
     !updatedEvent.recurrenceId
   )
   const nextVevents = [...vevents]
-  const overrideIndex = findOverrideIndex(nextVevents, updatedEvent)
+  const overrideIndex = findOverrideIndex(
+    nextVevents,
+    updatedEvent,
+    storedVtimezones
+  )
   if (overrideIndex !== -1) {
     // Preserve the stored RECURRENCE-ID tuple (its TZID parameter and exact
     // wall-clock form) on the regenerated VEVENT. makeVevent re-derives the
@@ -59,9 +64,13 @@ function findRecurrenceId(vevent: VCalComponent): VObjectProperty | undefined {
 // whatever zone the event is written in after the edit. Reading it in the zone
 // of the edited event (the DTSTART zone of a moved override, or the zone picked
 // in the form) designates another instant and missed the override. See #1882.
+// A TZID only its VTIMEZONE defines is read in the zone it names. Without one,
+// reading the value in a fallback zone is a guess: it only applies when no
+// override designates the instant for certain. See #1977.
 function findOverrideIndex(
   vevents: VCalComponent[],
-  updatedEvent: CalendarEvent
+  updatedEvent: CalendarEvent,
+  storedVtimezones: VCalComponent[]
 ): number {
   const id = updatedEvent.recurrenceId
   if (!id) {
@@ -74,14 +83,44 @@ function findOverrideIndex(
   if (exactIndex !== -1) {
     return exactIndex
   }
-  return storedIds.findIndex(
+  const isSameInstant = (storedId: VObjectProperty | undefined): boolean =>
+    storedId !== undefined &&
+    sameRecurrence(
+      { value: storedId[3], tzid: storedTzid(storedId, storedVtimezones) },
+      { value: id },
+      updatedEvent.timezone
+    )
+  const certainIndex = storedIds.findIndex(
     storedId =>
       storedId &&
-      sameRecurrence(
-        { value: storedId[3], tzid: getTzidParam(storedId[1]) },
-        { value: id },
-        updatedEvent.timezone
-      )
+      hasCertainInstant(storedId, storedVtimezones) &&
+      isSameInstant(storedId)
+  )
+  return certainIndex !== -1 ? certainIndex : storedIds.findIndex(isSameInstant)
+}
+
+// The TZID to read a stored value in: the zone a VTIMEZONE names for a TZID
+// moment-timezone does not know
+function storedTzid(
+  storedId: VObjectProperty,
+  storedVtimezones: VCalComponent[]
+): string | undefined {
+  const tzid = getTzidParam(storedId[1])
+  if (!tzid || isMomentZone(resolveTimezone(tzid))) {
+    return tzid
+  }
+  return vtimezoneLocation(tzid, storedVtimezones) ?? tzid
+}
+
+function hasCertainInstant(
+  storedId: VObjectProperty,
+  storedVtimezones: VCalComponent[]
+): boolean {
+  const tzid = storedTzid(storedId, storedVtimezones)
+  return (
+    /Z$/.test(String(storedId[3])) ||
+    !tzid ||
+    isMomentZone(resolveTimezone(tzid))
   )
 }
 
