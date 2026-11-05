@@ -103,7 +103,11 @@ function vtimezoneTzid([, props]: VCalComponent): string | undefined {
 
 function toIcalTimezone(vtimezone: VCalComponent): ICAL.Timezone | undefined {
   try {
-    return new ICAL.Timezone(new ICAL.Component(vtimezone as unknown[]))
+    const zone = new ICAL.Timezone(new ICAL.Component(vtimezone as unknown[]))
+    // ical.js only reads the observances on first use: a zone it cannot expand
+    // is not registered, and reads like a TZID without a VTIMEZONE
+    zone.utcOffset(ICAL.Time.fromJSDate(new Date(), true))
+    return zone
   } catch {
     return undefined
   }
@@ -192,6 +196,19 @@ function publicOffsetAtInstant(zone: ICAL.Timezone, instantMs: number): number {
  * one: it keeps the old offset for an hour after each change.
  */
 function offsetAtInstant(zone: ICAL.Timezone, instantMs: number): number {
+  try {
+    return expandedOffsetAtInstant(zone, instantMs)
+  } catch {
+    // Expanding up to the year of the instant can fail after the registration
+    // succeeded, for an earlier year: read it as a zone without a VTIMEZONE
+    return 0
+  }
+}
+
+function expandedOffsetAtInstant(
+  zone: ICAL.Timezone,
+  instantMs: number
+): number {
   if (zone === ICAL.Timezone.utcTimezone) return 0
   const internals = zoneInternals(zone)
   if (!internals) return publicOffsetAtInstant(zone, instantMs)
