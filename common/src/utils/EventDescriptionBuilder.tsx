@@ -1,3 +1,10 @@
+import de from '@common/locales/de.json'
+import en from '@common/locales/en.json'
+import es from '@common/locales/es.json'
+import fr from '@common/locales/fr.json'
+import it from '@common/locales/it.json'
+import ru from '@common/locales/ru.json'
+import vi from '@common/locales/vi.json'
 import { Attachment } from '@common/types/Attachment'
 import { sanitizeHtml } from './sanitizeUtils'
 import linkifyHtml from 'linkify-html'
@@ -10,6 +17,12 @@ export const SEPARATORS_NEED_HANDLE = [
   EVENT_FOOTER_SEPARATOR,
   '-::~:~::~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~::~:~::-'
 ]
+
+// The closing line of a footer depends on the language of whoever saved the
+// event, not of whoever reads it: every language is recognized
+const FOOTER_NOTICES = new Set(
+  [de, en, es, fr, it, ru, vi].map(locale => locale.event.form.doNotEditSection)
+)
 
 const ZERO_WIDTH_SPACE = '​'
 
@@ -103,9 +116,10 @@ export class EventDescriptionBuilder {
    *
    * That ":" alone is ambiguous: a note between two separators appended after
    * the footer may hold one too, and would then claim the footer's closing
-   * separator. Pairs shaped the way `withFooter` writes them (a blank line
-   * then a last notice line) are therefore removed first; the ":" heuristic
-   * only applies between them, e.g. to footers written by older versions.
+   * separator. Pairs closed the way `withFooter` closes them (a blank line then
+   * a known notice) are therefore removed first; the ":" heuristic only applies
+   * between them, e.g. to footers written by older versions. Any other last
+   * paragraph is user text, which must not take a separator from such a footer.
    *
    * Removing a block joins the separators around it, which may form a new
    * pair: the removal is repeated until the text no longer changes, so that
@@ -198,17 +212,17 @@ export class EventDescriptionBuilder {
     return blocks.reverse()
   }
 
-  // Whether text[from, to) ends with a blank line then a single non blank
-  // line, the "do not edit" notice `withFooter` closes its block with
+  // Whether text[from, to) ends with a blank line then the "do not edit" notice
+  // `withFooter` closes its block with
   private endsWithNotice(from: number, to: number): boolean {
     let lineEnd = to
     while (lineEnd > from && /\s/.test(this.text[lineEnd - 1])) lineEnd--
     let lineStart = lineEnd
     while (lineStart > from && this.text[lineStart - 1] !== '\n') lineStart--
     return (
-      lineStart < lineEnd &&
       lineStart - 2 >= from &&
-      this.text[lineStart - 2] === '\n'
+      this.text[lineStart - 2] === '\n' &&
+      FOOTER_NOTICES.has(this.text.slice(lineStart, lineEnd))
     )
   }
 
