@@ -29,18 +29,18 @@ import { RepetitionObject } from '@common/types/Repetition'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
 import {
   CalendarApi,
-  DateSelectArg,
+  DateSelectInfo,
   EventApi,
-  EventClickArg,
-  EventDropArg
-} from '@fullcalendar/core'
-import { EventResizeDoneArg } from '@fullcalendar/interaction'
+  EventClickInfo,
+  EventDropInfo
+} from '@fullcalendar/react'
+import { EventResizeDoneInfo } from '@fullcalendar/react'
 import { User } from '@sentry/react'
 import moment from 'moment'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
 
 export interface EventHandlersProps {
-  setSelectedRange: (range: DateSelectArg | null) => void
+  setSelectedRange: (range: DateSelectInfo | null) => void
   setAnchorEl: (el: HTMLElement | null) => void
   calendarRef: React.RefObject<CalendarApi | null>
   dispatch: AppDispatch
@@ -99,13 +99,13 @@ const vtimezonesOf = (jcal: unknown): VCalComponent[] => {
 export const createEventHandlers = (
   props: EventHandlersProps
 ): {
-  handleDateSelect: (selectInfo: DateSelectArg | null) => void
+  handleDateSelect: (selectInfo: DateSelectInfo | null) => void
   handleClosePopover: () => void
   handleCloseEventDisplay: () => void
-  handleEventClick: (info: EventClickArg) => void
+  handleEventClick: (info: EventClickInfo) => void
   handleEventAllow: () => boolean
-  handleEventDrop: (arg: EventDropArg) => Promise<void>
-  handleEventResize: (arg: EventResizeDoneArg) => Promise<void>
+  handleEventDrop: (arg: EventDropInfo) => Promise<void>
+  handleEventResize: (arg: EventResizeDoneInfo) => Promise<void>
 } => {
   const {
     setSelectedRange,
@@ -126,7 +126,7 @@ export const createEventHandlers = (
     onEditBookingLink
   } = props
 
-  const handleDateSelect = (selectInfo: DateSelectArg | null): void => {
+  const handleDateSelect = (selectInfo: DateSelectInfo | null): void => {
     setSelectedRange(selectInfo)
     if (tempUsers) {
       setTempEvent(buildInitialTempEvent(selectInfo, timezone, tempUsers))
@@ -159,7 +159,7 @@ export const createEventHandlers = (
   }
 
   const getEventClickTarget = (
-    jsEvent?: EventClickArg['jsEvent'],
+    jsEvent?: EventClickInfo['jsEvent'],
     fallbackEl?: HTMLElement
   ): HTMLElement => {
     const target = jsEvent?.target as HTMLElement | undefined
@@ -209,7 +209,7 @@ export const createEventHandlers = (
     }
   }
 
-  const handleEventClick = (info: EventClickArg): void => {
+  const handleEventClick = (info: EventClickInfo): void => {
     info.jsEvent.preventDefault()
 
     const bookingLink = info.event.extendedProps.bookingLink as
@@ -238,7 +238,7 @@ export const createEventHandlers = (
 
     setEventDisplayedId(uid)
     setEventDisplayedCalId(calId)
-    setEventDisplayedTemp(info.event._def.extendedProps.temp as boolean)
+    setEventDisplayedTemp(info.event.extendedProps.temp as boolean)
   }
 
   const handleEventAllow = (): boolean => {
@@ -259,7 +259,7 @@ export const createEventHandlers = (
   }
 
   const buildInitialTempEvent = (
-    selectInfo: DateSelectArg | null,
+    selectInfo: DateSelectInfo | null,
     tz: string,
     users: User[]
   ): CalendarEvent => {
@@ -489,7 +489,7 @@ export const createEventHandlers = (
     })
   }
 
-  const handleEventDrop = async (arg: EventDropArg): Promise<void> => {
+  const handleEventDrop = async (arg: EventDropInfo): Promise<void> => {
     await handleTimeChangeAction(
       arg.event,
       () => {
@@ -500,7 +500,7 @@ export const createEventHandlers = (
     )
   }
 
-  const handleEventResize = async (arg: EventResizeDoneArg): Promise<void> => {
+  const handleEventResize = async (arg: EventResizeDoneInfo): Promise<void> => {
     await handleTimeChangeAction(
       arg.event,
       () => ({

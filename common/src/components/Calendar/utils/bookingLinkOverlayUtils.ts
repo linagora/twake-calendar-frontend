@@ -1,5 +1,5 @@
 import moment from 'moment-timezone'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import {
   AvailabilityRule,
   BookingLink,

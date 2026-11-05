@@ -11,17 +11,13 @@ import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 import { convertEventDateTimeToISO } from '@common/utils/timezone'
-import {
-  EventApi,
-  EventInput,
-  SlotLabelContentArg
-} from '@fullcalendar/core/index.js'
+import { EventApi, EventInput, SlotHeaderInfo } from '@fullcalendar/react'
 import moment from 'moment-timezone'
 import { CALENDAR_VIEWS } from './constants'
 
 export const updateSlotLabelVisibility = (
   currentTime: Date,
-  slotLabel: SlotLabelContentArg,
+  slotLabel: SlotHeaderInfo,
   timezone: string
 ): 'fc-timegrid-slot-label' | 'timegrid-slot-label-hidden' => {
   const isCurrentWeekOrDay = checkIfCurrentWeekOrDay()
@@ -77,7 +73,8 @@ export function formatEventChipTitle(
     : e.title
 }
 
-type ConvertedEvent = CalendarEvent & {
+type ConvertedEvent = Omit<CalendarEvent, 'class' | 'color'> & {
+  extendedProps: Pick<CalendarEvent, 'class'>
   id: string
   colors: Record<string, string> | undefined
   editable: boolean
@@ -174,8 +171,11 @@ function buildConvertedEvent({
   const isOrganiser = isEventOrganiser(event, effectiveEmail, calendar)
   const isPersonalEvent = extractEventBaseUuid(event.calId) === userId
 
+  const { class: classification, color, ...eventProps } = event
   const convertedEvent: ConvertedEvent = {
-    ...event,
+    ...eventProps,
+    // FullCalendar 7 uses the top-level class property for CSS classes.
+    extendedProps: { class: classification },
     // FullCalendar reconciles events by `id`, not by our `uid`. Without a
     // stable, grid-unique id it can't reliably drop chips when the event set
     // shrinks (e.g. deselecting a shared calendar) — most visibly for a
@@ -185,7 +185,7 @@ function buildConvertedEvent({
     // keeps it unique when the same uid is shared across displayed calendars.
     id: `${event.calId}/${event.uid}`,
     title: formatEventChipTitle(event, t),
-    colors: event.color,
+    colors: color,
     editable: isEventEditable(
       isPersonalEvent,
       isWriteDelegated,

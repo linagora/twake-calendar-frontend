@@ -5,7 +5,7 @@ import EventFormFields from '@common/components/Event/EventFormFields'
 import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -20,8 +20,8 @@ import { isListView } from '@common/components/Calendar/utils/constants'
 const EventPopover: React.FC<{
   open: boolean
   onClose: (refresh?: boolean) => void
-  selectedRange: DateSelectArg | null
-  setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectArg | null>>
+  selectedRange: DateSelectInfo | null
+  setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectInfo | null>>
   setDraftCalendarId?: (id: string) => void
   calendarRef: React.RefObject<CalendarApi | null>
   event?: CalendarEvent

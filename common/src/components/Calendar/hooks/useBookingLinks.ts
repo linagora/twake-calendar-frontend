@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import type { RootState } from '@common/app/store'
-import type { EventInput } from '@fullcalendar/core'
+import type { EventInput } from '@fullcalendar/react'
 import type {
   BookingLink,
   AvailabilityRule
@@ -43,8 +43,7 @@ function buildEventsForRule(
       title: link.name,
       start: startMoment.toISOString(),
       end: endMoment.toISOString(),
-      backgroundColor: link.color,
-      borderColor: link.color,
+      color: link.color,
       extendedProps: {
         calId: link.publicId,
         colors: link.color

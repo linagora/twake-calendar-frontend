@@ -1,6 +1,6 @@
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { resolveKnownTimezone } from '@common/utils/timezone'
 
@@ -40,7 +40,7 @@ export function formatEventDates(
  * Builds initial values from a user-selected range.
  */
 export function buildFromSelectedRange(
-  selectedRange: DateSelectArg,
+  selectedRange: DateSelectInfo,
   base: Partial<EventFormValues>
 ): Partial<EventFormValues> {
   const { start, end, allDay, startStr, endStr } = selectedRange

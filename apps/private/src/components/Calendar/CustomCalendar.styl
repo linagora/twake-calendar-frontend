@@ -1,11 +1,11 @@
 /* FullCalendar colours, from the twake-mui palette to follow the colour scheme */
 .fc
-  --fc-page-bg-color: var(--twake-palette-background-paper)
-  --fc-neutral-bg-color: var(--twake-palette-background-contrast)
-  --fc-neutral-text-color: var(--twake-palette-text-secondary)
-  --fc-border-color: var(--twake-palette-divider)
+  --fc-classic-background: var(--twake-palette-background-paper)
+  --fc-classic-muted: var(--twake-palette-background-contrast)
+  --fc-classic-muted-foreground: var(--twake-palette-text-secondary)
+  --fc-classic-border: var(--twake-palette-divider)
   --fc-list-event-hover-bg-color: var(--twake-palette-action-hover)
-  --fc-now-indicator-color: var(--twake-palette-primary-main)
+  --fc-classic-now: var(--twake-palette-primary-main)
 
 /* Custom main calendar view */
 .fc-theme-standard td,
@@ -197,14 +197,12 @@ th.fc-col-header-cell.fc-day
   overflow unset
 
 .fc .fc-timegrid-slot
-  height auto
-  min-height 20px !important
+  min-height 20px
 
 .fc .fc-timegrid-slot-label
   display flex
   align-items flex-start
   padding-top 2px
-  height 100%
 
 tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
   display none
@@ -218,10 +216,10 @@ tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
 .fc-dayGridMonth-view .fc-scrollgrid-section td .fc-daygrid-day-frame
     border-bottom none
 
-th.fc-col-header-cell.fc-day
+.fc-col-header-cell.fc-day
   cursor pointer
 
-th.fc-col-header-cell.fc-day:hover .fc-daygrid-day-number:not(.current-date)::after
+.fc-col-header-cell.fc-day:hover .fc-daygrid-day-number:not(.current-date)::after
   background-color var(--twake-palette-action-focus)
 
 /* Hover effects for month view using CSS */

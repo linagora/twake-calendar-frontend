@@ -1,4 +1,4 @@
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import { useTheme } from '@linagora/twake-mui'
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'

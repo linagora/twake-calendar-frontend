@@ -1,20 +1,20 @@
 import { buildFromSelectedRange, formatEventDates } from './dateResolvers'
 import type { CalendarEvent } from '@common/types/EventsTypes'
-import type { DateSelectArg } from '@fullcalendar/core'
+import type { DateSelectInfo } from '@fullcalendar/react'
 
 const allDayRanges = [
   ['a normal date', '2026-09-30', '2026-10-02', '2026-10-01'],
   ['the spring DST transition', '2026-03-07', '2026-03-09', '2026-03-08']
 ] as const
 
-function selectedRange(start: string, end: string): DateSelectArg {
+function selectedRange(start: string, end: string): DateSelectInfo {
   return {
     start: new Date(start),
     end: new Date(end),
     startStr: start,
     endStr: end,
     allDay: true
-  } as DateSelectArg
+  } as DateSelectInfo
 }
 
 describe('formatEventDates', () => {

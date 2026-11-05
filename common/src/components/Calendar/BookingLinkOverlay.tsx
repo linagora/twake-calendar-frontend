@@ -5,7 +5,7 @@ import React, {
   useSyncExternalStore
 } from 'react'
 import type { MutableRefObject } from 'react'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { createPortal } from 'react-dom'
 import { useI18n } from 'twake-i18n'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
@@ -108,9 +108,13 @@ function useCalendarContainer(
         return
       }
 
-      const body = document.querySelector('.fc .fc-timegrid-body')
-
-      setContainerElement(store, body ? (body as HTMLElement) : null)
+      // The slot lanes and day columns share the scrolling canvas. The body
+      // also contains the separate all-day row.
+      const lane = document.querySelector<HTMLElement>(
+        '.fc .calendar-time-lane'
+      )
+      const canvas = lane?.parentElement?.parentElement
+      setContainerElement(store, canvas ?? null)
     }, CONTAINER_FIND_DELAY_MS)
 
     return (): void => {

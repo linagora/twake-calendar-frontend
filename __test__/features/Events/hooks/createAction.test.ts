@@ -15,7 +15,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
-import type { DateSelectArg } from '@fullcalendar/core'
+import type { DateSelectInfo } from '@fullcalendar/react'
 
 vi.mock('p-map', () => ({ default: vi.fn() }))
 
@@ -206,7 +206,7 @@ describe('buildNewEvent - from a grid selection in another zone (#1398)', () => 
       startStr: '2026-09-24T05:00:00+13:00',
       endStr: '2026-09-24T06:00:00+13:00',
       allDay: false
-    } as DateSelectArg
+    } as DateSelectInfo
 
     const selected = buildFromSelectedRange(selection, {
       timezone: 'Pacific/Tongatapu'

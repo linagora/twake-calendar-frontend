@@ -3,7 +3,7 @@
  */
 
 import { getEventTimes } from '@common/components/Event/EventChip/EventChipUtils'
-import { EventContentArg } from '@fullcalendar/core'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import 'moment-timezone'
 
 vi.mock('@injected/components/Attendees/AttendeeActions', () => ({
@@ -14,11 +14,14 @@ vi.mock('@common/components/Event/EventChip/EventChip', () => ({
   EVENT_DURATION: { SHORT: 15, MEDIUM: 30, LONG: 60 }
 }))
 
-const eventOf = (start: string, end: string | null): EventContentArg['event'] =>
+const eventOf = (
+  start: string,
+  end: string | null
+): EventDisplayInfo['event'] =>
   ({
     start: new Date(start),
     end: end ? new Date(end) : null
-  }) as EventContentArg['event']
+  }) as EventDisplayInfo['event']
 
 describe('getEventTimes', () => {
   it('formats the start and the end in the time zone', () => {

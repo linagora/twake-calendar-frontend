@@ -2,7 +2,7 @@ import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { clearSearch } from '@common/features/Search/SearchSlice'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import {
   IconButton,
   Stack,

@@ -2,35 +2,37 @@ import React, { useState, useCallback } from 'react'
 import cx from 'classnames'
 import type { MutableRefObject, RefObject } from 'react'
 import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin, {
-  EventResizeDoneArg
-} from '@fullcalendar/interaction'
-import momentTimezonePlugin from '@fullcalendar/moment-timezone'
-import listPlugin from '@fullcalendar/list'
-import frLocale from '@fullcalendar/core/locales/fr'
-import esLocale from '@fullcalendar/core/locales/es'
-import deLocale from '@fullcalendar/core/locales/de'
-import itLocale from '@fullcalendar/core/locales/it'
-import ruLocale from '@fullcalendar/core/locales/ru'
-import viLocale from '@fullcalendar/core/locales/vi'
+import dayGridPlugin from '@fullcalendar/react/daygrid'
+import timeGridPlugin from '@fullcalendar/react/timegrid'
+import interactionPlugin from '@fullcalendar/react/interaction'
+import classicTheme from '@fullcalendar/react/themes/classic'
+import '@fullcalendar/react/skeleton.css'
+import '@fullcalendar/react/themes/classic/theme.css'
+import '@fullcalendar/react/themes/classic/palette.css'
+import listPlugin from '@fullcalendar/react/list'
+import frLocale from '@fullcalendar/react/locales/fr'
+import esLocale from '@fullcalendar/react/locales/es'
+import deLocale from '@fullcalendar/react/locales/de'
+import itLocale from '@fullcalendar/react/locales/it'
+import ruLocale from '@fullcalendar/react/locales/ru'
+import viLocale from '@fullcalendar/react/locales/vi'
 import type {
   CalendarApi,
   LocaleInput,
-  MoreLinkArg,
+  MoreLinkHandler,
   EventApi,
-  DateSelectArg,
-  EventClickArg,
-  EventDropArg,
-  DatesSetArg
-} from '@fullcalendar/core'
+  DateSelectInfo,
+  EventClickInfo,
+  EventDropInfo,
+  EventResizeDoneInfo,
+  DatesSetInfo
+} from '@fullcalendar/react'
 import {
   updateSlotLabelVisibility,
   sortEventsByDateTime,
   getInitialCalendarView
 } from './utils/calendarUtils'
-import { CALENDAR_VIEWS } from './utils/constants'
+import { CALENDAR_VIEWS, isListView } from './utils/constants'
 import { NoEventsContent } from './NoEventsContent'
 import { WeekNumberContent } from './WeekNumberContent'
 import { DayCellContent } from './DayCellContent'
@@ -69,18 +71,18 @@ export interface CalendarGridProps {
   onViewChange: (view: string) => void
   errorHandler: EventErrorHandler
   eventHandlers: {
-    handleDateSelect: (selectInfo: DateSelectArg | null) => void
-    handleEventClick: (info: EventClickArg) => void
+    handleDateSelect: (selectInfo: DateSelectInfo | null) => void
+    handleEventClick: (info: EventClickInfo) => void
     handleEventAllow: () => boolean
-    handleEventDrop: (arg: EventDropArg) => Promise<void>
-    handleEventResize: (arg: EventResizeDoneArg) => Promise<void>
+    handleEventDrop: (arg: EventDropInfo) => Promise<void>
+    handleEventResize: (arg: EventResizeDoneInfo) => Promise<void>
   }
   displayWeekNumbers: boolean
-  handleMoreLinkClick: (arg: MoreLinkArg) => string | void
-  datesSet: (arg: DatesSetArg) => void
+  handleMoreLinkClick: MoreLinkHandler
+  datesSet: (arg: DatesSetInfo) => void
   openEventDisplay: boolean
   visibleBookingLinks?: string[]
-  selectedRange?: DateSelectArg | null
+  selectedRange?: DateSelectInfo | null
   draftCalendarId?: string | null
   onEditBookingLink?: (link: BookingLink) => void
 }
@@ -89,7 +91,7 @@ const CALENDAR_PLUGINS = [
   dayGridPlugin,
   timeGridPlugin,
   interactionPlugin,
-  momentTimezonePlugin,
+  classicTheme,
   listPlugin
 ]
 
@@ -110,11 +112,11 @@ const CALENDAR_DEFAULT_PROPS = {
   dayMaxEvents: true,
   weekNumberFormat: { week: 'long' },
   slotDuration: '00:30:00',
-  slotLabelInterval: '01:00:00',
+  slotHeaderInterval: '01:00:00',
   scrollTimeReset: false,
   unselectAuto: false,
   allDayText: '',
-  slotLabelFormat: {
+  slotHeaderFormat: {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
@@ -128,7 +130,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   datesSet,
   ...otherProps
 }) => {
-  const { lang, t } = useI18n()
+  const { lang } = useI18n()
   const { isTooSmall: isMobile, isTablet } = useScreenSizeDetection()
   const isNotDesktop = isTablet || isMobile
 
@@ -137,7 +139,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   )
 
   const handleDatesSet = useCallback(
-    (arg: DatesSetArg) => {
+    (arg: DatesSetInfo) => {
       setDateRange({ start: arg.start, end: arg.end })
       datesSet(arg)
     },
@@ -182,7 +184,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     <>
       <div
         ref={calendarWrapperRef}
-        className={cx({
+        className={cx('fc', {
           'calendar-swipe-container': isNotDesktop,
           'hide-selection-highlight': !!otherProps.selectedRange
         })}
@@ -208,16 +210,69 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           initialView={getInitialCalendarView(otherProps.currentView, isTablet)}
           initialDate={otherProps.selectedDate}
           locale={localeMap[lang]}
-          // Some FullCalendar locales (fr, it, ru) leave the list view headers in English
-          timeHint={t('calendar.listTimeHint')}
-          eventHint={t('calendar.listEventHint')}
           hiddenDays={otherProps.hiddenDays}
           timeZone={otherProps.timezone}
           select={otherProps.eventHandlers.handleDateSelect}
-          slotLabelClassNames={arg => [
-            updateSlotLabelVisibility(new Date(), arg, otherProps.timezone)
-          ]}
-          nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
+          viewClass={({ view }) =>
+            cx('fc-view-harness', `fc-${view.type}-view`, {
+              'calendar-list-view': isListView(view.type)
+            })
+          }
+          tableBodyClass={() =>
+            otherProps.currentView === CALENDAR_VIEWS.dayGridMonth
+              ? 'fc-daygrid-body'
+              : 'fc-timegrid-body'
+          }
+          dayHeaderClass={({ inPopover, isToday }) =>
+            inPopover
+              ? 'fc-popover-header'
+              : cx('fc-col-header-cell fc-day', { 'fc-day-today': isToday })
+          }
+          dayHeaderInnerClass={({ inPopover }) =>
+            inPopover ? 'fc-popover-title' : 'fc-col-header-cell-cushion'
+          }
+          dayCellClass={({ isToday }) =>
+            cx('fc-daygrid-day', { 'fc-day-today': isToday })
+          }
+          dayCellInnerClass={({ inPopover }) =>
+            inPopover ? 'fc-popover-body' : 'fc-daygrid-day-frame'
+          }
+          dayLaneClass={({ isToday }) =>
+            cx('fc-timegrid-col', { 'fc-day-today': isToday })
+          }
+          slotLaneClass="fc-timegrid-slot calendar-time-lane"
+          slotHeaderClass={arg =>
+            cx(
+              'fc-timegrid-slot fc-timegrid-slot-label',
+              updateSlotLabelVisibility(new Date(), arg, otherProps.timezone)
+            )
+          }
+          slotHeaderInnerClass="fc-timegrid-slot-label-cushion fc-timegrid-slot-label-frame"
+          nowIndicatorHeaderClass="fc-timegrid-now-indicator-arrow"
+          nowIndicatorLineClass="fc-timegrid-now-indicator-line"
+          allDayHeaderInnerClass="fc-timegrid-axis-cushion"
+          listDaysClass="fc-list"
+          listDayHeaderClass="fc-list-day"
+          noEventsClass="fc-list-empty"
+          eventClass={({ isSelected }) =>
+            cx('fc-event', { 'fc-event-selected': isSelected })
+          }
+          columnEventClass="fc-timegrid-event"
+          columnEventBeforeClass={({ isStartResizable }) =>
+            isStartResizable ? 'fc-event-resizer-start' : ''
+          }
+          columnEventAfterClass={({ isEndResizable }) =>
+            isEndResizable ? 'fc-event-resizer-end' : ''
+          }
+          listItemEventClass="fc-list-event"
+          listItemEventTimeClass="fc-list-event-time"
+          listItemEventBeforeClass="fc-list-event-graphic"
+          eventInnerClass="fc-event-main"
+          popoverClass="fc-popover fc-more-popover"
+          popoverCloseClass="fc-popover-close"
+          moreLinkClass="fc-daygrid-more-link"
+          highlightClass="fc-highlight"
+          nowIndicatorHeaderContent={viewHandlers.handleNowIndicatorContent}
           noEventsContent={() => (
             <NoEventsContent
               isPending={isPending}
@@ -228,8 +283,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           moreLinkClick={otherProps.handleMoreLinkClick}
           moreLinkContent={arg => (
             <MoreLinkContent
-              text={arg.text}
-              shortText={arg.shortText}
+              text={arg.longText}
+              shortText={arg.numericText}
               isCompact={isMobile}
             />
           )}
@@ -241,15 +296,15 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             otherProps.currentView === CALENDAR_VIEWS.timeGridWeek ||
             otherProps.currentView === CALENDAR_VIEWS.timeGridDay
           }
-          weekNumberContent={arg => (
+          weekNumberHeaderContent={arg => (
             <WeekNumberContent
-              num={arg.num}
+              num={arg.num ?? 0}
               displayWeekNumbers={otherProps.displayWeekNumbers}
               timezone={otherProps.timezone}
               selectedDate={otherProps.selectedDate}
             />
           )}
-          dayCellContent={arg => (
+          dayCellTopContent={arg => (
             <DayCellContent
               date={arg.date}
               view={arg.view}
