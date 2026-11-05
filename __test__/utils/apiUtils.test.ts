@@ -55,7 +55,7 @@ describe('api client authorization', () => {
     setTokenSet({ access_token: 'calendar-token' })
 
     await api.get('auth/token_exchange', {
-      prefixUrl: 'https://drive.example.com'
+      prefix: 'https://drive.example.com'
     })
 
     expect(sent[0].url).toBe('https://drive.example.com/auth/token_exchange')
