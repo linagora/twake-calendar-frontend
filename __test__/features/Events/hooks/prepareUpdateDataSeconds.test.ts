@@ -141,3 +141,56 @@ describe('prepareUpdateData - DTSTART/DTEND with seconds (#1905)', () => {
     expect(bob(newEvent)).toMatchObject({ partstat: 'NEEDS-ACTION' })
   })
 })
+
+describe('prepareUpdateData - the minute the form shows (#2000)', () => {
+  it('keeps an end with seconds in a zone whose offset has seconds', () => {
+    const event = eventWithSeconds(
+      '1970-06-11T10:44:30.000Z',
+      '1970-06-11T11:15:15.000Z',
+      'Africa/Monrovia'
+    )
+    const values = formValues(event)
+    expect(values.end).toBe('1970-06-11T10:30')
+
+    const { newEvent } = save(event, values)
+
+    expect(new Date(newEvent.end ?? '').toISOString()).toBe(
+      '1970-06-11T11:15:15.000Z'
+    )
+    expect(bob(newEvent)).toMatchObject({ partstat: 'ACCEPTED', rsvp: 'FALSE' })
+  })
+
+  it('keeps a start in the second reading of a repeated hour', () => {
+    const event = eventWithSeconds(
+      '2026-11-01T06:30:00.000Z', // 01:30 EST, after 01:30 EDT
+      '2026-11-01T07:30:00.000Z',
+      'America/New_York'
+    )
+
+    const { newEvent } = save(event, formValues(event))
+
+    expect(new Date(newEvent.start).toISOString()).toBe(
+      '2026-11-01T06:30:00.000Z'
+    )
+    expect(bob(newEvent)).toMatchObject({ partstat: 'ACCEPTED', rsvp: 'FALSE' })
+  })
+
+  it('still sees a change of the minute in such a zone', () => {
+    const event = eventWithSeconds(
+      '1970-06-11T10:44:30.000Z',
+      '1970-06-11T11:15:15.000Z',
+      'Africa/Monrovia'
+    )
+
+    const { newEvent } = save(event, {
+      ...formValues(event),
+      end: '1970-06-11T10:31',
+      hasEndDateChanged: true
+    })
+
+    expect(new Date(newEvent.end ?? '').toISOString()).toBe(
+      '1970-06-11T11:15:30.000Z'
+    )
+    expect(bob(newEvent)).toMatchObject({ partstat: 'NEEDS-ACTION' })
+  })
+})

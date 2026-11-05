@@ -1,6 +1,7 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUtils'
+import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
 import {
   findStoredAttendee,
   updateAttendeesAfterTimeChange
@@ -297,12 +298,18 @@ export function prepareUpdateData({
       timezone: values.timezone,
       showMore,
       hasEndDateChanged: values.hasEndDateChanged
-    })
+    }),
+    values.timezone
   )
 
   const referenceEvent =
     typeOfAction === 'all' && masterEvent ? masterEvent : event
-  const timeChanged = hasEventTimeChanged(referenceEvent, startISO, endISO)
+  const timeChanged = hasEventTimeChanged(
+    referenceEvent,
+    startISO,
+    endISO,
+    values.timezone
+  )
   const newCalId = values.calendarid
 
   const newEvent = prepareUpdatedEvent({
@@ -336,24 +343,28 @@ export function prepareUpdateData({
   }
 }
 
-const MINUTE_MS = 60 * 1000
-
-function truncateToMinute(date: string | undefined): number {
-  const time = new Date(date ?? '').getTime()
-  return Math.floor(time / MINUTE_MS) * MINUTE_MS
-}
-
-function isSameMinute(a: string | undefined, b: string | undefined): boolean {
-  return truncateToMinute(a) === truncateToMinute(b)
+// Compared the way the form shows them, in its zone: the minutes of UTC only
+// are the minutes of the form when the offset of the zone has no seconds, and
+// the hour repeated at the end of summer time shows the same minute twice.
+function isSameFormMinute(
+  a: string | undefined,
+  b: string | undefined,
+  timezone: string
+): boolean {
+  const shownA = formatLocalDateTime(new Date(a ?? ''), timezone)
+  return (
+    shownA !== '' && shownA === formatLocalDateTime(new Date(b ?? ''), timezone)
+  )
 }
 
 // The form only holds minutes: when it still shows the stored minute, keep
 // the stored instant so that the seconds of DTSTART/DTEND survive the save.
 function keepStoredBoundary(
   stored: string | undefined,
-  resolved: string
+  resolved: string,
+  timezone: string
 ): string {
-  return stored && isSameMinute(stored, resolved)
+  return stored && isSameFormMinute(stored, resolved, timezone)
     ? new Date(stored).toISOString()
     : resolved
 }
@@ -361,12 +372,13 @@ function keepStoredBoundary(
 function keepStoredSeconds(
   event: CalendarEvent,
   allday: boolean,
-  range: { startISO: string; endISO: string }
+  range: { startISO: string; endISO: string },
+  timezone: string
 ): { startISO: string; endISO: string } {
   if (allday || event.allday) return range
   return {
-    startISO: keepStoredBoundary(event.start, range.startISO),
-    endISO: keepStoredBoundary(event.end, range.endISO)
+    startISO: keepStoredBoundary(event.start, range.startISO, timezone),
+    endISO: keepStoredBoundary(event.end, range.endISO, timezone)
   }
 }
 
@@ -375,10 +387,12 @@ function keepStoredSeconds(
 function hasEventTimeChanged(
   event: CalendarEvent,
   startISO: string,
-  endISO: string
+  endISO: string,
+  timezone: string
 ): boolean {
   return (
-    !isSameMinute(event.start, startISO) || !isSameMinute(event?.end, endISO)
+    !isSameFormMinute(event.start, startISO, timezone) ||
+    !isSameFormMinute(event?.end, endISO, timezone)
   )
 }
 
