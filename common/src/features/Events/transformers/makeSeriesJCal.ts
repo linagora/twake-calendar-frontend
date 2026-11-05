@@ -15,6 +15,8 @@ import {
   parseInstant
 } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
+import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
+import { getTzidParam } from './recurrenceInstant'
 import { makeSeriesVtimezones } from './seriesVtimezones'
 import { mergeStoredRrule } from './storedRrule'
 
@@ -199,6 +201,33 @@ const shiftWallClockValue = (
   return instant.utc().format(`${WALL_CLOCK_FORMAT}[Z]`)
 }
 
+// The shift is measured in the zone of the series: a value in another zone moves
+// by it there, and stays written in its own zone. Moved in its own wall clock, it
+// would not follow the occurrence across a change of offset only one zone has.
+const shiftInSeriesZone = (
+  value: string,
+  shiftMs: number,
+  ownZone: string,
+  seriesZone: string
+): string => {
+  const instant = moment.tz(value, ownZone)
+  if (!instant.isValid()) return value
+  const shifted = moment
+    .utc(instant.tz(seriesZone).format(WALL_CLOCK_FORMAT))
+    .add(shiftMs, 'ms')
+    .format(WALL_CLOCK_FORMAT)
+  return moment.tz(shifted, seriesZone).tz(ownZone).format(WALL_CLOCK_FORMAT)
+}
+
+const otherKnownZone = (
+  tzid: string | undefined,
+  seriesZone: string | undefined
+): string | undefined => {
+  if (!tzid || !isMomentZone(seriesZone)) return undefined
+  const zone = resolveTimezone(tzid)
+  return isMomentZone(zone) && zone !== seriesZone ? zone : undefined
+}
+
 // Shift every value of a DATE-TIME property (EXDATE may hold several)
 const shiftDateTimeProp = (
   prop: VObjectProperty,
@@ -207,11 +236,17 @@ const shiftDateTimeProp = (
 ): VObjectProperty => {
   const [name, params, type, ...values] = prop
   if (shiftMs === 0 || type !== 'date-time') return prop
+  const seriesZone = resolveTimezone(tz)
+  const ownZone = otherKnownZone(getTzidParam(params), seriesZone)
   return [
     name,
     params,
     type,
-    ...values.map(value => shiftWallClockValue(value, shiftMs, tz))
+    ...values.map(value =>
+      ownZone && typeof value === 'string' && !value.endsWith('Z')
+        ? shiftInSeriesZone(value, shiftMs, ownZone, seriesZone)
+        : shiftWallClockValue(value, shiftMs, tz)
+    )
   ] as VObjectProperty
 }
 
