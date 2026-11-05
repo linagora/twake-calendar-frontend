@@ -4,6 +4,11 @@ export function formatDate(
   timeZone: string,
   allday?: boolean
 ): string {
+  // A start the client cannot read (a second 60...) gives no text, as in
+  // formatEnd, instead of "Invalid Date"
+  if (isNaN(new Date(date).getTime())) {
+    return ''
+  }
   if (allday) {
     // All-day dates are floating YYYY-MM-DD values parsed as UTC midnight
     return new Date(date).toLocaleDateString(t('locale'), {
