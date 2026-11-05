@@ -380,3 +380,21 @@ describe('a floating UNTIL on a series edit (#1948)', () => {
     expect(ruleOf(jCal)).toEqual({ ...weekly, until: '20251104T080000Z' })
   })
 })
+
+describe('parseRepetitionRule count', () => {
+  it.each(['/', '5DTEND', '', '1.5', '-2', 0])(
+    'leaves out the count %j',
+    count => {
+      const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
+      expect(parseRepetitionRule(rule).occurrences).toBeFalsy()
+    }
+  )
+
+  it.each([
+    [5, 5],
+    ['5', 5]
+  ])('reads the count %j as a number', (count, expected) => {
+    const rule = { freq: 'YEARLY', count } as unknown as RepetitionRule
+    expect(parseRepetitionRule(rule).occurrences).toBe(expected)
+  })
+})
