@@ -292,6 +292,23 @@ export function wallClockOf(instant: moment.Moment, timezone: string): string {
     .format(WALL_CLOCK_FORMAT)
 }
 
+// The basic format of RFC 5545 (20250315T100000Z) in the extended one of jCal,
+// which Date and moment read. Any other value is returned as is.
+export function normalizeBasicDateTime(datetime: string): string {
+  const match = datetime.match(
+    /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})?(Z|[+-]\d{2}:?\d{2})?$/
+  )
+  if (!match) {
+    return datetime
+  }
+  const [, year, month, day, hour, min, sec, tz] = match
+  let tzFormatted = tz ?? ''
+  if (tz && tz !== 'Z' && !tz.includes(':')) {
+    tzFormatted = tz.slice(0, 3) + ':' + tz.slice(3)
+  }
+  return `${year}-${month}-${day}T${hour}:${min}${sec ? `:${sec}` : ''}${tzFormatted}`
+}
+
 export function convertEventDateTimeToISO(
   datetime: string | undefined,
   timezone: string,
@@ -300,18 +317,7 @@ export function convertEventDateTimeToISO(
   if (!datetime || !timezone) return undefined
   if (options?.isAllDay) return undefined
 
-  let normalized = datetime
-  const match = datetime.match(
-    /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})?(Z|[+-]\d{2}:?\d{2})?$/
-  )
-  if (match) {
-    const [, year, month, day, hour, min, sec, tz] = match
-    let tzFormatted = tz ?? ''
-    if (tz && tz !== 'Z' && !tz.includes(':')) {
-      tzFormatted = tz.slice(0, 3) + ':' + tz.slice(3)
-    }
-    normalized = `${year}-${month}-${day}T${hour}:${min}${sec ? `:${sec}` : ''}${tzFormatted}`
-  }
+  const normalized = normalizeBasicDateTime(datetime)
 
   if (normalized.includes('Z') || normalized.match(/[+-]\d{2}:\d{2}$/)) {
     return normalized
