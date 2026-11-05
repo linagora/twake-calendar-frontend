@@ -379,19 +379,28 @@ function processEventDates(
   }
 
   if (!event.end) {
+    // A wall clock is read in the zone of the event, not of the browser
     const start = event.start
-      ? new Date(normalizeBasicDateTime(event.start))
+      ? new Date(
+          (eventTimezone &&
+            convertEventDateTimeToISO(event.start, eventTimezone)) ||
+            normalizeBasicDateTime(event.start)
+        )
       : new Date()
     const timeToAdd = duration
       ? moment.duration(duration).asMilliseconds()
       : moment.duration(30, 'minutes').asMilliseconds()
-    // A start the client cannot read (a second 60...) gives no end to compute
-    event.end = isNaN(start.getTime())
-      ? event.start
-      : formatDateTimeToICal(
-          new Date(start.getTime() + timeToAdd),
-          eventTimezone
-        )
+    const artificialEnd = new Date(start.getTime() + timeToAdd)
+    if (isNaN(start.getTime())) {
+      // A start the client cannot read (a second 60...) gives no end to compute
+      event.end = event.start
+    } else {
+      // The instant itself: a wall clock in the hour repeated at the end of
+      // summer time would be read back as its first occurrence
+      event.end = eventTimezone
+        ? artificialEnd.toISOString()
+        : formatDateTimeToICal(artificialEnd, eventTimezone)
+    }
   }
 
   if (!event.allday && eventTimezone) {
