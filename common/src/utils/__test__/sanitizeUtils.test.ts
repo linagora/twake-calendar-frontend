@@ -68,6 +68,45 @@ describe('sanitizeUtils', () => {
       )
     })
 
+    it.each([
+      'el66:x',
+      'ps8://visio.exam',
+      'foo:x',
+      'javascript:alert(1)',
+      'JAVASCRIPT:alert(1)',
+      'java\tscript:alert(1)',
+      ' javascript:alert(1)',
+      'j4vascript:alert(1)',
+      'data:text/html,x',
+      'vbscript:x',
+      'file:///etc/passwd',
+      'blob:https://example.com/x'
+    ])('should drop the link scheme of %j', href => {
+      const link = document.createElement('div')
+      link.innerHTML = sanitizeHtml(`<a href="${href}">y</a>`)
+      expect(link.querySelector('a')?.hasAttribute('href')).toBe(false)
+      expect(link.textContent).toBe('y')
+    })
+
+    it.each([
+      'https://example.com/a1:b',
+      'http://example.com',
+      'ftp://example.com',
+      'mailto:a@b.co',
+      'tel:+33123',
+      'matrix:r/room',
+      '/relative1:x',
+      './a1:b',
+      'relative/a:b',
+      'page1?a=b:c',
+      '#top1',
+      '?q=1:2'
+    ])('should keep the href %s', href => {
+      const link = document.createElement('div')
+      link.innerHTML = sanitizeHtml(`<a href="${href}">y</a>`)
+      expect(link.querySelector('a')?.getAttribute('href')).toBe(href)
+    })
+
     it('should open links without a target in a new tab', () => {
       const input = '<a href="https://example.com">link</a>'
       expect(sanitizeHtml(input)).toBe(
