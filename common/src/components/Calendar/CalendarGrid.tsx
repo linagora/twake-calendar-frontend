@@ -117,6 +117,7 @@ const CALENDAR_DEFAULT_PROPS = {
   dayMaxEvents: true,
   weekNumberFormat: { week: 'long' },
   slotDuration: '00:30:00',
+  slotMinHeight: 25,
   slotHeaderInterval: '01:00:00',
   scrollTimeReset: false,
   unselectAuto: false,
@@ -245,6 +246,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           dayLaneClass={({ isToday }) =>
             cx('fc-timegrid-col', { 'fc-day-today': isToday })
           }
+          dayLaneInnerClass="calendar-time-events"
           slotLaneClass={({ isMinor }) =>
             cx('fc-timegrid-slot calendar-time-lane', {
               'fc-timegrid-slot-minor': isMinor

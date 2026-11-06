@@ -190,6 +190,20 @@ th.fc-col-header-cell.fc-day
 .fc .fc-timegrid-col.fc-day-today
   --fc-classic-today: transparent
 
+// Stack events above booking links and let clicks through the empty parts of the layer.
+.fc .fc-timegrid-col
+  z-index auto
+
+.fc [aria-hidden='true']:has(> div > .calendar-time-lane)
+  pointer-events none
+
+.fc .calendar-time-events
+  z-index 2
+  pointer-events none
+
+  > *
+    pointer-events auto
+
 .fc .fc-daygrid-day.fc-day-today
   background-color var(--twake-palette-background-paper)
 
@@ -384,6 +398,7 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
     display flex
     flex-direction row
     align-items center
+    padding: 0
 
 .fc-timegrid-event-harness-inset .fc-timegrid-event
   box-shadow none
