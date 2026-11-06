@@ -113,7 +113,7 @@ function useCalendarContainer(
       const lane = document.querySelector<HTMLElement>(
         '.fc .calendar-time-lane'
       )
-      const canvas = lane?.parentElement?.parentElement
+      const canvas = lane?.parentElement?.parentElement?.parentElement
       setContainerElement(store, canvas ?? null)
     }, CONTAINER_FIND_DELAY_MS)
 
