@@ -66,7 +66,7 @@ npm run fmt
 
 ## Running it
 
-Requirement: **Node 24+**
+Requirement: **Node 24.15.0 or later in the 24.x line**
 
 First, install the dependencies from the root directory:
 
