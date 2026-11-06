@@ -9,7 +9,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
@@ -264,32 +264,33 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = anEventAt(calendar, "Refused move", "09:00", "10:00");
         String before = dtStart(probe, user);
+        // Drop clear of the save notification, which can cover evening slots
+        // just after the event is created.
+        String destination = "11:00:00";
 
         // Refuse every write towards a calendar, whatever verb carries it: a move does not
         // necessarily travel as a PUT, and letting the real one through would have the event
         // move for good while the test believes it was refused.
-        AtomicInteger refused = new AtomicInteger();
+        AtomicBoolean refused = new AtomicBoolean();
         page.route("**/*", route -> {
             String method = route.request().method();
             boolean write = "PUT".equals(method) || "POST".equals(method)
                 || "PATCH".equals(method) || "DELETE".equals(method);
             if (write && route.request().url().contains("calendars")) {
-                refused.incrementAndGet();
                 route.fulfill(new com.microsoft.playwright.Route.FulfillOptions()
                     .setStatus(500).setBody("nope"));
+                refused.set(true);
             } else {
                 route.resume();
             }
         });
-        calendar.tryDragEventToSlot(title, E2EClock.today(), "19:00:00", () -> refused.get() > 0);
+        calendar.tryDragEventToSlot(title, E2EClock.today(), destination, refused::get);
 
-        assertThat(refused.get())
-            .as("the grid registered the move and handed it to the server")
-            .isPositive();
+        page.waitForCondition(refused::get, new Page.WaitForConditionOptions().setTimeout(10_000));
         Awaitility.await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
-            assertThat(calendar.eventSitsOnSlot(title, "19:00:00"))
-                .as("a move the server refused must not be left on screen")
-                .isFalse());
+            assertThat(calendar.eventSitsOnSlot(title, "09:00:00"))
+                .as("the refused move returns the event to its original slot")
+                .isTrue());
 
         // Writes stay refused until the end: the drop reads the event before writing it, and
         // a write going out once the route is gone would move the event for real.
