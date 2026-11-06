@@ -960,9 +960,10 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
       )
       const input = await waitFor(() => screen.getByTestId('start-time-input'))
       // Change time to 2:00 PM (14:00)
-      userEvent.click(input)
-      userEvent.clear(input)
-      userEvent.type(input, '14:00{enter}')
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      await user.click(input)
+      await user.clear(input)
+      await user.type(input, '14:00{enter}')
 
       const saveButton = screen.getByRole('button', { name: 'actions.save' })
 

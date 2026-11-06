@@ -19,12 +19,12 @@ const preloadedState = {
 }
 
 describe('MobileEventSearchBar', () => {
-  it('keeps the Clear button on the same line as the typed text', () => {
+  it('keeps the Clear button on the same line as the typed text', async () => {
     renderWithProviders(<MobileSearchBar />, preloadedState)
 
     const input = screen.getByPlaceholderText('common.search')
     expect(input).toHaveClass('MuiAutocomplete-input')
-    userEvent.type(input, 'batch')
+    await userEvent.type(input, 'batch')
 
     const clearButton = screen.getByRole('button', { name: 'common.clear' })
     const inputRoot = input.closest('.MuiAutocomplete-inputRoot')

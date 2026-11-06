@@ -156,14 +156,14 @@ describe('EventSearchBar', () => {
     expect(searchInput).not.toBeInTheDocument()
   })
 
-  it('should not unexpand search bar when field is unfocused but not empty', () => {
+  it('should not unexpand search bar when field is unfocused but not empty', async () => {
     renderWithProviders(<SearchBar />, preloadedState)
 
     const searchButton = screen.getByRole('button')
     fireEvent.click(searchButton)
 
     const searchInput = screen.getByPlaceholderText('common.search')
-    userEvent.type(searchInput, 'test')
+    await userEvent.type(searchInput, 'test')
     fireEvent.blur(searchInput)
     expect(searchInput).toBeInTheDocument()
     expect(searchInput).toHaveValue('test')
@@ -546,11 +546,11 @@ describe('EventSearchBar', () => {
     expect(screen.getByPlaceholderText('common.search')).toBeInTheDocument()
   })
 
-  it('keeps input value after popover closes if not empty', () => {
+  it('keeps input value after popover closes if not empty', async () => {
     renderWithProviders(<SearchBar />, preloadedState)
 
     fireEvent.click(screen.getByRole('button'))
-    userEvent.type(screen.getByPlaceholderText('common.search'), 'hello')
+    await userEvent.type(screen.getByPlaceholderText('common.search'), 'hello')
 
     const tuneBtn = screen
       .getAllByRole('button')

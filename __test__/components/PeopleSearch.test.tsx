@@ -13,6 +13,8 @@ vi.mock('@common/features/User/UserDao')
 const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
 
 describe('PeopleSearch', () => {
+  let user: ReturnType<typeof userEvent.setup>
+
   const baseUser: SearchResponseItem = new SearchResponseItem({
     id: '1234567890',
     emailAddresses: [{ value: 'test@example.com' }],
@@ -39,6 +41,7 @@ describe('PeopleSearch', () => {
 
   beforeEach(() => {
     vi.useFakeTimers()
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     mockedSearchUsers.mockReset()
   })
 
@@ -51,7 +54,7 @@ describe('PeopleSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -66,13 +69,13 @@ describe('PeopleSearch', () => {
     const { onChange } = setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
 
     const option = await screen.findByText('Test User')
-    await userEvent.click(option)
+    await user.click(option)
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalled()
@@ -90,7 +93,7 @@ describe('PeopleSearch', () => {
       }
     ])
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -120,7 +123,7 @@ describe('PeopleSearch', () => {
     setup()
     const input = screen.getByRole('combobox')
 
-    userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -129,7 +132,7 @@ describe('PeopleSearch', () => {
       expect(screen.getByRole('listbox')).toBeInTheDocument()
     })
 
-    userEvent.clear(input)
+    await user.clear(input)
 
     await waitFor(() => {
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
@@ -141,7 +144,7 @@ describe('PeopleSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
 
     await act(async () => {
       vi.advanceTimersByTime(300)
@@ -162,7 +165,7 @@ describe('PeopleSearch', () => {
     setup([], { hideOptions: true, onSearchStateChange })
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'zz')
+    await user.type(input, 'zz')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -172,7 +175,7 @@ describe('PeopleSearch', () => {
       )
     )
 
-    await userEvent.clear(input)
+    await user.clear(input)
 
     expect(onSearchStateChange).toHaveBeenLastCalledWith({
       query: '',
@@ -198,7 +201,7 @@ describe('PeopleSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -209,8 +212,8 @@ describe('PeopleSearch', () => {
     })
 
     mockedSearchUsers.mockRejectedValueOnce(new Error('Network error'))
-    await userEvent.clear(input)
-    await userEvent.type(input, 'Error')
+    await user.clear(input)
+    await user.type(input, 'Error')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -222,8 +225,8 @@ describe('PeopleSearch', () => {
     expect(screen.queryByText('Test User')).not.toBeInTheDocument()
 
     mockedSearchUsers.mockResolvedValueOnce([baseUser])
-    await userEvent.clear(input)
-    await userEvent.type(input, 'Test')
+    await user.clear(input)
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -243,7 +246,7 @@ describe('PeopleSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Test')
+    await user.type(input, 'Test')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -572,7 +575,7 @@ describe('PeopleSearch', () => {
     const input = screen.getByRole('combobox')
 
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await user.type(input, 'Test')
     })
 
     await waitFor(() => {
@@ -596,7 +599,7 @@ describe('PeopleSearch', () => {
       setup([], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'valid@example.com')
+      await user.type(input, 'valid@example.com')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })
@@ -609,7 +612,7 @@ describe('PeopleSearch', () => {
       const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'space@example.com')
+      await user.type(input, 'space@example.com')
 
       fireEvent.keyDown(input, { key: ' ' })
 
@@ -626,7 +629,7 @@ describe('PeopleSearch', () => {
       const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'Jean Dupont')
+      await user.type(input, 'Jean Dupont')
 
       expect(input).toHaveValue('Jean Dupont')
       expect(onChange).not.toHaveBeenCalled()
@@ -645,7 +648,7 @@ describe('PeopleSearch', () => {
       })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'BOB@Open-Paas.org')
+      await user.type(input, 'BOB@Open-Paas.org')
 
       fireEvent.keyDown(input, { key: ' ' })
 
@@ -668,7 +671,7 @@ describe('PeopleSearch', () => {
       })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'BOB@Open-Paas.org')
+      await user.type(input, 'BOB@Open-Paas.org')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })
@@ -696,7 +699,7 @@ describe('PeopleSearch', () => {
       })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'TEST@Example.com')
+      await user.type(input, 'TEST@Example.com')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })
@@ -722,11 +725,11 @@ describe('PeopleSearch', () => {
       const { onChange } = setup([existing], { showWarningOnDuplicate: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'Test')
+      await user.type(input, 'Test')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })
-      await userEvent.click(await screen.findByRole('option'))
+      await user.click(await screen.findByRole('option'))
 
       expect(onChange).not.toHaveBeenCalled()
       expect(
@@ -742,13 +745,13 @@ describe('PeopleSearch', () => {
       setup([existing], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'bob@open-paas.org')
+      await user.type(input, 'bob@open-paas.org')
       fireEvent.keyDown(input, { key: ' ' })
       expect(
         screen.getByText('peopleSearch.emailAlreadyAdded')
       ).toBeInTheDocument()
 
-      await userEvent.type(input, 'a')
+      await user.type(input, 'a')
 
       expect(
         screen.queryByText('peopleSearch.emailAlreadyAdded')
@@ -775,7 +778,7 @@ describe('PeopleSearch', () => {
       })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'space@example.com')
+      await user.type(input, 'space@example.com')
 
       fireEvent.keyDown(input, { key: ' ' })
 
@@ -788,7 +791,7 @@ describe('PeopleSearch', () => {
       const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'Test')
+      await user.type(input, 'Test')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })
@@ -816,7 +819,7 @@ describe('PeopleSearch', () => {
       const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
 
       const input = screen.getByRole('combobox')
-      await userEvent.type(input, 'Test')
+      await user.type(input, 'Test')
       await act(async () => {
         vi.advanceTimersByTime(300)
       })

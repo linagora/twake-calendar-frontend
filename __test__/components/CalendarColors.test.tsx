@@ -86,7 +86,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -135,7 +135,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -193,7 +193,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -233,7 +233,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -270,7 +270,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -324,7 +324,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     const option = await screen.findByText('Test User')
@@ -399,7 +399,7 @@ describe('RegisterCalendars', () => {
 
     const input = screen.getByRole('combobox')
     await act(async () => {
-      userEvent.type(input, 'Test')
+      await userEvent.type(input, 'Test')
     })
 
     await waitFor(() => {

@@ -41,10 +41,10 @@ describe('MobileEventSearchBar', () => {
     renderWithProviders(<MobileSearchBar />, preloadedState)
     const input = screen.getByPlaceholderText('common.search')
 
-    userEvent.type(input, 'Orgfilter')
+    await userEvent.type(input, 'Orgfilter')
     expect(input).toHaveValue('Orgfilter')
 
-    userEvent.click(screen.getByRole('button', { name: 'common.clear' }))
+    await userEvent.click(screen.getByRole('button', { name: 'common.clear' }))
 
     await waitFor(() => expect(input).toHaveValue(''))
     expect(
@@ -52,13 +52,13 @@ describe('MobileEventSearchBar', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('does not append a new keyword to the cleared one', () => {
+  it('does not append a new keyword to the cleared one', async () => {
     renderWithProviders(<MobileSearchBar />, preloadedState)
     const input = screen.getByPlaceholderText('common.search')
 
-    userEvent.type(input, 'Orgfilter')
-    userEvent.click(screen.getByRole('button', { name: 'common.clear' }))
-    userEvent.type(input, 'budget')
+    await userEvent.type(input, 'Orgfilter')
+    await userEvent.click(screen.getByRole('button', { name: 'common.clear' }))
+    await userEvent.type(input, 'budget')
 
     expect(input).toHaveValue('budget')
   })

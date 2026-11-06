@@ -13,6 +13,8 @@ vi.mock('@common/features/User/UserDao')
 const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
 
 describe('ResourceSearch', () => {
+  let user: ReturnType<typeof userEvent.setup>
+
   const baseResource: SearchResponseItem = new SearchResponseItem({
     id: '1234567890',
     names: [{ displayName: 'Projector Room' }]
@@ -36,6 +38,7 @@ describe('ResourceSearch', () => {
 
   beforeEach(() => {
     vi.useFakeTimers()
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     mockedSearchUsers.mockReset()
   })
 
@@ -58,7 +61,7 @@ describe('ResourceSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -75,13 +78,13 @@ describe('ResourceSearch', () => {
     const { onChange } = setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
 
     const option = await screen.findByText('Projector Room')
-    await userEvent.click(option)
+    await user.click(option)
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalled()
@@ -94,7 +97,7 @@ describe('ResourceSearch', () => {
     ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     setup([{ displayName: 'Projector Room' }])
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Projector')
+    await user.type(input, 'Projector')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -120,7 +123,7 @@ describe('ResourceSearch', () => {
     setup()
     const input = screen.getByRole('combobox')
 
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -129,7 +132,7 @@ describe('ResourceSearch', () => {
       expect(screen.getByRole('listbox')).toBeInTheDocument()
     })
 
-    await userEvent.clear(input)
+    await user.clear(input)
 
     await waitFor(() => {
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
@@ -141,7 +144,7 @@ describe('ResourceSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
 
     await act(async () => {
       vi.advanceTimersByTime(300)
@@ -164,7 +167,7 @@ describe('ResourceSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -175,8 +178,8 @@ describe('ResourceSearch', () => {
     })
 
     mockedSearchUsers.mockRejectedValueOnce(new Error('Network error'))
-    await userEvent.clear(input)
-    await userEvent.type(input, 'Error')
+    await user.clear(input)
+    await user.type(input, 'Error')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -190,8 +193,8 @@ describe('ResourceSearch', () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
     ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
-    await userEvent.clear(input)
-    await userEvent.type(input, 'Room')
+    await user.clear(input)
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
       await Promise.resolve()
@@ -213,7 +216,7 @@ describe('ResourceSearch', () => {
     setup()
 
     const input = screen.getByRole('combobox')
-    await userEvent.type(input, 'Room')
+    await user.type(input, 'Room')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
