@@ -3,6 +3,8 @@ package com.linagora.calendar.e2e.pages;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.options.WaitUntilState;
 
 /** The Dex login form the SPA redirects to when no session is present. */
 public class LoginPage {
@@ -14,8 +16,9 @@ public class LoginPage {
 
     /** Goes through the whole OIDC dance and returns once the calendar is usable. */
     public static CalendarPage loginAs(Page page, E2EUser user) {
-        page.navigate("/");
-        return new LoginPage(page).submit(user);
+        LoginPage login = new LoginPage(page);
+        login.openCalendar();
+        return login.submit(user);
     }
 
     public CalendarPage submit(E2EUser user) {
@@ -23,12 +26,12 @@ public class LoginPage {
         fill(user.email(), user.password());
         submit();
         if (!landsOnTheCalendar()) {
-            // the token exchange of the callback is a single request, and Chromium drops the
-            // requests in flight whenever a network interface of the host comes or goes -- any
-            // container started on a shared CI agent. Not what a login test is about: go again.
-            System.out.println("[e2e] the OIDC callback failed, logging in again");
-            page.navigate("/");
-            page.waitForURL(url -> url.contains("/auth") || url.contains("/calendar"));
+            // A dropped token exchange can land on /error or leave the callback stalled.
+            // Restart once from the app, using the Dex session if it was already established.
+            System.out.println("[e2e] the OIDC callback did not reach the calendar, logging in again");
+            openCalendar();
+            page.waitForURL(url -> url.contains("/auth") || url.contains("/calendar"),
+                new Page.WaitForURLOptions().setWaitUntil(WaitUntilState.COMMIT));
             if (page.url().contains("/auth")) {
                 loginField().waitFor();
                 fill(user.email(), user.password());
@@ -40,15 +43,24 @@ public class LoginPage {
         // see E2EClock. Start it over from the root rather than reloading the calendar: the tokens
         // live in the memory of the page, and a reloaded calendar would draw itself -- and fire
         // its requests, answered by 401 -- before signing back in through the SSO.
-        CalendarPage.signInAgain(page, () -> page.navigate("/", new Page.NavigateOptions()
-            .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.COMMIT)));
+        CalendarPage.signInAgain(page, this::openCalendar);
         calendar.waitUntilLoaded();
         return calendar;
     }
 
+    private void openCalendar() {
+        // The next step waits for the specific page it needs; a page load is not a login signal.
+        page.navigate("/", new Page.NavigateOptions().setWaitUntil(WaitUntilState.COMMIT));
+    }
+
     private boolean landsOnTheCalendar() {
-        page.waitForURL(url -> url.contains("/calendar") || url.contains("/error"));
-        return !page.url().contains("/error");
+        try {
+            page.waitForURL(url -> url.contains("/calendar") || url.contains("/error"),
+                new Page.WaitForURLOptions().setWaitUntil(WaitUntilState.COMMIT));
+            return !page.url().contains("/error");
+        } catch (TimeoutError callbackStalled) {
+            return false;
+        }
     }
 
     /** Fills the form without submitting it, for the tests that assert on what it does next. */
@@ -69,7 +81,7 @@ public class LoginPage {
             // the address it was given.
             System.out.println("[e2e] the SPA did not reach the SSO, reloading it");
             page.reload(new Page.ReloadOptions()
-                .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.COMMIT));
+                .setWaitUntil(WaitUntilState.COMMIT));
             page.waitForURL("**/auth**");
         }
         loginField().waitFor();
@@ -80,7 +92,7 @@ public class LoginPage {
         try {
             page.waitForURL("**/auth**", new Page.WaitForURLOptions().setTimeout(15_000));
             return true;
-        } catch (com.microsoft.playwright.TimeoutError notThereYet) {
+        } catch (TimeoutError notThereYet) {
             return false;
         }
     }
