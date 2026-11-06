@@ -69,7 +69,9 @@ export function getSlotDurationMinutes(
 }
 
 export function getSlotHeightPixels(container: HTMLElement): number {
-  const slotEl = container.querySelector('.fc-timegrid-slot')
+  const slotEl =
+    container.querySelector('.calendar-time-lane') ??
+    container.querySelector('.fc-timegrid-slot')
   return slotEl?.getBoundingClientRect().height ?? 0
 }
 
@@ -93,9 +95,13 @@ export function getTimeSlotOffset(
   container: HTMLElement,
   time: string
 ): number | null {
-  const slotEl = container.querySelector<HTMLElement>(
-    `.fc-timegrid-slot[data-time="${time}"]`
-  )
+  const slotEl =
+    container.querySelector<HTMLElement>(
+      `.calendar-time-lane[data-time="${time}"]`
+    ) ??
+    container.querySelector<HTMLElement>(
+      `.fc-timegrid-slot[data-time="${time}"]`
+    )
   return slotEl?.offsetTop ?? null
 }
 
@@ -121,9 +127,9 @@ export function findFirstTimeSlot(container: HTMLElement): {
   element: HTMLElement
   time: string
 } | null {
-  const firstSlot = container.querySelector<HTMLElement>(
-    '.fc-timegrid-slot[data-time]'
-  )
+  const firstSlot =
+    container.querySelector<HTMLElement>('.calendar-time-lane[data-time]') ??
+    container.querySelector<HTMLElement>('.fc-timegrid-slot[data-time]')
   if (!firstSlot) return null
 
   const time = firstSlot.getAttribute('data-time')
