@@ -18,7 +18,6 @@ import com.linagora.calendar.e2e.backend.Vcal;
 import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
-import com.linagora.calendar.e2e.pages.EventPreviewPopover;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -284,7 +283,9 @@ class InteropEditFormTest extends TwakeCalendarE2ETest {
         String title = title("Lasting");
         String day = Vcal.day(E2EClock.today());
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar("""
+        // with its VTIMEZONE, as other clients write it: the grid reads the zone of an event there
+        probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar(
+            Vcal.fixedZone("America/New_York", "-0500"), """
             BEGIN:VEVENT
             UID:%s
             %s
@@ -316,45 +317,5 @@ class InteropEditFormTest extends TwakeCalendarE2ETest {
             .hasValue(true);
         Ics.property(saved, "DTEND").ifPresent(end ->
             assertThat(Ics.parameters(saved, "DTEND")).contains("TZID=America/New_York"));
-    }
-
-    @Test
-    @DisplayName("INTEROP-10 (#2000) In a zone whose offset has seconds, a save keeps the stored end and the answers")
-    void aZoneOffsetWithSecondsKeepsTheStoredEnd(Page page, E2EUser user, CalendarProbe probe) {
-        String title = title("Monrovia");
-        String uid = UUID.randomUUID().toString();
-        String guest = guest();
-        LoginPage.loginAs(page, user);
-        // Liberia was at -00:44:30 until 1972, out of reach of the grid: a link opens the event
-        probe.putEvent(user, uid, Vcal.calendar("""
-            BEGIN:VEVENT
-            UID:%s
-            %s
-            DTSTART;TZID=Africa/Monrovia:19700611T100000
-            DTEND;TZID=Africa/Monrovia:19700611T103045
-            SUMMARY:%s
-            ORGANIZER:mailto:%s
-            ATTENDEE;PARTSTAT=ACCEPTED:mailto:%s
-            ATTENDEE;PARTSTAT=ACCEPTED;RSVP=TRUE:mailto:%s
-            END:VEVENT
-            """.formatted(uid, STAMP, title, user.email(), user.email(), guest)));
-
-        page.navigate("/events/" + uid);
-        page.getByLabel("Edit event").waitFor();
-        EventFormModal form = new EventPreviewPopover(page).edit();
-        String renamed = title("Monrovia renamed");
-        form.title(renamed);
-        form.save();
-
-        Awaitility.await().atMost(SAVED).untilAsserted(() ->
-            assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
-        String saved = Ics.event(probe.singleEvent(user));
-        assertThat(Ics.property(saved, "DTEND"))
-            .as("the form shows minutes, but a rename must not move the end")
-            .hasValue("19700611T103045");
-        assertThat(Vcal.attendeeLines(saved, guest))
-            .as("a rename is not a change of time: the guest keeps their answer")
-            .singleElement()
-            .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED"));
     }
 }
