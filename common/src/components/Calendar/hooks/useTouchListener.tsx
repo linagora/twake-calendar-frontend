@@ -1,4 +1,4 @@
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import { endOfDay } from 'date-fns'
 import moment from 'moment-timezone'
 import { RefObject, useEffect } from 'react'
@@ -34,7 +34,7 @@ export function buildSelectArg(
   date: string,
   time: string,
   timezone: string
-): DateSelectArg {
+): DateSelectInfo {
   const start = moment.tz(`${date}T${time}`, timezone)
   const end = start.clone().add(30, 'minutes')
   return {
@@ -43,7 +43,7 @@ export function buildSelectArg(
     startStr: start.format(),
     endStr: end.format(),
     allDay: false
-  } as DateSelectArg
+  } as DateSelectInfo
 }
 
 function isAllDayTap(x: number, y: number): string | null {
@@ -55,12 +55,12 @@ function isAllDayTap(x: number, y: number): string | null {
   ) {
     return null
   }
-  const dayCell = el?.closest('.fc-daygrid-body td.fc-daygrid-day[data-date]')
+  const dayCell = el?.closest('.fc-daygrid-body .fc-daygrid-day[data-date]')
   return dayCell?.getAttribute('data-date') ?? null
 }
 
 export function useTouchListener(
-  handleDateSelect: (selectInfo: DateSelectArg | null) => void,
+  handleDateSelect: (selectInfo: DateSelectInfo | null) => void,
   isTouch: boolean,
   wrapperRef: RefObject<HTMLDivElement>,
   timezone: string
@@ -102,7 +102,7 @@ export function useTouchListener(
           start: startOfDay,
           end: endDate,
           allDay: true
-        } as DateSelectArg)
+        } as DateSelectInfo)
       }
     }
 

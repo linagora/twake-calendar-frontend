@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { isListView } from '@common/components/Calendar/utils/constants'
-import { EventApi, EventInput } from '@fullcalendar/core'
+import { EventApi, EventInput } from '@fullcalendar/react'
 import { sortEventsByDateTime } from '@common/components/Calendar/utils/calendarUtils'
 
 export const useFindUpcommingEvent = (

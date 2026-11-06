@@ -90,7 +90,7 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
 
         calendar.switchView("Schedule");
 
-        assertThat(calendar.currentViewClass()).contains("fc-list");
+        assertThat(calendar.currentViewClass()).contains("calendar-list-view");
         String listed = page.locator(".fc-view-harness").innerText();
         assertThat(listed.indexOf(morning))
             .as("the schedule reads in time order")
@@ -205,8 +205,10 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
         page.waitForTimeout(3000);
 
         Object scrollTop = page.evaluate(
-            "() => { const s = document.querySelector('.fc-timegrid .fc-scroller-liquid-absolute')"
-            + " || document.querySelector('.fc-timegrid .fc-scroller'); return s ? s.scrollTop : -1; }");
+            "() => { let scroller = document.querySelector('.fc-timegrid-body .calendar-time-lane');"
+            + " while (scroller && getComputedStyle(scroller).overflowY !== 'auto') {"
+            + "   scroller = scroller.parentElement;"
+            + " } return scroller?.scrollTop ?? -1; }");
         assertThat(((Number) scrollTop).doubleValue())
             .as("midnight is never what the user wants to see first")
             .isGreaterThan(0);

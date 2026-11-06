@@ -4,7 +4,7 @@ import {
   createViewHandlers,
   ViewHandlersProps
 } from '@common/components/Calendar/handlers/viewHandlers'
-import { CalendarApi, EventInput } from '@fullcalendar/core'
+import { CalendarApi, EventInput } from '@fullcalendar/react'
 import { getInitialCalendarView } from '../utils/calendarUtils'
 
 export const useSyncCalendarView = (
@@ -48,7 +48,6 @@ export const useWebKitSizeSync = (
     if (!api || !wrapper) return
 
     const raf = requestAnimationFrame(() => {
-      api.updateSize()
       wrapper.style.transform = 'translateZ(0)'
       requestAnimationFrame(() => {
         wrapper.style.transform = ''

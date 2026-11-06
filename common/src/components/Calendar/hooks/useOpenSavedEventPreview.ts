@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import type { CalendarApi, EventApi } from '@fullcalendar/core'
+import type { CalendarApi, EventApi } from '@fullcalendar/react'
 import type { AppDispatch } from '@common/app/store'
 import { getEventByUid } from '@common/features/Calendars/CalendarSlice'
 import type { SavedEvent } from '@common/features/Events/eventSaveFeedbackSlice'

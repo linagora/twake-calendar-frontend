@@ -1,5 +1,5 @@
-import type { EventApi } from '@fullcalendar/core'
-import type { EventImpl } from '@fullcalendar/core/internal'
+import type { EventApi } from '@fullcalendar/react'
+import type { EventDisplayInfo } from '@fullcalendar/react'
 
 export const isVisibleInRange = (
   event: EventApi,
@@ -12,7 +12,7 @@ export const isVisibleInRange = (
   // FullCalendar stores its configured default end in the instance range even
   // when the public end is null. Convert its date marker through the calendar's
   // date environment so named time zones and all-day durations stay consistent.
-  const internalEvent = event as EventImpl
+  const internalEvent = event as EventDisplayInfo['event']
   const end =
     event.end ??
     (internalEvent._instance

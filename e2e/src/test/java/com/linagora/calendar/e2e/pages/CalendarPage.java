@@ -146,7 +146,7 @@ public class CalendarPage {
 
     /** All day events live in their own row, above the time grid. */
     public Locator allDayEventCards() {
-        return page.locator(".fc-daygrid-body " + EVENT_CARD);
+        return page.locator(".fc-timegrid-body .fc-daygrid-day " + EVENT_CARD);
     }
 
     // -------------------------------------------------------------- navigation
@@ -245,7 +245,7 @@ public class CalendarPage {
     /** FullCalendar view class, e.g. {@code fc-dayGridMonth-view}. */
     public String currentViewClass() {
         return String.valueOf(page.evaluate(
-            "() => document.querySelector('.fc-view-harness').firstElementChild.className"));
+            "() => document.querySelector('.fc-view-harness').className"));
     }
 
     /** The date range currently displayed, as the column headers spell it. */
@@ -372,7 +372,7 @@ public class CalendarPage {
     }
 
     public Locator weekNumber() {
-        return page.locator(".fc-timegrid-axis-cushion");
+        return page.locator(".fc-timegrid-week-number");
     }
 
     // ------------------------------------------------------------------- menus
@@ -643,6 +643,10 @@ public class CalendarPage {
         return page.locator(".fc-timegrid-slot[data-time='" + slot + "']").first();
     }
 
+    private Locator dayCell(String view, java.time.LocalDate day) {
+        return page.locator(".fc-" + view + "-view .fc-daygrid-day[data-date='" + day + "']").first();
+    }
+
     /** Same day of the week grid, another column: only the date changes. */
     public CalendarPage dragEventToDay(String title, java.time.LocalDate day) {
         BoundingBox column = requireBox(
@@ -655,17 +659,15 @@ public class CalendarPage {
 
     /** Drags an event of the month grid onto another day cell. */
     public CalendarPage dragMonthEventToDay(String title, java.time.LocalDate day) {
-        BoundingBox cell = requireBox(
-            page.locator(".fc-daygrid-day[data-date='" + day + "'] .fc-daygrid-day-frame").first(),
-            "the cell of " + day);
+        Locator dayCell = dayCell("dayGridMonth", day);
+        BoundingBox cell = requireBox(dayCell, "the cell of " + day);
         boolean moved = dragUntilMoved(
             () -> {
                 BoundingBox now = boxOf(eventCard(title).first(), "the card of " + title);
                 drag(now.x + now.width / 2, now.y + now.height / 2,
                     cell.x + cell.width / 2, cell.y + cell.height / 2);
             },
-            () -> page.locator(".fc-daygrid-day[data-date='" + day + "'] "
-                + EVENT_CARD).filter(new Locator.FilterOptions().setHasText(title)).count() > 0);
+            () -> dayCell.locator(EVENT_CARD).filter(new Locator.FilterOptions().setHasText(title)).count() > 0);
         if (!moved) {
             throw new AssertionError("The grid never registered the gesture: move "
                 + title + " to " + day);
@@ -694,37 +696,32 @@ public class CalendarPage {
 
     /** Same, for a resize the grid is entitled to refuse. */
     public boolean tryResizeEventEndTo(String title, String slot) {
-        return resize(title, "end", slot, box -> box.y + box.height);
-    }
-
-    private boolean resize(String title, String edge, String slot,
-                                java.util.function.ToDoubleFunction<BoundingBox> movingEdge) {
-        Locator harness = eventCard(title).first();
-        harness.hover();
-        // the resizers are children of the outer FullCalendar event, not of the card we render
-        // inside it: `fc-event-main` is the closest ancestor matching `fc-event`, and holds none
-        Locator handle = harness.locator("xpath=ancestor::*[contains(@class,'fc-timegrid-event')][1]")
-            .locator(".fc-event-resizer-" + edge);
-        if (handle.count() == 0) {
-            throw new AssertionError("No " + edge + " resize handle on " + title
-                + ", the event is probably not editable");
-        }
-        BoundingBox target = requireBox(
-            page.locator(".fc-timegrid-slot[data-time='" + slot + "']").first(), "the " + slot + " slot");
-        harness.hover();
-        BoundingBox card = boxOf(harness, "the card of " + title);
-        BoundingBox grip = boxOf(handle.first(), "the " + edge + " handle of " + title);
-        double gripCentreY = grip.y + grip.height / 2;
+        Locator card = eventCard(title).first();
+        Locator event = page.locator(".fc-timegrid-event")
+            .filter(new Locator.FilterOptions().setHas(card)).first();
+        Locator handle = event.locator(".fc-event-resizer-end");
+        Locator targetSlot = page.locator(".calendar-time-lane[data-time='" + slot + "']").first();
+        dismissEventPreview();
+        requireBox(targetSlot, "the " + slot + " slot");
         return dragUntilMoved(
             () -> {
-                harness.hover();
-                BoundingBox now = boxOf(harness, "the card of " + title);
-                drag(grip.x + grip.width / 2, gripCentreY,
-                    grip.x + grip.width / 2,
-                    gripCentreY + (target.y - movingEdge.applyAsDouble(now)));
+                card.hover();
+                BoundingBox target = boxOf(targetSlot, "the " + slot + " slot");
+                BoundingBox current = boxOf(event, "the event " + title);
+                BoundingBox grip = boxOf(handle, "the end handle of " + title);
+                double x = grip.x + grip.width / 2;
+                double y = grip.y + grip.height / 4;
+                // FullCalendar resizes by the difference between the slots under the pointer.
+                // Move by whole slots so rounding at the end boundary cannot change that difference.
+                double end = current.y + current.height;
+                long slotsToMove = Math.round((target.y - end) / target.height);
+                drag(x, y, x, y + slotsToMove * target.height);
             },
-            () -> Math.abs(movingEdge.applyAsDouble(
-                boxOf(harness, "the card of " + title)) - target.y) < 12);
+            () -> {
+                BoundingBox current = boxOf(event, "the event " + title);
+                BoundingBox target = boxOf(targetSlot, "the " + slot + " slot");
+                return Math.abs(current.y + current.height - target.y) < target.height / 2;
+            });
     }
 
     /**
@@ -759,17 +756,15 @@ public class CalendarPage {
             }
             // a click opened the preview instead: put it away before trying again. Best effort,
             // since a gesture the grid refused outright leaves nothing to dismiss.
-            if (page.getByLabel("Edit event").count() > 0) {
-                page.keyboard().press("Escape");
-                try {
-                    page.getByLabel("Edit event").first().waitFor(new Locator.WaitForOptions()
-                        .setState(WaitForSelectorState.DETACHED).setTimeout(3_000));
-                } catch (com.microsoft.playwright.TimeoutError ignored) {
-                    page.mouse().click(5, 5);
-                }
-            }
+            dismissEventPreview();
         }
         return false;
+    }
+
+    private void dismissEventPreview() {
+        if (page.getByLabel("Edit event").first().isVisible()) {
+            new EventPreviewPopover(page).close();
+        }
     }
 
     /** Brings an element into view, then measures it. */
@@ -795,15 +790,13 @@ public class CalendarPage {
 
     /** Clicks the all day row of a day in the week view, which starts an all day event on that day. */
     public EventFormModal selectAllDayCell(java.time.LocalDate day) {
-        page.locator(".fc-timeGridWeek-view .fc-daygrid-day[data-date='" + day + "'] .fc-daygrid-day-frame")
-            .first().click();
+        dayCell("timeGridWeek", day).click();
         return new EventFormModal(page).waitUntilOpen();
     }
 
     /** Clicks a day cell of the month grid, which starts an all day event on that day. */
     public EventFormModal selectMonthCell(java.time.LocalDate day) {
-        page.locator(".fc-daygrid-day[data-date='" + day + "'] .fc-daygrid-day-frame").first()
-            .click(new Locator.ClickOptions().setPosition(20, 40));
+        dayCell("dayGridMonth", day).click(new Locator.ClickOptions().setPosition(20, 40));
         return new EventFormModal(page).waitUntilOpen();
     }
 
@@ -950,12 +943,16 @@ public class CalendarPage {
             .pollInterval(java.time.Duration.ofSeconds(3))
             .until(() -> {
                 search(keywords);
-                return page.getByText(expected).count() > 0;
+                return searchResultList().getByText(expected).first().isVisible();
             });
         return this;
     }
 
     public String searchResults() {
-        return page.locator("body").innerText();
+        return searchResultList().innerText();
+    }
+
+    private Locator searchResultList() {
+        return page.locator(".search-result-content-body");
     }
 }

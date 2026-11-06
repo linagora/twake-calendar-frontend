@@ -6,7 +6,7 @@ import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
-import { EventClickArg } from '@fullcalendar/core'
+import { EventClickInfo } from '@fullcalendar/react'
 
 const calId = '667037022b752d0026472254/cal1'
 
@@ -42,13 +42,13 @@ const calendars: Record<string, Calendar> = {
   } as unknown as Calendar
 }
 
-function clickOn(uid: string): EventClickArg {
+function clickOn(uid: string): EventClickInfo {
   const info = {
     jsEvent: { preventDefault: vi.fn(), target: document.body },
     el: document.body,
     event: { extendedProps: { uid, calId }, _def: { extendedProps: {} } }
   }
-  return info as unknown as EventClickArg
+  return info as unknown as EventClickInfo
 }
 
 function openEvent(uid: string): void {

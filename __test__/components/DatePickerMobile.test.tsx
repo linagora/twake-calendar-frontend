@@ -1,5 +1,5 @@
 import type { Mock } from 'vitest'
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import {
   act,
   render as rtlRender,

@@ -1,4 +1,4 @@
-import type { CalendarApi, EventApi } from '@fullcalendar/core'
+import type { CalendarApi, EventApi } from '@fullcalendar/react'
 import { act, renderHook } from '@testing-library/react'
 import type { AppDispatch } from '@common/app/store'
 import { getEventByUid } from '@common/features/Calendars/CalendarSlice'

@@ -1,4 +1,4 @@
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import { useTheme } from '@linagora/twake-mui'
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
@@ -105,7 +105,6 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
   const handlePickDate = (newDate: PickerValue): void => {
     onChangeDate(newDate)
     onCloseDatePicker()
-    calendarRef.current?.updateSize?.()
   }
 
   return (

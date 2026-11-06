@@ -8,7 +8,7 @@ import {
 } from '@common/components/Calendar/handlers/eventHandlers'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'

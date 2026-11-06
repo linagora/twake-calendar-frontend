@@ -8,8 +8,8 @@ import { fetchEvent } from '@common/features/Events/EventDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { EventDropArg } from '@fullcalendar/core'
-import { EventResizeDoneArg } from '@fullcalendar/interaction'
+import { EventDropInfo } from '@fullcalendar/react'
+import { EventResizeDoneInfo } from '@fullcalendar/react'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -77,7 +77,7 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
       event: { extendedProps: { uid: occurrence.uid, calId } },
       delta: { years: 0, months: 0, days: 2, milliseconds: 0 },
       revert
-    } as unknown as EventDropArg)
+    } as unknown as EventDropInfo)
     await afterChoice()(undefined)
 
     expect(revert).toHaveBeenCalledTimes(1)
@@ -93,7 +93,7 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
       startDelta: { years: 0, months: 0, days: 0, milliseconds: 0 },
       endDelta: { years: 0, months: 0, days: 1, milliseconds: 0 },
       revert
-    } as unknown as EventResizeDoneArg)
+    } as unknown as EventResizeDoneInfo)
     await afterChoice()(undefined)
 
     expect(revert).toHaveBeenCalledTimes(1)
@@ -107,7 +107,7 @@ describe('Dismissing the recurrent event dialog after a drag (#1764)', () => {
       event: { extendedProps: { uid: occurrence.uid, calId } },
       delta: { years: 0, months: 0, days: 2, milliseconds: 0 },
       revert
-    } as unknown as EventDropArg)
+    } as unknown as EventDropInfo)
     await afterChoice()('solo')
 
     expect(revert).not.toHaveBeenCalled()

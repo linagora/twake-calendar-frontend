@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { EventSaveFeedback } from '@common/components/Calendar/EventSaveFeedback'
 import feedbackReducer, {
   eventSaved

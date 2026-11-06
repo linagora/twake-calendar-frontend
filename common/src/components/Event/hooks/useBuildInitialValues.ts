@@ -5,7 +5,7 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useEventOrganizer } from '@common/features/Events/useEventOrganizer'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import {
   buildFromExistingEvent,
   buildFromSelectedRange,
@@ -15,12 +15,12 @@ import { useDefaultCalendarId } from '@common/features/Calendars/hooks/useDefaul
 
 export interface UseBuildInitialValuesParams {
   event?: CalendarEvent | null
-  selectedRange?: DateSelectArg | null
+  selectedRange?: DateSelectInfo | null
   calId?: string
 }
 
 const isValidToInitBySelectedRange = (
-  selectedRange: DateSelectArg | null | undefined,
+  selectedRange: DateSelectInfo | null | undefined,
   event: CalendarEvent | null | undefined
 ): boolean => {
   if (!selectedRange) return false
@@ -88,7 +88,7 @@ export const useBuildInitialValues = ({
     if (isInitFromSelectedRange) {
       return {
         ...defaultEvent,
-        ...buildFromSelectedRange(selectedRange ?? ({} as DateSelectArg), base)
+        ...buildFromSelectedRange(selectedRange ?? ({} as DateSelectInfo), base)
       }
     }
 
