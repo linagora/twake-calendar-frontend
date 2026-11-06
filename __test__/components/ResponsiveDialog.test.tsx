@@ -490,6 +490,114 @@ describe('ResponsiveDialog', () => {
     expect(screen.getByLabelText('eventPreview.showLess')).toBeInTheDocument()
   })
 
+  describe('dragging (#1805)', () => {
+    const paperOf = (title: string): HTMLElement =>
+      screen.getByText(title).closest('.MuiDialog-paper') as HTMLElement
+
+    const titleOf = (title: string): HTMLElement =>
+      screen.getByText(title).closest('.draggable-dialog-title') as HTMLElement
+
+    // jsdom has no PointerEvent, whose coordinates come from MouseEvent anyway
+    const pointer = (
+      type: string,
+      element: HTMLElement,
+      init: MouseEventInit = {}
+    ): void => {
+      fireEvent(element, new MouseEvent(type, { bubbles: true, ...init }))
+    }
+
+    const press = (element: HTMLElement): void => {
+      pointer('pointerdown', element, {
+        buttons: 1,
+        clientX: 100,
+        clientY: 100
+      })
+    }
+
+    const moveTo = (
+      element: HTMLElement,
+      clientX: number,
+      buttons = 1
+    ): void => {
+      pointer('pointermove', element, { buttons, clientX, clientY: 100 })
+    }
+
+    beforeEach(() => {
+      HTMLElement.prototype.setPointerCapture = vi.fn()
+    })
+
+    const renderNestedDialogs = (): void => {
+      renderWithTheme(
+        <ResponsiveDialog
+          open={true}
+          onClose={mockOnClose}
+          title="Outer"
+          draggable
+          actions={
+            <ResponsiveDialog
+              open={true}
+              onClose={mockOnClose}
+              title="Inner"
+              draggable
+            >
+              <div>Inner content</div>
+            </ResponsiveDialog>
+          }
+        >
+          <div>Outer content</div>
+        </ResponsiveDialog>
+      )
+    }
+
+    it('moves only the dialog whose title is dragged', () => {
+      renderNestedDialogs()
+      const inner = paperOf('Inner')
+      const outer = paperOf('Outer')
+
+      press(titleOf('Inner'))
+      moveTo(inner, 150)
+      pointer('pointerup', inner)
+
+      expect(inner.style.transform).toBe('translate(50px, 0px)')
+      expect(outer.style.transform).toBe('')
+      expect(HTMLElement.prototype.setPointerCapture).toHaveBeenCalledTimes(1)
+    })
+
+    it('stops following the cursor after the release', () => {
+      renderNestedDialogs()
+      const inner = paperOf('Inner')
+
+      press(titleOf('Inner'))
+      moveTo(inner, 150)
+      pointer('pointerup', inner)
+      moveTo(inner, 300, 0)
+
+      expect(inner.style.transform).toBe('translate(50px, 0px)')
+    })
+
+    it.each([
+      ['no button is pressed anymore', (p: HTMLElement) => moveTo(p, 200, 0)],
+      [
+        'the pointer is cancelled',
+        (p: HTMLElement) => pointer('pointercancel', p)
+      ],
+      [
+        'the pointer capture is lost',
+        (p: HTMLElement) => pointer('lostpointercapture', p)
+      ]
+    ])('stops dragging when %s', (_, interrupt) => {
+      renderNestedDialogs()
+      const inner = paperOf('Inner')
+
+      press(titleOf('Inner'))
+      moveTo(inner, 150)
+      interrupt(inner)
+      moveTo(inner, 300)
+
+      expect(inner.style.transform).toBe('translate(50px, 0px)')
+    })
+  })
+
   describe('fullscreen-view body class', () => {
     const expandableDialog = (props: {
       open: boolean
