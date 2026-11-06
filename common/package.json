@@ -35,7 +35,7 @@
     "ky": "^2.2.0",
     "lodash": "^4.17.23",
     "moment": "^2.30.1",
-    "moment-timezone": "^0.6.6",
+    "moment-timezone": "^0.5.48",
     "p-map": "^7.1.1",
     "react": "^18.2.0",
     "react-colorful": "^5.8.1",
