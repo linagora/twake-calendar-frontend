@@ -103,7 +103,6 @@
     "eslint": "10.14.0",
     "history": "^5.3.0",
     "jsdom": "^26.1.0",
-    "preact": "^10.12.1",
     "rslint-config-cozy-app": "^0.2.0",
     "rstack": "0.8.6",
     "ts-node": "^10.9.2",

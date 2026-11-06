@@ -131,7 +131,6 @@ export default defineConfig({
     dedupe: [
       'react',
       'react-dom',
-      'preact',
       '@linagora/twake-mui',
       '@linagora/twake-icons',
       '@linagora/twake-oidc',
