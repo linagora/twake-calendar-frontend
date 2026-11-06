@@ -320,6 +320,7 @@ describe('EventPopover', () => {
   })
 
   it('adds a attendee', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     try {
       vi.spyOn(calDAO, 'fetchCalendars').mockResolvedValue({ json: vi.fn() })
       renderPopover()
@@ -331,8 +332,8 @@ describe('EventPopover', () => {
       act(() => {
         select.focus()
         fireEvent.mouseDown(select)
-        userEvent.type(select, 'john')
       })
+      await user.type(select, 'john')
       await act(async () => {
         vi.advanceTimersByTime(400)
       })
@@ -342,7 +343,7 @@ describe('EventPopover', () => {
         expect(screen.getByText('John Doe')).toBeInTheDocument()
       })
       await act(async () => {
-        userEvent.click(screen.getByText('John Doe'))
+        await user.click(screen.getByText('John Doe'))
       })
 
       const spy = vi
@@ -393,6 +394,7 @@ describe('EventPopover', () => {
   })
 
   it('adds a resource', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     try {
       renderPopover()
       fireEvent.change(screen.getByLabelText('event.form.title'), {
@@ -411,7 +413,7 @@ describe('EventPopover', () => {
         resourceCombobox.focus()
         fireEvent.mouseDown(resourceCombobox)
       })
-      await userEvent.type(resourceCombobox, 'room')
+      await user.type(resourceCombobox, 'room')
 
       await act(async () => {
         vi.advanceTimersByTime(400)
@@ -421,7 +423,7 @@ describe('EventPopover', () => {
         expect(screen.getByText('Room 1')).toBeInTheDocument()
       })
 
-      await userEvent.click(screen.getByText('Room 1'))
+      await user.click(screen.getByText('Room 1'))
 
       const spy = vi
         .spyOn(eventThunks, 'putEvent')

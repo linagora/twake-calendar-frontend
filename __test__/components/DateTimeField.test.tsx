@@ -131,7 +131,8 @@ describe('DateTimeFields', () => {
     const endTimeInput = screen.getByTestId('end-time-input')
     await userEvent.click(endTimeInput)
     await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument())
-    await userEvent.type(endTimeInput, '{selectall}12:75')
+    await userEvent.clear(endTimeInput)
+    await userEvent.type(endTimeInput, '12:75')
     expect(onInvalidTimeInputChange).toHaveBeenLastCalledWith(true)
 
     await userEvent.tab()
