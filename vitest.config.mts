@@ -170,6 +170,8 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'node',
+          // Timezone tests change TZ in the worker process.
+          pool: 'forks',
           environment: 'node',
           include: ['**/*.test.ts'],
           server: { deps: { inline: inlineFrom(NODE_INLINE) } }
