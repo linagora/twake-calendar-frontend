@@ -373,6 +373,41 @@ class SeriesInteropTest extends TwakeCalendarE2ETest {
     }
 
     @Test
+    @DisplayName("SERIES-INTEROP-18 (#1941) Renaming a whole series in a custom zone keeps the zone, the overrides and the EXDATEs")
+    void aRenameInACustomZoneKeepsTheSeriesWhole(Page page, E2EUser user, CalendarProbe probe) {
+        String zone = "Customized Time Zone";
+        String title = title("Custom series");
+        String moved = title("Custom moved");
+        String uid = UUID.randomUUID().toString();
+        String day2 = Vcal.day(today.plusDays(2));
+        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
+            Vcal.fixedZone(zone, "-0500"),
+            dailyMaster(uid, zone, title, "EXDATE;TZID=" + zone + ":" + day2 + "T090000"), """
+            BEGIN:VEVENT
+            UID:%s
+            %s
+            RECURRENCE-ID;TZID=%s:%sT090000
+            DTSTART;TZID=%s:%sT110000
+            DTEND;TZID=%s:%sT120000
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(uid, STAMP, zone, day1, zone, day1, zone, day1, moved)));
+
+        String saved = renameAndAwait(calendar.openEventOn(title, today).edit(ALL_EVENTS), user, probe,
+            title("Custom renamed"));
+
+        String master = Ics.master(saved);
+        assertThat(Ics.parameters(master, "DTSTART")).contains("TZID=" + zone);
+        assertThat(Ics.property(master, "DTSTART")).hasValue(day0 + "T090000");
+        assertThat(Vcal.vtimezoneIds(saved)).contains(zone);
+        assertThat(Ics.overrides(saved))
+            .as("a rename is no change of zone: the form only shows this one in UTC")
+            .singleElement()
+            .satisfies(override -> assertThat(Ics.property(override, "SUMMARY")).hasValue(moved));
+        assertThat(Ics.property(master, "EXDATE")).hasValue(day2 + "T090000");
+    }
+
+    @Test
     @DisplayName("SERIES-INTEROP-11 (#1886) An invitation listing the user with a padded address is answered in place")
     void aPaddedAttendeeAddressIsAnsweredInPlace(Page page, E2EUser user, E2EUserFactory users,
                                                  CalendarProbe probe) {
