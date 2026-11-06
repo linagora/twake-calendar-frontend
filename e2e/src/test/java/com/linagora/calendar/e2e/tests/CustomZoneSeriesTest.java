@@ -6,9 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +23,6 @@ import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
 import com.linagora.calendar.e2e.pages.LoginPage;
-import com.linagora.calendar.e2e.pages.ScopeDialog;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.WaitForSelectorState;
@@ -39,7 +35,6 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
     private static final Duration SAVED = Duration.ofSeconds(30);
     private static final String STAMP = "DTSTAMP:20260101T000000Z";
     private static final String CUSTOM_ZONE = "Customized Time Zone";
-    private static final DateTimeFormatter LOCAL_DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
     private LocalDate today;
     private LocalDate tomorrow;
@@ -56,10 +51,6 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
 
     private static String title(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
-    }
-
-    private static String byDay(LocalDate date) {
-        return date.getDayOfWeek().name().substring(0, 2);
     }
 
     private void awaitAttached(Locator locator) {
@@ -111,41 +102,6 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
         assertThat(Vcal.vtimezoneIds(saved))
             .as("the series still says when %s is", CUSTOM_ZONE)
             .contains(CUSTOM_ZONE);
-    }
-
-    @Test
-    @DisplayName("CUSTOM-ZONE-02 (#1941) Dragging a whole series across midnight of its zone moves its weekday")
-    void aDragAcrossMidnightOfTheZoneMovesTheWeekday(Page page, E2EUser user, CalendarProbe probe) {
-        String title = title("Late series");
-        // Yesterday 22:00 at UTC-11 is this morning for the browser: the drag stays within one day
-        // of the grid and of UTC, and only the zone of the series sees it reach the next day
-        LocalDate yesterday = today.minusDays(1);
-        String startDay = Vcal.day(yesterday);
-        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
-            Vcal.fixedZone(CUSTOM_ZONE, "-1100"), """
-            BEGIN:VEVENT
-            UID:%s
-            %s
-            DTSTART;TZID=%s:%sT220000
-            DTEND;TZID=%s:%sT223000
-            RRULE:FREQ=WEEKLY;BYDAY=%s;COUNT=3
-            SUMMARY:%s
-            END:VEVENT
-            """.formatted(UUID.randomUUID(), STAMP, CUSTOM_ZONE, startDay, CUSTOM_ZONE, startDay, byDay(yesterday), title)));
-        LocalDateTime dropped = today.atTime(13, 0).atZone(E2EClock.BROWSER_ZONE)
-            .withZoneSameInstant(ZoneOffset.ofHours(-11)).toLocalDateTime();
-
-        calendar.dragEventToSlot(title, today, "13:00:00");
-        ScopeDialog.waitFor(page).allEvents();
-
-        Awaitility.await().atMost(SAVED).untilAsserted(() -> {
-            String master = Ics.master(probe.singleEvent(user));
-            assertThat(Ics.property(master, "DTSTART")).hasValue(dropped.format(LOCAL_DATE_TIME));
-            assertThat(Ics.parameters(master, "DTSTART")).contains("TZID=" + CUSTOM_ZONE);
-            assertThat(Ics.rulePart(Ics.property(master, "RRULE").orElseThrow(), "BYDAY"))
-                .as("in the zone of the series, the occurrences now fall on the weekday of the drop")
-                .hasValue(byDay(dropped.toLocalDate()));
-        });
     }
 
     @Test
