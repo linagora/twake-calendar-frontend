@@ -22,6 +22,7 @@ import { normalizeIdentity } from '@common/utils/normalizeIdentity'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 import { getDisplayedCalendarRange } from '@common/utils'
@@ -156,7 +157,9 @@ async function handleSoloRSVP({
       return
     }
   }
-  await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
+  await assertThunkSuccess(
+    await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
+  )
 }
 
 async function handleAllRSVP({
@@ -222,7 +225,9 @@ async function handleDefaultRSVP({
     )
     return
   }
-  await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
+  await assertThunkSuccess(
+    await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
+  )
 }
 
 function getAttendeeEmail(

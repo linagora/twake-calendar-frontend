@@ -321,6 +321,7 @@
     "uploadedFileMissingId": "Failed to upload the file: missing file ID",
     "importEventFromFileFailed": "Failed to import the event from the file",
     "saveEventFailed": "The event could not be saved. Please try again.",
+    "participationUpdateFailed": "Your participation could not be updated. Please try again.",
     "deleteEventFailed": "The event could not be deleted. Please try again.",
     "loadEventsFailed": "The events could not be loaded. Please try again.",
     "requestFailed": "The server could not complete the request. Please try again."
@@ -507,7 +508,12 @@
     "months": "months",
     "years": "years",
     "alarmText": "%{trigger} by %{action}",
-    "replySentTo": "Your reply has been sent to %{organizerName}"
+    "replySentTo": "Your reply has been sent to %{organizerName}",
+    "participationUpdated": {
+      "ACCEPTED": "Invitation accepted",
+      "DECLINED": "Invitation declined",
+      "TENTATIVE": "Invitation tentatively accepted"
+    }
   },
   "dateTimeFields": {
     "date": "Date",

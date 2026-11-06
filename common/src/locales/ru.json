@@ -321,6 +321,7 @@
     "uploadedFileMissingId": "Не удалось загрузить файл: отсутствует идентификатор файла",
     "importEventFromFileFailed": "Не удалось импортировать событие из файла",
     "saveEventFailed": "Не удалось сохранить событие. Попробуйте ещё раз.",
+    "participationUpdateFailed": "Не удалось обновить статус участия. Попробуйте ещё раз.",
     "deleteEventFailed": "Не удалось удалить событие. Попробуйте ещё раз.",
     "loadEventsFailed": "Не удалось загрузить события. Попробуйте ещё раз.",
     "requestFailed": "Серверу не удалось выполнить запрос. Попробуйте ещё раз."
@@ -507,7 +508,12 @@
     "months": "месяцы",
     "years": "годы",
     "alarmText": "%{trigger} через %{action}",
-    "replySentTo": "Ваш ответ был отправлен %{organizerName}"
+    "replySentTo": "Ваш ответ был отправлен %{organizerName}",
+    "participationUpdated": {
+      "ACCEPTED": "Приглашение принято",
+      "DECLINED": "Приглашение отклонено",
+      "TENTATIVE": "Приглашение принято предварительно"
+    }
   },
   "dateTimeFields": {
     "date": "Дата",

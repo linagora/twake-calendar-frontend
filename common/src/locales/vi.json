@@ -321,6 +321,7 @@
     "uploadedFileMissingId": "Không thể tải tệp lên: thiếu ID tệp",
     "importEventFromFileFailed": "Không thể nhập sự kiện từ tệp",
     "saveEventFailed": "Không thể lưu sự kiện. Vui lòng thử lại.",
+    "participationUpdateFailed": "Không thể cập nhật trạng thái tham dự. Vui lòng thử lại.",
     "deleteEventFailed": "Không thể xóa sự kiện. Vui lòng thử lại.",
     "loadEventsFailed": "Không thể tải các sự kiện. Vui lòng thử lại.",
     "requestFailed": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại."
@@ -507,7 +508,12 @@
     "months": "tháng",
     "years": "năm",
     "alarmText": "%{trigger} bằng %{action}",
-    "replySentTo": "Câu trả lời của bạn đã được gửi tới %{organizerName}"
+    "replySentTo": "Câu trả lời của bạn đã được gửi tới %{organizerName}",
+    "participationUpdated": {
+      "ACCEPTED": "Đã chấp nhận lời mời",
+      "DECLINED": "Đã từ chối lời mời",
+      "TENTATIVE": "Đã tạm chấp nhận lời mời"
+    }
   },
   "dateTimeFields": {
     "date": "Ngày",

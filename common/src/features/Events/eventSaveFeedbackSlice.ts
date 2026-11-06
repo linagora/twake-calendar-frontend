@@ -1,14 +1,27 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { CalendarEvent } from '@common/types/EventsTypes'
+import type { PartStat } from '@common/features/User/models/attendee'
 
 export type SavedEvent = Pick<
   CalendarEvent,
   'uid' | 'calId' | 'start' | 'allday'
 >
 
+type SavedNotice = {
+  kind: 'saved'
+  id: number
+  event: SavedEvent
+  savedAt: number
+}
+type ParticipationNotice = {
+  kind: 'participation'
+  id: number
+  partstat: PartStat
+}
+
 interface EventSaveFeedbackState {
   sequence: number
-  notice: { id: number; event: SavedEvent; savedAt: number } | null
+  notice: SavedNotice | ParticipationNotice | null
 }
 
 const initialState: EventSaveFeedbackState = { sequence: 0, notice: null }
@@ -25,7 +38,18 @@ const eventSaveFeedbackSlice = createSlice({
         state,
         action: PayloadAction<{ event: SavedEvent; savedAt: number }>
       ) => {
-        state.notice = { id: ++state.sequence, ...action.payload }
+        state.notice = {
+          kind: 'saved',
+          id: ++state.sequence,
+          ...action.payload
+        }
+      }
+    },
+    participationUpdated: (state, action: PayloadAction<PartStat>) => {
+      state.notice = {
+        kind: 'participation',
+        id: ++state.sequence,
+        partstat: action.payload
       }
     },
     dismissEventSaveFeedback: (state, action: PayloadAction<number>) => {
@@ -34,6 +58,6 @@ const eventSaveFeedbackSlice = createSlice({
   }
 })
 
-export const { eventSaved, dismissEventSaveFeedback } =
+export const { eventSaved, participationUpdated, dismissEventSaveFeedback } =
   eventSaveFeedbackSlice.actions
 export default eventSaveFeedbackSlice.reducer

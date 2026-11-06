@@ -321,6 +321,7 @@
     "uploadedFileMissingId": "Die Datei konnte nicht hochgeladen werden: Datei-ID fehlt",
     "importEventFromFileFailed": "Der Termin konnte nicht aus der Datei importiert werden",
     "saveEventFailed": "Der Termin konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "participationUpdateFailed": "Ihre Teilnahme konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
     "deleteEventFailed": "Der Termin konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
     "loadEventsFailed": "Die Termine konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
     "requestFailed": "Der Server konnte die Anfrage nicht bearbeiten. Bitte versuchen Sie es erneut."
@@ -507,7 +508,12 @@
     "months": "Monate",
     "years": "Jahre",
     "alarmText": "%{trigger} per %{action}",
-    "replySentTo": "Ihre Antwort wurde an %{organizerName} gesendet"
+    "replySentTo": "Ihre Antwort wurde an %{organizerName} gesendet",
+    "participationUpdated": {
+      "ACCEPTED": "Einladung angenommen",
+      "DECLINED": "Einladung abgelehnt",
+      "TENTATIVE": "Einladung vorläufig angenommen"
+    }
   },
   "dateTimeFields": {
     "date": "Datum",

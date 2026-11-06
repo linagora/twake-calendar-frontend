@@ -51,13 +51,26 @@ export function useEventSaveFeedback(
   const notice = useAppSelector(state => state.eventSaveFeedback.notice)
   if (!notice) return null
 
-  const date = getEventDate(notice.event, timezone)
   const closeNotice = (): void => {
     dispatch(dismissEventSaveFeedback(notice.id))
   }
   const handleSetOpen = (open: boolean): void => {
     if (!open) closeNotice()
   }
+
+  if (notice.kind === 'participation') {
+    return (
+      <SnackbarAlert
+        key={notice.id}
+        open
+        setOpen={handleSetOpen}
+        message={t(`eventPreview.participationUpdated.${notice.partstat}`)}
+        autoHideDuration={4000}
+      />
+    )
+  }
+
+  const date = getEventDate(notice.event, timezone)
 
   if (!isOutsidePeriod(date, displayedPeriod)) {
     return (
