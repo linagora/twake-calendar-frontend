@@ -89,7 +89,7 @@
     "@rsbuild/plugin-react": "^2.1.1",
     "@rsbuild/plugin-stylus": "^2.0.1",
     "@rsbuild/plugin-svgr": "^2.0.5",
-    "@sentry/webpack-plugin": "^5.4.0",
+    "@sentry/webpack-plugin": "^11.10.0",
     "@tanstack/eslint-plugin-query": "^5.105.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
