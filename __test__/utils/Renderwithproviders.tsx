@@ -1,5 +1,6 @@
 import type { AppStore, RootState } from '@common/app/store'
 import { setupStore } from '@common/app/store'
+import { UndoableActionsProvider } from '@common/components/UndoableActions/UndoableActionsProvider'
 import { calendarColorSchemes } from '@common/theme/makeCalendarOverrides'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import type { RenderOptions } from '@testing-library/react'
@@ -46,7 +47,9 @@ export function renderWithProviders(
           }}
         >
           <MemoryRouter initialEntries={['/']}>
-            <Provider store={store}>{children}</Provider>
+            <Provider store={store}>
+              <UndoableActionsProvider>{children}</UndoableActionsProvider>
+            </Provider>
           </MemoryRouter>
         </I18nContext.Provider>
       </TwakeMuiThemeProvider>

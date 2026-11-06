@@ -2,11 +2,14 @@ import { createAppSlice } from '@common/app/createAppSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import {
   addEventReducer,
+  addPendingDeletionReducer,
   clearErrorReducer,
   clearFetchCacheReducer,
   createCalendarReducer,
   emptyEventsCalReducer,
+  markPendingDeletionCommittingReducer,
   removeEventReducer,
+  removePendingDeletionReducer,
   removeTempCalReducer,
   setCalendarErrorReducer,
   setIsMobileSearchOpenReducer,
@@ -35,6 +38,7 @@ import {
   updateSeriesThunk
 } from './services'
 import { updateDelegationCalendarThunk } from './services/updateDelegationCalendarAsync'
+import { PendingDeletion } from './types/PendingDeletion'
 
 export interface CalendarState {
   list: Record<string, Calendar>
@@ -42,6 +46,7 @@ export interface CalendarState {
   pending: boolean
   error: string | null
   isMobileSearchOpen: boolean
+  pendingDeletions: PendingDeletion[]
 }
 
 const initialState: CalendarState = {
@@ -49,7 +54,8 @@ const initialState: CalendarState = {
   templist: {},
   pending: true,
   error: null as string | null,
-  isMobileSearchOpen: false
+  isMobileSearchOpen: false,
+  pendingDeletions: [] as PendingDeletion[]
 }
 
 const CalendarSlice = createAppSlice({
@@ -68,6 +74,9 @@ const CalendarSlice = createAppSlice({
     clearError: clearErrorReducer(create),
     updateCalColor: updateCalColorReducer(create),
     setIsMobileSearchOpen: setIsMobileSearchOpenReducer(create),
+    addPendingDeletion: addPendingDeletionReducer(create),
+    markPendingDeletionCommitting: markPendingDeletionCommittingReducer(create),
+    removePendingDeletion: removePendingDeletionReducer(create),
     //  thunks using create.asyncThunk
     getCalendarsList: getCalendarsListThunk(create),
     getTempCalendarsList: getTempCalendarsListThunk(create),
@@ -104,6 +113,9 @@ export const {
   clearError,
   updateCalColor,
   setIsMobileSearchOpen,
+  addPendingDeletion,
+  markPendingDeletionCommitting,
+  removePendingDeletion,
   //  thunks
   getCalendarsList,
   getTempCalendarsList,

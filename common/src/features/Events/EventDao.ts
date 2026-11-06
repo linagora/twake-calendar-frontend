@@ -106,7 +106,8 @@ export async function putEvent(
 }
 
 export async function deleteEvent(event: CalendarEvent): Promise<Response> {
-  return api(`dav${event.URL}`, { method: 'DELETE' })
+  // keepalive: a deletion sent as the page goes away still reaches the server
+  return api(`dav${event.URL}`, { method: 'DELETE', keepalive: true })
 }
 
 export async function moveEvent(
