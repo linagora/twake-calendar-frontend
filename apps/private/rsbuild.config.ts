@@ -11,10 +11,8 @@ import {
 } from '../../common/sentryBuildUtils'
 import { injectedAliases } from './injectedAliases'
 
-const lottiePlayerWasm = path.join(
-  path.dirname(require.resolve('@lottiefiles/dotlottie-web/package.json')),
-  'dist/dotlottie-player.wasm'
-)
+const lottiePlayerWasm =
+  require.resolve('@lottiefiles/dotlottie-web/dotlottie-player.wasm')
 
 export default defineConfig({
   plugins: [pluginReact(), pluginStylus(), pluginSvgr()],
