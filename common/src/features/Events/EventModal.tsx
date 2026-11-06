@@ -150,7 +150,9 @@ const EventPopover: React.FC<{
         }}
         anchorEl={anchorEl}
         dynamicPositioning={
-          !isListView(currentView) && anchorEl !== document.body
+          !isListView(currentView) &&
+          Boolean(anchorEl) &&
+          anchorEl !== document.body
         }
         onClose={handleClose}
         title={modalTitle}

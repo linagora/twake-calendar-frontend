@@ -79,7 +79,7 @@ const EventUpdateModalInternal: React.FC<
         onExpandToggle={handleExpandToggle}
         draggable={!showMore}
         anchorEl={props.anchorEl}
-        dynamicPositioning={!isListView(currentView)}
+        dynamicPositioning={!isListView(currentView) && Boolean(props.anchorEl)}
         actions={actions}
         sx={dialogPaddingStyles(isMobile)}
         expandText={t('tooltip.moreEventOptions')}
