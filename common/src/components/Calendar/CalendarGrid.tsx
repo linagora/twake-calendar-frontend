@@ -105,6 +105,11 @@ const CALENDAR_DEFAULT_PROPS = {
   noEventsText: '',
   headerToolbar: false,
   views: {
+    timeGrid: {
+      tableClass: 'calendar-time-grid',
+      dayHeaderDividerClass: 'calendar-time-grid-header-divider',
+      allDayDividerClass: 'calendar-time-grid-all-day-divider'
+    },
     timeGridWeek: {
       titleFormat: { month: 'long', year: 'numeric' }
     }
@@ -240,7 +245,11 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           dayLaneClass={({ isToday }) =>
             cx('fc-timegrid-col', { 'fc-day-today': isToday })
           }
-          slotLaneClass="fc-timegrid-slot calendar-time-lane"
+          slotLaneClass={({ isMinor }) =>
+            cx('fc-timegrid-slot calendar-time-lane', {
+              'fc-timegrid-slot-minor': isMinor
+            })
+          }
           slotHeaderClass={arg =>
             cx(
               'fc-timegrid-slot fc-timegrid-slot-label',
@@ -250,6 +259,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           slotHeaderInnerClass="fc-timegrid-slot-label-cushion fc-timegrid-slot-label-frame"
           nowIndicatorHeaderClass="fc-timegrid-now-indicator-arrow"
           nowIndicatorLineClass="fc-timegrid-now-indicator-line"
+          weekNumberHeaderInnerClass="fc-timegrid-week-number"
+          allDayHeaderClass="fc-timegrid-all-day-header"
           allDayHeaderInnerClass="fc-timegrid-axis-cushion"
           listDaysClass="fc-list"
           listDayHeaderClass="fc-list-day"
