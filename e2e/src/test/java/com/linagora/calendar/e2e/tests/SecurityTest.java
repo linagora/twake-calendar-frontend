@@ -282,7 +282,7 @@ class SecurityTest extends TwakeCalendarE2ETest {
         calendar.reload();
         awaitAttached(calendar.eventCard(title));
 
-        calendar.openEvent(title).showMore();
+        calendar.openEvent(title);
         page.getByText("Bold text").first().waitFor();
 
         assertThat(page.locator("a[href^='el66:']").count())
