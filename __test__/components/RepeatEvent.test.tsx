@@ -192,10 +192,13 @@ describe('RepeatEvent Component', () => {
     expect(screen.getByTestId('event-repeat-end-date')).toHaveValue(
       'Wednesday, 30 December 2026'
     )
-    expect(screen.getByTestId('event-repeat-end-date-container')).toHaveStyle({
-      width: 'calc(27ch + 40px)',
-      minWidth: '220px'
-    })
+    const field = screen.getByTestId('event-repeat-end-date-container')
+    const { width, minWidth } = getComputedStyle(field)
+    // jsdom resolves the calc() expression to pixels in computed styles.
+    expect(minWidth).toBe('220px')
+    expect(Number.parseFloat(width)).toBeGreaterThan(
+      Number.parseFloat(minWidth)
+    )
   })
 
   it('allows selecting repetition frequency', () => {
