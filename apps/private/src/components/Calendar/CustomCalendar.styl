@@ -88,6 +88,46 @@ span.fc-daygrid-day-number.current-date:after
   width 36px
   height 36px
 
+.fc-col-header-cell .fc-daygrid-day-top:not(.fc-daygrid-day-top--mobile)
+  flex-direction row-reverse
+  justify-content center
+
+.fc-col-header-cell .fc-daygrid-day-number
+  display grid
+  place-items center
+  height 47px
+
+.fc-col-header-cell .fc-daygrid-day-top--mobile .fc-daygrid-day-number
+  height 38px
+
+.fc-col-header-cell .fc-daygrid-day-number:after
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+
+.fc-timegrid-week-number
+  width 80px
+  margin-inline 0
+
+.fc-timegrid-all-day-header
+  min-height 34px
+
+// Keep the sidebar and toolbar separators as the outer edges of the time grid.
+.fc .calendar-time-grid
+  border-top-width 0
+  border-inline-width 0
+
+.fc .calendar-time-grid .fc-col-header-cell
+  border-inline-color transparent
+
+// The all-day rules start at the first day column, beyond the time gutter.
+.fc .calendar-time-grid-header-divider,
+.fc .calendar-time-grid-all-day-divider
+  display none
+
+.fc .calendar-time-grid .fc-timegrid-body .fc-daygrid-day
+  box-shadow inset 0 1px var(--twake-palette-divider), inset 0 -1px var(--twake-palette-divider)
+
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink,
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor
   border 0
@@ -99,6 +139,7 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink
 .fc .fc-timegrid-axis-cushion
   min-width 80px
   max-width 80px
+  margin-inline 0
   padding 0
   text-align left
   font-size 12.507px
@@ -145,7 +186,10 @@ th.fc-col-header-cell.fc-day
   top 9.5px
   right -15px
 
-.fc .fc-timegrid-col.fc-day-today,
+// In v7 the timed day lanes sit above the horizontal slot lines.
+.fc .fc-timegrid-col.fc-day-today
+  --fc-classic-today: transparent
+
 .fc .fc-daygrid-day.fc-day-today
   background-color var(--twake-palette-background-paper)
 
@@ -202,7 +246,7 @@ th.fc-col-header-cell.fc-day
 .fc .fc-timegrid-slot-label
   display flex
   align-items flex-start
-  padding-top 2px
+  border-top-color transparent
 
 tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
   display none
