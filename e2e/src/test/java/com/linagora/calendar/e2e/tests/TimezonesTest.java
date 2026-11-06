@@ -17,6 +17,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.backend.Vcal;
 import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.docker.RuntimeConfig;
@@ -401,6 +402,40 @@ class TimezonesTest extends TwakeCalendarE2ETest {
             assertThat(Ics.parameters(event, "DTEND")).contains("TZID=Asia/Tokyo");
             assertThat(Ics.property(event, "DTSTART").orElseThrow()).endsWith("T180000");
         });
+    }
+
+    @Test
+    @DisplayName("TZ-28 After a reload, editing an event written in another zone keeps its zone")
+    void editingAfterAReloadKeepsTheZoneOfTheEvent(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("New York");
+        String day = Vcal.day(E2EClock.today());
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        // the REPORT of the grid carries no zone: only the stored object knows it
+        probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar(
+            Vcal.fixedZone("America/New_York", "-0500"), """
+            BEGIN:VEVENT
+            UID:%s
+            DTSTAMP:20260101T000000Z
+            DTSTART;TZID=America/New_York:%sT100000
+            DTEND;TZID=America/New_York:%sT110000
+            SUMMARY:%s
+            END:VEVENT
+            """.formatted(UUID.randomUUID(), day, day, title)));
+        calendar.reload();
+        awaitAttached(calendar.eventCard(title));
+
+        var form = calendar.openEvent(title).edit().expand();
+        assertThat(form.startTime()).isEqualTo("10:00");
+        assertThat(form.endTime()).isEqualTo("11:00");
+        String renamed = title("New York renamed");
+        form.title(renamed);
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
+        String event = Ics.event(probe.singleEvent(user));
+        assertThat(Ics.parameters(event, "DTSTART")).contains("TZID=America/New_York");
+        assertThat(Ics.property(event, "DTSTART")).hasValue(day + "T100000");
     }
 
     @Test

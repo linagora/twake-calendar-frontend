@@ -16,6 +16,7 @@ import { Valarms } from '@common/types/Valarms'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { EventUpdateModalProps } from './EventUpdateModal'
 import { useMasterEvent } from './hooks/useMasterEvent'
+import { useStoredZone } from './hooks/useStoredZone'
 import { useSubmitUpdateEvent } from './hooks/useSubmitUpdateEvent'
 
 export function useEventUpdateModal(
@@ -52,8 +53,17 @@ export function useEventUpdateModal(
   const [showMore, setShowMore] = useState(false)
   const formRef = useRef<EventFormHandle>(null)
 
-  const { masterEvent, effectiveEvent, hasOverrides, isMasterPending } =
-    useMasterEvent(event, open, typeOfAction)
+  const {
+    masterEvent,
+    effectiveEvent: eventToEdit,
+    hasOverrides,
+    isMasterPending: isSeriesPending
+  } = useMasterEvent(event, open, typeOfAction)
+  const { eventInStoredZone: effectiveEvent, isZonePending } = useStoredZone(
+    eventToEdit,
+    open
+  )
+  const isMasterPending = isSeriesPending || isZonePending
 
   const initialValues = useBuildInitialValues({
     event: effectiveEvent || null,

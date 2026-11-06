@@ -6,6 +6,14 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import dayjs from 'dayjs'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
+// The read of the zone has its own tests: this file is about the form itself
+vi.mock('@common/features/Events/hooks/useStoredZone', () => ({
+  useStoredZone: (eventInStoredZone: unknown) => ({
+    eventInStoredZone,
+    isZonePending: false
+  })
+}))
+
 describe('Event Full Display', () => {
   const mockOnClose = vi.fn()
   const day = new Date('2025-01-15T10:00:00.000Z') // Fixed date in UTC: Jan 15, 2025 10:00 AM UTC
