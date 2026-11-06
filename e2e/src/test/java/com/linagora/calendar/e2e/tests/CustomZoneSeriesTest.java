@@ -85,8 +85,8 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("CUSTOM-ZONE-01 (#1941) Renaming a whole series does not move its occurrences")
-    void aRenameDoesNotMoveTheSeries(Page page, E2EUser user, CalendarProbe probe) {
+    @DisplayName("CUSTOM-ZONE-01 (#1941) Renaming a whole series keeps its zone, its VTIMEZONE and its hour")
+    void aRenameKeepsTheZoneOfTheSeries(Page page, E2EUser user, CalendarProbe probe) {
         String title = title("Custom zone");
         CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
             Vcal.fixedZone(CUSTOM_ZONE, "-0500"), """
@@ -104,14 +104,13 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             title("Custom zone renamed"));
 
         String master = Ics.master(saved);
-        // The form only offers the zones the browser knows, and shows this one in UTC: the save
-        // writes the same instant in UTC, until it keeps the custom zone. Both forms are right.
-        String sameInstant = Ics.parameters(master, "DTSTART").contains("TZID=" + CUSTOM_ZONE)
-            ? day0 + "T090000"
-            : day0 + "T140000";
+        assertThat(Ics.parameters(master, "DTSTART")).contains("TZID=" + CUSTOM_ZONE);
         assertThat(Ics.property(master, "DTSTART"))
             .as("a rename must not move every occurrence by the offset of the zone")
-            .hasValue(sameInstant);
+            .hasValue(day0 + "T090000");
+        assertThat(Vcal.vtimezoneIds(saved))
+            .as("the series still says when %s is", CUSTOM_ZONE)
+            .contains(CUSTOM_ZONE);
     }
 
     @Test
