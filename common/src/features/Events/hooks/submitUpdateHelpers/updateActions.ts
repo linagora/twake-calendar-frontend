@@ -19,7 +19,7 @@ import {
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { resolveTimezone } from '@common/utils/timezone'
+import { resolveKnownTimezone, resolveTimezone } from '@common/utils/timezone'
 import moment from 'moment'
 import { deleteEvent, putEvent } from '@common/features/Events/EventDao'
 import {
@@ -161,7 +161,8 @@ export async function handleUpdateRecurringSeries(
       end: values.end
     },
     masterEvent || null,
-    resolveTimezone
+    // The zone the form starts from: a custom zone it shows in UTC is no change
+    resolveKnownTimezone
   )
 
   // Overrides and EXDATEs designate occurrences: they survive as long as the

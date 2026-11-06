@@ -3,6 +3,7 @@ import { findTimezoneData } from '@common/utils/timezoneLookup'
 import {
   isMomentZone,
   readWallClock,
+  resolveKnownTimezone,
   resolveTimezone,
   storedTimezone,
   wallClockOf,
@@ -519,9 +520,30 @@ export interface MakeSeriesJCalOptions {
   storedVtimezones?: VCalComponent[]
 }
 
+// The form only offers the zones the browser knows, and shows a custom one in
+// UTC (resolveKnownTimezone). A save leaving it there keeps the zone of the
+// series: in UTC, a zone with daylight saving would see its occurrences move.
+function zoneToWrite(
+  event: CalendarEvent,
+  oldMaster: VCalComponent,
+  storedVtimezones: VCalComponent[]
+): string {
+  const storedZone = getTzidParam(findFieldValue(oldMaster[1], 'dtstart')?.[1])
+  const showsStandIn =
+    event.timezone === 'UTC' &&
+    storedZone &&
+    resolveKnownTimezone(storedZone) === 'UTC'
+  const isCustomZone =
+    showsStandIn &&
+    withStoredTimezones(storedVtimezones, () =>
+      Boolean(storedTimezone(storedZone))
+    )
+  return isCustomZone ? storedZone : event.timezone
+}
+
 export const makeSeriesJCal = (
   vevents: VCalComponent[],
-  event: CalendarEvent,
+  savedEvent: CalendarEvent,
   options: MakeSeriesJCalOptions
 ): VCalComponent => {
   const removeOverrides = options.removeOverrides ?? true
@@ -534,13 +556,14 @@ export const makeSeriesJCal = (
     throw new Error('No master VEVENT found for this series')
   }
 
-  const tzid = event.timezone
   const oldMaster = vevents[masterIndex]
 
   // The stored VTIMEZONEs are written back: a custom zone keeps its TZID and
   // wall clock instead of being written as UTC. The master, the shift of the
   // series and the overrides it moves are all computed with them
   const storedVtimezones = options.storedVtimezones ?? []
+  const tzid = zoneToWrite(savedEvent, oldMaster, storedVtimezones)
+  const event = { ...savedEvent, timezone: tzid }
   const finalVevents = withStoredTimezones(storedVtimezones, () => {
     const updatedMaster = withStoredRrule(
       makeVevent(event, tzid, true) as VCalComponent,
