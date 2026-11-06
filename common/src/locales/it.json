@@ -324,6 +324,7 @@
     "uploadedFileMissingId": "Impossibile caricare il file: identificativo del file mancante",
     "importEventFromFileFailed": "Impossibile importare l'evento dal file",
     "saveEventFailed": "Impossibile salvare l'evento. Riprova.",
+    "participationUpdateFailed": "Impossibile aggiornare la partecipazione. Riprova.",
     "deleteEventFailed": "Impossibile eliminare l'evento. Riprova.",
     "loadEventsFailed": "Impossibile caricare gli eventi. Riprova.",
     "requestFailed": "Il server non è riuscito a completare la richiesta. Riprova."
@@ -510,7 +511,12 @@
     "months": "mesi",
     "years": "anni",
     "alarmText": "%{trigger} tramite %{action}",
-    "replySentTo": "La tua risposta è stata inviata a %{organizerName}"
+    "replySentTo": "La tua risposta è stata inviata a %{organizerName}",
+    "participationUpdated": {
+      "ACCEPTED": "Invito accettato",
+      "DECLINED": "Invito rifiutato",
+      "TENTATIVE": "Invito accettato provvisoriamente"
+    }
   },
   "dateTimeFields": {
     "date": "Data",

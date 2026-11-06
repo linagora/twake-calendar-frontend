@@ -1,9 +1,27 @@
 import { AppDispatch } from '@common/app/store'
 import { handleRSVP } from '@common/components/Event/eventHandlers/eventHandlers'
+import { setCalendarError } from '@common/features/Calendars/CalendarSlice'
+import { participationUpdated } from '@common/features/Events/eventSaveFeedbackSlice'
 import { PartStat } from '@common/features/User/models/attendee'
 import { userData } from '@common/features/User/userDataTypes'
 import { Dispatch, SetStateAction } from 'react'
 import { ContextualizedEvent } from '@common/types/EventsTypes'
+
+async function submitRSVP(
+  params: Parameters<typeof handleRSVP>[0],
+  onLoadingChange?: (loading: boolean, value?: PartStat) => void
+): Promise<void> {
+  const { dispatch } = params
+  try {
+    await handleRSVP(params)
+    dispatch(participationUpdated(params.rsvp))
+  } catch (error) {
+    console.error('Error handling RSVP:', error)
+    dispatch(setCalendarError('TRANSLATION:error.participationUpdateFailed'))
+  } finally {
+    onLoadingChange?.(false)
+  }
+}
 
 export async function handleRSVPClick(
   rsvp: PartStat,
@@ -30,37 +48,14 @@ export async function handleRSVPClick(
           // Now start loading since user made a choice
           onLoadingChange?.(true, rsvp)
 
-          try {
-            await handleRSVP({
-              dispatch,
-              calendar,
-              user,
-              event,
-              rsvp,
-              typeOfAction: type
-            })
-            onLoadingChange?.(false)
-          } catch (error) {
-            console.error('Error handling RSVP:', error)
-            // Clear loading on error
-            onLoadingChange?.(false)
-          }
+          await submitRSVP(
+            { dispatch, calendar, user, event, rsvp, typeOfAction: type },
+            onLoadingChange
+          )
         }
     )
     setOpenEditModePopup('attendance')
   } else {
-    try {
-      await handleRSVP({
-        dispatch,
-        calendar,
-        user,
-        event,
-        rsvp
-      })
-      onLoadingChange?.(false)
-    } catch (error) {
-      console.error('Error handling RSVP:', error)
-      onLoadingChange?.(false)
-    }
+    await submitRSVP({ dispatch, calendar, user, event, rsvp }, onLoadingChange)
   }
 }
