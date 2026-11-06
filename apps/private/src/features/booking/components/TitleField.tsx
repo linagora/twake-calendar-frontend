@@ -9,7 +9,7 @@ interface TitleFieldProps {
   showExpandedLabel: boolean
   name: string
   setName: (value: string) => void
-  nameInputRef: React.RefObject<HTMLInputElement>
+  nameInputRef: React.RefObject<HTMLInputElement | null>
 }
 
 export const TitleField: React.FC<TitleFieldProps> = ({

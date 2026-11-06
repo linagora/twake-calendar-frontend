@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { TwakeBarHeader } from '@common/components/TwakeBarHeader/TwakeBarHeader'
 import { setAppLoading } from '@common/app/loadingSlice'
 import '@testing-library/jest-dom'

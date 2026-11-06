@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { PartStat } from '@common/features/User/models/attendee'
 import { userData } from '@common/features/User/userDataTypes'
 import { Box, useTheme, useMediaQuery } from '@linagora/twake-mui'

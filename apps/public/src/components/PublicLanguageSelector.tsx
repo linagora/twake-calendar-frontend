@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useTheme, MenuItem, Select } from '@linagora/twake-mui'
 import LanguageIcon from '@mui/icons-material/Language'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'

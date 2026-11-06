@@ -35,7 +35,7 @@ export function useCalendarMessageHandler(
   const debouncedBookingLinksUpdateFnRef = useRef<
     DebouncedFunc<(dispatch: AppDispatch) => void> | undefined
   >(undefined)
-  const currentDebouncePeriodRef = useRef<number | undefined>()
+  const currentDebouncePeriodRef = useRef<number | undefined>(undefined)
   const delayedRefreshTimersRef = useRef<
     Map<string, ReturnType<typeof setTimeout>>
   >(new Map())

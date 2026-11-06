@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { formatEventChipTitle } from '@common/components/Calendar/utils/calendarUtils'
 import { ResponsiveDialog } from '@common/components/Dialog'

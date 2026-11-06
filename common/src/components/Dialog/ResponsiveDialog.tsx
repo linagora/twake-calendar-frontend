@@ -224,7 +224,7 @@ function ResponsiveDialog({
   headerRightAction,
   ariaLabel,
   ...otherDialogProps
-}: ResponsiveDialogProps): JSX.Element {
+}: ResponsiveDialogProps): React.JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))

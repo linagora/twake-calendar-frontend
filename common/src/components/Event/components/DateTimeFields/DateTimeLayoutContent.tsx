@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { Dayjs } from 'dayjs'
 import { AllDayDateLayout } from './AllDayDateLayout'

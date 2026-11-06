@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppDispatch } from '@common/app/hooks'
 import { Tooltip } from '@common/components/Tooltip'
 import { setView } from '@common/features/Settings/SettingsSlice'

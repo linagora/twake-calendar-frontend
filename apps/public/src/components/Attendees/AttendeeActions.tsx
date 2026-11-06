@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { ContactPopover } from '@linagora/twake-mui'
 import { useAppSelector } from '@common/app/hooks'
 import { buildMailComposerUrl, resolveMailSpaUrl } from '@linagora/twake-utils'

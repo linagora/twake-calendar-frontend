@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { calendarShortcutRows } from '@common/hooks/useCalendarShortcuts'
 import { Box } from '@linagora/twake-mui'

@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import type { ReactNode } from 'react'
 import type { AlertColor } from '@linagora/twake-mui'
 import { Alert, Snackbar } from '@linagora/twake-mui'

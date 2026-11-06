@@ -103,7 +103,7 @@ const ShowLessButton: React.FC<{
 
 export function BookingExtraAttendees({
   extraAttendees
-}: BookingExtraAttendeesProps): JSX.Element {
+}: BookingExtraAttendeesProps): React.JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const [showAllAttendees, setShowAllAttendees] = useState(false)

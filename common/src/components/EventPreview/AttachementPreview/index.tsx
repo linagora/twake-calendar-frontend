@@ -55,10 +55,13 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
   )
 }
 
-const renderAttachments: React.FC<{
+const renderAttachments = ({
+  attachments,
+  slice
+}: {
   attachments: Attachment[]
   slice: 'first' | 'rest'
-}> = ({ attachments, slice }) => {
+}): React.JSX.Element[] => {
   const sliced =
     slice === 'first'
       ? attachments.slice(0, ATTACHMENT_DISPLAY_LIMIT)

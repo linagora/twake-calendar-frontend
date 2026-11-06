@@ -45,6 +45,7 @@ describe('Calendar - Timezone Integration', () => {
   const chooseTimeZone = async (city: string): Promise<void> => {
     fireEvent.click(await screen.findByText(/UTC/i))
     const autocomplete = await screen.findByRole('combobox')
+    await waitFor(() => expect(autocomplete).toHaveFocus())
     fireEvent.change(autocomplete, { target: { value: city } })
     fireEvent.click(
       await screen.findByRole('option', { name: new RegExp(city, 'i') })

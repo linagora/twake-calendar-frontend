@@ -85,10 +85,9 @@ describe('RegularHoursRow', () => {
     customRender(<RegularHoursRow {...defaultProps} isEnabled={false} />)
     const startInput = screen.getByDisplayValue('09:00')
     expect(startInput).toBeDisabled()
-    expect(TimePickerField).toHaveBeenCalledWith(
-      expect.objectContaining({ disabled: true }),
-      expect.anything()
-    )
+    expect(
+      vi.mocked(TimePickerField).mock.calls.map(([props]) => props)
+    ).toContainEqual(expect.objectContaining({ disabled: true }))
   })
 
   it('calls handleToggleDay on switch click', () => {
@@ -173,10 +172,9 @@ describe('RegularHoursRow', () => {
     expect(screen.getByTestId('slot-error-MON-0')).toHaveTextContent(
       'event.validation.endAfterStart'
     )
-    expect(TimePickerField).toHaveBeenCalledWith(
-      expect.objectContaining({ hasError: true }),
-      expect.anything()
-    )
+    expect(
+      vi.mocked(TimePickerField).mock.calls.map(([props]) => props)
+    ).toContainEqual(expect.objectContaining({ hasError: true }))
   })
 
   it('associates the slot error with both time inputs', () => {
@@ -191,9 +189,10 @@ describe('RegularHoursRow', () => {
       'slot-error-MON-0'
     )
     ;['start-time-MON-0', 'end-time-MON-0'].forEach(testId =>
-      expect(TimePickerField).toHaveBeenCalledWith(
-        expect.objectContaining({ testId, errorId: 'slot-error-MON-0' }),
-        expect.anything()
+      expect(
+        vi.mocked(TimePickerField).mock.calls.map(([props]) => props)
+      ).toContainEqual(
+        expect.objectContaining({ testId, errorId: 'slot-error-MON-0' })
       )
     )
   })

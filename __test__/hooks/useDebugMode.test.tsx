@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { act, render, screen } from '@testing-library/react'
 import { useDebugMode } from '@common/hooks/useDebugMode'
 import { toggleDebugMode } from '@common/utils/debugMode'

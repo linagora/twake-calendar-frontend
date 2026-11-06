@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { ContactPopover } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { useNavigate } from 'react-router'

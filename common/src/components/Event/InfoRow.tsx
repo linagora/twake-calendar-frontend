@@ -57,7 +57,7 @@ export function InfoRow({
   style,
   alignItems = 'center',
   flexWrap = 'nowrap'
-}: InfoRowProps): JSX.Element {
+}: InfoRowProps): React.JSX.Element {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 

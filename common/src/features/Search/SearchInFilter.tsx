@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { CalendarItemList } from '@common/components/Calendar/CalendarItemList'
 import { CalendarName } from '@common/components/Calendar/CalendarName'
@@ -145,7 +146,7 @@ const getDisplayLabel = (
 }
 
 const CalendarMobileSelector: React.FC<{
-  selectorRef: React.RefObject<MobileSelectorHandle>
+  selectorRef: React.RefObject<MobileSelectorHandle | null>
   filters: SearchFilters
   personalCalendars: Calendar[]
   sharedCalendars: Calendar[]
