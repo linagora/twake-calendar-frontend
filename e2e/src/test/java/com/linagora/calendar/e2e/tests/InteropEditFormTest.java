@@ -278,12 +278,13 @@ class InteropEditFormTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("INTEROP-09 (#1999) An event with a TZID and a DURATION ends a duration after its start")
+    @DisplayName("INTEROP-09 (#1999) A series with a TZID and a DURATION ends a duration after its start")
     void aDurationCountsFromTheStartInItsZone(Page page, E2EUser user, CalendarProbe probe) {
         String title = title("Lasting");
         String day = Vcal.day(E2EClock.today());
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        // with its VTIMEZONE, as other clients write it: the grid reads the zone of an event there
+        // A series: the form then reads the stored object, DURATION included. The grid only
+        // knows the expanded occurrence, in UTC, with an end the server computed.
         probe.putEvent(user, UUID.randomUUID().toString(), Vcal.calendar(
             Vcal.fixedZone("America/New_York", "-0500"), """
             BEGIN:VEVENT
@@ -291,13 +292,14 @@ class InteropEditFormTest extends TwakeCalendarE2ETest {
             %s
             DTSTART;TZID=America/New_York:%sT100000
             DURATION:PT1H
+            RRULE:FREQ=DAILY;COUNT=3
             SUMMARY:%s
             END:VEVENT
             """.formatted(UUID.randomUUID(), STAMP, day, title)));
         calendar.reload();
         awaitAttached(calendar.eventCard(title));
 
-        EventFormModal form = calendar.openEvent(title).edit().expand();
+        EventFormModal form = calendar.openEventOn(title, E2EClock.today()).edit(EventFormModal.Scope.ALL_EVENTS).expand();
         assertThat(form.startTime()).isEqualTo("10:00");
         assertThat(form.endTime())
             .as("the end was computed from the start read in the zone of the browser, hours off")
