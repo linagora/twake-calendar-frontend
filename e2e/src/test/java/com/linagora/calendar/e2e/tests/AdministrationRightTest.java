@@ -127,9 +127,14 @@ class AdministrationRightTest extends TwakeCalendarE2ETest {
     /** Reopens that dialog on a fresh page and reads back the right the grantee holds. */
     private String rightShownAfterAReload(Row row, E2EUser grantee) {
         CalendarModal modal = row.reopenDialog().tab("Access");
-        String right = modal.hasAccessRow(grantee.email()) ? modal.rightOf(grantee.email()) : "";
-        modal.close();
-        return right;
+        try {
+            assertThat(modal.awaitAccessRow(grantee.email()))
+                .as("the reopened Access tab shows the grantee %s", grantee.email())
+                .isTrue();
+            return modal.rightOf(grantee.email());
+        } finally {
+            modal.close();
+        }
     }
 
     /** Sets the public visibility of the calendar of that row, All or You, and saves. */
