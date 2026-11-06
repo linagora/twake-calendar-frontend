@@ -10,6 +10,14 @@ import { jCalFromIcs } from '../../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 
+// The read of the zone has its own tests: this file is about the form itself
+vi.mock('@common/features/Events/hooks/useStoredZone', () => ({
+  useStoredZone: (eventInStoredZone: unknown) => ({
+    eventInStoredZone,
+    isZonePending: false
+  })
+}))
+
 vi.mock('@common/features/Events/EventDao')
 vi.mock('@common/features/Calendars/CalendarDAO')
 
