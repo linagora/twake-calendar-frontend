@@ -3,9 +3,12 @@ import { setupStore } from '@common/app/store'
 import en from '@common/locales/en.json'
 import { putEvent } from '@common/features/Events/EventDao'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
+import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import type { CalendarEvent } from '@common/types/EventsTypes'
+import { redirectTo } from '@common/utils/navigation'
 import App from '@private/App'
-import { act, cleanup, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
@@ -37,9 +40,15 @@ vi.mock('@common/features/Events/EventDao', async () => ({
   ...(await vi.importActual('@common/features/Events/EventDao')),
   putEvent: vi.fn()
 }))
+vi.mock('@common/features/Calendars/CalendarDAO', async () => ({
+  ...(await vi.importActual('@common/features/Calendars/CalendarDAO')),
+  fetchCalendars: vi.fn()
+}))
 vi.mock('@common/useScreenSizeDetection', () => ({
   useScreenSizeDetection: vi.fn(() => ({ isTooSmall: false, isTablet: false }))
 }))
+// jsdom cannot leave the page: where the app would go instead
+vi.mock('@common/utils/navigation', () => ({ redirectTo: vi.fn() }))
 
 const USER_ID = '667037022b752d0026472254'
 
@@ -52,7 +61,23 @@ const t = (key: string): string =>
       en
     ) as string
 
-const renderRoute = (search = SEARCH): ReturnType<typeof setupStore> => {
+const MY_CALENDARS = {
+  pending: false,
+  list: {
+    [`${USER_ID}/${USER_ID}`]: {
+      id: `${USER_ID}/${USER_ID}`,
+      name: 'My calendar',
+      color: { light: '#FF0000', dark: '#000' },
+      owner: { emails: ['test@test.com'] },
+      events: {}
+    }
+  }
+}
+
+const renderRoute = (
+  search = SEARCH,
+  calendars: { pending: boolean; list: object } = MY_CALENDARS
+): ReturnType<typeof setupStore> => {
   window.history.replaceState(null, '', `/embed/newEvent${search}`)
   const initial = setupStore().getState()
   const store = setupStore({
@@ -80,19 +105,7 @@ const renderRoute = (search = SEARCH): ReturnType<typeof setupStore> => {
         cal_address: 'test@test.com'
       })
     },
-    calendars: {
-      ...initial.calendars,
-      pending: false,
-      list: {
-        [`${USER_ID}/${USER_ID}`]: {
-          id: `${USER_ID}/${USER_ID}`,
-          name: 'My calendar',
-          color: { light: '#FF0000', dark: '#000' },
-          owner: { emails: ['test@test.com'] },
-          events: {}
-        }
-      }
-    }
+    calendars: { ...initial.calendars, ...calendars }
   } as Parameters<typeof setupStore>[0])
   render(
     <Provider store={store}>
@@ -123,6 +136,22 @@ const sentOfType = (type: string): unknown[][] =>
 
 const findForm = async (): Promise<HTMLElement> =>
   screen.findByRole('textbox', { name: /title/i }, { timeout: 10000 })
+
+// A failed save keeps what the user typed for the next form: once it is
+// kept, the app has handled the failure
+const failureHandled = async (): Promise<void> =>
+  waitFor(() =>
+    expect(
+      JSON.parse(sessionStorage.getItem('eventFormTempData_create') ?? '{}')
+        .fromError
+    ).toBe(true)
+  )
+
+// Lets every pending promise and the renders they cause run
+const settle = async (): Promise<void> =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 50))
+  })
 
 describe('the new event form framed by Twake Chat', () => {
   let entries: number
@@ -161,38 +190,46 @@ describe('the new event form framed by Twake Chat', () => {
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
   })
 
-  it('tells Twake Chat about the event it saved', async () => {
+  it('tells Twake Chat about the event it saved, on the day the user picked', async () => {
+    // Today is 9 November 2026: the form opens on that day
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-11-09T10:12:00Z'))
+    onTestFinished(() => {
+      vi.useRealTimers()
+    })
     const user = userEvent.setup()
     renderRoute()
     greet()
 
     await user.type(await findForm(), 'Weekly sync')
+    await user.click(
+      screen.getByRole('button', { name: t('common.moreOptions') })
+    )
+    await user.click(
+      screen.getByRole('checkbox', { name: t('event.form.allDay') })
+    )
     await user.click(screen.getByRole('button', { name: t('actions.save') }))
 
     await waitFor(() =>
       expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
     )
-    const saved = (putEvent as Mock).mock.calls[0][0] as CalendarEvent
-    expect(sentOfType('twake-calendar:event-created')).toEqual([
-      [
-        {
-          type: 'twake-calendar:event-created',
-          event: {
-            uid: saved.uid,
-            title: 'Weekly sync',
-            start: saved.start,
-            end: saved.end,
-            allDay: false,
-            timeZone: saved.timezone,
-            videoConferenceUrl: saved.x_openpass_videoconference ?? null,
-            url: `${window.location.origin}/events/${saved.uid}`
-          }
-        },
-        CHAT
-      ]
-    ])
-    expect(Date.parse(saved.start)).not.toBeNaN()
-    expect(Date.parse(saved.end)).not.toBeNaN()
+    const [[message, target]] = sentOfType('twake-calendar:event-created') as [
+      { event: Record<string, unknown> },
+      string
+    ][]
+    expect(target).toBe(CHAT)
+    // An all day event: from midnight UTC of its day to midnight of the next
+    expect(message.event).toMatchObject({
+      title: 'Weekly sync',
+      start: '2026-11-09T00:00:00.000Z',
+      end: '2026-11-10T00:00:00.000Z',
+      allDay: true,
+      videoConferenceUrl: null
+    })
+    const uid = message.event.uid as string
+    expect(uid).toMatch(/\S/)
+    expect(message.event.url).toBe(`${window.location.origin}/events/${uid}`)
+    expect(typeof message.event.timeZone).toBe('string')
     expect(sentOfType('twake-calendar:closed')).toEqual([])
     expect(window.history.length).toBe(entries)
   })
@@ -206,10 +243,109 @@ describe('the new event form framed by Twake Chat', () => {
     await user.type(await findForm(), 'Weekly sync')
     await user.click(screen.getByRole('button', { name: t('actions.save') }))
 
-    await waitFor(() => expect(putEvent).toHaveBeenCalled())
+    await failureHandled()
+    await settle()
     expect(await findForm()).toHaveValue('Weekly sync')
     expect(sentOfType('twake-calendar:event-created')).toEqual([])
     expect(sentOfType('twake-calendar:closed')).toEqual([])
+  })
+
+  it('says the save failed, with a way to dismiss it, and keeps what the user typed', async () => {
+    ;(putEvent as Mock).mockRejectedValue(new Error('Server down'))
+    const user = userEvent.setup()
+    renderRoute()
+    greet()
+
+    await user.type(await findForm(), 'Weekly sync')
+    await user.click(screen.getByRole('button', { name: t('actions.save') }))
+
+    // The message the calendar shows for a failed save (error.saveEventFailed)
+    const alert = await screen.findByRole('alert', {}, { timeout: 3000 })
+    expect(alert).toHaveTextContent(t('error.saveEventFailed'))
+    expect(
+      within(alert).getByRole('button', { name: t('common.ok') })
+    ).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue(
+      'Weekly sync'
+    )
+    expect(sentOfType('twake-calendar:event-created')).toEqual([])
+  })
+
+  it('saves the event once when the user submits again while it is saving', async () => {
+    let answer: (response: Response) => void = () => {}
+    ;(putEvent as Mock).mockReturnValueOnce(
+      new Promise<Response>(resolve => {
+        answer = resolve
+      })
+    )
+    const user = userEvent.setup()
+    renderRoute()
+    greet()
+
+    await user.type(await findForm(), 'Weekly sync')
+    const save = screen.getByRole('button', { name: t('actions.save') })
+    await user.click(save)
+    await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+    // The server has not answered yet: an impatient second try, with Enter in
+    // the title (Save may well be disabled by then)
+    await user.click(screen.getByRole('textbox', { name: /title/i }))
+    await user.keyboard('{Enter}')
+    await settle()
+    expect(putEvent).toHaveBeenCalledTimes(1)
+
+    answer(new Response(null, { status: 201 }))
+    await settle()
+    expect(putEvent).toHaveBeenCalledTimes(1)
+    expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
+  })
+
+  it('tells Twake Chat the user must sign in when the session ends in another tab, and stays in the frame', async () => {
+    renderRoute()
+    greet()
+    await findForm()
+
+    // Another tab of the calendar signs out
+    const otherTab = new BroadcastChannel('twake-oidc-session')
+    otherTab.postMessage({ type: 'session-ended', senderId: 'another-tab' })
+    otherTab.close()
+
+    await waitFor(() =>
+      expect(sentOfType('twake-calendar:login-required')).toEqual([
+        [{ type: 'twake-calendar:login-required' }, CHAT]
+      ])
+    )
+    expect(redirectTo).not.toHaveBeenCalled()
+  })
+
+  it('tells Twake Chat the form is closed when the user has no calendar to save into', async () => {
+    renderRoute(SEARCH, { pending: false, list: {} })
+    greet()
+
+    await waitFor(() =>
+      expect(sentOfType('twake-calendar:closed')).toEqual([
+        [{ type: 'twake-calendar:closed' }, CHAT]
+      ])
+    )
+  })
+
+  it('tells Twake Chat the form is closed when the calendars fail to load, not before', async () => {
+    ;(fetchCalendars as Mock).mockRejectedValue(new Error('Server down'))
+    const store = renderRoute(SEARCH, { pending: true, list: {} })
+    greet()
+
+    // Still loading: nothing to tell yet
+    await settle()
+    expect(sentOfType('twake-calendar:closed')).toEqual([])
+
+    await act(async () => {
+      await store.dispatch(getCalendarsList())
+    })
+
+    await waitFor(() =>
+      expect(sentOfType('twake-calendar:closed')).toEqual([
+        [{ type: 'twake-calendar:closed' }, CHAT]
+      ])
+    )
   })
 
   it('opens a new event for the room of each frame, never the draft of a failed save in another one', async () => {
@@ -219,7 +355,8 @@ describe('the new event form framed by Twake Chat', () => {
     renderRoute()
     await user.type(await findForm(), 'Draft of another room')
     await user.click(screen.getByRole('button', { name: t('actions.save') }))
-    await waitFor(() => expect(putEvent).toHaveBeenCalled())
+    // The failure is handled: its draft is kept for the next form
+    await failureHandled()
     cleanup()
 
     // Chat frames the form again, for another room
