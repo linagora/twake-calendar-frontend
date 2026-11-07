@@ -317,35 +317,56 @@ describe('the new event form framed by Twake Chat', () => {
     expect(redirectTo).not.toHaveBeenCalled()
   })
 
-  it('tells Twake Chat the form is closed when the user has no calendar to save into', async () => {
-    renderRoute(SEARCH, { pending: false, list: {} })
-    greet()
+  // Without a calendar the form cannot save: the frame says so, and Chat
+  // closes its dialog only when the user has read it. The calendar's own text
+  // for a calendar list it could not get (error.calendarsNotFound)
+  const noCalendarShownThenClosed = async (): Promise<void> => {
+    const user = userEvent.setup()
+    expect(
+      await screen.findByText(t('error.calendarsNotFound'), undefined, {
+        timeout: 3000
+      })
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('textbox', { name: /title/i })
+    ).not.toBeInTheDocument()
+    // Nothing told while the user has not closed it
+    await settle()
+    expect(sentOfType('twake-calendar:closed')).toEqual([])
+
+    await user.click(screen.getByRole('button', { name: t('actions.close') }))
 
     await waitFor(() =>
       expect(sentOfType('twake-calendar:closed')).toEqual([
         [{ type: 'twake-calendar:closed' }, CHAT]
       ])
     )
+  }
+
+  it('says there is no calendar to save into, and tells Twake Chat only once the user closes it', async () => {
+    renderRoute(SEARCH, { pending: false, list: {} })
+    greet()
+
+    await noCalendarShownThenClosed()
   })
 
-  it('tells Twake Chat the form is closed when the calendars fail to load, not before', async () => {
+  it('says the calendars could not be loaded once they fail, and tells Twake Chat only once the user closes it', async () => {
     ;(fetchCalendars as Mock).mockRejectedValue(new Error('Server down'))
     const store = renderRoute(SEARCH, { pending: true, list: {} })
     greet()
 
-    // Still loading: nothing to tell yet
+    // Still loading: no message yet, nothing told
     await settle()
+    expect(
+      screen.queryByText(t('error.calendarsNotFound'))
+    ).not.toBeInTheDocument()
     expect(sentOfType('twake-calendar:closed')).toEqual([])
 
     await act(async () => {
       await store.dispatch(getCalendarsList())
     })
 
-    await waitFor(() =>
-      expect(sentOfType('twake-calendar:closed')).toEqual([
-        [{ type: 'twake-calendar:closed' }, CHAT]
-      ])
-    )
+    await noCalendarShownThenClosed()
   })
 
   it('opens a new event for the room of each frame, never the draft of a failed save in another one', async () => {
