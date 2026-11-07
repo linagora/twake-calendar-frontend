@@ -218,9 +218,9 @@ The frame follows the contract of [`@linagora/twake-embed`](https://github.com/l
 Twake Chat frames the form of a new event on `/embed/newEvent?attendee=<e-mail>&attendee=<e-mail>`, in a dialog of a room, with the members of the room as attendees (the `attendee` parameter of `/newEvent`). The page shows the form alone, without the Twake bar, signs in silently like the other embed routes and never adds a history entry. `FRAME_ANCESTORS` must list the origin of Twake Chat, and that of TwakeSpace too when Chat runs inside it. It speaks to its parent window with `postMessage`:
 
 - once listening, it posts `{ type: 'twake-calendar:ready' }` to its parent, to any origin, and waits for `{ type: 'twake-calendar:hello' }`. It takes the first greeting that comes from its parent window and then posts to the origin of that greeting alone; what happens before waits for it.
-- `{ type: 'twake-calendar:event-created', event: { uid, title, start, end, allDay, timeZone, videoConferenceUrl, url } }` once the server saved the event: `start` and `end` in ISO 8601 (an all-day event starts at midnight UTC and ends at midnight UTC of the day after its last day, as `DTEND`), `videoConferenceUrl` null without a video conference, `url` the event in the application (`/events/<uid>`). A failed save posts nothing and keeps the form as the user filled it.
-- `{ type: 'twake-calendar:closed' }` when the user closes or cancels the form.
-- `{ type: 'twake-calendar:login-required' }` when the silent sign in is refused: the page that frames it opens `/newEvent` in a tab instead.
+- `{ type: 'twake-calendar:event-created', event: { uid, title, start, end, allDay, timeZone, videoConferenceUrl, url } }` once the server saved the event: `start` and `end` in ISO 8601 (an all-day event starts at midnight UTC and ends at midnight UTC of the day after its last day, as `DTEND`), `videoConferenceUrl` null without a video conference, `url` the event in the application (`/events/<uid>`). A failed save posts nothing, shows the calendar's error and keeps the form as the user filled it; a second submit while the first is saving is ignored.
+- `{ type: 'twake-calendar:closed' }` when the user closes or cancels the form, or closes the message shown when there is no calendar to save into (none, or they could not be loaded).
+- `{ type: 'twake-calendar:login-required' }` when the silent sign in is refused, or the session ends in another tab: the page that frames it opens `/newEvent` in a tab instead.
 
 ---
 

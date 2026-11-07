@@ -17,6 +17,35 @@ import { useSubmitCreateEvent } from '@common/features/Events/hooks/useSubmitCre
 import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard'
 import { isListView } from '@common/components/Calendar/utils/constants'
 
+type Submit = ReturnType<typeof useSubmitCreateEvent>['handleSubmit']
+
+// Framed, the form stays on screen while the server saves (elsewhere it
+// closes at once): a second Save or Enter meanwhile would create the event
+// twice. The ref drops a submit that comes before the re-render, `saving`
+// greys Save out
+function useSubmitOnce(submit: Submit): {
+  submitOnce: Submit
+  saving: boolean
+} {
+  const savingRef = useRef(false)
+  const [saving, setSaving] = useState(false)
+  const submitOnce: Submit = useCallback(
+    async (values, organizer) => {
+      if (savingRef.current) return
+      savingRef.current = true
+      setSaving(true)
+      try {
+        await submit(values, organizer)
+      } finally {
+        savingRef.current = false
+        setSaving(false)
+      }
+    },
+    [submit]
+  )
+  return { submitOnce, saving }
+}
+
 const EventPopover: React.FC<{
   open: boolean
   onClose: (refresh?: boolean) => void
@@ -115,6 +144,8 @@ const EventPopover: React.FC<{
     userPersonalCalendars
   })
 
+  const { submitOnce, saving } = useSubmitOnce(handleSubmit)
+
   const performClose = useCallback(() => {
     clearEventFormTempData('create')
     setIsFormDirty(false)
@@ -169,6 +200,9 @@ const EventPopover: React.FC<{
         isExpanded={showMore}
         onExpandToggle={embedded ? undefined : (): void => setShowMore(s => !s)}
         hideBackdrop={embedded}
+        // Framed, the form is the whole page: the error of a failed save,
+        // beside it, must stay reachable with the keyboard
+        disableEnforceFocus={embedded}
         draggable={!showMore}
         actions={
           <EventActions
@@ -178,6 +212,7 @@ const EventPopover: React.FC<{
               await formRef.current?.submit()
             }}
             onExpanded={() => setShowMore(s => !s)}
+            saving={saving}
           />
         }
         expandText={t('tooltip.moreEventOptions')}
@@ -190,7 +225,7 @@ const EventPopover: React.FC<{
           typeOfAction={undefined}
           eventId={event?.uid ?? null}
           userPersonalCalendars={userPersonalCalendars}
-          onSubmit={handleSubmit}
+          onSubmit={embedded ? submitOnce : handleSubmit}
           onCancel={handleClose}
           tempStorageKey="create"
           onCalendarChange={handleCalendarChange}

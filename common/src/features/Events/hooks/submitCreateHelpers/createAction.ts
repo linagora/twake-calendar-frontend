@@ -164,8 +164,17 @@ export async function handleCreateEvent({
     await assertThunkSuccess(result)
     clearEventFormTempData('create')
     dispatch(eventSaved(newEvent))
-    onCreated?.(newEvent)
   } catch (error) {
     handleCreateEventError(values, error)
+    return
+  }
+
+  // Outside the save: the server has the event, so an error here must not
+  // keep it as a failed draft (a retry would create it twice), nor escape
+  // the submit unhandled
+  try {
+    onCreated?.(newEvent)
+  } catch (error) {
+    console.error('After the event was saved:', error)
   }
 }
