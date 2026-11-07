@@ -27,6 +27,13 @@ const EventPopover: React.FC<{
   event?: CalendarEvent
   anchorEl?: HTMLElement | null
   currentView?: string
+  /** Called with the event once it is saved */
+  onCreated?: (event: CalendarEvent) => void
+  /**
+   * Framed by another page, the form is all the page shows: no expand arrow
+   * (More options still opens the full form), no backdrop
+   */
+  embedded?: boolean
 }> = ({
   open,
   onClose,
@@ -36,7 +43,9 @@ const EventPopover: React.FC<{
   calendarRef,
   event,
   anchorEl,
-  currentView
+  currentView,
+  onCreated,
+  embedded = false
 }) => {
   const { t } = useI18n()
 
@@ -102,6 +111,7 @@ const EventPopover: React.FC<{
   const { handleSubmit } = useSubmitCreateEvent({
     showMore,
     onClose: () => onClose(true),
+    onCreated,
     userPersonalCalendars
   })
 
@@ -155,7 +165,8 @@ const EventPopover: React.FC<{
         onClose={handleClose}
         title={modalTitle}
         isExpanded={showMore}
-        onExpandToggle={() => setShowMore(s => !s)}
+        onExpandToggle={embedded ? undefined : (): void => setShowMore(s => !s)}
+        hideBackdrop={embedded}
         draggable={!showMore}
         actions={
           <EventActions

@@ -19,8 +19,10 @@ import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
 import {
   EMBED_CALENDAR_ROUTE,
-  EMBED_EVENT_ROUTE
+  EMBED_EVENT_ROUTE,
+  EMBED_NEW_EVENT_ROUTE
 } from '@common/features/Embed/embeddedCalendar'
+import { EmbeddedNewEvent } from '@common/features/Embed/EmbeddedNewEvent'
 import {
   overlayThemeOptions,
   SpaceOverlayProvider
@@ -188,6 +190,10 @@ export default function App(): JSX.Element {
                     <Route
                       path={EMBED_EVENT_ROUTE}
                       element={<EmbeddedCalendar />}
+                    />
+                    <Route
+                      path={EMBED_NEW_EVENT_ROUTE}
+                      element={<EmbeddedNewEvent />}
                     />
                     <Route path="/events/:uid" element={<EventDeepLink />} />
                     <Route path="/newEvent" element={<NewEventDeepLink />} />

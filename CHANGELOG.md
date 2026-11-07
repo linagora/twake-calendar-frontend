@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+
+### Added
+
+- `/embed/newEvent`, the form of a new event alone, which Twake Chat frames in a room: it tells the
+  page that frames it when the event is saved or the form closed
+
 ## [1.3.3] - 2026-09-29
 
 ### Added
