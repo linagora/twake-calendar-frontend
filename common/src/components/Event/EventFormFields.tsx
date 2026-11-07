@@ -72,7 +72,7 @@ function useEventFormImperativeHandle(
     onSubmit: (
       values: EventFormValues,
       organizer?: userOrganiser
-    ) => Promise<void>
+    ) => Promise<unknown>
     onCancel: () => void
   }
 ): void {

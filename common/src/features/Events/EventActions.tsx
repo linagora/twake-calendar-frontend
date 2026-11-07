@@ -9,6 +9,8 @@ interface EventActionsProps {
   onExpanded: () => void
   onClose: () => void
   onSave: () => Promise<void>
+  /** A save is in flight: Save is disabled */
+  saving?: boolean
 }
 
 export const EventActions: React.FC<EventActionsProps> = ({
@@ -16,7 +18,8 @@ export const EventActions: React.FC<EventActionsProps> = ({
   isEdit,
   onExpanded,
   onClose,
-  onSave
+  onSave,
+  saving = false
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -51,7 +54,12 @@ export const EventActions: React.FC<EventActionsProps> = ({
             {t('common.cancel')}
           </Button>
         )}
-        <Button size="medium" variant="contained" onClick={() => void onSave()}>
+        <Button
+          size="medium"
+          variant="contained"
+          disabled={saving}
+          onClick={() => void onSave()}
+        >
           {t('actions.save')}
         </Button>
       </Box>

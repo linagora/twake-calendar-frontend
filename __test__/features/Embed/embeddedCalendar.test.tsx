@@ -1,5 +1,9 @@
 import { setupStore } from '@common/app/store'
-import { useEmbeddedEventUid } from '@common/features/Embed/embeddedCalendar'
+import {
+  isEmbedPath,
+  useEmbeddedCalendarId,
+  useEmbeddedEventUid
+} from '@common/features/Embed/embeddedCalendar'
 import { useSelectedCalendars } from '@common/utils/storage/useSelectedCalendars'
 import { renderHook } from '@testing-library/react'
 import React from 'react'
@@ -62,5 +66,28 @@ describe('useEmbeddedEventUid', () => {
     expect(uidAt('/embed/calendars/team1')).toBeNull()
     expect(uidAt('/events/e1')).toBeNull()
     expect(uidAt('/embed/calendars/team1/events/%E0')).toBeNull()
+  })
+})
+
+describe('the new event form framed by Twake Chat', () => {
+  it('signs in silently, returns there from its callback, and keeps the calendars selection, like the other embed routes', () => {
+    expect(isEmbedPath('/embed/newEvent')).toBe(true)
+  })
+
+  it('is not a team calendar: it embeds no calendar and shows the selection of the user', () => {
+    const calendarIdAt = (pathname: string): string | null =>
+      renderHook(() => useEmbeddedCalendarId(), {
+        wrapper: ({ children }) => (
+          <Provider store={storeAt(pathname)}>{children}</Provider>
+        )
+      }).result.current
+
+    expect(calendarIdAt('/embed/newEvent')).toBeNull()
+    localStorage.setItem('selectedCalendars', JSON.stringify(['user1/cal1']))
+    try {
+      expect(renderAt('/embed/newEvent')).toEqual(['user1/cal1'])
+    } finally {
+      localStorage.removeItem('selectedCalendars')
+    }
   })
 })

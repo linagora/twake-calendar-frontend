@@ -17,6 +17,37 @@ import { useSubmitCreateEvent } from '@common/features/Events/hooks/useSubmitCre
 import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard'
 import { isListView } from '@common/components/Calendar/utils/constants'
 
+type Submit = ReturnType<typeof useSubmitCreateEvent>['handleSubmit']
+
+// Framed, the form stays on screen while the server saves, and after, until
+// Chat closes the frame (elsewhere it closes at once): a second Save or Enter
+// would create the event twice. Only a failed save unlocks it. The ref drops
+// a submit that comes before the re-render, `saving` greys Save out
+function useSubmitOnce(submit: Submit): {
+  submitOnce: Submit
+  saving: boolean
+} {
+  const savingRef = useRef(false)
+  const [saving, setSaving] = useState(false)
+  const submitOnce: Submit = useCallback(
+    async (values, organizer) => {
+      if (savingRef.current) return false
+      savingRef.current = true
+      setSaving(true)
+      let saved = false
+      try {
+        saved = await submit(values, organizer)
+      } finally {
+        savingRef.current = saved
+        setSaving(saved)
+      }
+      return saved
+    },
+    [submit]
+  )
+  return { submitOnce, saving }
+}
+
 const EventPopover: React.FC<{
   open: boolean
   onClose: (refresh?: boolean) => void
@@ -27,6 +58,13 @@ const EventPopover: React.FC<{
   event?: CalendarEvent
   anchorEl?: HTMLElement | null
   currentView?: string
+  /** Called with the event once it is saved */
+  onCreated?: (event: CalendarEvent) => void
+  /**
+   * Framed by another page, the form is all the page shows: no expand arrow
+   * (More options still opens the full form), no backdrop
+   */
+  embedded?: boolean
 }> = ({
   open,
   onClose,
@@ -36,7 +74,9 @@ const EventPopover: React.FC<{
   calendarRef,
   event,
   anchorEl,
-  currentView
+  currentView,
+  onCreated,
+  embedded = false
 }) => {
   const { t } = useI18n()
 
@@ -102,8 +142,11 @@ const EventPopover: React.FC<{
   const { handleSubmit } = useSubmitCreateEvent({
     showMore,
     onClose: () => onClose(true),
+    onCreated,
     userPersonalCalendars
   })
+
+  const { submitOnce, saving } = useSubmitOnce(handleSubmit)
 
   const performClose = useCallback(() => {
     clearEventFormTempData('create')
@@ -155,7 +198,11 @@ const EventPopover: React.FC<{
         onClose={handleClose}
         title={modalTitle}
         isExpanded={showMore}
-        onExpandToggle={() => setShowMore(s => !s)}
+        onExpandToggle={embedded ? undefined : (): void => setShowMore(s => !s)}
+        hideBackdrop={embedded}
+        // Framed, the form is the whole page: the error of a failed save,
+        // beside it, must stay reachable with the keyboard
+        disableEnforceFocus={embedded}
         draggable={!showMore}
         actions={
           <EventActions
@@ -165,6 +212,7 @@ const EventPopover: React.FC<{
               await formRef.current?.submit()
             }}
             onExpanded={() => setShowMore(s => !s)}
+            saving={saving}
           />
         }
         expandText={t('tooltip.moreEventOptions')}
@@ -177,7 +225,7 @@ const EventPopover: React.FC<{
           typeOfAction={undefined}
           eventId={event?.uid ?? null}
           userPersonalCalendars={userPersonalCalendars}
-          onSubmit={handleSubmit}
+          onSubmit={embedded ? submitOnce : handleSubmit}
           onCancel={handleClose}
           tempStorageKey="create"
           onCalendarChange={handleCalendarChange}

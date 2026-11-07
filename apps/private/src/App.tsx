@@ -19,8 +19,11 @@ import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
 import {
   EMBED_CALENDAR_ROUTE,
-  EMBED_EVENT_ROUTE
+  EMBED_EVENT_ROUTE,
+  EMBED_NEW_EVENT_ROUTE
 } from '@common/features/Embed/embeddedCalendar'
+import { EmbeddedNewEvent } from '@common/features/Embed/EmbeddedNewEvent'
+import { newEventHost } from '@common/features/Embed/newEventEmbed'
 import {
   overlayThemeOptions,
   SpaceOverlayProvider
@@ -96,6 +99,14 @@ const reportCrash = (error: unknown, errorInfo: ErrorInfo): void => {
   })
 }
 
+// Logging out from another tab ended the session: start over from the login.
+// Framed by Twake Chat (/embed/newEvent), the frame cannot show the SSO: Chat
+// is told instead, and opens the form in a tab
+const startOverFromLogin = (): void => {
+  if (newEventHost) newEventHost.loginRequired()
+  else redirectTo('/')
+}
+
 export default function App(): JSX.Element {
   const error = useAppSelector(state => state.user.error)
   const appLoading = useAppSelector(state => state.loading.isLoading)
@@ -121,8 +132,7 @@ export default function App(): JSX.Element {
 
   useInitializeApp()
 
-  // Logging out from another tab ended the session: start over from the login
-  useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
+  useEffect(() => onSessionEndedElsewhere(startOverFromLogin), [])
 
   // Framed by TwakeSpace, the default theme of Twake: the dialogs and drawers
   // go onto its overlay, with the palette additions of the calendar
@@ -188,6 +198,10 @@ export default function App(): JSX.Element {
                     <Route
                       path={EMBED_EVENT_ROUTE}
                       element={<EmbeddedCalendar />}
+                    />
+                    <Route
+                      path={EMBED_NEW_EVENT_ROUTE}
+                      element={<EmbeddedNewEvent />}
                     />
                     <Route path="/events/:uid" element={<EventDeepLink />} />
                     <Route path="/newEvent" element={<NewEventDeepLink />} />
