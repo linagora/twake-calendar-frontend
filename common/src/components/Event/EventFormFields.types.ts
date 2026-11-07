@@ -102,7 +102,7 @@ export interface EventFormFieldsProps {
   onSubmit: (
     values: EventFormValues,
     organizer?: userOrganiser
-  ) => Promise<void>
+  ) => Promise<unknown>
   onCancel: () => void
 
   // Temp-storage context

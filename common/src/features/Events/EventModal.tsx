@@ -19,10 +19,10 @@ import { isListView } from '@common/components/Calendar/utils/constants'
 
 type Submit = ReturnType<typeof useSubmitCreateEvent>['handleSubmit']
 
-// Framed, the form stays on screen while the server saves (elsewhere it
-// closes at once): a second Save or Enter meanwhile would create the event
-// twice. The ref drops a submit that comes before the re-render, `saving`
-// greys Save out
+// Framed, the form stays on screen while the server saves, and after, until
+// Chat closes the frame (elsewhere it closes at once): a second Save or Enter
+// would create the event twice. Only a failed save unlocks it. The ref drops
+// a submit that comes before the re-render, `saving` greys Save out
 function useSubmitOnce(submit: Submit): {
   submitOnce: Submit
   saving: boolean
@@ -31,15 +31,17 @@ function useSubmitOnce(submit: Submit): {
   const [saving, setSaving] = useState(false)
   const submitOnce: Submit = useCallback(
     async (values, organizer) => {
-      if (savingRef.current) return
+      if (savingRef.current) return false
       savingRef.current = true
       setSaving(true)
+      let saved = false
       try {
-        await submit(values, organizer)
+        saved = await submit(values, organizer)
       } finally {
-        savingRef.current = false
-        setSaving(false)
+        savingRef.current = saved
+        setSaving(saved)
       }
+      return saved
     },
     [submit]
   )
