@@ -1,4 +1,6 @@
+import { userAttendee } from '@common/features/User/models/attendee'
 import { EmailAddress } from '@common/types/EmailAddress'
+import type { CalendarEvent } from '@common/types/EventsTypes'
 
 // Session storage key used to carry the attendee(s) that should prefill a new
 // event once the user lands on the calendar page (e.g. when following a
@@ -21,4 +23,19 @@ export function parseNewEventAttendees(params: URLSearchParams): string[] {
     .flatMap(value => value.split(','))
     .map(email => email.trim())
     .filter(email => EmailAddress.parse(email) !== null)
+}
+
+/**
+ * The event the create form opens with when a link names its attendees:
+ * no date yet, each attendee asked to reply.
+ */
+export function newEventWithAttendees(emails: string[]): CalendarEvent {
+  return {
+    start: '',
+    end: '',
+    allday: false,
+    attendee: emails.map(
+      email => new userAttendee({ cal_address: email, cn: email, rsvp: 'TRUE' })
+    )
+  } as CalendarEvent
 }

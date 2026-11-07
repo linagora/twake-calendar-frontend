@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { handleCreateEvent } from './submitCreateHelpers/createAction'
 import { userOrganiser } from '@common/features/User/userDataTypes'
@@ -9,12 +10,15 @@ import { useI18n } from 'twake-i18n'
 export interface UseSubmitCreateEventProps {
   showMore: boolean
   onClose: (refresh?: boolean) => void
+  /** Called with the event once it is saved */
+  onCreated?: (event: CalendarEvent) => void
   userPersonalCalendars: Calendar[]
 }
 
 export function useSubmitCreateEvent({
   showMore,
   onClose,
+  onCreated,
   userPersonalCalendars
 }: UseSubmitCreateEventProps): {
   handleSubmit: (
@@ -48,10 +52,11 @@ export function useSubmitCreateEvent({
         showMore,
         organizer,
         onClose,
+        onCreated,
         t
       })
     },
-    [showMore, onClose, userPersonalCalendars, dispatch, calList, t]
+    [showMore, onClose, onCreated, userPersonalCalendars, dispatch, calList, t]
   )
 
   return { handleSubmit }

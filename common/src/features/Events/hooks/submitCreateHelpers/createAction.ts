@@ -135,6 +135,7 @@ export async function handleCreateEvent({
   showMore,
   organizer,
   onClose,
+  onCreated,
   t
 }: {
   dispatch: AppDispatch
@@ -143,6 +144,8 @@ export async function handleCreateEvent({
   showMore: boolean
   organizer?: userOrganiser
   onClose: (refresh?: boolean) => void
+  // Once the server has the event, never before
+  onCreated?: (event: CalendarEvent) => void
   t?: (key: string) => string
 }): Promise<void> {
   const newEvent = buildNewEvent({
@@ -161,6 +164,7 @@ export async function handleCreateEvent({
     await assertThunkSuccess(result)
     clearEventFormTempData('create')
     dispatch(eventSaved(newEvent))
+    onCreated?.(newEvent)
   } catch (error) {
     handleCreateEventError(values, error)
   }

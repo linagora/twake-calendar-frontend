@@ -9,6 +9,7 @@ import React, { useLayoutEffect, useMemo } from 'react'
 import type { RootState } from '@common/app/store'
 import { useAppSelector } from '@common/app/hooks'
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
+import { newEventHost } from '@common/features/Embed/newEventEmbed'
 import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { getPlatformSdk } from '@common/utils/sdkSession'
 import { getUserDisplayName } from '@common/utils/userUtils'
@@ -36,11 +37,14 @@ const BAR_APP = {
 
 const handleLogOut = (): void => void logOut()
 
+// The page that frames calendar shows its own bar, or none
+const isFramed = (): boolean => twakeSpace !== null || newEventHost !== null
+
 /**
  * The Twake bar, pinned on top of the page in the space the body reserves,
  * once calendar's loader is gone. Rendered under the theme and i18n providers,
  * which the bar follows. Not shown when TwakeSpace frames calendar: the bar of
- * TwakeSpace is above it.
+ * TwakeSpace is above it; nor in the new event form Twake Chat frames.
  *
  * The bar shows the platform session, which calendar signs in at load.
  * Without a platform, or when the token exchange fails, it shows calendar's
@@ -50,7 +54,7 @@ export const TwakeBarHeader = (): React.JSX.Element | null => {
   const isAppLoading = useAppSelector(selectIsAppLoading)
   const platformURL = useAppSelector(selectPlatformURL)
   const user = useAppSelector(selectUser)
-  const isShown = twakeSpace === null && !isAppLoading
+  const isShown = !isFramed() && !isAppLoading
 
   const fallback = useMemo<TwakeBarFallback>(
     () => ({
