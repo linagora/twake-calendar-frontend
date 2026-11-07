@@ -299,6 +299,48 @@ describe('the new event form framed by Twake Chat', () => {
     expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
   })
 
+  it('saves the event once when the user submits again after it is saved, before Chat closes the frame', async () => {
+    // A disabled Save is clicked like any other: it must simply do nothing
+    const user = userEvent.setup({ pointerEventsCheck: 0 })
+    renderRoute()
+    greet()
+
+    await user.type(await findForm(), 'Weekly sync')
+    await user.click(screen.getByRole('button', { name: t('actions.save') }))
+    await waitFor(() =>
+      expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
+    )
+
+    // The event is saved, Chat has not closed its dialog yet
+    await user.click(screen.getByRole('textbox', { name: /title/i }))
+    await user.keyboard('{Enter}')
+    await user.click(screen.getByRole('button', { name: t('actions.save') }))
+    await settle()
+
+    expect(putEvent).toHaveBeenCalledTimes(1)
+    expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
+  })
+
+  it('lets the user save again after a failed save, and tells Twake Chat once it works', async () => {
+    ;(putEvent as Mock).mockRejectedValueOnce(new Error('Server down'))
+    const user = userEvent.setup()
+    renderRoute()
+    greet()
+
+    await user.type(await findForm(), 'Weekly sync')
+    await user.click(screen.getByRole('button', { name: t('actions.save') }))
+    await failureHandled()
+    await settle()
+    expect(sentOfType('twake-calendar:event-created')).toEqual([])
+
+    await user.click(screen.getByRole('button', { name: t('actions.save') }))
+
+    await waitFor(() =>
+      expect(sentOfType('twake-calendar:event-created')).toHaveLength(1)
+    )
+    expect(putEvent).toHaveBeenCalledTimes(2)
+  })
+
   it('tells Twake Chat the user must sign in when the session ends in another tab, and stays in the frame', async () => {
     renderRoute()
     greet()
