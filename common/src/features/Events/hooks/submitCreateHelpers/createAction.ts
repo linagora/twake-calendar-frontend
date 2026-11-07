@@ -147,7 +147,7 @@ export async function handleCreateEvent({
   // Once the server has the event, never before
   onCreated?: (event: CalendarEvent) => void
   t?: (key: string) => string
-}): Promise<void> {
+}): Promise<boolean> {
   const newEvent = buildNewEvent({
     values,
     targetCalendar,
@@ -166,7 +166,7 @@ export async function handleCreateEvent({
     dispatch(eventSaved(newEvent))
   } catch (error) {
     handleCreateEventError(values, error)
-    return
+    return false
   }
 
   // Outside the save: the server has the event, so an error here must not
@@ -177,4 +177,5 @@ export async function handleCreateEvent({
   } catch (error) {
     console.error('After the event was saved:', error)
   }
+  return true
 }

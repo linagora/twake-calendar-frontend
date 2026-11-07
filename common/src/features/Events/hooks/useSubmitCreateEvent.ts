@@ -21,10 +21,11 @@ export function useSubmitCreateEvent({
   onCreated,
   userPersonalCalendars
 }: UseSubmitCreateEventProps): {
+  /** Resolves true once the server saved the event, false otherwise */
   handleSubmit: (
     values: EventFormValues,
     organizer?: userOrganiser
-  ) => Promise<void>
+  ) => Promise<boolean>
 } {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
@@ -34,7 +35,7 @@ export function useSubmitCreateEvent({
     async (
       values: EventFormValues,
       organizer?: userOrganiser
-    ): Promise<void> => {
+    ): Promise<boolean> => {
       const targetCalendar: Calendar | undefined =
         calList[values.calendarid] ||
         userPersonalCalendars[0] ||
@@ -42,10 +43,10 @@ export function useSubmitCreateEvent({
 
       if (!targetCalendar?.id) {
         console.error('No target calendar available to save event')
-        return
+        return false
       }
 
-      await handleCreateEvent({
+      return handleCreateEvent({
         dispatch,
         values,
         targetCalendar,
