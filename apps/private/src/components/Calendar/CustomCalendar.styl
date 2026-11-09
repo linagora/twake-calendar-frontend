@@ -47,19 +47,36 @@ span.fc-daygrid-day-number
   width 48px
   line-height 39px
 
-.fc-daygrid-day-frame .fc-daygrid-day-top .fc-daygrid-day-number
+.fc-dayGridMonth-view .fc-daygrid-day-top .fc-daygrid-day-number
+  display inline-block
   font-size 12px
   font-weight 500
   line-height 16px
-  width 100%
+  width auto
+  min-width 16px
   text-align  center
   padding 0
+  isolation isolate
 
-.fc-daygrid-day-frame span.fc-daygrid-day-number:after
+.fc-dayGridMonth-view .fc-daygrid-day-top .fc-daygrid-day-number:after
   width 25px
   height 25px
-  top -6px
-  left -6px
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+
+.fc-dayGridMonth-view .fc-day-other .fc-daygrid-day-number
+  color var(--twake-palette-text-disabled)
+
+.fc .calendar-month-grid
+  border-top-width 0
+  border-inline-width 0
+
+.fc .calendar-month-grid .fc-col-header-cell
+  border-inline-color transparent
+
+.fc-dayGridMonth-view .compactStartTime
+  display none
 
 .fc-daygrid-day-top .fc-daygrid-day-number:after,
 span.fc-daygrid-day-number:after
@@ -452,6 +469,9 @@ hr.MuiDivider-root.MuiDivider-fullWidth
   display none
 
 /* FullCalendar List View Custom Styling */
+.fc .calendar-list-view .fc-list-event
+  padding 0
+
 .fc-listWeek-view.fc-list,
 .fc-listMonth-view.fc-list
   border-width 0

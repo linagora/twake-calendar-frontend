@@ -97,7 +97,7 @@ export const BaseBookingLinkChip: React.FC<BaseBookingLinkChipProps> = ({
           '.MuiCardHeader-title': { lineHeight: 1 }
         }}
         title={
-          showCompact ? (
+          isMonthView || showCompact ? (
             statusIcon
           ) : (
             <Box

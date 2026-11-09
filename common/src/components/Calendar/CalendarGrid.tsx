@@ -105,6 +105,9 @@ const CALENDAR_DEFAULT_PROPS = {
   noEventsText: '',
   headerToolbar: false,
   views: {
+    dayGridMonth: {
+      tableClass: 'calendar-month-grid'
+    },
     timeGrid: {
       tableClass: 'calendar-time-grid',
       dayHeaderDividerClass: 'calendar-time-grid-header-divider',
@@ -239,9 +242,13 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           dayHeaderInnerClass={({ inPopover }) =>
             inPopover ? 'fc-popover-title' : 'fc-col-header-cell-cushion'
           }
-          dayCellClass={({ isToday }) =>
-            cx('fc-daygrid-day', { 'fc-day-today': isToday })
+          dayCellClass={({ isToday, isOther }) =>
+            cx('fc-daygrid-day', {
+              'fc-day-today': isToday,
+              'fc-day-other': isOther
+            })
           }
+          dayCellTopClass="fc-daygrid-day-top"
           dayCellInnerClass={({ inPopover }) =>
             inPopover ? 'fc-popover-body' : 'fc-daygrid-day-frame'
           }
