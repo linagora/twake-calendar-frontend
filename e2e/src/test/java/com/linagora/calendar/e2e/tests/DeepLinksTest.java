@@ -2,10 +2,12 @@ package com.linagora.calendar.e2e.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +16,11 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.backend.Vcal;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
+import com.linagora.calendar.e2e.pages.EventFormModal;
+import com.linagora.calendar.e2e.pages.EventPreviewPopover;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -195,6 +201,63 @@ class DeepLinksTest extends TwakeCalendarE2ETest {
             .isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(30_000));
         assertThat(page.locator(".MuiPopover-root:visible, [role=dialog]:visible").last().innerText())
             .contains("Recurrent Event");
+    }
+
+    @Test
+    @DisplayName("DEEP-14 The edit form opens from a link to an event outside the displayed week")
+    void theEditFormOpensFromALinkOutsideTheWeek(Page page, E2EUser user, CalendarProbe probe) {
+        String title = title("Far away");
+        String uid = UUID.randomUUID().toString();
+        LoginPage.loginAs(page, user);
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today().plusDays(60), 9));
+
+        // the week on screen holds no event the form could be placed next to
+        String renamed = renameFromLink(page, user, probe, uid, title("Far away renamed"));
+
+        assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed);
+    }
+
+    @Test
+    @DisplayName("DEEP-15 (#2000) In a zone whose offset has seconds, a save keeps the stored end and the answers")
+    void aZoneOffsetWithSecondsKeepsTheStoredEnd(Page page, E2EUser user, CalendarProbe probe) {
+        String uid = UUID.randomUUID().toString();
+        String guest = "guest-" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+        LoginPage.loginAs(page, user);
+        // Liberia was at -00:44:30 until 1972, out of reach of the grid: a link opens the event
+        probe.putEvent(user, uid, Vcal.calendar("""
+            BEGIN:VEVENT
+            UID:%s
+            DTSTAMP:20260101T000000Z
+            DTSTART;TZID=Africa/Monrovia:19700611T100000
+            DTEND;TZID=Africa/Monrovia:19700611T103045
+            SUMMARY:%s
+            ORGANIZER:mailto:%s
+            ATTENDEE;PARTSTAT=ACCEPTED:mailto:%s
+            ATTENDEE;PARTSTAT=ACCEPTED;RSVP=TRUE:mailto:%s
+            END:VEVENT
+            """.formatted(uid, title("Monrovia"), user.email(), user.email(), guest)));
+
+        renameFromLink(page, user, probe, uid, title("Monrovia renamed"));
+
+        String saved = Ics.event(probe.singleEvent(user));
+        assertThat(Ics.property(saved, "DTEND"))
+            .as("the form shows minutes, but a rename must not move the end")
+            .hasValue("19700611T103045");
+        assertThat(Vcal.attendeeLines(saved, guest))
+            .as("a rename is not a change of time: the guest keeps their answer")
+            .singleElement()
+            .satisfies(line -> assertThat(Vcal.partstat(line)).isEqualTo("ACCEPTED"));
+    }
+
+    private String renameFromLink(Page page, E2EUser user, CalendarProbe probe, String uid, String renamed) {
+        page.navigate("/events/" + uid);
+        page.getByLabel("Edit event").waitFor();
+        EventFormModal form = new EventPreviewPopover(page).edit();
+        form.title(renamed);
+        form.save();
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(probe.singleEvent(user)).contains("SUMMARY:" + renamed));
+        return renamed;
     }
 
     @Test
