@@ -324,6 +324,7 @@
     "uploadedFileMissingId": "Échec de l'envoi du fichier : identifiant de fichier manquant",
     "importEventFromFileFailed": "Impossible d'importer l'événement depuis le fichier",
     "saveEventFailed": "L'événement n'a pas pu être enregistré. Veuillez réessayer.",
+    "participationUpdateFailed": "Votre participation n'a pas pu être mise à jour. Veuillez réessayer.",
     "deleteEventFailed": "L'événement n'a pas pu être supprimé. Veuillez réessayer.",
     "loadEventsFailed": "Les événements n'ont pas pu être chargés. Veuillez réessayer.",
     "requestFailed": "Le serveur n'a pas pu traiter la demande. Veuillez réessayer."
@@ -510,7 +511,12 @@
     "months": "mois",
     "years": "ans",
     "alarmText": "%{trigger} par %{action}",
-    "replySentTo": "Votre réponse a été envoyée à %{organizerName}"
+    "replySentTo": "Votre réponse a été envoyée à %{organizerName}",
+    "participationUpdated": {
+      "ACCEPTED": "Invitation acceptée",
+      "DECLINED": "Invitation déclinée",
+      "TENTATIVE": "Invitation acceptée provisoirement"
+    }
   },
   "dateTimeFields": {
     "date": "Date",

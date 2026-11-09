@@ -570,3 +570,27 @@ describe('answering a whole series', () => {
     ).rejects.toThrow('status 412')
   })
 })
+
+describe('RSVP regenerated when the stored event has no matching attendee', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(
+      JSON.parse(JSON.stringify(STORED_JCAL)) as VCalComponent
+    )
+  })
+
+  it('reports an answer whose save was rejected', async () => {
+    await expect(
+      handleRSVP({
+        dispatch: vi.fn().mockResolvedValue({
+          type: 'calendars/putEvent/rejected',
+          error: { message: 'refused' }
+        }),
+        calendar: CALENDAR,
+        user: { ...USER, email: 'stranger@example.com' },
+        event: STALE_EVENT,
+        rsvp: 'ACCEPTED'
+      })
+    ).rejects.toThrow('refused')
+  })
+})

@@ -7,6 +7,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { useEventSaveFeedback } from '@common/components/Calendar/hooks/useEventSaveFeedback'
 import {
   eventSaved,
+  participationUpdated,
   dismissEventSaveFeedback,
   type SavedEvent
 } from '@common/features/Events/eventSaveFeedbackSlice'
@@ -18,6 +19,10 @@ vi.mock('twake-i18n', () => ({
         locale: 'en',
         'event.saved': 'Event saved',
         'event.savedFor': `Event saved for ${options?.date}`,
+        'eventPreview.participationUpdated.ACCEPTED': 'Invitation accepted',
+        'eventPreview.participationUpdated.DECLINED': 'Invitation declined',
+        'eventPreview.participationUpdated.TENTATIVE':
+          'Invitation tentatively accepted',
         'actions.show': 'Show'
       })[key]
   })
@@ -78,10 +83,12 @@ describe('event save feedback', () => {
       title: 'Not needed for feedback'
     }
     store.dispatch(eventSaved(fullEvent))
-    expect(store.getState().eventSaveFeedback.notice?.event).toEqual({
-      ...saved,
-      allday: undefined
+    expect(store.getState().eventSaveFeedback.notice).toMatchObject({
+      event: { ...saved, allday: undefined }
     })
+    expect(store.getState().eventSaveFeedback.notice).not.toHaveProperty(
+      'event.title'
+    )
   })
 
   it('keeps a newer save when an older snackbar dismisses', () => {
@@ -103,6 +110,25 @@ describe('event save feedback', () => {
       vi.advanceTimersByTime(4000)
     })
     expect(screen.queryByText('Event saved')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['ACCEPTED', 'Invitation accepted'],
+    ['DECLINED', 'Invitation declined'],
+    ['TENTATIVE', 'Invitation tentatively accepted']
+  ] as const)('names the %s answer for four seconds', (partstat, message) => {
+    renderFeedback()
+    act(() => {
+      store.dispatch(participationUpdated(partstat))
+    })
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Show' })
+    ).not.toBeInTheDocument()
+    act(() => {
+      vi.advanceTimersByTime(4000)
+    })
+    expect(screen.queryByText(message)).not.toBeInTheDocument()
   })
 
   it('shows an outside date for six seconds and navigates only on Show', () => {
