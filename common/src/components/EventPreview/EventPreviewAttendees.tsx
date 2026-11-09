@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { useAttendeesFreeBusy } from '@common/components/Attendees/useFreeBusy'
 import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'

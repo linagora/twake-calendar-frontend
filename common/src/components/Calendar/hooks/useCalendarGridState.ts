@@ -42,7 +42,7 @@ const getFilteredEvents = (
 
 export interface UseCalendarGridStateProps {
   calendarRef: React.MutableRefObject<CalendarApi | null>
-  calendarWrapperRef: React.RefObject<HTMLDivElement>
+  calendarWrapperRef: React.RefObject<HTMLDivElement | null>
   currentView: string
   timezone: string
   selectedCalendars: string[]

@@ -46,7 +46,7 @@ export function useOpenSavedEventPreview({
   dispatch: AppDispatch
   userId: string
   calendarRef: RefObject<CalendarApi | null>
-  calendarWrapperRef: RefObject<HTMLDivElement>
+  calendarWrapperRef: RefObject<HTMLDivElement | null>
   onOpen: (eventId: string, calId: string, anchorEl: HTMLElement | null) => void
 }): (event: SavedEvent) => Promise<void> {
   return async (saved): Promise<void> => {

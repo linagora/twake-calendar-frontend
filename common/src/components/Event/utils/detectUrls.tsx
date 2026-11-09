@@ -37,7 +37,7 @@ function normalizeHref(token: LinkifyToken): string {
   return href
 }
 
-export function detectUrls(text: string): JSX.Element[] {
+export function detectUrls(text: string): React.JSX.Element[] {
   const parts = []
   let lastIndex = 0
 

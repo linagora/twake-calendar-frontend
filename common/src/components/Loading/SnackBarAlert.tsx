@@ -1,6 +1,6 @@
 import type { AlertColor, AlertProps } from '@linagora/twake-mui'
 import { Alert, Button, Snackbar } from '@linagora/twake-mui'
-import { forwardRef, type ReactNode } from 'react'
+import { forwardRef, ReactNode, JSX } from 'react'
 
 export interface AlertAction {
   label: string

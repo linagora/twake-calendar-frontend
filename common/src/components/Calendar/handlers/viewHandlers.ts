@@ -49,7 +49,7 @@ export interface ViewHandlersProps {
   userId?: string
   currentView?: string
   view?: string
-  calendarWrapperRef?: React.RefObject<HTMLDivElement>
+  calendarWrapperRef?: React.RefObject<HTMLDivElement | null>
   sortedSelectedCalendars?: string[]
   fullCalendarEvents?: EventInput[]
 }
@@ -58,7 +58,7 @@ export interface ViewHandlers {
   handleNowIndicatorContent: (
     arg: NowIndicatorContentArg
   ) => React.ReactElement | undefined
-  handleDayHeaderContent: (arg: DayHeaderContentArg) => JSX.Element
+  handleDayHeaderContent: (arg: DayHeaderContentArg) => React.JSX.Element
   handleDayHeaderDidMount: (arg: DayHeaderMountArg) => void
   handleDayHeaderWillUnmount: (arg: DayHeaderMountArg) => void
   handleViewDidMount: (arg: ViewMountArg) => void
@@ -132,7 +132,9 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     }
   }
 
-  const handleDayHeaderContent = (arg: DayHeaderContentArg): JSX.Element => {
+  const handleDayHeaderContent = (
+    arg: DayHeaderContentArg
+  ): React.JSX.Element => {
     const isMonthView = arg.view.type === CALENDAR_VIEWS.dayGridMonth
     const weekDay = (
       isMonthView

@@ -10,14 +10,14 @@ import { useI18n } from 'twake-i18n'
 interface TdrivePickerDialogProps {
   open: boolean
   onClose: () => void
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   onReadyToUse: (callback: () => void) => void
   onFileSelected: (file: TdriveFile) => void
 }
 
 interface PickerContentProps {
   isReady: boolean
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
 }
 
 const PickerContent: React.FC<PickerContentProps> = ({

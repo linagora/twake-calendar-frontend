@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { push } from 'redux-first-history'

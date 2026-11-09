@@ -3,6 +3,7 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +15,9 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
+import com.linagora.calendar.e2e.backend.Ical;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -223,11 +226,25 @@ class AlarmsTest extends TwakeCalendarE2ETest {
     void theReminderSurvivesATimeChange(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Moved reminder");
-        calendar.createEvent().title(title).expand()
-            .startTime("09:00").endTime("10:00").notification("10 minutes").save();
-        awaitAttached(calendar.eventCard(title));
+        String uid = UUID.randomUUID().toString();
+        LocalDate day = E2EClock.daysAheadOnBothClocks(1);
+        String reminder = """
+            BEGIN:VALARM
+            ACTION:EMAIL
+            TRIGGER:-PT10M
+            ATTENDEE:mailto:%s
+            SUMMARY:%s
+            DESCRIPTION:%s
+            END:VALARM
+            """.formatted(user.email(), title, title).replace("\n", "\r\n");
+        probe.putEvent(user, uid, Ical.event(uid, title, day, 9)
+            .replace("END:VEVENT", reminder + "END:VEVENT"));
+        assertThat(alarms(probe.singleEvent(user))).singleElement()
+            .satisfies(saved -> assertThat(triggerOf(saved)).isEqualTo("-PT10M"));
 
-        var form = calendar.openEvent(title).edit().expand();
+        calendar.reload().goToDate(day);
+        awaitAttached(calendar.eventCardOn(title, day));
+        var form = calendar.openEventOn(title, day).edit().expand();
         form.startTime("16:00").endTime("17:00");
         form.save();
 

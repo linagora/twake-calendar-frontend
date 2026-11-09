@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { User } from '@common/components/Attendees/types'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'

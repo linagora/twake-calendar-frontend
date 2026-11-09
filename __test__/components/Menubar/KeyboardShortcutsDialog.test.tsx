@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useState } from 'react'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { KeyboardShortcutsDialog } from '@common/components/Menubar/KeyboardShortcutsDialog'

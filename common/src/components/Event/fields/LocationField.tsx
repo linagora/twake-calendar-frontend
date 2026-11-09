@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { TextField } from '@linagora/twake-mui'
 import { LocationOnOutlined as LocationIcon } from '@mui/icons-material'
 import { useRef, useState } from 'react'

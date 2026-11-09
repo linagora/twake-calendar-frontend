@@ -76,7 +76,7 @@ const ResourceField: React.FC<ResourceFieldProps> = ({
         setSelectedResources(value)
       }
       hideLabel={true}
-      getChipIcon={(resource): JSX.Element =>
+      getChipIcon={(resource): React.JSX.Element =>
         start && end ? (
           <FreeBusyIndicator
             status={statusMap[resourceKey(resource)] ?? 'unknown'}

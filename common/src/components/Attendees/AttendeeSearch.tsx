@@ -188,7 +188,7 @@ export const AttendeeSearch: React.FC<{
       inputSlot={inputSlot}
       placeholder={placeholder}
       label={label}
-      getChipIcon={(user): JSX.Element =>
+      getChipIcon={(user): React.JSX.Element =>
         start && end ? (
           <FreeBusyIndicator status={statusMap[user.email] ?? 'unknown'} />
         ) : (

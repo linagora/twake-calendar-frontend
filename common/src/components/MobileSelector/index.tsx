@@ -39,8 +39,8 @@ const SelectorButton = styled(ButtonBase)(({ theme }) => ({
 interface MobileSelectorProps {
   displayText: React.ReactNode
   children?: React.ReactNode
-  bottomSheetRef?: React.RefObject<HTMLDivElement>
-  paperRef?: React.RefObject<HTMLDivElement>
+  bottomSheetRef?: React.RefObject<HTMLDivElement | null>
+  paperRef?: React.RefObject<HTMLDivElement | null>
   bottomSheetChildren?: (props: {
     open: boolean
     onClose: () => void

@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useCallback, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'

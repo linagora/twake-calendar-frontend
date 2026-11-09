@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { useI18n } from 'twake-i18n'
 

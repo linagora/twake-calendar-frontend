@@ -58,7 +58,7 @@ const localeMap: Record<string, LocaleInput | undefined> = {
 
 export interface CalendarGridProps {
   calendarRef: MutableRefObject<CalendarApi | null>
-  calendarWrapperRef: RefObject<HTMLDivElement>
+  calendarWrapperRef: RefObject<HTMLDivElement | null>
   hiddenDays: number[]
   currentView: string
   selectedDate: Date

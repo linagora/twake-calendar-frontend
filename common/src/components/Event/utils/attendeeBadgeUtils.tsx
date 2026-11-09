@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Badge, Box, Typography } from '@linagora/twake-mui'

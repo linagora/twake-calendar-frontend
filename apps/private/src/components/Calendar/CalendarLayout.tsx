@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import {
   useCalendarShortcuts,
   OPEN_CALENDAR_SEARCH,
@@ -60,7 +61,7 @@ export default function CalendarLayout(): JSX.Element {
       : CALENDAR_VIEWS.timeGridWeek
   )
 
-  const currentViewModeRef = useRef<string>()
+  const currentViewModeRef = useRef<string>(undefined)
 
   useEffect(() => {
     const setViewMode = (): void => {
