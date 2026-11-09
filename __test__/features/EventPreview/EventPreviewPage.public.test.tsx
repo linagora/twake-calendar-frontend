@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, RenderResult, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { EventPreviewPage } from '@public/features/EventPreview/EventPreviewPage'
@@ -14,9 +14,13 @@ vi.mock('react-router', () => ({
   useSearchParams: () => [new URLSearchParams(), vi.fn()]
 }))
 
+const browser = vi.hoisted(() => ({ timeZone: 'Asia/Ho_Chi_Minh' }))
+
 vi.mock('@common/utils/timezone', async () => ({
   ...(await vi.importActual('@common/utils/timezone')),
-  browserDefaultTimeZone: 'Asia/Ho_Chi_Minh'
+  get browserDefaultTimeZone() {
+    return browser.timeZone
+  }
 }))
 
 vi.mock('@public/features/EventPreview/hooks/useParseToken', () => ({
@@ -55,25 +59,6 @@ vi.mock('@common/components/Loading/Loading', () => ({
   Loading: () => null
 }))
 
-vi.mock('@common/components/EventPreview/EventPreviewTitleRow', () => ({
-  EventPreviewTitleRow: ({ timezone }: { timezone: string }) => (
-    <div data-testid="title-row-timezone">{timezone}</div>
-  )
-}))
-
-vi.mock('@common/components/Timezone/TimezoneSelector', () => ({
-  TimezoneSelector: ({ value, onChange }: any) => (
-    <select
-      data-testid="timezone-selector"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-    >
-      <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh</option>
-      <option value="Asia/Tokyo">Asia/Tokyo</option>
-    </select>
-  )
-}))
-
 vi.mock('@public/components/EventPreview/EventPreviewDetails', () => ({
   EventPreviewDetails: () => null
 }))
@@ -89,27 +74,48 @@ vi.mock(
   })
 )
 
-describe('EventPreviewPage', () => {
-  it('displays the event in the browser time zone rather than its own', () => {
-    render(<EventPreviewPage />, { wrapper: TwakeMuiThemeProvider })
+const renderPage = (): RenderResult =>
+  render(<EventPreviewPage />, { wrapper: TwakeMuiThemeProvider })
 
-    expect(screen.getByTestId('timezone-selector')).toHaveValue(
-      'Asia/Ho_Chi_Minh'
-    )
-    expect(screen.getByTestId('title-row-timezone')).toHaveTextContent(
-      'Asia/Ho_Chi_Minh'
-    )
+const pickTimeZone = async (name: RegExp): Promise<void> => {
+  fireEvent.click(screen.getByRole('button'))
+  fireEvent.mouseDown(await screen.findByRole('combobox'))
+  fireEvent.click(await screen.findByRole('option', { name }))
+}
+
+describe('EventPreviewPage', () => {
+  beforeEach(() => {
+    browser.timeZone = 'Asia/Ho_Chi_Minh'
   })
 
-  it('displays the event in the time zone picked by the attendee', () => {
-    render(<EventPreviewPage />, { wrapper: TwakeMuiThemeProvider })
+  it('displays the event in the browser time zone rather than its own', () => {
+    renderPage()
 
-    fireEvent.change(screen.getByTestId('timezone-selector'), {
-      target: { value: 'Asia/Tokyo' }
-    })
+    // 09:00Z is 16:00 in Ho Chi Minh City (UTC+7), 10:00 in Paris
+    expect(screen.getByRole('button')).toHaveTextContent('UTC+7')
+    expect(screen.getByText(/16:00/)).toHaveTextContent('UTC+7')
+  })
 
-    expect(screen.getByTestId('title-row-timezone')).toHaveTextContent(
-      'Asia/Tokyo'
-    )
+  it('displays the event in the time zone picked by the attendee', async () => {
+    renderPage()
+
+    await pickTimeZone(/tokyo/i)
+
+    // 09:00Z is 18:00 in Tokyo (UTC+9)
+    expect(screen.getByText(/18:00/)).toHaveTextContent('UTC+9')
+    expect(screen.queryByText(/16:00/)).not.toBeInTheDocument()
+  })
+
+  it('selects the browser zone even when missing from the bundled ones', async () => {
+    browser.timeZone = 'Europe/Kyiv'
+    renderPage()
+
+    // 09:00Z is 11:00 in Kyiv (UTC+2 in November)
+    expect(screen.getByText(/11:00/)).toHaveTextContent('UTC+2')
+    fireEvent.click(screen.getByRole('button'))
+    fireEvent.mouseDown(await screen.findByRole('combobox'))
+    expect(
+      await screen.findByRole('option', { selected: true })
+    ).toHaveTextContent('Europe/Kyiv')
   })
 })
