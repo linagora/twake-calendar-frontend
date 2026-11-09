@@ -7,7 +7,7 @@
     "@linagora/twake-mui": "^19.1.1",
     "@mui/icons-material": "^9.5.0",
     "@mui/x-date-pickers": "^9",
-    "@sentry/react": "^11.10.0",
+    "@sentry/react": "^11.11.0",
     "date-fns": "^4.4.0",
     "dayjs": "^1.11.23",
     "ky": "^2.2.0",
