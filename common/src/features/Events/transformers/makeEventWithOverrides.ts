@@ -9,7 +9,13 @@ import {
   makeTimezone,
   makeVevent
 } from '@common/features/Events/utils'
-import { isMomentZone, resolveTimezone } from '@common/utils/timezone'
+import {
+  isMomentZone,
+  readWallClock,
+  resolveTimezone,
+  storedTimezone,
+  withStoredTimezones
+} from '@common/utils/timezone'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 import {
   getTzidParam,
@@ -29,10 +35,8 @@ export function makeEventWithOverrides(
     !updatedEvent.recurrenceId
   )
   const nextVevents = [...vevents]
-  const overrideIndex = findOverrideIndex(
-    nextVevents,
-    updatedEvent,
-    storedVtimezones
+  const overrideIndex = withStoredTimezones(storedVtimezones, () =>
+    findOverrideIndex(nextVevents, updatedEvent, storedVtimezones)
   )
   if (overrideIndex !== -1) {
     // Preserve the stored RECURRENCE-ID tuple (its TZID parameter and exact
@@ -94,13 +98,22 @@ function findOverrideIndex(
   const storedIds = vevents.map(findRecurrenceId)
   const isSameInstant =
     (zone: string | undefined) =>
-    (storedId: VObjectProperty | undefined): boolean =>
-      storedId !== undefined &&
-      sameRecurrence(
-        { value: storedId[3], tzid: storedTzid(storedId, storedVtimezones) },
-        { value: id },
-        zone
-      )
+    (storedId: VObjectProperty | undefined): boolean => {
+      if (!storedId) return false
+      const tzid = storedTzid(storedId, storedVtimezones)
+      const raw = storedId[3]
+      // A custom TZID without an IANA location still has a definite instant
+      // when its stored VTIMEZONE supplies the offset. Do not read its wall
+      // clock in the fallback zone: that can select a different override.
+      const value =
+        typeof raw === 'string' &&
+        tzid &&
+        storedTimezone(tzid) &&
+        !/Z$/.test(raw)
+          ? readWallClock(raw, tzid).toISOString()
+          : raw
+      return sameRecurrence({ value, tzid }, { value: id }, zone)
+    }
   const exactIndexes = /Z$/.test(id)
     ? []
     : storedIds.flatMap((storedId, index) =>
@@ -129,8 +142,8 @@ function findOverrideIndex(
   return certainIndex !== -1 ? certainIndex : storedIds.findIndex(inSeriesZone)
 }
 
-// The TZID to read a stored value in: the zone a VTIMEZONE names for a TZID
-// moment-timezone does not know
+// The TZID to read a stored value in: prefer the IANA location of an unknown
+// TZID, otherwise keep its name so the stored VTIMEZONE can supply its rules.
 function storedTzid(
   storedId: VObjectProperty,
   storedVtimezones: VCalComponent[]
@@ -148,8 +161,9 @@ function hasCertainInstant(
 ): boolean {
   const tzid = storedTzid(storedId, storedVtimezones)
   return (
-    /Z$/.test(String(storedId[3])) ||
+    (typeof storedId[3] === 'string' && /Z$/.test(storedId[3])) ||
     !tzid ||
+    Boolean(storedTimezone(tzid)) ||
     isMomentZone(resolveTimezone(tzid))
   )
 }

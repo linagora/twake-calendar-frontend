@@ -808,7 +808,7 @@ describe('makeEventWithOverrides — override in a TZID only a VTIMEZONE defines
     expect(propOf(edited as VCalComponent, 'summary')?.[3]).toBe('Edited')
   })
 
-  it('prefers a certain instant to a TZID nothing tells the zone of', () => {
+  it('keeps a custom-zone override distinct from a UTC override at the same wall clock', () => {
     const overrides = listOverrides(
       makeEventWithOverrides(
         editOf('2025-01-13T09:00:00Z'),
@@ -822,15 +822,46 @@ describe('makeEventWithOverrides — override in a TZID only a VTIMEZONE defines
     expect(summaries(overrides)).not.toContain('Second shift')
   })
 
-  it('keeps reading such a TZID as a last resort', () => {
+  it('reads a custom TZID from its observances without an IANA location', () => {
     const overrides = listOverrides(
       makeEventWithOverrides(
-        editOf('2025-01-13T09:00:00Z'),
+        editOf('2025-01-13T08:00:00Z'),
         [master, structuredClone(morning)],
         [vtimezone()]
       )
     )
 
     expect(summaries(overrides)).toEqual(['Edited'])
+  })
+
+  it('replaces its own custom-zone override when another has its UTC wall clock', () => {
+    const customSecond = structuredClone(second)
+    customSecond[1] = customSecond[1].map(prop => {
+      switch (prop[0]) {
+        case 'recurrence-id':
+          return [prop[0], custom, 'date-time', '2025-01-13T10:00:00']
+        case 'dtstart':
+          return [prop[0], custom, 'date-time', '2025-01-13T10:15:00']
+        case 'dtend':
+          return [prop[0], custom, 'date-time', '2025-01-13T10:45:00']
+        default:
+          return prop
+      }
+    })
+    const overrides = listOverrides(
+      makeEventWithOverrides(
+        editOf('2025-01-13T09:00:00Z'),
+        [master, structuredClone(morning), customSecond],
+        [vtimezone()]
+      )
+    )
+
+    expect(overrides).toHaveLength(2)
+    expect(overrides).toContainEqual(morning)
+    const edited = overrides.find(v => propOf(v, 'summary')?.[3] === 'Edited')
+    expect(edited).toBeDefined()
+    expect(propOf(edited!, 'recurrence-id')).toEqual(
+      propOf(customSecond, 'recurrence-id')
+    )
   })
 })
