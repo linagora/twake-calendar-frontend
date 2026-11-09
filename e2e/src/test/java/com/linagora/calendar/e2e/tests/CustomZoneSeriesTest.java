@@ -57,12 +57,10 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
         locator.first().waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.ATTACHED));
     }
 
-    private CalendarPage seed(Page page, E2EUser user, CalendarProbe probe, String title,
-                              String icalendar) {
+    private CalendarPage seed(Page page, E2EUser user, CalendarProbe probe, String icalendar) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         probe.putEvent(user, UUID.randomUUID().toString(), icalendar);
         calendar.reload();
-        awaitAttached(calendar.eventCard(title));
         return calendar;
     }
 
@@ -79,7 +77,7 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
     @DisplayName("CUSTOM-ZONE-01 (#1941) Renaming a whole series keeps its zone, its VTIMEZONE and its hour")
     void aRenameKeepsTheZoneOfTheSeries(Page page, E2EUser user, CalendarProbe probe) {
         String title = title("Custom zone");
-        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar(
+        CalendarPage calendar = seed(page, user, probe, Vcal.calendar(
             Vcal.fixedZone(CUSTOM_ZONE, "-0500"), """
             BEGIN:VEVENT
             UID:%s
@@ -91,6 +89,7 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             END:VEVENT
             """.formatted(UUID.randomUUID(), STAMP, CUSTOM_ZONE, day0, CUSTOM_ZONE, day0, title)));
 
+        awaitAttached(calendar.eventCard(title));
         String saved = renameAndAwait(calendar.openEventOn(title, today).edit(ALL_EVENTS), user, probe,
             title("Custom zone renamed"));
 
@@ -113,7 +112,7 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
         String uid = UUID.randomUUID().toString();
         // 10:00 at UTC+1, the instant of the second override, is 09:00Z: the very wall clock
         // of the RECURRENCE-ID of the first one
-        CalendarPage calendar = seed(page, user, probe, second, Vcal.calendar(
+        CalendarPage calendar = seed(page, user, probe, Vcal.calendar(
             Vcal.fixedZone(CUSTOM_ZONE, "+0100"), """
             BEGIN:VEVENT
             UID:%1$s
@@ -141,6 +140,7 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             END:VEVENT
             """.formatted(uid, STAMP, CUSTOM_ZONE, day0, title, day1, first, second)));
 
+        awaitAttached(calendar.eventCard(second));
         String renamed = title("Second edited");
         String saved = renameAndAwait(calendar.openEvent(second).edit(THIS_EVENT), user, probe, renamed);
 
@@ -165,7 +165,7 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
     void anUnexpandableVtimezoneStillOpens(Page page, E2EUser user, CalendarProbe probe) {
         String title = title("Unexpandable");
         // valid under RFC 5545, but ical.js refuses BYMONTH next to BYYEARDAY
-        CalendarPage calendar = seed(page, user, probe, title, Vcal.calendar("""
+        CalendarPage calendar = seed(page, user, probe, Vcal.calendar("""
             BEGIN:VTIMEZONE
             TZID:%s
             BEGIN:STANDARD
@@ -184,6 +184,8 @@ class CustomZoneSeriesTest extends TwakeCalendarE2ETest {
             SUMMARY:%s
             END:VEVENT
             """.formatted(UUID.randomUUID(), STAMP, CUSTOM_ZONE, day0, CUSTOM_ZONE, day0, title)));
+
+        awaitAttached(calendar.eventCard(title));
 
         // before the fix, reading the object threw: the form never opened
         String saved = renameAndAwait(calendar.openEvent(title).edit(), user, probe,

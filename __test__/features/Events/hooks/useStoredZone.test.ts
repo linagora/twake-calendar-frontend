@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { fetchEvent } from '@common/features/Events/EventDao'
 import { useStoredZone } from '@common/features/Events/hooks/useStoredZone'
@@ -114,5 +114,57 @@ describe('useStoredZone', () => {
 
     await waitFor(() => expect(result.current.isZonePending).toBe(false))
     expect(result.current.eventInStoredZone?.timezone).toBe('Europe/Paris')
+  })
+
+  it('ignores a late read from the previous event', async () => {
+    let resolveFirst!: (value: VCalComponent) => void
+    const firstRead = new Promise<VCalComponent>(resolve => {
+      resolveFirst = resolve
+    })
+    vi.mocked(fetchEvent).mockReturnValueOnce(firstRead)
+    const { result, rerender } = renderHook(
+      ({ event }) => useStoredZone(event, true),
+      { initialProps: { event: fromTheGrid() } }
+    )
+
+    rerender({ event: fromTheGrid({ uid: 'event-2' }) })
+    await waitFor(() => expect(result.current.isZonePending).toBe(false))
+
+    await act(async () => {
+      resolveFirst(stored)
+      await firstRead
+    })
+
+    expect(fetchEvent).toHaveBeenCalledTimes(2)
+    expect(result.current.isZonePending).toBe(false)
+    expect(result.current.eventInStoredZone?.uid).toBe('event-2')
+    expect(result.current.eventInStoredZone?.timezone).toBe('America/New_York')
+  })
+
+  it('ignores a read completed while closed and reads again on reopening', async () => {
+    let resolveRead!: (value: VCalComponent) => void
+    const pendingRead = new Promise<VCalComponent>(resolve => {
+      resolveRead = resolve
+    })
+    vi.mocked(fetchEvent).mockReturnValueOnce(pendingRead)
+    const event = fromTheGrid()
+    const { result, rerender } = renderHook(
+      ({ open }) => useStoredZone(event, open),
+      { initialProps: { open: true } }
+    )
+
+    rerender({ open: false })
+    await act(async () => {
+      resolveRead(stored)
+      await pendingRead
+    })
+    expect(result.current.eventInStoredZone).toBe(event)
+    expect(result.current.isZonePending).toBe(false)
+
+    rerender({ open: true })
+    expect(result.current.isZonePending).toBe(true)
+    await waitFor(() => expect(result.current.isZonePending).toBe(false))
+    expect(fetchEvent).toHaveBeenCalledTimes(2)
+    expect(result.current.eventInStoredZone?.timezone).toBe('America/New_York')
   })
 })
