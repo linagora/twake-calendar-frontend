@@ -99,20 +99,19 @@ function findOverrideIndex(
     (zone: string | undefined) =>
     (storedId: VObjectProperty | undefined): boolean => {
       if (!storedId) return false
-      const tzid = getTzidParam(storedId[1])
-      // An expanded UTC id must be compared with the instant defined by the
-      // stored observances, not with a custom TZID's local wall clock.
-      if (tzid && storedTimezone(tzid) && /Z$/.test(id)) {
-        return (
-          typeof storedId[3] === 'string' &&
-          readWallClock(storedId[3], tzid).valueOf() === recurrenceInstant(id)
-        )
-      }
-      return sameRecurrence(
-        { value: storedId[3], tzid: storedTzid(storedId, storedVtimezones) },
-        { value: id },
-        zone
-      )
+      const tzid = storedTzid(storedId, storedVtimezones)
+      const raw = storedId[3]
+      // A custom TZID without an IANA location still has a definite instant
+      // when its stored VTIMEZONE supplies the offset. Do not read its wall
+      // clock in the fallback zone: that can select a different override.
+      const value =
+        typeof raw === 'string' &&
+        tzid &&
+        storedTimezone(tzid) &&
+        !/Z$/.test(raw)
+          ? readWallClock(raw, tzid).toISOString()
+          : raw
+      return sameRecurrence({ value, tzid }, { value: id }, zone)
     }
   const exactIndexes = /Z$/.test(id)
     ? []
@@ -142,8 +141,8 @@ function findOverrideIndex(
   return certainIndex !== -1 ? certainIndex : storedIds.findIndex(inSeriesZone)
 }
 
-// The TZID to read a stored value in: the zone a VTIMEZONE names for a TZID
-// moment-timezone does not know
+// The TZID to read a stored value in: prefer the IANA location of an unknown
+// TZID, otherwise keep its name so the stored VTIMEZONE can supply its rules.
 function storedTzid(
   storedId: VObjectProperty,
   storedVtimezones: VCalComponent[]
@@ -161,9 +160,9 @@ function hasCertainInstant(
 ): boolean {
   const tzid = storedTzid(storedId, storedVtimezones)
   return (
-    /Z$/.test(String(storedId[3])) ||
-    Boolean(storedTimezone(getTzidParam(storedId[1]))) ||
+    (typeof storedId[3] === 'string' && /Z$/.test(storedId[3])) ||
     !tzid ||
+    Boolean(storedTimezone(tzid)) ||
     isMomentZone(resolveTimezone(tzid))
   )
 }

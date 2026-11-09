@@ -106,8 +106,7 @@
     "preact": "^10.12.1",
     "rslint-config-cozy-app": "^0.2.0",
     "rstack": "0.8.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.0",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   },
   "overrides": {
