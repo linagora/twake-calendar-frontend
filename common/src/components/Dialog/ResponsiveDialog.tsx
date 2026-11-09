@@ -155,7 +155,10 @@ const DraggablePaper = React.forwardRef<HTMLDivElement, PaperProps>(
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
       if (!isDraggable) return
       const target = e.target as HTMLElement
-      if (!target.closest('.draggable-dialog-title')) return
+      // React events bubble through portals: a dialog opened from this one's
+      // subtree reaches this handler, but its title is not in this Paper.
+      const title = target.closest('.draggable-dialog-title')
+      if (!title || !el.current?.contains(title)) return
       if (target.closest('button')) return
 
       // Re-sync pos with reality if useDynamicPosition cleared the transform
@@ -172,6 +175,11 @@ const DraggablePaper = React.forwardRef<HTMLDivElement, PaperProps>(
 
     const onPointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
       if (!origin.current || !el.current) return
+      // No button pressed: the release was missed, never follow the cursor.
+      if (e.buttons === 0) {
+        origin.current = null
+        return
+      }
       pos.current = {
         x: e.clientX - origin.current.mx,
         y: e.clientY - origin.current.my
@@ -179,7 +187,7 @@ const DraggablePaper = React.forwardRef<HTMLDivElement, PaperProps>(
       el.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px)`
     }
 
-    const onPointerUp = (): void => {
+    const stopDragging = (): void => {
       origin.current = null
     }
 
@@ -189,7 +197,9 @@ const DraggablePaper = React.forwardRef<HTMLDivElement, PaperProps>(
         ref={el}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+        onPointerUp={stopDragging}
+        onPointerCancel={stopDragging}
+        onLostPointerCapture={stopDragging}
       />
     )
   }
