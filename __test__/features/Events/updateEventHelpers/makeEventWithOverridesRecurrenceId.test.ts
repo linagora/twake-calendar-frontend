@@ -808,7 +808,7 @@ describe('makeEventWithOverrides — override in a TZID only a VTIMEZONE defines
     expect(propOf(edited as VCalComponent, 'summary')?.[3]).toBe('Edited')
   })
 
-  it('prefers a certain instant to a TZID nothing tells the zone of', () => {
+  it('keeps a custom-zone override when a different override matches', () => {
     const overrides = listOverrides(
       makeEventWithOverrides(
         editOf('2025-01-13T09:00:00Z'),
@@ -822,12 +822,49 @@ describe('makeEventWithOverrides — override in a TZID only a VTIMEZONE defines
     expect(summaries(overrides)).not.toContain('Second shift')
   })
 
-  it('keeps reading such a TZID as a last resort', () => {
+  it.each([
+    ['2025-01-13T08:00:00Z', '2025-01-13T09:00:00', '2025-01-13T10:00:00'],
+    ['2025-01-13T09:00:00Z', '2025-01-13T10:00:00', '2025-01-13T09:00:00']
+  ])(
+    'uses stored observances to match %s without X-LIC-LOCATION',
+    (id, editedId, keptId) => {
+      const customMaster = structuredClone(master)
+      const masterStart = propOf(customMaster, 'dtstart')!
+      masterStart[1] = custom
+      masterStart[3] = '2025-01-06T09:00:00'
+      const customSecond = structuredClone(second)
+      for (const prop of customSecond[1]) {
+        if (['recurrence-id', 'dtstart', 'dtend'].includes(prop[0])) {
+          prop[1] = custom
+          prop[3] = String(prop[3]).replace('T09:', 'T10:').replace(/Z$/, '')
+        }
+      }
+      const overrides = listOverrides(
+        makeEventWithOverrides(
+          editOf(id),
+          [customMaster, structuredClone(morning), customSecond],
+          [vtimezone()]
+        )
+      )
+
+      expect(overrides).toHaveLength(2)
+      const edited = overrides.find(
+        v => propOf(v, 'recurrence-id')?.[3] === editedId
+      )
+      expect(propOf(edited!, 'summary')?.[3]).toBe('Edited')
+      expect(propOf(edited!, 'recurrence-id')?.[1]).toEqual(custom)
+      expect(overrides).toContainEqual(
+        keptId.endsWith('T09:00:00') ? morning : customSecond
+      )
+    }
+  )
+
+  it('keeps reading a TZID without a stored definition as a last resort', () => {
     const overrides = listOverrides(
       makeEventWithOverrides(
         editOf('2025-01-13T09:00:00Z'),
         [master, structuredClone(morning)],
-        [vtimezone()]
+        []
       )
     )
 
