@@ -1,0 +1,9 @@
+# Inscrit ce dépôt au bot auto-js-pr (mises à jour de dépendances vulnérables).
+#
+# Pas de script typecheck : les tests et le bundle rsbuild sont les seules
+# vérifications. `--maxWorkers=4` parce que le nombre de workers par défaut
+# fait tuer des workers jsdom par manque de mémoire, sur main comme sur le
+# correctif : un faux échec sans rapport avec les dépendances.
+verifyCommands:
+  - npm run test -- --maxWorkers=4
+  - npm run build
