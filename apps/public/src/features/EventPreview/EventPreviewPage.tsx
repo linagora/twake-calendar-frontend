@@ -13,8 +13,11 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { EventStatus } from '@/components/EventPreview/EventStatus'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import { useRsvpAction } from './hooks/useRsvpAction'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
+import { browserDefaultTimeZone } from '@common/utils/timezone'
+import { TimezoneSelector } from '@common/components/Timezone/TimezoneSelector'
+import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 
 const isUnableToLoad = (
   error: boolean,
@@ -28,6 +31,10 @@ export const EventPreviewPage: React.FC = () => {
   const { t } = useI18n()
   const theme = useTheme()
   const [, setSearchParams] = useSearchParams()
+  // The invitation mail shows the event in the attendee's zone: so does this page
+  const [selectedTimezone, setSelectedTimezone] = useState<string>(
+    browserDefaultTimeZone
+  )
 
   const decodedClaims = useParseToken()
   const { jwt = '', calId = '', action = undefined } = decodedClaims || {}
@@ -75,10 +82,25 @@ export const EventPreviewPage: React.FC = () => {
 
   return (
     <PreviewContainer>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '8px'
+        }}
+      >
+        <LanguageOutlinedIcon sx={{ color: 'text.secondary' }} />
+        <TimezoneSelector
+          value={selectedTimezone}
+          onChange={setSelectedTimezone}
+          referenceDate={new Date((event as CalendarEvent).start)}
+        />
+      </Box>
       <EventPreviewTitleRow
         event={event as CalendarEvent}
         isOwn={false}
-        timezone={event?.timezone as string}
+        timezone={selectedTimezone}
         t={t}
         headingComponent="h1"
       />
