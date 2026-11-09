@@ -117,7 +117,9 @@ const CALENDAR_DEFAULT_PROPS = {
   dayMaxEvents: true,
   weekNumberFormat: { week: 'long' },
   slotDuration: '00:30:00',
-  slotMinHeight: 25,
+  // v6's table slots measured 26px including their border; v7 uses this
+  // value as the full slot height. Keep the same 52px per hour.
+  slotMinHeight: 26,
   slotHeaderInterval: '01:00:00',
   scrollTimeReset: false,
   unselectAuto: false,
