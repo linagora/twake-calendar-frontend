@@ -1,5 +1,5 @@
 import React from 'react'
-import { EventContentArg, EventApi } from '@fullcalendar/core'
+import { EventDisplayInfo, EventApi } from '@fullcalendar/react'
 import moment from 'moment-timezone'
 import { sortEventsByDateTime } from '@common/components/Calendar/utils/calendarUtils'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -10,7 +10,7 @@ import { DesktopEventChipSchedule } from './DesktopEventChipSchedule'
 import { MobileEventChipSchedule } from './MobileEventChipSchedule'
 
 export interface EventChipScheduleProps {
-  arg: EventContentArg
+  arg: EventDisplayInfo
   calendars: Record<string, Calendar>
   tempcalendars: Record<string, Calendar>
   timezone: string
@@ -18,7 +18,7 @@ export interface EventChipScheduleProps {
 }
 
 const getEffectiveDayMoment = (
-  arg: EventContentArg,
+  arg: EventDisplayInfo,
   timezone: string
 ): moment.Moment => {
   if (arg.isStart || !arg.event.end) {
@@ -61,7 +61,7 @@ const getEventInstanceKey = (e: EventApi): string => {
 }
 
 const buildListDayData = (
-  arg: EventContentArg,
+  arg: EventDisplayInfo,
   timezone: string,
   locale: string
 ): {

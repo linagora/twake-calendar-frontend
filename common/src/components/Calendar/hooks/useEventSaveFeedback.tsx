@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import type { MutableRefObject } from 'react'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Button } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'

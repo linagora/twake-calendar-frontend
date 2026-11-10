@@ -1,19 +1,19 @@
 import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { useCalendarPreviewSync } from '@common/components/Event/hooks/useCalendarPreviewSync'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import { renderHook } from '@testing-library/react'
 import React from 'react'
 
 const TONGATAPU = 'Pacific/Tongatapu'
 
-type RangeUpdate = (prev: DateSelectArg | null) => DateSelectArg
+type RangeUpdate = (prev: DateSelectInfo | null) => DateSelectInfo
 
 function renderWithFormIn(
   timezone: string,
   allday = false
 ): {
   result: { current: ReturnType<typeof useCalendarPreviewSync> }
-  nextRange: () => DateSelectArg
+  nextRange: () => DateSelectInfo
 } {
   const formRef = {
     current: {
@@ -27,7 +27,7 @@ function renderWithFormIn(
     useCalendarPreviewSync({ formRef, setSelectedRange, calendarRef })
   )
 
-  const nextRange = (): DateSelectArg => {
+  const nextRange = (): DateSelectInfo => {
     const update: RangeUpdate = setSelectedRange.mock.lastCall?.[0]
     return update(null)
   }

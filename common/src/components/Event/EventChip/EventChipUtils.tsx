@@ -1,6 +1,6 @@
 import { EventErrorHandler } from '@common/components/Error/EventErrorHandler'
 import { Calendar } from '@common/types/CalendarTypes'
-import { EventContentArg } from '@fullcalendar/core'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import {
   Theme,
   alpha,
@@ -21,7 +21,7 @@ const COMPACT_WIDTH_THRESHOLD = 100
 const MIN_UI_CONTRAST = 3
 
 export interface EventChipProps {
-  arg: EventContentArg
+  arg: EventDisplayInfo
   calendars?: Record<string, Calendar>
   tempcalendars?: Record<string, Calendar>
   errorHandler: EventErrorHandler
@@ -32,7 +32,7 @@ export interface IconDisplayConfig {
   needAction: boolean
   private: boolean
 }
-export function getEventDuration(event: EventContentArg['event']): number {
+export function getEventDuration(event: EventDisplayInfo['event']): number {
   return moment(event._instance?.range.end).diff(
     moment(event._instance?.range.start),
     'minutes'
@@ -88,7 +88,7 @@ function isColorless(color: string): boolean {
 }
 
 export function getEventTimes(
-  event: EventContentArg['event'],
+  event: EventDisplayInfo['event'],
   timeZone: string
 ): {
   startTime: string

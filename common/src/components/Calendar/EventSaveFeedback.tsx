@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import type { MutableRefObject } from 'react'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import type { SavedEvent } from '@common/features/Events/eventSaveFeedbackSlice'
 import { useEventSaveFeedback } from './hooks/useEventSaveFeedback'
 

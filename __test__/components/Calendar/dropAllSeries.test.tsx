@@ -9,7 +9,7 @@ import { parseFetchedEvent } from '@common/features/Events/transformers'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
-import { EventDropArg } from '@fullcalendar/core'
+import { EventDropInfo } from '@fullcalendar/react'
 
 vi.mock('@common/features/Events/EventDao', () => ({
   fetchEvent: vi.fn()
@@ -59,7 +59,7 @@ async function dropAllSeries(
   await handlers.handleEventDrop({
     event: { extendedProps: { uid: instance.uid, calId } },
     delta: { years: 0, months: 0, days: deltaDays, milliseconds }
-  } as unknown as EventDropArg)
+  } as unknown as EventDropInfo)
 
   const afterChoice = setAfterChoiceFunc.mock.calls[0][0]()
   await afterChoice('all')

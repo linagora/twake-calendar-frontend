@@ -1,5 +1,5 @@
 import type { MockInstance } from 'vitest'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import eventSaveFeedbackReducer from '@common/features/Events/eventSaveFeedbackSlice'

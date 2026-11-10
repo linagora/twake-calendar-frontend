@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { act, fireEvent, screen } from '@testing-library/react'
 import CalendarController from '@private/components/Calendar/CalendarController'
 import { renderWithProviders } from '../../utils/Renderwithproviders'

@@ -1,10 +1,10 @@
 import { useAppSelector } from '@common/app/hooks'
 import { useDefaultCalendarId } from '@common/features/Calendars/hooks/useDefaultCalendarId'
 import { useI18n } from 'twake-i18n'
-import type { DateSelectArg, EventInput } from '@fullcalendar/core'
+import type { DateSelectInfo, EventInput } from '@fullcalendar/react'
 
 interface UseDraftEventProps {
-  selectedRange?: DateSelectArg | null
+  selectedRange?: DateSelectInfo | null
   draftCalendarId?: string | null
   filteredCalendarEvents: EventInput[]
 }

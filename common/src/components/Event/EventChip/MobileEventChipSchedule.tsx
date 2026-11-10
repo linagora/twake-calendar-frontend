@@ -1,5 +1,5 @@
 import React from 'react'
-import { EventContentArg } from '@fullcalendar/core'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import { Box, useTheme } from '@linagora/twake-mui'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -15,7 +15,7 @@ import { getEffectiveColor } from './EventChipUtils'
 import { useAppSelector } from '@common/app/hooks'
 
 export interface MobileEventChipScheduleProps extends EventChipScheduleProps {
-  arg: EventContentArg
+  arg: EventDisplayInfo
   calendars: Record<string, Calendar>
   tempcalendars: Record<string, Calendar>
   timezone: string
@@ -29,7 +29,7 @@ export interface MobileEventChipScheduleProps extends EventChipScheduleProps {
 }
 
 const parseEventToSearchResult = (
-  arg: EventContentArg,
+  arg: EventDisplayInfo,
   ext: CalendarEvent,
   videoUrl: string | undefined
 ): SearchEventResult => {

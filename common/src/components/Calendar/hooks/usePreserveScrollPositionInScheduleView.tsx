@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { isListView } from '@common/components/Calendar/utils/constants'
 
+const LIST_SCROLLER = '.calendar-list-view > :has(> .fc-list)'
+
 export const usePreserveScrollPositionInScheduleView = (
   openEventDisplay: boolean,
   currentView: string
@@ -20,9 +22,7 @@ export const usePreserveScrollPositionInScheduleView = (
 
       const target = e.target
       const isListView =
-        target instanceof Element &&
-        target.classList.contains('fc-scroller') &&
-        target.closest('.fc-list')
+        target instanceof HTMLElement && target.matches(LIST_SCROLLER)
       if (isListView) {
         savedScrollTop.current = target.scrollTop
       }
@@ -42,7 +42,7 @@ export const usePreserveScrollPositionInScheduleView = (
 
     // Helper to keep the DOM query DRY
     const getScrollers = (): NodeListOf<HTMLElement> =>
-      document.querySelectorAll<HTMLElement>('.fc-list .fc-scroller')
+      document.querySelectorAll<HTMLElement>(LIST_SCROLLER)
 
     const lockScroll = (): void => {
       getScrollers().forEach(scroller => {

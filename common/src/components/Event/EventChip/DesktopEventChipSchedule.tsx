@@ -1,6 +1,6 @@
 import React from 'react'
 import { isVisibleInRange } from './scheduleEventRange'
-import { EventContentArg } from '@fullcalendar/core'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import { Box, useTheme } from '@linagora/twake-mui'
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -22,7 +22,7 @@ import {
 import { type EventChipScheduleProps } from './EventChipSchedule'
 
 export interface DesktopEventChipScheduleProps extends EventChipScheduleProps {
-  arg: EventContentArg
+  arg: EventDisplayInfo
   calendars: Record<string, Calendar>
   tempcalendars: Record<string, Calendar>
   timezone: string
@@ -95,7 +95,7 @@ export const DesktopEventChipSchedule: React.FC<
 }
 
 const useScheduleCalendarColor = (
-  arg: EventContentArg,
+  arg: EventDisplayInfo,
   calId: string
 ): string => {
   const theme = useTheme()
@@ -119,7 +119,7 @@ const useScheduleCalendarColor = (
 
 // Use the same tracks for every event in the displayed schedule range.
 const getScheduleColumns = (
-  arg: EventContentArg
+  arg: EventDisplayInfo
 ): {
   hasDetails: boolean
   hasVideo: boolean

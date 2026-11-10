@@ -97,7 +97,7 @@ export const BaseBookingLinkChip: React.FC<BaseBookingLinkChipProps> = ({
           '.MuiCardHeader-title': { lineHeight: 1 }
         }}
         title={
-          showCompact ? (
+          isMonthView || showCompact ? (
             statusIcon
           ) : (
             <Box
@@ -142,7 +142,7 @@ export const BookingLinkEventChip: React.FC<EventChipProps> = ({ arg }) => {
   const color =
     (colors as { light: string; dark: string } | undefined)?.dark ||
     (colors as { light: string; dark: string } | undefined)?.light ||
-    event.backgroundColor ||
+    event.color ||
     defaultColors[0].light
   return (
     <BaseBookingLinkChip

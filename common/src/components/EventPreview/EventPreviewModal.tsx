@@ -12,7 +12,7 @@ import EventSettingsUpdateModal from '@common/features/Events/EventSettingsUpdat
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import { useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventPreviewTitleRow } from './EventPreviewTitleRow'
@@ -256,7 +256,7 @@ const EventPreviewModal: React.FC<{
             end: new Date(event.end ?? event.start),
             endStr: event.end ?? event.start,
             allDay: event.allday ?? false
-          } as DateSelectArg
+          } as DateSelectInfo
         }
         setSelectedRange={() => {}}
         calendarRef={{ current: null }}

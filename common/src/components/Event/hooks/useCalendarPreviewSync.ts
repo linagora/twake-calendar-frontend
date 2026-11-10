@@ -1,12 +1,12 @@
 import React, { useCallback, startTransition } from 'react'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import moment from 'moment-timezone'
 import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 
 interface UseCalendarPreviewSyncProps {
   formRef: React.RefObject<EventFormHandle | null>
-  setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectArg | null>>
+  setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectInfo | null>>
   calendarRef: React.RefObject<CalendarApi | null>
 }
 
@@ -15,7 +15,7 @@ interface UseCalendarPreviewSyncProps {
  */
 function syncCalendarSelection(
   calendarRef: React.RefObject<CalendarApi | null>,
-  range: DateSelectArg
+  range: DateSelectInfo
 ): void {
   setTimeout(() => {
     calendarRef.current?.select(range)
@@ -77,12 +77,12 @@ function endBound(end: string, allDay: boolean, timezone?: string): RangeBound {
  * Pure helper to calculate the new date range when toggling all-day mode.
  */
 function calculateAllDayRange(
-  prev: DateSelectArg | null,
+  prev: DateSelectInfo | null,
   newAllDay: boolean,
   newStart: string,
   newEnd: string,
   timezone?: string
-): DateSelectArg {
+): DateSelectInfo {
   const start = startBound(newStart, newAllDay, timezone)
   const end = endBound(newEnd, newAllDay, timezone)
 
@@ -93,7 +93,7 @@ function calculateAllDayRange(
     start: start.date,
     end: end.date,
     allDay: newAllDay
-  } as DateSelectArg
+  } as DateSelectInfo
 }
 
 export interface UseCalendarPreviewSyncReturn {
@@ -123,7 +123,7 @@ export function useCalendarPreviewSync({
             start: start.date,
             startStr: start.str,
             allDay: allday
-          } as DateSelectArg
+          } as DateSelectInfo
           syncCalendarSelection(calendarRef, newRange)
           return newRange
         })
@@ -144,7 +144,7 @@ export function useCalendarPreviewSync({
             end: end.date,
             endStr: end.str,
             allDay: allday
-          } as DateSelectArg
+          } as DateSelectInfo
           syncCalendarSelection(calendarRef, newRange)
           return newRange
         })

@@ -1,11 +1,11 @@
 /* FullCalendar colours, from the twake-mui palette to follow the colour scheme */
 .fc
-  --fc-page-bg-color: var(--twake-palette-background-paper)
-  --fc-neutral-bg-color: var(--twake-palette-background-contrast)
-  --fc-neutral-text-color: var(--twake-palette-text-secondary)
-  --fc-border-color: var(--twake-palette-divider)
+  --fc-classic-background: var(--twake-palette-background-paper)
+  --fc-classic-muted: var(--twake-palette-background-contrast)
+  --fc-classic-muted-foreground: var(--twake-palette-text-secondary)
+  --fc-classic-border: var(--twake-palette-divider)
   --fc-list-event-hover-bg-color: var(--twake-palette-action-hover)
-  --fc-now-indicator-color: var(--twake-palette-primary-main)
+  --fc-classic-now: var(--twake-palette-primary-main)
 
 /* Custom main calendar view */
 .fc-theme-standard td,
@@ -47,19 +47,36 @@ span.fc-daygrid-day-number
   width 48px
   line-height 39px
 
-.fc-daygrid-day-frame .fc-daygrid-day-top .fc-daygrid-day-number
+.fc-dayGridMonth-view .fc-daygrid-day-top .fc-daygrid-day-number
+  display inline-block
   font-size 12px
   font-weight 500
   line-height 16px
-  width 100%
+  width auto
+  min-width 16px
   text-align  center
   padding 0
+  isolation isolate
 
-.fc-daygrid-day-frame span.fc-daygrid-day-number:after
+.fc-dayGridMonth-view .fc-daygrid-day-top .fc-daygrid-day-number:after
   width 25px
   height 25px
-  top -6px
-  left -6px
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+
+.fc-dayGridMonth-view .fc-day-other .fc-daygrid-day-number
+  color var(--twake-palette-text-disabled)
+
+.fc .calendar-month-grid
+  border-top-width 0
+  border-inline-width 0
+
+.fc .calendar-month-grid .fc-col-header-cell
+  border-inline-color transparent
+
+.fc-dayGridMonth-view .compactStartTime
+  display none
 
 .fc-daygrid-day-top .fc-daygrid-day-number:after,
 span.fc-daygrid-day-number:after
@@ -88,6 +105,46 @@ span.fc-daygrid-day-number.current-date:after
   width 36px
   height 36px
 
+.fc-col-header-cell .fc-daygrid-day-top:not(.fc-daygrid-day-top--mobile)
+  flex-direction row-reverse
+  justify-content center
+
+.fc-col-header-cell .fc-daygrid-day-number
+  display grid
+  place-items center
+  height 47px
+
+.fc-col-header-cell .fc-daygrid-day-top--mobile .fc-daygrid-day-number
+  height 38px
+
+.fc-col-header-cell .fc-daygrid-day-number:after
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+
+.fc-timegrid-week-number
+  width 80px
+  margin-inline 0
+
+.fc-timegrid-all-day-header
+  min-height 34px
+
+// Keep the sidebar and toolbar separators as the outer edges of the time grid.
+.fc .calendar-time-grid
+  border-top-width 0
+  border-inline-width 0
+
+.fc .calendar-time-grid .fc-col-header-cell
+  border-inline-color transparent
+
+// The all-day rules start at the first day column, beyond the time gutter.
+.fc .calendar-time-grid-header-divider,
+.fc .calendar-time-grid-all-day-divider
+  display none
+
+.fc .calendar-time-grid .fc-timegrid-body .fc-daygrid-day
+  box-shadow inset 0 1px var(--twake-palette-divider), inset 0 -1px var(--twake-palette-divider)
+
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink,
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor
   border 0
@@ -99,6 +156,7 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink
 .fc .fc-timegrid-axis-cushion
   min-width 80px
   max-width 80px
+  margin-inline 0
   padding 0
   text-align left
   font-size 12.507px
@@ -145,7 +203,24 @@ th.fc-col-header-cell.fc-day
   top 9.5px
   right -15px
 
-.fc .fc-timegrid-col.fc-day-today,
+// In v7 the timed day lanes sit above the horizontal slot lines.
+.fc .fc-timegrid-col.fc-day-today
+  --fc-classic-today: transparent
+
+// Stack events above booking links and let clicks through the empty parts of the layer.
+.fc .fc-timegrid-col
+  z-index auto
+
+.fc [aria-hidden='true']:has(> div > .calendar-time-lane)
+  pointer-events none
+
+.fc .calendar-time-events
+  z-index 2
+  pointer-events none
+
+  > *
+    pointer-events auto
+
 .fc .fc-daygrid-day.fc-day-today
   background-color var(--twake-palette-background-paper)
 
@@ -197,14 +272,12 @@ th.fc-col-header-cell.fc-day
   overflow unset
 
 .fc .fc-timegrid-slot
-  height auto
-  min-height 20px !important
+  min-height 20px
 
 .fc .fc-timegrid-slot-label
   display flex
   align-items flex-start
-  padding-top 2px
-  height 100%
+  border-top-color transparent
 
 tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
   display none
@@ -218,10 +291,10 @@ tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
 .fc-dayGridMonth-view .fc-scrollgrid-section td .fc-daygrid-day-frame
     border-bottom none
 
-th.fc-col-header-cell.fc-day
+.fc-col-header-cell.fc-day
   cursor pointer
 
-th.fc-col-header-cell.fc-day:hover .fc-daygrid-day-number:not(.current-date)::after
+.fc-col-header-cell.fc-day:hover .fc-daygrid-day-number:not(.current-date)::after
   background-color var(--twake-palette-action-focus)
 
 /* Hover effects for month view using CSS */
@@ -342,6 +415,7 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
     display flex
     flex-direction row
     align-items center
+    padding: 0
 
 .fc-timegrid-event-harness-inset .fc-timegrid-event
   box-shadow none
@@ -395,6 +469,9 @@ hr.MuiDivider-root.MuiDivider-fullWidth
   display none
 
 /* FullCalendar List View Custom Styling */
+.fc .calendar-list-view .fc-list-event
+  padding 0
+
 .fc-listWeek-view.fc-list,
 .fc-listMonth-view.fc-list
   border-width 0

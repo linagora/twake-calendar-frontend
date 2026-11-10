@@ -2,7 +2,7 @@ import { OPEN_CALENDAR_SEARCH } from '@common/hooks/useCalendarShortcuts'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { clearSearch } from '@common/features/Search/SearchSlice'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import {
   IconButton,
   Stack,
@@ -79,13 +79,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   }, [dateLabel, showsShortLabel])
 
   const onToggleDatePicker = (): void => {
-    setOpenDatePicker(prev => {
-      const newState = !prev
-      setTimeout(() => {
-        calendarRef.current?.updateSize?.()
-      }, 0)
-      return newState
-    })
+    setOpenDatePicker(prev => !prev)
   }
 
   const handleBackClick = (event: React.MouseEvent): void => {

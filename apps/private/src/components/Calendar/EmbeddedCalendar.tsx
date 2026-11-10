@@ -14,7 +14,7 @@ import {
 } from '@common/features/Embed/embeddedCalendar'
 import { embedRoute } from '@linagora/twake-embed'
 import { Button, GlobalStyles, Stack, Typography } from '@linagora/twake-mui'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import AddIcon from '@mui/icons-material/Add'
 import { useMemo, useRef, useState } from 'react'
 import { replace } from 'redux-first-history'

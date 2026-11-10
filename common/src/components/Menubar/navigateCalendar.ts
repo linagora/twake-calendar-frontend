@@ -1,4 +1,4 @@
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 
 export function navigateCalendar(
   calendar: CalendarApi | null,

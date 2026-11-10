@@ -1,5 +1,5 @@
 import EventPopover from '@common/features/Events/EventModal'
-import { DateSelectArg } from '@fullcalendar/core'
+import { DateSelectInfo } from '@fullcalendar/react'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -47,7 +47,7 @@ describe('EventPopover', () => {
     end: new Date('2025-07-18T10:00'),
     allDay: false,
     resource: undefined
-  } as unknown as DateSelectArg
+  } as unknown as DateSelectInfo
 
   const renderPopover = (selectedRange = defaultSelectedRange) => {
     renderWithProviders(

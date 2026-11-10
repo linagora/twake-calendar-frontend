@@ -1,7 +1,7 @@
 import { useAppDispatch } from '@common/app/hooks'
 import Tooltip from '@common/components/Tooltip'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { IconButton, SxProps } from '@linagora/twake-mui'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { DateCalendar } from '@mui/x-date-pickers'

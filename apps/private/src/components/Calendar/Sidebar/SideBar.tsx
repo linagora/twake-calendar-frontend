@@ -1,5 +1,5 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { CalendarApi } from '@fullcalendar/core'
+import { CalendarApi } from '@fullcalendar/react'
 import { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { User } from '@common/components/Attendees/types'
 import { DesktopSidebar } from './DesktopSidebar'

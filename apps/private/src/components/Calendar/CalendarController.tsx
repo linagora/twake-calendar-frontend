@@ -12,12 +12,12 @@ import { setDisplayedDateAndRange } from '@common/utils/CalendarRangeManager'
 import { DisplayedPeriod } from '@common/components/Menubar/periodLabel'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import type {
-  DatesSetArg,
+  DatesSetInfo,
   EventApi,
-  MoreLinkArg,
-  SlotLabelContentArg
-} from '@fullcalendar/core'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+  MoreLinkHandler,
+  SlotHeaderInfo
+} from '@fullcalendar/react'
+import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import {
   MutableRefObject,
   useCallback,
@@ -238,7 +238,9 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     ((type: 'solo' | 'all' | undefined) => void) | undefined
   >()
   const [, setSelectedEvent] = useState<CalendarEvent>({} as CalendarEvent)
-  const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(null)
+  const [selectedRange, setSelectedRange] = useState<DateSelectInfo | null>(
+    null
+  )
   const [draftCalendarId, setDraftCalendarId] = useState<string | null>(null)
 
   const [tempEvent, setTempEvent] = useState<CalendarEvent>({} as CalendarEvent)
@@ -261,7 +263,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     setEditingBookingLink(null)
   }
 
-  const handleMoreLinkClick = (arg: MoreLinkArg): string | void => {
+  const handleMoreLinkClick: MoreLinkHandler = arg => {
     if (!isMobile) return
 
     setMoreEvents(arg.hiddenSegs.map(seg => seg.event))
@@ -360,7 +362,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     }
   }, [controllerRef, handleCreateEvent])
 
-  const datesSet = (arg: DatesSetArg): void => {
+  const datesSet = (arg: DatesSetInfo): void => {
     onViewChange?.(arg.view.type)
     const calendarCurrentDate =
       calendarRef.current?.getDate() || new Date(arg.start)
@@ -399,7 +401,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     setCurrentView(arg.view.type)
 
     setTimeout(() => {
-      updateSlotLabelVisibility(new Date(), {} as SlotLabelContentArg, timezone)
+      updateSlotLabelVisibility(new Date(), {} as SlotHeaderInfo, timezone)
     }, 100)
   }
 
