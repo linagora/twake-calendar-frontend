@@ -95,6 +95,8 @@ function findOverrideIndex(
     return -1
   }
   const storedIds = vevents.map(findRecurrenceId)
+  const isCertain = (storedId: VObjectProperty | undefined): boolean =>
+    storedId !== undefined && hasCertainInstant(storedId, storedVtimezones)
   const isSameInstant =
     (zone: string | undefined) =>
     (storedId: VObjectProperty | undefined): boolean => {
@@ -122,23 +124,39 @@ function findOverrideIndex(
     return exactIndexes[0]
   }
   if (exactIndexes.length > 1) {
+    // A TZID the fallback zone only reads matches any wall clock: prefer the
+    // candidates with a definite instant. See #2034.
     const inEventZone = isSameInstant(updatedEvent.timezone)
-    return (
-      exactIndexes.find(index => inEventZone(storedIds[index])) ??
-      exactIndexes[0]
+    const index = preferCertain(
+      exactIndexes,
+      index => inEventZone(storedIds[index]),
+      index => isCertain(storedIds[index])
     )
+    return index ?? exactIndexes[0]
   }
   // A stored value without TZID is read in the zone of the series (#1938)
   const inSeriesZone = isSameInstant(
     seriesZone(vevents) ?? updatedEvent.timezone
   )
-  const certainIndex = storedIds.findIndex(
-    storedId =>
-      storedId &&
-      hasCertainInstant(storedId, storedVtimezones) &&
-      inSeriesZone(storedId)
+  return (
+    preferCertain(
+      storedIds.map((_, index) => index),
+      index => inSeriesZone(storedIds[index]),
+      index => isCertain(storedIds[index])
+    ) ?? -1
   )
-  return certainIndex !== -1 ? certainIndex : storedIds.findIndex(inSeriesZone)
+}
+
+// The first matching index with a definite instant, else the first matching one
+function preferCertain(
+  indexes: number[],
+  matches: (index: number) => boolean,
+  isCertain: (index: number) => boolean
+): number | undefined {
+  return (
+    indexes.find(index => isCertain(index) && matches(index)) ??
+    indexes.find(matches)
+  )
 }
 
 // The TZID to read a stored value in: prefer the IANA location of an unknown

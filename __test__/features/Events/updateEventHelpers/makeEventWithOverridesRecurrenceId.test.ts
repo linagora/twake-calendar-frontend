@@ -902,3 +902,76 @@ describe('makeEventWithOverrides — override in a TZID only a VTIMEZONE defines
     )
   })
 })
+
+describe('makeEventWithOverrides — same wall clock under a TZID with no definite zone (#2034)', () => {
+  const prop = (v: VCalComponent, name: string): VObjectProperty | undefined =>
+    v[1].find(([k]) => k === name)
+
+  const override = (tzid: string, summary: string): VCalComponent => [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['recurrence-id', { tzid }, 'date-time', '2020-10-15T23:45:00'],
+      ['dtstart', { tzid }, 'date-time', '2020-10-16T00:45:00'],
+      ['duration', {}, 'duration', 'PT1H'],
+      ['summary', {}, 'text', summary]
+    ],
+    []
+  ]
+  const master: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['dtstart', { tzid: 'Asia/Seoul' }, 'date-time', '2020-10-01T23:45:00'],
+      ['duration', {}, 'duration', 'PT1H'],
+      ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+      ['summary', {}, 'text', 'Weekly sync']
+    ],
+    []
+  ]
+  const seoul = override('Asia/Seoul', 'Weekly sync, moved')
+  const edited = {
+    uid: 'series-1/2020-10-15T14:45:00Z',
+    recurrenceId: '2020-10-15T23:45:00',
+    timezone: 'Asia/Seoul',
+    start: '2020-10-15T16:00:00.000Z',
+    end: '2020-10-15T17:00:00.000Z',
+    attendee: [],
+    title: 'Weekly sync, edited'
+  } as unknown as CalendarEvent
+
+  it.each(['Customized Time Zone', 'constructor'])(
+    'does not replace an override in %s stored first',
+    tzid => {
+      const custom = override(tzid, 'Moved by another client')
+
+      const overrides = listOverrides(
+        makeEventWithOverrides(edited, structuredClone([master, custom, seoul]))
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(custom)
+      const seoulOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Asia/Seoul'
+      )
+      expect(prop(seoulOut as VCalComponent, 'summary')?.[3]).toBe(
+        'Weekly sync, edited'
+      )
+    }
+  )
+
+  it('keeps the first override read in the fallback zone as a last resort', () => {
+    const first = override('Customized Time Zone', 'First')
+    const second = override('Other Custom Zone', 'Second')
+
+    const overrides = listOverrides(
+      makeEventWithOverrides(edited, structuredClone([master, first, second]))
+    )
+
+    expect(overrides).toHaveLength(2)
+    expect(overrides).toContainEqual(second)
+    expect(overrides.map(v => prop(v, 'summary')?.[3])).toContain(
+      'Weekly sync, edited'
+    )
+  })
+})
