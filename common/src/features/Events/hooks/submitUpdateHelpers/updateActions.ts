@@ -19,9 +19,20 @@ import {
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { resolveKnownTimezone, resolveTimezone } from '@common/utils/timezone'
+import {
+  isMomentZone,
+  resolveKnownTimezone,
+  resolveTimezone,
+  storedTimezone,
+  wallClockOf,
+  withStoredTimezones
+} from '@common/utils/timezone'
 import moment from 'moment'
-import { deleteEvent, putEvent } from '@common/features/Events/EventDao'
+import {
+  deleteEvent,
+  fetchRecurrentSeries,
+  putEvent
+} from '@common/features/Events/EventDao'
 import {
   HandleUpdateErrorParams,
   RecurringUpdateContext,
@@ -135,15 +146,40 @@ export async function handleUpdateRecurringSolo({
 
 // The master, not the clicked occurrence, tells what the series was: the form
 // of an "all events" edit starts from the master date
-function startsOnSeriesDay(
+async function startsOnSeriesDay(
   values: RecurringUpdateContext['values'],
   seriesEvent: CalendarEvent
-): boolean {
-  const seriesTz = resolveTimezone(
-    values.timezone || seriesEvent.timezone || 'UTC'
-  )
-  const seriesDay = moment.tz(seriesEvent.start, seriesTz)
-  return moment.tz(values.start, seriesTz).isSame(seriesDay, 'day')
+): Promise<boolean> {
+  const seriesZone = resolveTimezone(seriesEvent.timezone || 'UTC')
+  if (seriesEvent.allday || isMomentZone(seriesZone)) {
+    const seriesTz = resolveTimezone(values.timezone || seriesZone)
+    const seriesDay = moment.tz(seriesEvent.start, seriesTz)
+    return moment.tz(values.start, seriesTz).isSame(seriesDay, 'day')
+  }
+  return startsOnCustomZoneDay(values, seriesEvent, seriesZone)
+}
+
+// The rule of a series in a custom zone is evaluated on the wall clock of its
+// stored VTIMEZONE (#1941), while the form shows that zone in UTC: the days are
+// compared in the zone the series is written in (#2033)
+async function startsOnCustomZoneDay(
+  values: RecurringUpdateContext['values'],
+  seriesEvent: CalendarEvent,
+  seriesZone: string
+): Promise<boolean> {
+  const formZone = resolveKnownTimezone(values.timezone || seriesZone)
+  const newStart = moment.tz(values.start, formZone)
+  const oldStart = moment(seriesEvent.start)
+  if (newStart.isSame(oldStart)) return true
+
+  const { vtimezones } = await fetchRecurrentSeries(seriesEvent)
+  return withStoredTimezones(vtimezones, () => {
+    // Without its VTIMEZONE, the series is written in UTC
+    const zone = storedTimezone(seriesZone) ? seriesZone : 'UTC'
+    const dayOf = (instant: moment.Moment): string =>
+      wallClockOf(instant, zone).slice(0, 'YYYY-MM-DD'.length)
+    return dayOf(newStart) === dayOf(oldStart)
+  })
 }
 
 export async function handleUpdateRecurringSeries(
@@ -169,7 +205,7 @@ export async function handleUpdateRecurringSeries(
   // series keeps the same occurrences, possibly at another time of the day
   const staysOnSeriesDay =
     params.seriesDayChanged === undefined
-      ? startsOnSeriesDay(values, seriesEvent)
+      ? await startsOnSeriesDay(values, seriesEvent)
       : !params.seriesDayChanged
   const keepsOccurrences = staysOnSeriesDay && !changes.recurrenceChanged
 

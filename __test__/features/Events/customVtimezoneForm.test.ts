@@ -13,6 +13,7 @@ import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { handleUpdateRecurringSeries } from '@common/features/Events/hooks/submitUpdateHelpers/updateActions'
 import { prepareUpdateData } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
 import { RecurringUpdateContext } from '@common/features/Events/hooks/submitUpdateHelpers/types'
+import { fetchRecurrentSeries } from '@common/features/Events/EventDao'
 import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { userOrganiser } from '@common/features/User/userDataTypes'
@@ -26,6 +27,10 @@ vi.mock('@common/utils/assertThunkSuccess', () => ({
 vi.mock('@common/features/Calendars/CalendarSlice', async importOriginal => ({
   ...(await importOriginal<object>()),
   updateSeries: vi.fn(() => ({ type: 'updateSeries' }))
+}))
+vi.mock('@common/features/Events/EventDao', async importOriginal => ({
+  ...(await importOriginal<object>()),
+  fetchRecurrentSeries: vi.fn()
 }))
 
 // The whole way of a save: the form shows a zone the browser does not know in
@@ -247,5 +252,109 @@ describe('saving a series in a custom zone from the form', () => {
     expect(updateSeries).toHaveBeenCalledWith(
       expect.objectContaining({ removeOverrides: false })
     )
+  })
+
+  describe('a time move of the series', () => {
+    const WEEKLY_THURSDAY_LATE = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//test//EN',
+      'BEGIN:VTIMEZONE',
+      `TZID:${TZID}`,
+      'BEGIN:STANDARD',
+      'DTSTART:19700101T000000',
+      'TZOFFSETFROM:-0500',
+      'TZOFFSETTO:-0500',
+      'END:STANDARD',
+      'END:VTIMEZONE',
+      'BEGIN:VEVENT',
+      'UID:series-1',
+      'DTSTAMP:20260101T000000Z',
+      `DTSTART;TZID=${TZID}:20261105T220000`,
+      `DTEND;TZID=${TZID}:20261105T230000`,
+      'RRULE:FREQ=WEEKLY;BYDAY=TH;COUNT=5',
+      `EXDATE;TZID=${TZID}:20261112T220000`,
+      'SUMMARY:Sync',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n')
+
+    const storedSeries = (ics: string): void => {
+      vi.mocked(fetchRecurrentSeries).mockResolvedValue({
+        vevents: components(ics, 'vevent'),
+        vtimezones: components(ics, 'vtimezone')
+      })
+    }
+
+    const saveSeries = async (
+      ics: string,
+      start: string,
+      end: string
+    ): Promise<void> => {
+      storedSeries(ics)
+      const master = readMaster(ics)
+      const values = { ...formValues(master), start, end }
+
+      await handleUpdateRecurringSeries({
+        dispatch: vi.fn(),
+        calId: CAL_ID,
+        event: master,
+        masterEvent: master,
+        values,
+        newEvent: savedEvent(master, values),
+        baseUID: 'series-1',
+        targetCalendar: cal,
+        tempContext: {},
+        getSeriesInstances: () => ({})
+      } as unknown as RecurringUpdateContext)
+    }
+
+    it('does not keep the EXDATEs when the new time is on another day of the series zone', async () => {
+      // shown 2026-11-06T03:00 UTC; 06:00 UTC is still Friday in UTC, but
+      // Friday 01:00 in the zone, where the series is on Thursdays
+      await saveSeries(
+        WEEKLY_THURSDAY_LATE,
+        '2026-11-06T06:00',
+        '2026-11-06T07:00'
+      )
+
+      expect(updateSeries).toHaveBeenCalledWith(
+        expect.objectContaining({ removeOverrides: true })
+      )
+    })
+
+    it('keeps the overrides and the EXDATEs when the new time crosses midnight UTC only', async () => {
+      // 22:00 in the zone (03:00 UTC on Friday) moved to 18:00 in the zone,
+      // 23:00 UTC on Thursday: still Thursday in the zone
+      await saveSeries(
+        WEEKLY_THURSDAY_LATE,
+        '2026-11-05T23:00',
+        '2026-11-06T00:00'
+      )
+
+      expect(updateSeries).toHaveBeenCalledWith(
+        expect.objectContaining({
+          removeOverrides: false,
+          followTimeChange: true
+        })
+      )
+    })
+
+    it('keeps the overrides and the EXDATEs on a move within the day', async () => {
+      await saveSeries(ICS, '2026-11-04T15:00', '2026-11-04T16:00')
+
+      expect(updateSeries).toHaveBeenCalledWith(
+        expect.objectContaining({
+          removeOverrides: false,
+          followTimeChange: true
+        })
+      )
+    })
+
+    it('does not read the stored series when the start does not move', async () => {
+      await saveSeries(ICS, '2026-11-04T14:00', '2026-11-04T16:00')
+
+      expect(fetchRecurrentSeries).not.toHaveBeenCalled()
+    })
   })
 })
