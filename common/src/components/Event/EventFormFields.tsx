@@ -54,6 +54,7 @@ function useEventFormImperativeHandle(
     organizer,
     isTeamCalendar,
     isFormValid,
+    isUploading,
     isSpecific,
     showMore,
     tempStorageKey,
@@ -65,6 +66,7 @@ function useEventFormImperativeHandle(
     organizer: userOrganiser
     isTeamCalendar: boolean
     isFormValid: boolean
+    isUploading: boolean
     isSpecific: boolean
     showMore: boolean
     tempStorageKey: 'create' | 'update'
@@ -94,6 +96,8 @@ function useEventFormImperativeHandle(
   useImperativeHandle(ref, () => ({
     submit: async (): Promise<void> => {
       if (!isFormValid && !isSpecific) return
+      // The event would be saved without the files still uploading
+      if (isUploading) return
 
       const values = { ...latestValuesRef.current }
       saveEventFormDataToTemp(tempStorageKey, {
@@ -131,7 +135,8 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       onAllDayChange,
       onCalendarChange,
       onValidationChange,
-      onDirtyChange
+      onDirtyChange,
+      onUploadingChange
     } = props
 
     const { t } = useI18n()
@@ -189,9 +194,19 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       eventOrganizer: event?.organizer
     })
 
+    const [isUploading, setIsUploading] = useState(false)
+
+    // Closing mid-upload loses the files on their way: ask first, as for
+    // unsaved changes
     useEffect(() => {
-      onDirtyChange?.(isDirty)
-    }, [isDirty, onDirtyChange])
+      onDirtyChange?.(isDirty || isUploading)
+    }, [isDirty, isUploading, onDirtyChange])
+
+    useEffect(() => {
+      if (!isUploading) return
+      onUploadingChange?.(true)
+      return (): void => onUploadingChange?.(false)
+    }, [isUploading, onUploadingChange])
 
     const isFormValid =
       isDateTimeValid && isValidRepetition(formValues.repetition)
@@ -225,6 +240,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       organizer,
       isTeamCalendar,
       isFormValid,
+      isUploading,
       isSpecific,
       showMore,
       tempStorageKey,
@@ -312,6 +328,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           setAttachments={setAttachments}
           showMore={showMore}
           isExpanded={isExpanded}
+          onUploadingChange={setIsUploading}
         />
 
         <LocationField

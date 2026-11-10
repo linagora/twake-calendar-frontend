@@ -125,6 +125,9 @@ export interface EventFormFieldsProps {
 
   // Dirty notification for parent (e.g. to enable unsaved-changes guard)
   onDirtyChange?: (isDirty: boolean) => void
+
+  // Attachments uploading to the Drive: the form cannot be saved meanwhile
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 export interface UseEventFormValuesReturn {

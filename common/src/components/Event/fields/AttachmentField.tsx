@@ -1,5 +1,6 @@
 import { AttachementChip } from '@common/components/EventPreview/AttachementPreview/AttachementChip'
 import { Attachment } from '@common/types/Attachment'
+import type { PendingUpload } from '@common/features/Tdrive/hooks/useAttachmentUpload'
 import { isSafeHttpUrl } from '@common/utils/isSafeUrl'
 import { Box } from '@linagora/twake-mui'
 import { MouseEvent } from 'react'
@@ -7,11 +8,13 @@ import { MouseEvent } from 'react'
 interface AttachmentFieldProps {
   attachments?: Attachment[]
   setAttachments?: (attachments: Attachment[]) => void
+  pendingUploads?: PendingUpload[]
 }
 
 export const AttachmentField: React.FC<AttachmentFieldProps> = ({
   attachments,
-  setAttachments
+  setAttachments,
+  pendingUploads = []
 }) => {
   const handleRemove = (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
@@ -23,7 +26,7 @@ export const AttachmentField: React.FC<AttachmentFieldProps> = ({
     setAttachments?.(newAttachments)
   }
 
-  if (!attachments || attachments.length === 0) {
+  if (!attachments?.length && !pendingUploads.length) {
     return null
   }
 
@@ -36,7 +39,7 @@ export const AttachmentField: React.FC<AttachmentFieldProps> = ({
         gap: 1
       }}
     >
-      {attachments.map((attachment, index) => {
+      {(attachments ?? []).map((attachment, index) => {
         if (!isSafeHttpUrl(attachment.uri)) return null
         return (
           <AttachementChip
@@ -46,6 +49,13 @@ export const AttachmentField: React.FC<AttachmentFieldProps> = ({
           />
         )
       })}
+      {pendingUploads.map(upload => (
+        <AttachementChip
+          key={upload.id}
+          attachment={new Attachment('', upload.type || undefined, upload.name)}
+          loading
+        />
+      ))}
     </Box>
   )
 }

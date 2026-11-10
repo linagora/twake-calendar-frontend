@@ -20,7 +20,8 @@ export const EventFormAttachments: React.FC<{
   setAttachments: (v: Attachment[]) => void
   showMore: boolean
   isExpanded: boolean
-}> = ({ v, setAttachments, showMore, isExpanded }) => {
+  onUploadingChange?: (isUploading: boolean) => void
+}> = ({ v, setAttachments, showMore, isExpanded, onUploadingChange }) => {
   const { t } = useI18n()
   const platformURL = useAppSelector(selectPlatformURL)
   const hasVisibleAttachments = v.attachments.some(a => isSafeHttpUrl(a.uri))
@@ -49,6 +50,7 @@ export const EventFormAttachments: React.FC<{
         showMore={showMore}
         attachments={v.attachments}
         setAttachments={setAttachments}
+        onUploadingChange={onUploadingChange}
       />
     )
   }
