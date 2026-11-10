@@ -384,4 +384,34 @@ describe('renderPrintDocument', () => {
 
     expect(html).toContain('Late call')
   })
+
+  it('shows an event late on the day the clocks went back in the month grid', () => {
+    const tz = 'Europe/Paris'
+    const html = renderPrintDocument({
+      periods: buildPrintPeriods(
+        'month',
+        dayjs.tz('2024-10-21', tz).startOf('day'),
+        dayjs.tz('2024-10-28', tz).startOf('day')
+      ),
+      calendars: [
+        {
+          events: selectPrintEvents(
+            [
+              makeEvent({
+                start: '2024-10-27T22:15:00Z', // 23:15 CET
+                end: '2024-10-27T22:45:00Z',
+                title: 'Late call'
+              })
+            ],
+            tz,
+            LABELS.noTitle
+          )
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    expect(html).toContain('Late call')
+  })
 })

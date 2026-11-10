@@ -169,7 +169,7 @@ const renderTimeGrid = (
   const allDayCells = days
     .map(day => {
       const dayStart = day.startOf('day')
-      const dayEnd = dayStart.add(1, 'day')
+      const dayEnd = dayStart.add(1, 'day').startOf('day')
       const chips = allDay
         .filter(event => overlapsRange(event, dayStart, dayEnd))
         .map(event => chip(event, false))
@@ -222,7 +222,7 @@ const renderMonthGrid = (
     const cells = Array.from({ length: 7 }, (_, d) => {
       const day = gridStart.add(w * 7 + d, 'day')
       const dayStart = day.startOf('day')
-      const dayEnd = dayStart.add(1, 'day')
+      const dayEnd = dayStart.add(1, 'day').startOf('day')
       const outside = day.month() !== period.start.month() ? ' mg-outside' : ''
       const chips = periodEvents
         .filter(event => overlapsRange(event, dayStart, dayEnd))
