@@ -1,21 +1,33 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { SectionPreviewRow } from '@common/components/Event/components/SectionPreviewRow'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { AttachmentField } from '@common/components/Event/fields/AttachmentField'
 import { Box, Button, Snackbar, Alert } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
+import { useDialogFileDrop } from '@common/components/Dialog/DialogFileDrop'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import type { AttachmentUploadFailure } from '../AttachmentDao'
+import { useAttachmentUpload } from '../hooks/useAttachmentUpload'
 import { useTdrivePicker } from '../hooks/useTdrivePicker'
 import { TdriveFile } from '../types'
 import { TdrivePickerDialog } from './TdrivePickerDialog'
 import { Icon, Drive } from '@linagora/twake-icons'
 import { Attachment } from '@common/types/Attachment'
 
+const UPLOAD_FAILURE_MESSAGES: Record<AttachmentUploadFailure, string> = {
+  unavailable: 'event.form.attachmentUploadUnavailable',
+  rejected: 'event.form.attachmentRejected',
+  tooLarge: 'event.form.attachmentTooLarge',
+  timeout: 'event.form.attachmentUploadTimeout',
+  failed: 'event.form.attachmentUploadError'
+}
+
 interface TdriveButtonProps {
   onFilesSelected: (file: TdriveFile[]) => void
   showMore: boolean
   attachments: Attachment[]
   setAttachments: (attachments: Attachment[]) => void
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 const TdriveIcon: React.FC = () => (
@@ -64,7 +76,8 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   onFilesSelected,
   showMore,
   attachments,
-  setAttachments
+  setAttachments,
+  onUploadingChange
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -77,6 +90,18 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
     dismissOpenPickerError,
     onReadyToUse
   } = useTdrivePicker({ onFilesSelected })
+  const { pendingUploads, uploadFailure, uploadFiles, dismissUploadFailure } =
+    useAttachmentUpload({ attachments, setAttachments })
+  useDialogFileDrop(uploadFiles, t('event.form.dropAttachments'))
+
+  // Over once the files are in, or once the field is gone: its uploads are
+  // dropped then
+  const isUploading = pendingUploads.length > 0
+  useEffect(() => {
+    if (!isUploading) return
+    onUploadingChange?.(true)
+    return (): void => onUploadingChange?.(false)
+  }, [isUploading, onUploadingChange])
 
   // A click away from the alert may be the click that reopens the picker:
   // only the timeout and the alert's close button dismiss it.
@@ -86,6 +111,14 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   ): void => {
     if (reason === 'clickaway') return
     dismissOpenPickerError()
+  }
+
+  const handleUploadFailureClose = (
+    _event?: React.SyntheticEvent | Event,
+    reason?: string
+  ): void => {
+    if (reason === 'clickaway') return
+    dismissUploadFailure()
   }
 
   const isExpanded = showMore && !isMobile
@@ -105,6 +138,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
           <AttachmentField
             attachments={attachments}
             setAttachments={setAttachments}
+            pendingUploads={pendingUploads}
           />
         </Box>
       </FieldWithLabel>
@@ -124,6 +158,17 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
       >
         <Alert severity="error" onClose={handleErrorClose}>
           {t('event.form.tdrivePickerError')}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={uploadFailure !== null}
+        autoHideDuration={3000}
+        onClose={handleUploadFailureClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={handleUploadFailureClose}>
+          {uploadFailure && t(UPLOAD_FAILURE_MESSAGES[uploadFailure])}
         </Alert>
       </Snackbar>
     </>
