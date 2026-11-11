@@ -398,6 +398,55 @@ describe('EventDescriptionBuilder', () => {
     expect(builder2.buildPlainText()).toBe('link &amp;')
   })
 
+  describe('plain-text description (#2046)', () => {
+    const render = (text: string): string =>
+      new EventDescriptionBuilder(text)
+        .removeFooter()
+        .linkify()
+        .sanitize()
+        .buildHtml()
+
+    it('should keep a plain-text description with angle brackets as typed', () => {
+      expect(render('Send it to <name> please & thanks')).toBe(
+        'Send it to &lt;name&gt; please &amp; thanks'
+      )
+    })
+
+    it('should keep entities of a plain-text description as typed', () => {
+      expect(render('a &amp; b')).toBe('a &amp;amp; b')
+    })
+
+    it('should still linkify a plain-text description', () => {
+      expect(render('See <https://linagora.com> & more')).toBe(
+        'See &lt;<a href="https://linagora.com" target="_blank" rel="noopener noreferrer">https://linagora.com</a>&gt; &amp; more'
+      )
+    })
+
+    it('should keep the query of a link in a plain-text description', () => {
+      expect(render('Go https://x.com/?a=1&b="2" <now>')).toBe(
+        'Go <a href="https://x.com/?a=1&amp;b=&quot;2" target="_blank" rel="noopener noreferrer">https://x.com/?a=1&amp;b="2</a>" &lt;now&gt;'
+      )
+    })
+
+    it('should render a description holding HTML markup as HTML', () => {
+      expect(render('<b>I am bold!</b><br>And me not')).toBe(
+        '<b>I am bold!</b><br>And me not'
+      )
+    })
+
+    it('should still sanitize a description holding HTML markup', () => {
+      expect(
+        render('<script>alert(2)</script><img src=x onerror="alert(4)">ok')
+      ).toBe('ok')
+    })
+
+    it('should return a plain-text description as is in plain text', () => {
+      expect(
+        new EventDescriptionBuilder('Send it to <name> & co').buildPlainText()
+      ).toBe('Send it to <name> & co')
+    })
+  })
+
   describe('linkify (security & edge cases)', () => {
     it('should convert a bare URL to a clickable link', () => {
       const text = 'Check out https://linagora.com for more info.'
