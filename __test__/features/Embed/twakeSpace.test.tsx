@@ -53,18 +53,18 @@ describe('the frame of TwakeSpace', () => {
     expect(postMessage).not.toHaveBeenCalled()
   })
 
-  it('leaves the new event form framed by Twake Chat alone: no twake-embed message, no overlay', () => {
-    history.replace('/embed/newEvent?attendee=alice%40example.com')
+  it('leaves the intents page framed by Twake Chat alone: no twake-embed message, no overlay', () => {
+    history.replace('/intents?intent=intent-1')
     expect(connectCalendarToTwakeSpace(parent)).toBeNull()
 
     // Nor on the callback of its silent sign in
-    history.replace('/callback?code=c&state=s')
+    history.replace('/intents/callback?code=c&state=s')
     sessionStorage.setItem(
       'redirectState',
       JSON.stringify({
         code_verifier: 'v',
         state: 's',
-        returnTo: '/embed/newEvent?attendee=alice%40example.com'
+        returnTo: '/intents?intent=intent-1'
       })
     )
     const space = connectCalendarToTwakeSpace(parent)

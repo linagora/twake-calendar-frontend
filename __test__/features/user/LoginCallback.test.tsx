@@ -214,35 +214,6 @@ describe('CallbackResume', () => {
     })
   })
 
-  it('returns to the new event form framed by Twake Chat with its attendees', async () => {
-    const returnTo =
-      '/embed/newEvent?attendee=alice%40example.com&attendee=bob%40example.com'
-    const mockTokenSet = { access_token: 'abc' }
-    const mockUserInfo = { name: 'Test User' }
-    ;(completeLogin as Mock).mockResolvedValue({
-      tokenSet: mockTokenSet,
-      userinfo: mockUserInfo,
-      returnTo
-    })
-
-    const { rerender } = render(<CallbackResume />)
-    await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(getCalendarsList())
-    })
-
-    mockUserState = {
-      ...mockUserState,
-      userData: mockUserInfo,
-      tokens: mockTokenSet
-    }
-    rerender(<CallbackResume />)
-
-    await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(replace(returnTo))
-    })
-    expect(dispatch).not.toHaveBeenCalledWith(replace('/calendar'))
-  })
-
   it('shows an error when the SSO refuses the silent sign in', async () => {
     ;(completeLogin as Mock).mockRejectedValue(
       new LoginRequiredError('/embed/calendars/team1')

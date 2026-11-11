@@ -10,7 +10,9 @@ vi.hoisted(() => {
   window.history.replaceState(null, '', '/calendar')
 })
 
-// See embeddedNewEvent.test.tsx: the router of the routes of the app
+// The CommonJS build of redux-first-history/rr6 loads another copy of
+// react-router than the routes of the app under Vite: the same router, taken
+// from the copy the routes use
 vi.mock('redux-first-history/rr6', async () => ({
   HistoryRouter: (await import('react-router')).unstable_HistoryRouter
 }))
