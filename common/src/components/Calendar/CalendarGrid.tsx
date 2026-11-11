@@ -276,8 +276,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           listDaysClass="fc-list"
           listDayHeaderClass="fc-list-day"
           noEventsClass="fc-list-empty"
-          eventClass={({ isSelected }) =>
-            cx('fc-event', { 'fc-event-selected': isSelected })
+          eventClass={arg =>
+            cx(
+              'fc-event',
+              { 'fc-event-selected': arg.isSelected },
+              viewHandlers.handleEventClass(arg)
+            )
           }
           columnEventClass="fc-timegrid-event"
           columnEventBeforeClass={({ isStartResizable }) =>
