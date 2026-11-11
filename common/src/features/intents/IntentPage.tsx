@@ -2,10 +2,11 @@ import { Loading } from '@common/components/Loading/Loading'
 import { Stack, Typography } from '@linagora/twake-mui'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
 import type { IntentService } from 'cozy-interapp'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useI18n } from 'twake-i18n'
 import { checkFrameAncestors, readAncestorOrigins } from './frameAncestors'
+import { hasLoginRequired, subscribeLoginRequired } from './loginRequired'
 import { isNewEventIntent, parseNewEventData } from './newEventIntent'
 import { NewEventIntentPage } from './NewEventIntentPage'
 import { useIntentService, type IntentServiceError } from './useIntentService'
@@ -96,14 +97,20 @@ function RejectedIntent({
 }
 
 /**
- * Whether another tab of the calendar ended the session. The frame never
- * shows the SSO, nor the calendar: the page says it and the client is told
- * (it can open Calendar in a tab instead).
+ * Whether the session ended: another tab of the calendar ended it, or the
+ * calendar server answered 401 (twake-oidc's onLoginRequired, read with
+ * useSyncExternalStore from loginRequired.ts). The frame never shows the SSO,
+ * nor the calendar: the page says it and the client is told (it can open
+ * Calendar in a tab instead).
  */
-function useSessionEndedElsewhere(): boolean {
-  const [hasEnded, setHasEnded] = useState(false)
-  useEffect(() => onSessionEndedElsewhere(() => setHasEnded(true)), [])
-  return hasEnded
+function useSessionEnded(): boolean {
+  const [hasEndedElsewhere, setHasEndedElsewhere] = useState(false)
+  useEffect(() => onSessionEndedElsewhere(() => setHasEndedElsewhere(true)), [])
+  const isLoginRequired = useSyncExternalStore(
+    subscribeLoginRequired,
+    hasLoginRequired
+  )
+  return hasEndedElsewhere || isLoginRequired
 }
 
 // Why the intent the client sent cannot be served, null when it can
@@ -138,7 +145,7 @@ function rejectionOf(
  */
 export function IntentPage({ intentId }: { intentId: string }): JSX.Element {
   const state = useIntentService(intentId)
-  const hasSessionEnded = useSessionEndedElsewhere()
+  const hasSessionEnded = useSessionEnded()
 
   if (state.status === 'loading') return <Loading />
   if (state.status === 'failed') {

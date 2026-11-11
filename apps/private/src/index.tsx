@@ -14,6 +14,7 @@ import {
   isUnderIntentsPath
 } from '@common/features/intents/intentPath'
 import { twakeSpace } from '@common/features/Embed/twakeSpace'
+import { reportLoginRequired } from '@common/features/intents/loginRequired'
 
 // Another app of the Workplace (Twake Chat) frames /intents for a cozy-stack
 // intent: every path under it is the intents page, never the calendar
@@ -36,9 +37,11 @@ configureAuth({
   // sign in shows no SSO page and leaves no history entry
   framed: () => isIntentsPage || isEmbedPath(window.location.pathname),
   // Framed, an ended session never navigates the frame: TwakeSpace signs
-  // the user in again at the top level and reloads its frames
+  // the user in again at the top level and reloads its frames; the intents
+  // page tells its client (twakeSpace is null there)
   onLoginRequired: () => {
     twakeSpace?.notifyLoginRequired()
+    reportLoginRequired()
   }
 })
 
