@@ -416,8 +416,18 @@ public class CalendarPage {
         Locator row = page.locator("li:has(label[aria-label='" + calendarName + "'])");
         row.hover();
         row.locator("button").last().click();
-        page.locator("[role=menuitem]:visible").first().waitFor();
+        waitUntilCalendarMenuReady();
         return this;
+    }
+
+    private void waitUntilCalendarMenuReady() {
+        page.locator("[role=menuitem]:visible").first().waitFor();
+        // MUI's Grow transition can start after Playwright's stability check. A click
+        // calculated before it starts can land on another row as the menu expands.
+        // Wait for the rendered opacity, rather than the inline target or a fixed delay.
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+            page.locator(".MuiMenu-paper:visible"))
+            .hasCSS("opacity", "1");
     }
 
     /** What the overflow menu of a calendar offers. */
@@ -447,6 +457,7 @@ public class CalendarPage {
             .filter(new Locator.FilterOptions().setHasText(rowFragment)).first();
         row.hover();
         row.locator("button").last().click();
+        waitUntilCalendarMenuReady();
         page.getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions().setName("Modify")).click();
         return new CalendarModal(page).waitUntilOpen();
     }
