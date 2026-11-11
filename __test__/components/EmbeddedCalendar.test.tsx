@@ -114,8 +114,10 @@ describe('EmbeddedCalendar', () => {
       calendars: { pending: false, list: {} }
     })
 
-    expect(
-      screen.getByText('embed.calendarUnavailable').parentElement
-    ).toHaveStyle({ height: 'calc(100vh - var(--twake-bar-height, 0px))' })
+    const message = screen.getByText('embed.calendarUnavailable').parentElement
+    expect(message).toHaveStyle({ height: `${window.innerHeight}px` })
+
+    message?.style.setProperty('--twake-bar-height', '32px')
+    expect(message).toHaveStyle({ height: `${window.innerHeight - 32}px` })
   })
 })

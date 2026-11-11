@@ -519,7 +519,7 @@ describe('ResponsiveDialog', () => {
       clientX: number,
       buttons = 1
     ): void => {
-      pointer('pointermove', element, { buttons, clientX, clientY: 100 })
+      pointer('pointermove', element, { buttons, clientX, clientY: 120 })
     }
 
     beforeEach(() => {
@@ -558,7 +558,7 @@ describe('ResponsiveDialog', () => {
       moveTo(inner, 150)
       pointer('pointerup', inner)
 
-      expect(inner.style.transform).toBe('translate(50px, 0px)')
+      expect(inner.style.transform).toBe('translate(50px, 20px)')
       expect(outer.style.transform).toBe('')
       expect(HTMLElement.prototype.setPointerCapture).toHaveBeenCalledTimes(1)
     })
@@ -572,7 +572,7 @@ describe('ResponsiveDialog', () => {
       pointer('pointerup', inner)
       moveTo(inner, 300, 0)
 
-      expect(inner.style.transform).toBe('translate(50px, 0px)')
+      expect(inner.style.transform).toBe('translate(50px, 20px)')
     })
 
     it.each([
@@ -594,7 +594,7 @@ describe('ResponsiveDialog', () => {
       interrupt(inner)
       moveTo(inner, 300)
 
-      expect(inner.style.transform).toBe('translate(50px, 0px)')
+      expect(inner.style.transform).toBe('translate(50px, 20px)')
     })
   })
 
