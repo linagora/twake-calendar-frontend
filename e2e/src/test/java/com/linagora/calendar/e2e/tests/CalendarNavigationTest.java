@@ -254,11 +254,15 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
         calendar.switchView("Month");
         calendar.goToMonth(month);
 
-        assertThat(calendar.visibleDates()).contains(lastGridDay.toString());
-        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
-            assertThat(calendar.eventDates(title))
-                .as("every day of the grid is loaded, not only the days of the month")
-                .containsExactly(lastGridDay.toString()));
+        PlaywrightAssertions.assertThat(page.locator(
+            ".fc-dayGridMonth-view .fc-daygrid-day[data-date]"))
+            .hasCount(42, new LocatorAssertions.HasCountOptions().setTimeout(20_000));
+        // Keep retries on the Playwright thread; Awaitility polls on a worker thread.
+        PlaywrightAssertions.assertThat(calendar.eventCardOn(title, lastGridDay))
+            .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        assertThat(calendar.eventDates(title))
+            .as("every day of the grid is loaded, not only the days of the month")
+            .containsExactly(lastGridDay.toString());
     }
 
     private static LocalDate firstGridDay(YearMonth month) {
