@@ -239,6 +239,20 @@ const settle = async (): Promise<void> =>
     await new Promise(resolve => setTimeout(resolve, 50))
   })
 
+// The next save waits for the server: answered later, saved or failed
+const pendingSave = (): ((saved: boolean) => void) => {
+  let answer: (saved: boolean) => void = () => {}
+  ;(putEvent as Mock).mockReturnValueOnce(
+    new Promise<Response>((resolve, reject) => {
+      answer = saved =>
+        saved
+          ? resolve(new Response(null, { status: 201 }))
+          : reject(new Error('Server down'))
+    })
+  )
+  return saved => answer(saved)
+}
+
 const setAncestorOrigins = (origins: string[]): void => {
   Object.defineProperty(window.location, 'ancestorOrigins', {
     value: origins,
@@ -361,6 +375,29 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
         await vi.advanceTimersByTimeAsync(30_000)
       })
 
+      await findMessage('failed')
+    })
+
+    it('answers a client that answers after the 30 s with an error, so it stops waiting, and keeps saying it failed', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      onTestFinished(() => {
+        vi.useRealTimers()
+      })
+      openIntent()
+      await waitFor(() => expect(sentOfType('ready')).toHaveLength(1), {
+        timeout: 10000
+      })
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30_000)
+      })
+      await findMessage('failed')
+
+      // The `ready` is already out: Chat answers it, too late
+      fromClient(ROOM)
+
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('error'))
+      await settle()
       await findMessage('failed')
     })
 
@@ -586,6 +623,58 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       expect(putEvent).toHaveBeenCalledTimes(2)
     })
 
+    // The user confirms Close while the server has not answered the save: the
+    // event may still be created, so the outcome decides what the client gets
+    const closeWhileSaving = async (): Promise<(saved: boolean) => void> => {
+      const answerSave = pendingSave()
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await user.type(await findForm(), 'Weekly sync')
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+      await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+
+      await user.click(screen.getByRole('button', { name: t('actions.close') }))
+      const discard = screen.queryByRole('dialog', {
+        name: t('editModeDialog.discardChanges.title')
+      })
+      if (discard) {
+        await user.click(
+          within(discard).getByRole('button', {
+            name: t('editModeDialog.discardChanges.discard')
+          })
+        )
+      }
+      await settle()
+      // Nothing settled while the save is pending
+      expect(answers()).toEqual([])
+      return answerSave
+    }
+
+    it('gives the client the event when the user closes the form while it saves and the save then works', async () => {
+      const answerSave = await closeWhileSaving()
+
+      answerSave(true)
+
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      expect(
+        (sentOfType('done')[0][0].document as { title: string }).title
+      ).toBe('Weekly sync')
+      expect(answers()).toEqual(sentOfType('done'))
+    })
+
+    it('gives the client null when the user closes the form while it saves and the save then fails', async () => {
+      const answerSave = await closeWhileSaving()
+
+      answerSave(false)
+
+      await waitFor(() =>
+        expect(answers()).toEqual([[{ type: 'intent-intent-1:cancel' }, CHAT]])
+      )
+      await settle()
+      expect(answers()).toHaveLength(1)
+    })
+
     it('opens a fresh event for each intent, never the draft a failed save left in an earlier one', async () => {
       // A save fails in the dialog of one room, which the user then leaves
       ;(putEvent as Mock).mockRejectedValue(new Error('Server down'))
@@ -661,6 +750,114 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       })
 
       await noCalendarShownThenClosed()
+    })
+
+    // Shared with the user, as the calendar form sees them: one it does not
+    // own, delegated with or without the right to write in it
+    const delegatedCalendar = (
+      write: boolean
+    ): { pending: boolean; list: object } => ({
+      pending: false,
+      list: {
+        'bob/bob': {
+          id: 'bob/bob',
+          name: 'Calendar of Bob',
+          color: { light: '#00FF00', dark: '#000' },
+          owner: { emails: ['bob@example.com'] },
+          delegated: true,
+          access: {
+            freebusy: true,
+            read: true,
+            write,
+            'write-properties': false,
+            all: false
+          },
+          events: {}
+        }
+      }
+    })
+
+    it('says there is no calendar to save into when the user may only read the ones they have, and gives the client null once the user closes it', async () => {
+      openIntent(
+        'intent-1',
+        signedInStore({ calendars: delegatedCalendar(false) })
+      )
+      await answerHandshake()
+
+      await noCalendarShownThenClosed()
+    })
+
+    it('opens the form when the only calendar is delegated with the right to write', async () => {
+      openIntent(
+        'intent-1',
+        signedInStore({ calendars: delegatedCalendar(true) })
+      )
+      await answerHandshake()
+
+      await findForm()
+      expect(
+        screen.queryByText(t('error.calendarsNotFound'))
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('the session ends in another tab while it saves', () => {
+    const endSessionWhileSaving = async (): Promise<
+      (saved: boolean) => void
+    > => {
+      const answerSave = pendingSave()
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await user.type(await findForm(), 'Weekly sync')
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+      await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+
+      const otherTab = new BroadcastChannel('twake-oidc-session')
+      otherTab.postMessage({ type: 'session-ended', senderId: 'another-tab' })
+      otherTab.close()
+      await settle()
+      // The event may still be created: nothing told while the save is pending
+      expect(answers()).toEqual([])
+      return answerSave
+    }
+
+    it('gives the client the event, and no error, when the save then works', async () => {
+      const answerSave = await endSessionWhileSaving()
+
+      answerSave(true)
+
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      expect(
+        (sentOfType('done')[0][0].document as { title: string }).title
+      ).toBe('Weekly sync')
+      await settle()
+      expect(sentOfType('error')).toEqual([])
+      expect(answers()).toHaveLength(1)
+    })
+
+    it('says the session expired and gives the client an error when the save then fails', async () => {
+      const answerSave = await endSessionWhileSaving()
+
+      answerSave(false)
+
+      await findMessage('sessionExpired')
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('error'))
+    })
+
+    it('gives the client an error at once when no save is pending', async () => {
+      openIntent()
+      await answerHandshake()
+      await findForm()
+
+      const otherTab = new BroadcastChannel('twake-oidc-session')
+      otherTab.postMessage({ type: 'session-ended', senderId: 'another-tab' })
+      otherTab.close()
+
+      await findMessage('sessionExpired')
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('error'))
     })
   })
 
