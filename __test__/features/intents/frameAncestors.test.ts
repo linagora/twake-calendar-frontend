@@ -1,4 +1,10 @@
-import { checkFrameAncestors } from '@common/features/intents/frameAncestors'
+/**
+ * @vitest-environment jsdom
+ */
+import {
+  checkFrameAncestors,
+  readAncestorOrigins
+} from '@common/features/intents/frameAncestors'
 
 // The stack gives the origins that may frame a service of the intent
 // (`frameAncestors`, linagora/cozy-stack#4978, optional); the browser gives
@@ -36,5 +42,26 @@ describe('who frames the intents page', () => {
 
   it('cannot check when the browser does not tell the ancestors (Firefox)', () => {
     expect(checkFrameAncestors([CHAT], null)).toBe('unchecked')
+  })
+})
+
+describe('the pages above the intents page, as the browser tells them', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window.location, 'ancestorOrigins')
+  })
+
+  it('are the origins the browser gives, innermost first', () => {
+    Object.defineProperty(window.location, 'ancestorOrigins', {
+      value: [CHAT, CHAT_SHELL],
+      configurable: true
+    })
+
+    expect(readAncestorOrigins()).toEqual([CHAT, CHAT_SHELL])
+  })
+
+  it('are unknown when the browser does not tell them (Firefox)', () => {
+    expect('ancestorOrigins' in window.location).toBe(false)
+
+    expect(readAncestorOrigins()).toBeNull()
   })
 })

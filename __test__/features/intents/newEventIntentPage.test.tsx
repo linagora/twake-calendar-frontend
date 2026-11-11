@@ -126,11 +126,17 @@ const intentDocument = (id: string): unknown => ({
   }
 })
 
-// Signed in at the SSO (the silent sign-in of the frame is done)
-const signedInStore = (
-  calendars: { pending: boolean; list: object } = MY_CALENDARS,
-  workplaceFqdn: string | undefined = 'alice.workplace.test'
-): ReturnType<typeof setupStore> => {
+// Signed in at the SSO (the silent sign-in of the frame is done). `platform:
+// false`: the SSO gave no workplace for the user (and the deployment no
+// WORKPLACE_FQDN_FALLBACK)
+const signedInStore = ({
+  calendars = MY_CALENDARS,
+  platform = true
+}: {
+  calendars?: { pending: boolean; list: object }
+  platform?: boolean
+} = {}): ReturnType<typeof setupStore> => {
+  const workplaceFqdn = platform ? 'alice.workplace.test' : undefined
   const initial = setupStore().getState()
   return setupStore({
     ...initial,
@@ -516,7 +522,9 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       await user.click(save)
       await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
       // Locked while the server has not answered
-      expect(screen.getByRole('button', { name: t('actions.save') })).toBeDisabled()
+      expect(
+        screen.getByRole('button', { name: t('actions.save') })
+      ).toBeDisabled()
       // An impatient second try, with Enter in the title
       await user.click(screen.getByRole('textbox', { name: /title/i }))
       await user.keyboard('{Enter}')
@@ -624,7 +632,10 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
     }
 
     it('says there is no calendar to save into, and gives the client null once the user closes it', async () => {
-      openIntent('intent-1', signedInStore({ pending: false, list: {} }))
+      openIntent(
+        'intent-1',
+        signedInStore({ calendars: { pending: false, list: {} } })
+      )
       await answerHandshake()
 
       await noCalendarShownThenClosed()
@@ -634,7 +645,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       ;(fetchCalendars as Mock).mockRejectedValue(new Error('Server down'))
       const store = openIntent(
         'intent-1',
-        signedInStore({ pending: true, list: {} })
+        signedInStore({ calendars: { pending: true, list: {} } })
       )
       await answerHandshake()
 
@@ -682,9 +693,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
     })
 
     it('says it cannot open when the stack refuses the token', async () => {
-      sdk.login.mockRejectedValue(
-        new SdkAuthError('/auth/token_exchange', 400)
-      )
+      sdk.login.mockRejectedValue(new SdkAuthError('/auth/token_exchange', 400))
       openIntent()
 
       await findMessage('unavailable')
@@ -693,9 +702,11 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
     })
 
     it('says it cannot open when it does not know the platform of the user', async () => {
-      openIntent('intent-1', signedInStore(MY_CALENDARS, undefined))
+      openIntent('intent-1', signedInStore({ platform: false }))
 
       await findMessage('unavailable')
+      expect(sdk.login).not.toHaveBeenCalled()
+      expect(sdk.fetchJSON).not.toHaveBeenCalled()
       expect(sentOfType('ready')).toEqual([])
     })
 

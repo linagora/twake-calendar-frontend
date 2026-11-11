@@ -81,26 +81,25 @@ const authConfig = (): AuthConfig => {
   return calls[0][0]
 }
 const isFramed = (config: AuthConfig): boolean =>
-  typeof config.framed === 'function'
-    ? config.framed()
-    : Boolean(config.framed)
+  typeof config.framed === 'function' ? config.framed() : Boolean(config.framed)
 
 describe('the intents page as the browser loads it', () => {
-  it.each(['/intents/settings', '/intents/', '/intents/callback?code=c&state=s'])(
-    'shows the intents page at %s, never the calendar',
-    async path => {
-      await boot(path)
+  it.each([
+    '/intents/settings',
+    '/intents/',
+    '/intents/callback?code=c&state=s'
+  ])('shows the intents page at %s, never the calendar', async path => {
+    await boot(path)
 
-      const heading = await screen.findByRole(
-        'heading',
-        { level: 1, name: t('intents.unavailable.title') },
-        { timeout: 10000 }
-      )
-      expect(screen.getByRole('main')).toContainElement(heading)
-      expect(screen.queryByRole('banner')).not.toBeInTheDocument()
-      expect(redirectTo).not.toHaveBeenCalled()
-    }
-  )
+    const heading = await screen.findByRole(
+      'heading',
+      { level: 1, name: t('intents.unavailable.title') },
+      { timeout: 10000 }
+    )
+    expect(screen.getByRole('main')).toContainElement(heading)
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+    expect(redirectTo).not.toHaveBeenCalled()
+  })
 
   it('signs in silently and comes back to /intents/callback', async () => {
     await boot('/intents?intent=intent-1')

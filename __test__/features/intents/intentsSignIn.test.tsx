@@ -1,6 +1,7 @@
 import type { Mock } from 'vitest'
 import { setupStore } from '@common/app/store'
 import en from '@common/locales/en.json'
+import fr from '@common/locales/fr.json'
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import { fetchCurrentUser } from '@common/features/User/UserDao'
 import { redirectTo } from '@common/utils/navigation'
@@ -209,6 +210,45 @@ describe('the sign-in of the intents page', () => {
     expect(window.location.pathname).toBe('/intents/settings')
     expect(redirectTo).not.toHaveBeenCalled()
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+  })
+
+  it('says the SSO failed when the callback fails for another reason, without a login form', async () => {
+    pendingSignIn(INTENT_PATH)
+    ;(completeLogin as Mock).mockRejectedValue(new Error('SSO down'))
+
+    openAt('/intents/callback?code=c&state=s')
+
+    await findMessage('failed')
+    expect(here()).toBe(INTENT_PATH)
+    expect(startLogin).not.toHaveBeenCalled()
+    expect(redirectTo).not.toHaveBeenCalled()
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+  })
+
+  it('speaks the language of the account of the user', async () => {
+    window.history.replaceState(null, '', '/intents/settings')
+    const initial = setupStore().getState()
+    render(
+      <Provider
+        store={setupStore({
+          ...initial,
+          user: {
+            ...initial.user,
+            coreConfig: { ...initial.user.coreConfig, language: 'fr' }
+          }
+        })}
+      >
+        <IntentsApp />
+      </Provider>
+    )
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: fr.intents.unavailable.title
+      })
+    ).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('fr')
   })
 
   it('exchanges no code when the login it comes back from is not for an intent', async () => {

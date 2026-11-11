@@ -42,9 +42,9 @@ describe('the data the client sends with the intent', () => {
     expect(parseNewEventData(['alice@example.com'])).toBe(null)
     expect(parseNewEventData({ attendees: 'alice@example.com' })).toBe(null)
     expect(parseNewEventData({ attendees: [42] })).toBe(null)
-    expect(
-      parseNewEventData({ attendees: ['alice@example.com', null] })
-    ).toBe(null)
+    expect(parseNewEventData({ attendees: ['alice@example.com', null] })).toBe(
+      null
+    )
   })
 })
 
@@ -85,5 +85,13 @@ describe('the event the client gets back', () => {
 
   it('says whether the event lasts all day', () => {
     expect(createdEvent(savedEvent({ allday: true })).allDay).toBe(true)
+  })
+
+  it('gives an untitled event an empty title, and one that does not say it lasts all day a time', () => {
+    const event = createdEvent(
+      savedEvent({ title: undefined, allday: undefined })
+    )
+    expect(event.title).toBe('')
+    expect(event.allDay).toBe(false)
   })
 })
