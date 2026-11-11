@@ -33,6 +33,15 @@ const failed = (error: IntentServiceError): IntentServiceState => ({
   error
 })
 
+/** The client gets the error; called again, it is ignored */
+export function failIntent(service: IntentService, error: Error): void {
+  try {
+    service.throw(error)
+  } catch {
+    // Already answered
+  }
+}
+
 /** The value, or null once the delay is over */
 async function withTimeout<T>(
   promise: Promise<T>,
@@ -49,6 +58,22 @@ async function withTimeout<T>(
   }
 }
 
+/**
+ * The client may still answer the handshake once the page gave up on it:
+ * it then gets an error, or it would wait for an answer that never comes
+ */
+function failLateClient(pending: Promise<IntentService>): void {
+  void pending.then(
+    late =>
+      failIntent(
+        late,
+        new Error('Twake Calendar stopped waiting for the client')
+      ),
+    // Never answered: nothing to tell
+    () => {}
+  )
+}
+
 /** Reads the intent with the token of the stack, then waits for the client */
 async function startService(
   intentId: string,
@@ -57,11 +82,11 @@ async function startService(
   const intents = new Intents({ fetch: makeIntentFetch(sdk) })
   try {
     // The id given: cozy-interapp would read the first parameter only
-    const service = await withTimeout(
-      intents.createService(intentId, window),
-      CLIENT_ANSWER_TIMEOUT_MS
-    )
-    return service === null ? failed('failed') : { status: 'ready', service }
+    const pending = intents.createService(intentId, window)
+    const service = await withTimeout(pending, CLIENT_ANSWER_TIMEOUT_MS)
+    if (service !== null) return { status: 'ready', service }
+    failLateClient(pending)
+    return failed('failed')
   } catch (error: unknown) {
     console.error('[intents] Cannot start the service', error)
     return failed(

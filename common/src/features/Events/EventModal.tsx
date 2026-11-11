@@ -1,4 +1,5 @@
 import { useAppSelector } from '@common/app/hooks'
+import { canWriteToCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import { ConfirmDiscardChangesDialog } from '@common/components/Dialog/ConfirmDiscardChangesDialog'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
@@ -98,8 +99,7 @@ const EventPopover: React.FC<{
   })
 
   const userPersonalCalendars: Calendar[] = Object.values(calList || {}).filter(
-    cal =>
-      cal.id?.split('/')[0] === userId || (cal.delegated && cal.access?.write)
+    cal => canWriteToCalendar(cal, userId)
   )
 
   const currentCalendarId = selectedCalendarId ?? initialValues.calendarid

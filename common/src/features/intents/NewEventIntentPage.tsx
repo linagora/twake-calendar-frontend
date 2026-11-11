@@ -1,6 +1,8 @@
 import { useAppSelector } from '@common/app/hooks'
+import type { RootState } from '@common/app/store'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { Loading } from '@common/components/Loading/Loading'
+import { canWriteToCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import EventPopover from '@common/features/Events/EventModal'
 import { newEventWithAttendees } from '@common/features/Events/newEventDeepLinkUtils'
 import type { CalendarEvent } from '@common/types/EventsTypes'
@@ -69,10 +71,71 @@ function useNotifyShown(service: IntentService, isShown: boolean): void {
   }, [service, isShown])
 }
 
+// A calendar the form can save into, as the form chooses them (EventModal):
+// the user's own, or one delegated to them with the right to write
+function hasWritableCalendar(state: RootState): boolean {
+  const userId = state.user.userData?.openpaasId ?? ''
+  return Object.values(state.calendars.list).some(cal =>
+    canWriteToCalendar(cal, userId)
+  )
+}
+
+/**
+ * Calls back when a save of the form fails: the form tells it with this
+ * window event only (createAction.ts). The page holds no other form.
+ */
+function useSaveFailed(onFailed: () => void): void {
+  useEffect(() => {
+    window.addEventListener('eventModalError', onFailed)
+    return (): void => window.removeEventListener('eventModalError', onFailed)
+  }, [onFailed])
+}
+
+interface SaveInFlight {
+  isSaving: boolean
+  onSavingChange: (isSaving: boolean) => void
+  settle: (result: CreatedEvent | null) => void
+}
+
+/**
+ * The close of the form, while a save may be in flight: the server may still
+ * create the event, so a Close confirmed then waits for the outcome. Saved,
+ * the client gets the event (onCreated, as always); failed, null. A save that
+ * fails with no Close pending gives the form back to the user.
+ */
+function useCloseForm({ isSaving, onSavingChange, settle }: SaveInFlight): {
+  isClosing: boolean
+  closeForm: (toSave?: boolean) => void
+} {
+  const [isClosing, setIsClosing] = useState(false)
+  const onSaveFailed = useCallback((): void => {
+    if (isClosing) settle(null)
+    else onSavingChange(false)
+  }, [isClosing, settle, onSavingChange])
+  useSaveFailed(onSaveFailed)
+
+  // Closed to save, the form stays until the server answers: a failure
+  // leaves it with what the user typed, a success answers with the event
+  const closeForm = (toSave?: boolean): void => {
+    if (toSave) onSavingChange(true)
+    else if (isSaving) setIsClosing(true)
+    else settle(null)
+  }
+  return { isClosing, closeForm }
+}
+
 export interface NewEventIntentPageProps {
   service: IntentService
   /** Read once, when the form opens */
   initialAttendees: string[]
+  /** The session ended (IntentPage): a save in flight is waited for */
+  hasSessionEnded: boolean
+  /**
+   * A save sent and not failed (a saved one stays so), held by IntentPage,
+   * which waits for its outcome too
+   */
+  isSaving: boolean
+  onSavingChange: (isSaving: boolean) => void
 }
 
 /**
@@ -81,18 +144,21 @@ export interface NewEventIntentPageProps {
  * draws the dialog around. Saved, the client gets the event (CreatedEvent);
  * closed or cancelled, null. A failed save shows the calendar's error
  * snackbar over the form and tells the client nothing; without a calendar to
- * save into, a message the user closes. Used by IntentPage.
+ * save into, a message the user closes. Closed, or the session ended, while a
+ * save is in flight: a loader until the server answers, whose answer decides
+ * (useCloseForm, IntentPage). Used by IntentPage.
  */
 export function NewEventIntentPage({
   service,
-  initialAttendees
+  initialAttendees,
+  hasSessionEnded,
+  isSaving,
+  onSavingChange
 }: NewEventIntentPageProps): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
   // Not `pending`, which every save sets too: the form would leave the page
   // while saving, and what the user typed with it
-  const hasCalendar = useAppSelector(
-    state => Object.keys(state.calendars.list).length > 0
-  )
+  const hasCalendar = useAppSelector(hasWritableCalendar)
   const loading = useAppSelector(state => state.calendars.pending)
   const error = useAppSelector(state => state.calendars.error)
   // The attendees of this intent, read once: the form keeps its own state
@@ -106,15 +172,18 @@ export function NewEventIntentPage({
   // from that draft in its own (passive) effect, which runs after it.
   useLayoutEffect(() => clearEventFormTempData('create'), [])
 
-  // Closed to save, the form stays until the server answers: a failure
-  // leaves it with what the user typed, a success answers with the event
-  const closeForm = (toSave?: boolean): void => {
-    if (!toSave) settle(null)
-  }
+  const { isClosing, closeForm } = useCloseForm({
+    isSaving,
+    onSavingChange,
+    settle
+  })
+  const hasEnded = isClosing || hasSessionEnded
   const tellCreated = (saved: CalendarEvent): void => {
     settle(createdEvent(saved))
   }
 
+  // The user or the session is done: only the outcome of the save is left
+  if (isSaving && hasEnded) return <Loading />
   // The form needs a calendar to save into: none once they are loaded (or
   // failed to load) is said, never while they load
   if (!isShown) return <Loading />

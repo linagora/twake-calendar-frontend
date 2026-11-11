@@ -9,7 +9,11 @@ import { checkFrameAncestors, readAncestorOrigins } from './frameAncestors'
 import { hasLoginRequired, subscribeLoginRequired } from './loginRequired'
 import { isNewEventIntent, parseNewEventData } from './newEventIntent'
 import { NewEventIntentPage } from './NewEventIntentPage'
-import { useIntentService, type IntentServiceError } from './useIntentService'
+import {
+  failIntent,
+  useIntentService,
+  type IntentServiceError
+} from './useIntentService'
 
 /** What the page says when it cannot serve the intent */
 export type IntentMessage =
@@ -48,15 +52,6 @@ export function IntentMessageScreen({
       <Typography>{t(`intents.${message}.description`)}</Typography>
     </Stack>
   )
-}
-
-/** The client gets the error; called again, it is ignored */
-function failIntent(service: IntentService, error: Error): void {
-  try {
-    service.throw(error)
-  } catch {
-    // Already answered
-  }
 }
 
 /** Cancels the intent; called again, it is ignored */
@@ -101,7 +96,7 @@ function RejectedIntent({
  * calendar server answered 401 (twake-oidc's onLoginRequired, read with
  * useSyncExternalStore from loginRequired.ts). The frame never shows the SSO,
  * nor the calendar: the page says it and the client is told (it can open
- * Calendar in a tab instead).
+ * Calendar in a tab instead), once no save is in flight (IntentPage).
  */
 function useSessionEnded(): boolean {
   const [hasEndedElsewhere, setHasEndedElsewhere] = useState(false)
@@ -146,6 +141,10 @@ function rejectionOf(
 export function IntentPage({ intentId }: { intentId: string }): JSX.Element {
   const state = useIntentService(intentId)
   const hasSessionEnded = useSessionEnded()
+  // A save sent to the server and not failed: the event may be created, so
+  // its outcome, not the end of the session, decides what the client gets.
+  // Set by the form (NewEventIntentPage), read here and there
+  const [isSaving, setIsSaving] = useState(false)
 
   if (state.status === 'loading') return <Loading />
   if (state.status === 'failed') {
@@ -153,7 +152,7 @@ export function IntentPage({ intentId }: { intentId: string }): JSX.Element {
   }
 
   const { service } = state
-  const rejection = rejectionOf(service, hasSessionEnded)
+  const rejection = rejectionOf(service, hasSessionEnded && !isSaving)
   if (rejection !== null)
     return <RejectedIntent service={service} {...rejection} />
   const data = parseNewEventData(service.getData())
@@ -178,7 +177,13 @@ export function IntentPage({ intentId }: { intentId: string }): JSX.Element {
         )
       }}
     >
-      <NewEventIntentPage service={service} initialAttendees={data.attendees} />
+      <NewEventIntentPage
+        service={service}
+        initialAttendees={data.attendees}
+        hasSessionEnded={hasSessionEnded}
+        isSaving={isSaving}
+        onSavingChange={setIsSaving}
+      />
     </ErrorBoundary>
   )
 }
