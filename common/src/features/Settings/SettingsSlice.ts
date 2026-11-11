@@ -22,6 +22,7 @@ export interface SettingsState {
   timeZonePickedDuringUserDataFetch: boolean
   hideDeclinedEvents: boolean | null
   displayWeekNumbers: boolean
+  keyboardShortcuts: boolean
   view: 'calendar' | 'settings' | 'search'
   businessHours: BusinessHour | null
   workingDays: boolean | null
@@ -47,6 +48,14 @@ const autoDetectTimeZone =
 function rememberAutoDetectTimeZone(enabled: boolean): void {
   localStorage.setItem(AUTO_DETECT_TIME_ZONE_KEY, String(enabled))
 }
+
+const KEYBOARD_SHORTCUTS_KEY = 'keyboardShortcuts'
+
+// Single key shortcuts must be possible to turn off (WCAG 2.1.4). The backend
+// only stores the configuration keys it knows of, so this browser remembers
+// the choice: the shortcuts stay on unless the user turned them off.
+const keyboardShortcuts =
+  localStorage.getItem(KEYBOARD_SHORTCUTS_KEY) !== 'false'
 
 interface DatetimeConfiguration {
   timeZone?: string | null
@@ -109,6 +118,7 @@ const initialState: SettingsState = {
   timeZonePickedDuringUserDataFetch: false,
   hideDeclinedEvents: null,
   displayWeekNumbers: true,
+  keyboardShortcuts,
   view: 'calendar',
   businessHours: null,
   workingDays: null
@@ -142,6 +152,12 @@ const SettingsSlice = createAppSlice({
     setDisplayWeekNumbers: create.reducer(
       (state, action: PayloadAction<boolean>) => {
         state.displayWeekNumbers = action.payload
+      }
+    ),
+    setKeyboardShortcuts: create.reducer(
+      (state, action: PayloadAction<boolean>) => {
+        state.keyboardShortcuts = action.payload
+        localStorage.setItem(KEYBOARD_SHORTCUTS_KEY, String(action.payload))
       }
     ),
     setView: create.reducer(
@@ -229,6 +245,7 @@ export const {
   setIsBrowserDefaultTimeZone,
   setHideDeclinedEvents,
   setDisplayWeekNumbers,
+  setKeyboardShortcuts,
   setBusinessHours,
   setWorkingDays
 } = SettingsSlice.actions
