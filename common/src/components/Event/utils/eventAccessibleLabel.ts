@@ -36,6 +36,16 @@ export function calendarLabel(
   )
 }
 
+/**
+ * The calendar day of an ISO string (e.g. FullCalendar's "2026-11-12"), at
+ * midnight UTC as eventAccessibleLabel expects for all-day events. The grid's
+ * Date objects of an all-day event are at midnight in the calendar time zone,
+ * the day before in UTC for every zone east of it.
+ */
+export function allDayDate(isoDate: string): Date {
+  return new Date(`${isoDate.slice(0, 10)}T00:00:00Z`)
+}
+
 // How the user reads dates and times
 interface Reading {
   locale: string

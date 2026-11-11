@@ -4,6 +4,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee'
 import {
+  allDayDate,
   calendarLabel,
   eventAccessibleLabel
 } from '@common/components/Event/utils/eventAccessibleLabel'
@@ -263,14 +264,15 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     }
 
     const { calendar, partstat } = eventDetails(arg.event)
+    const { allDay, startStr, endStr } = arg.event
     el.setAttribute('role', 'button')
     el.setAttribute(
       'aria-label',
       eventAccessibleLabel({
         title: arg.event.title,
-        start: arg.event.start,
-        end: arg.event.end,
-        allDay: arg.event.allDay,
+        start: allDay ? allDayDate(startStr) : arg.event.start,
+        end: allDay ? (endStr ? allDayDate(endStr) : null) : arg.event.end,
+        allDay,
         calendarName: calendarLabel(calendar, userId, t),
         partstat,
         timeZone: timezone,
