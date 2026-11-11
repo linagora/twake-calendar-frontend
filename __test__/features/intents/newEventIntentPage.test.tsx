@@ -177,9 +177,13 @@ const sent = (): [Message, string][] =>
 const sentOfType = (kind: string, id = 'intent-1'): [Message, string][] =>
   sent().filter(([message]) => message.type === `intent-${id}:${kind}`)
 // How the intent ends for the client: the event, null, or an error
-const answers = (): [Message, string][] =>
-  sent().filter(([message]) =>
-    /:(done|cancel|error|exposeFrameRemoval)$/.test(message.type)
+// (of one intent when `id` is given: a page an earlier test left still
+// listens on the window of the test, which no frame does in a browser)
+const answers = (id?: string): [Message, string][] =>
+  sent().filter(
+    ([message]) =>
+      /:(done|cancel|error|exposeFrameRemoval)$/.test(message.type) &&
+      (id === undefined || message.type.startsWith(`intent-${id}:`))
   )
 
 const fromClient = (data: unknown, origin = CHAT): void => {
@@ -383,8 +387,9 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       onTestFinished(() => {
         vi.useRealTimers()
       })
-      openIntent()
-      await waitFor(() => expect(sentOfType('ready')).toHaveLength(1), {
+      const id = 'intent-late'
+      openIntent(id)
+      await waitFor(() => expect(sentOfType('ready', id)).toHaveLength(1), {
         timeout: 10000
       })
       await act(async () => {
@@ -395,8 +400,8 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       // The `ready` is already out: Chat answers it, too late
       fromClient(ROOM)
 
-      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
-      expect(answers()).toEqual(sentOfType('error'))
+      await waitFor(() => expect(sentOfType('error', id)).toHaveLength(1))
+      expect(answers(id)).toEqual(sentOfType('error', id))
       await settle()
       await findMessage('failed')
     })
