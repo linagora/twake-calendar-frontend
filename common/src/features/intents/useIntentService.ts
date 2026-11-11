@@ -70,11 +70,28 @@ async function startService(
   }
 }
 
+/** What the page signs the platform client in with */
+type StartInputs = { platformURL: string; idToken: string }
+
+/**
+ * The platform and the id token to start with, when the page can start:
+ * null out of a frame (there is no client to answer), without a platform for
+ * the user or before the id token
+ */
+function readStartInputs(
+  isFramed: boolean,
+  platformURL: string | null,
+  idToken: string | undefined
+): StartInputs | null {
+  if (!isFramed) return null
+  if (!platformURL || !idToken) return null
+  return { platformURL, idToken }
+}
+
 /** The platform client signed in with the id token, then the service */
 async function signInAndStart(
   intentId: string,
-  platformURL: string,
-  idToken: string
+  { platformURL, idToken }: StartInputs
 ): Promise<IntentServiceState> {
   let sdk: Sdk
   try {
@@ -92,21 +109,24 @@ async function signInAndStart(
  * shared with the Drive picker), reads the intent, then waits for the data of
  * the client (the app that framed the page). Started once, in an Effect, as
  * it talks to the stack and to the page around: a second handshake would
- * answer the client twice. Used by IntentPage.
+ * answer the client twice (the ref keeps a later run of the Effect, on a
+ * renewed id token for instance, from starting again). Used by IntentPage.
  */
 export function useIntentService(intentId: string): IntentServiceState {
   const platformURL = useAppSelector(selectPlatformURL)
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
   const [state, setState] = useState<IntentServiceState>({ status: 'loading' })
   const startedRef = useRef(false)
-  // Out of a frame there is no client to answer
   const isFramed = window.parent !== window
 
   useEffect(() => {
-    if (startedRef.current || !isFramed || !platformURL || !idToken) return
+    const inputs = readStartInputs(isFramed, platformURL, idToken)
+    if (startedRef.current || inputs === null) return
     startedRef.current = true
-    void signInAndStart(intentId, platformURL, idToken).then(setState)
+    void signInAndStart(intentId, inputs).then(setState)
   }, [intentId, isFramed, platformURL, idToken])
 
-  return isFramed && platformURL && idToken ? state : failed('unavailable')
+  return readStartInputs(isFramed, platformURL, idToken)
+    ? state
+    : failed('unavailable')
 }

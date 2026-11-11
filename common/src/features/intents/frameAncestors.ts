@@ -29,19 +29,27 @@ export function readAncestorOrigins(): readonly string[] | null {
   return Array.from(window.location.ancestorOrigins)
 }
 
+/** An older stack does not give the origins (before linagora/cozy-stack `frameAncestors`) */
+function isNotGiven(value: unknown): value is null | undefined {
+  return value === undefined || value === null
+}
+
+/** There is an ancestor, and each one is an origin the stack allows */
+function allAllowed(
+  origins: readonly string[],
+  ancestors: readonly string[]
+): boolean {
+  return ancestors.length > 0 && ancestors.every(a => origins.includes(a))
+}
+
 export function checkFrameAncestors(
   allowed: unknown,
   ancestors: readonly string[] | null
 ): FrameCheck {
-  // An older stack does not give them; given in another shape, they are not
-  // trusted
-  if (allowed === undefined || allowed === null || ancestors === null) {
-    return 'unchecked'
-  }
+  // Firefox does not tell the ancestors
+  if (isNotGiven(allowed) || ancestors === null) return 'unchecked'
   const origins = readOrigins(allowed)
+  // Given in another shape, they are not trusted
   if (origins === null) return 'untrusted'
-  if (ancestors.length === 0) return 'untrusted'
-  return ancestors.every(ancestor => origins.includes(ancestor))
-    ? 'trusted'
-    : 'untrusted'
+  return allAllowed(origins, ancestors) ? 'trusted' : 'untrusted'
 }
