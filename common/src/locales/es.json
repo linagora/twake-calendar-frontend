@@ -748,5 +748,35 @@
   "embed": {
     "signInRequired": "Has cerrado sesión. Vuelve a iniciar sesión para ver este calendario.",
     "calendarUnavailable": "Este calendario no está disponible. Es posible que no seas miembro."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Twake Calendar no se puede abrir aquí",
+      "description": "Abra Twake Calendar para crear su evento."
+    },
+    "forbidden": {
+      "title": "Twake Calendar no está autorizado a responder aquí",
+      "description": "Su administrador debe permitir que Twake Calendar responda a esta aplicación."
+    },
+    "failed": {
+      "title": "No se pudo cargar Twake Calendar",
+      "description": "Cierre esta ventana y vuelva a intentarlo."
+    },
+    "sessionExpired": {
+      "title": "Su sesión ha caducado",
+      "description": "Abra Twake Calendar para volver a iniciar sesión y vuelva a intentarlo."
+    },
+    "unsupported": {
+      "title": "Twake Calendar no puede hacer esto",
+      "description": "Esta aplicación ha pedido a Twake Calendar algo que no ofrece."
+    },
+    "invalidData": {
+      "title": "Este evento no se puede crear",
+      "description": "Esta aplicación ha enviado un evento que Twake Calendar no puede leer."
+    },
+    "untrustedFrame": {
+      "title": "Twake Calendar no se puede abrir en esta página",
+      "description": "Otra página muestra esta aplicación: abra Twake Calendar directamente para crear su evento."
+    }
   }
 }

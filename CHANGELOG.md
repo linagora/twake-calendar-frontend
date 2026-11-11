@@ -7,8 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 ### Added
 
-- `/embed/newEvent`, the form of a new event alone, which Twake Chat frames in a room: it tells the
-  page that frames it when the event is saved or the form closed
+- The form of a new event as the cozy-stack intent `CREATE io.cozy.calendar.events` on `/intents`:
+  Twake Chat opens it in a room, with the members of the room as attendees, and gets the event saved
 
 ## [1.3.3] - 2026-09-29
 

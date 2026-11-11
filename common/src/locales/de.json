@@ -748,5 +748,35 @@
   "embed": {
     "signInRequired": "Sie sind abgemeldet. Melden Sie sich erneut an, um diesen Kalender zu sehen.",
     "calendarUnavailable": "Dieser Kalender ist nicht verfügbar. Möglicherweise sind Sie kein Mitglied."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Twake Calendar kann hier nicht geöffnet werden",
+      "description": "Öffnen Sie Twake Calendar, um Ihren Termin zu erstellen."
+    },
+    "forbidden": {
+      "title": "Twake Calendar darf hier nicht antworten",
+      "description": "Ihre Administration muss Twake Calendar erlauben, dieser App zu antworten."
+    },
+    "failed": {
+      "title": "Twake Calendar konnte nicht geladen werden",
+      "description": "Schließen Sie dieses Fenster und versuchen Sie es erneut."
+    },
+    "sessionExpired": {
+      "title": "Ihre Sitzung ist abgelaufen",
+      "description": "Öffnen Sie Twake Calendar, um sich erneut anzumelden, und versuchen Sie es dann noch einmal."
+    },
+    "unsupported": {
+      "title": "Twake Calendar kann das nicht",
+      "description": "Diese App hat Twake Calendar um etwas gebeten, das es nicht anbietet."
+    },
+    "invalidData": {
+      "title": "Dieser Termin kann nicht erstellt werden",
+      "description": "Diese App hat einen Termin gesendet, den Twake Calendar nicht lesen kann."
+    },
+    "untrustedFrame": {
+      "title": "Twake Calendar kann auf dieser Seite nicht geöffnet werden",
+      "description": "Eine andere Seite zeigt diese App an: Öffnen Sie Twake Calendar direkt, um Ihren Termin zu erstellen."
+    }
   }
 }

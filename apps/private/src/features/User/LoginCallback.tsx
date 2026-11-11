@@ -8,7 +8,6 @@ import {
   setUserError
 } from '@common/features/User/UserSlice'
 import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
-import { newEventHost } from '@common/features/Embed/newEventEmbed'
 import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import {
   completeLogin,
@@ -66,8 +65,7 @@ export const CallbackResume: React.FC = () => {
           return
         }
 
-        // An embed route signs in on its own: back to it, with its query, not to
-        // the calendar
+        // An embed route signs in on its own: back to it, not to the calendar
         if (isEmbedPath(data.returnTo)) returnTo.current = data.returnTo
 
         dispatch(setUserData(data.userinfo))
@@ -80,7 +78,6 @@ export const CallbackResume: React.FC = () => {
           dispatch(setAppLoading(false))
           setIsSignInRefused(true)
           twakeSpace?.notifyLoginRequired()
-          newEventHost?.loginRequired()
           return
         }
         console.error('OIDC callback error:', e)

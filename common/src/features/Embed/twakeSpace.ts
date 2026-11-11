@@ -4,12 +4,9 @@ import {
   type Metadata,
   type TwakeSpaceConnection
 } from '@linagora/twake-embed'
+import { getPendingReturnTo } from '@linagora/twake-oidc'
 import type { Calendar } from '@common/types/CalendarTypes'
-import {
-  EMBED_CALENDAR_PREFIX,
-  isEmbedCalendarPath,
-  showsEmbedRoute
-} from './embeddedCalendar'
+import { EMBED_CALENDAR_PREFIX, isEmbedPath } from './embeddedCalendar'
 import { connectSpaceOverlay, type SpaceOverlay } from './spaceOverlay'
 
 const TEAM_CALENDAR_ID = /^[\w-]+$/
@@ -17,14 +14,17 @@ const UPCOMING_DAYS = 7
 const DAY_MS = 24 * 60 * 60 * 1000
 
 /**
- * Whether this document is the one TwakeSpace frames: a team calendar route,
- * or the callback of the silent sign in it started. Not the new event form
- * Twake Chat frames, which speaks its own protocol (newEventEmbed.ts).
+ * Whether this document is the one TwakeSpace frames: an embed route, or the
+ * callback of the silent sign in that an embed route started (the route it
+ * returns to is saved with the sign in).
  */
 export function isFramedByTwakeSpace(
   pathname: string = window.location.pathname
 ): boolean {
-  return showsEmbedRoute(isEmbedCalendarPath, pathname)
+  if (isEmbedPath(pathname)) return true
+  if (pathname !== '/callback') return false
+  const returnTo = getPendingReturnTo()
+  return returnTo !== null && isEmbedPath(returnTo)
 }
 
 /**

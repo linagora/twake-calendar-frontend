@@ -14,17 +14,12 @@ import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
 import { TwakeBarHeader } from '@common/components/TwakeBarHeader/TwakeBarHeader'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
-import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
-import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
 import {
   EMBED_CALENDAR_ROUTE,
-  EMBED_EVENT_ROUTE,
-  EMBED_NEW_EVENT_ROUTE
+  EMBED_EVENT_ROUTE
 } from '@common/features/Embed/embeddedCalendar'
-import { EmbeddedNewEvent } from '@common/features/Embed/EmbeddedNewEvent'
-import { newEventHost } from '@common/features/Embed/newEventEmbed'
 import {
   overlayThemeOptions,
   SpaceOverlayProvider
@@ -50,45 +45,7 @@ import {
 } from '@common/theme/makeCalendarOverrides'
 import { ColorSchemeSync } from '@common/features/Settings/ColorSchemeSync'
 import paletteData from '@common/theme/palette.json'
-
-import {
-  enGB,
-  fr as frLocale,
-  es as esLocale,
-  de as deLocale,
-  it as itLocale,
-  ru as ruLocale,
-  vi as viLocale
-} from 'date-fns/locale'
-
-import I18n from 'twake-i18n'
-import en from '@common/locales/en.json'
-import fr from '@common/locales/fr.json'
-import es from '@common/locales/es.json'
-import de from '@common/locales/de.json'
-import it from '@common/locales/it.json'
-import ru from '@common/locales/ru.json'
-import vi from '@common/locales/vi.json'
-
-const locale = { en, fr, es, de, it, ru, vi }
-const dateLocales = {
-  en: enGB,
-  fr: frLocale,
-  es: esLocale,
-  de: deLocale,
-  it: itLocale,
-  ru: ruLocale,
-  vi: viLocale
-}
-
-const SUPPORTED_LANGUAGES = AVAILABLE_LANGUAGES.map(lang => lang.code)
-type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
-
-const isValidLanguage = (
-  lang: string | null | undefined
-): lang is SupportedLanguage => {
-  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage)
-}
+import { AppI18n } from './AppI18n'
 
 const reportCrash = (error: unknown, errorInfo: ErrorInfo): void => {
   Sentry.captureException(error, {
@@ -100,28 +57,9 @@ const reportCrash = (error: unknown, errorInfo: ErrorInfo): void => {
   })
 }
 
-// Logging out from another tab ended the session: start over from the login.
-// Framed by Twake Chat (/embed/newEvent), the frame cannot show the SSO: Chat
-// is told instead, and opens the form in a tab
-const startOverFromLogin = (): void => {
-  if (newEventHost) newEventHost.loginRequired()
-  else redirectTo('/')
-}
-
 export default function App(): JSX.Element {
   const error = useAppSelector(state => state.user.error)
   const appLoading = useAppSelector(state => state.loading.isLoading)
-  const userLanguage = useAppSelector(state => state.user.coreConfig.language)
-  const settingsLanguage = useAppSelector(state => state.settings.language)
-  const savedLang = localStorage.getItem('lang')
-  const defaultLang = window.LANG
-
-  const lang =
-    [userLanguage, settingsLanguage, savedLang, defaultLang].find(
-      l => !!l && isValidLanguage(l)
-    ) || 'en'
-
-  useDocumentLanguage(lang)
   usePlatformSignIn()
 
   const dispatch = useAppDispatch()
@@ -133,7 +71,8 @@ export default function App(): JSX.Element {
 
   useInitializeApp()
 
-  useEffect(() => onSessionEndedElsewhere(startOverFromLogin), [])
+  // Logging out from another tab ended the session: start over from the login
+  useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
 
   // Framed by TwakeSpace, the default theme of Twake: the dialogs and drawers
   // go onto its overlay, with the palette additions of the calendar
@@ -169,11 +108,7 @@ export default function App(): JSX.Element {
       themeOptions={themeOptions}
     >
       <ColorSchemeSync />
-      <I18n
-        dictRequire={(lang: keyof typeof locale) => locale[lang]}
-        lang={lang}
-        locales={dateLocales}
-      >
+      <AppI18n>
         {/* A crash of the bar leaves calendar without it, not without calendar */}
         <ErrorBoundary fallback={null} onError={reportCrash}>
           <TwakeBarHeader />
@@ -200,10 +135,6 @@ export default function App(): JSX.Element {
                       path={EMBED_EVENT_ROUTE}
                       element={<EmbeddedCalendar />}
                     />
-                    <Route
-                      path={EMBED_NEW_EVENT_ROUTE}
-                      element={<EmbeddedNewEvent />}
-                    />
                     <Route path="/events/:uid" element={<EventDeepLink />} />
                     <Route path="/newEvent" element={<NewEventDeepLink />} />
                     <Route path="/callback" element={<CallbackResume />} />
@@ -217,7 +148,7 @@ export default function App(): JSX.Element {
           </Suspense>
           {appLoading && <Loading />}
         </ErrorBoundary>
-      </I18n>
+      </AppI18n>
     </TwakeMuiThemeProvider>
   )
 }
