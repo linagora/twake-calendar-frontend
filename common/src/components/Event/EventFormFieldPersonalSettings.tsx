@@ -68,7 +68,8 @@ export function EventFormFieldPersonalSettings({
             action: alarm.action,
             attendees: [user],
             summary: alarm.summary,
-            description: alarm.description
+            description: alarm.description,
+            passthroughProps: alarm.passthroughProps
           })
         })
       )
