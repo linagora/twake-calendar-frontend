@@ -2,6 +2,7 @@ import type { MockedFunction } from 'vitest'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import * as calendarDetailThunks from '@common/features/Calendars/CalendarSlice'
 import * as servicesModule from '@common/features/Calendars/CalendarSlice'
+import { setKeyboardShortcuts } from '@common/features/Settings/SettingsSlice'
 import { searchPeople } from '@common/features/User/UserDao'
 import CalendarLayout from '@private/components/Calendar/CalendarLayout'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
@@ -182,6 +183,55 @@ describe('CalendarSelection', () => {
     expect(skip).toHaveAttribute('href', '#main-content')
     expect(document.getElementById('main-content')).toHaveClass('calendar')
   })
+  describe('single key shortcuts (#2048)', () => {
+    const renderCalendar = async () => {
+      const rendered = await act(async () =>
+        renderWithProviders(<CalendarLayout />, {
+          user: preloadedState.user,
+          calendars: {
+            list: {
+              'user1/cal1': preloadedState.calendars.list['user1/cal1']
+            },
+            pending: false
+          }
+        })
+      )
+      await waitFor(() => {
+        expect(window.__calendarRef.current).not.toBeNull()
+      })
+      return rendered
+    }
+
+    it('switch the view while enabled', async () => {
+      await renderCalendar()
+
+      await act(async () => {
+        fireEvent.keyDown(document.body, { key: 'm' })
+      })
+
+      await waitFor(() => {
+        expect(window.__calendarRef.current?.view.type).toBe(
+          CALENDAR_VIEWS.dayGridMonth
+        )
+      })
+    })
+
+    it('do nothing once turned off in the settings', async () => {
+      const { store } = await renderCalendar()
+      const initialView = window.__calendarRef.current?.view.type
+      act(() => {
+        store.dispatch(setKeyboardShortcuts(false))
+      })
+
+      await act(async () => {
+        fireEvent.keyDown(document.body, { key: 'm' })
+      })
+
+      expect(window.__calendarRef.current?.view.type).toBe(initialView)
+      expect(initialView).not.toBe(CALENDAR_VIEWS.dayGridMonth)
+    })
+  })
+
   it('open accordeon when clicking on button only', async () => {
     await act(async () => {
       renderWithProviders(<CalendarLayout />, preloadedState)
@@ -485,6 +535,34 @@ describe('calendar Availability search', () => {
     expect(dayNumbersWithContent.length).toBe(0)
   })
 
+  it('selects a day of the month shown in the mini calendar after "Next month" (#2047)', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true }).setSystemTime(
+      new Date(2026, 10, 11, 12)
+    )
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, {
+        user: preloadedState.user,
+        calendars: { list: {}, pending: false }
+      })
+    )
+    const calendarApi = window.__calendarRef.current
+    expect(calendarApi).not.toBeNull()
+
+    await act(async () => {
+      calendarApi?.changeView(CALENDAR_VIEWS.dayGridMonth)
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('ChevronRightIcon'))
+    })
+
+    const selectedDay = (year: number, month: number, date: number) =>
+      screen.getAllByTestId(`date-${year}-${month}-${date}`)[0]
+    await waitFor(() => {
+      expect(selectedDay(2026, 11, 1)).toHaveAttribute('aria-selected', 'true')
+    })
+    expect(selectedDay(2026, 10, 30)).toHaveAttribute('aria-selected', 'false')
+  })
+
   it('should fetch calendar details for February after navigating to month view and clicking next', async () => {
     const spy = vi
       .spyOn(calendarDetailThunks, 'getCalendarDetail')
@@ -527,39 +605,36 @@ describe('calendar Availability search', () => {
       vi.advanceTimersByTime(300)
     })
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled()
-    })
-
-    // Find the call that covers February 2025 (the navigated-to month)
-    const februaryCall = spy.mock.calls.find(call => {
-      const start = call[0].match.start as string
-      // start should be in January or February 2025 (month view includes padding days)
-      return start.startsWith('2025')
-    })
-
-    expect(februaryCall).toBeDefined()
-    const callArgs = februaryCall![0]
-    expect(callArgs.calId).toBe('user1/cal1')
-
     const parseDate = (s: string) =>
       new Date(
         s.replace(
           /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
           '$1-$2-$3T$4:$5:$6'
         )
+      ).getTime()
+    // The loads after the navigation, merged: the month view of February 2025
+    // must be covered from Feb 1 through Mar 1, whatever the number of loads
+    const coveredFebruaryUntil = () =>
+      spy.mock.calls
+        .filter(call => call[0].calId === 'user1/cal1')
+        .map(call => ({
+          start: parseDate(call[0].match.start as string),
+          end: parseDate(call[0].match.end as string)
+        }))
+        .sort((a, b) => a.start - b.start)
+        .reduce(
+          (coveredUntil, range) =>
+            range.start <= coveredUntil
+              ? Math.max(coveredUntil, range.end)
+              : coveredUntil,
+          new Date('2025-02-01').getTime()
+        )
+
+    await waitFor(() => {
+      expect(coveredFebruaryUntil()).toBeGreaterThanOrEqual(
+        new Date('2025-03-01').getTime()
       )
-
-    const startDate = parseDate(callArgs.match.start)
-    const endDate = parseDate(callArgs.match.end)
-
-    // February 2025 month view: range must cover Feb 1 through Mar 1
-    expect(startDate.getTime()).toBeLessThanOrEqual(
-      new Date('2025-02-01').getTime()
-    )
-    expect(endDate.getTime()).toBeGreaterThanOrEqual(
-      new Date('2025-03-01').getTime()
-    )
+    })
   })
 
   describe('Batch loading and prefetching', () => {

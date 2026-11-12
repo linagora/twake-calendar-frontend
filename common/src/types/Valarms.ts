@@ -30,7 +30,8 @@ export class Valarms {
             action: alarm.action,
             attendees: alarm.attendees ?? defaults.attendees,
             summary: alarm.summary ?? defaults.summary,
-            description: alarm.description ?? defaults.description
+            description: alarm.description ?? defaults.description,
+            passthroughProps: alarm.passthroughProps
           })
       )
     )
@@ -171,7 +172,8 @@ export class Valarms {
       action: alarm.action,
       attendees: remaining,
       summary: alarm.summary,
-      description: alarm.description
+      description: alarm.description,
+      passthroughProps: alarm.passthroughProps
     })
   }
 

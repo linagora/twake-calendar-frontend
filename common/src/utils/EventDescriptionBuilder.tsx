@@ -8,6 +8,7 @@ import vi from '@common/locales/vi.json'
 import { Attachment } from '@common/types/Attachment'
 import { sanitizeHtml } from './sanitizeUtils'
 import linkifyHtml from 'linkify-html'
+import { IntermediateRepresentation, Options, tokenize } from 'linkifyjs'
 import { linkifyOptions } from './urlUtils'
 
 // We use a new separator for new events, but we keep the legacy separator to be able to
@@ -81,6 +82,61 @@ function tryLinkify(html: string): string | null {
 
 function serializeAsDom(html: string): string {
   return new DOMParser().parseFromString(html, 'text/html').body.innerHTML
+}
+
+function isUnknownElement(element: Element): boolean {
+  return (
+    Object.prototype.toString.call(element) === '[object HTMLUnknownElement]'
+  )
+}
+
+/**
+ * Whether the text holds HTML markup: at least one element the browser knows,
+ * e.g. the `<b>` or `<br>` of a description written by Google Calendar. A
+ * text typed in a plain-text field, like `Send it to <name> & co`, only yields
+ * unknown elements, if any.
+ */
+function holdsHtmlMarkup(text: string): boolean {
+  if (!text.includes('<')) return false
+  const doc = new DOMParser().parseFromString(text, 'text/html')
+  return Array.from(doc.querySelectorAll('head *, body *')).some(
+    element => !isUnknownElement(element)
+  )
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function escapeAttribute(value: string): string {
+  return escapeHtml(value).replace(/"/g, '&quot;')
+}
+
+function renderLink({
+  tagName,
+  attributes,
+  content
+}: IntermediateRepresentation): string {
+  const renderedAttributes = Object.entries(attributes)
+    .map(([name, value]) => ` ${name}="${escapeAttribute(String(value))}"`)
+    .join('')
+  return `<${tagName}${renderedAttributes}>${escapeHtml(content)}</${tagName}>`
+}
+
+/**
+ * linkify-html cannot be given plain text: it decodes the entities of the text
+ * without encoding "&" back, so a typed "&amp;" would be shown as "&". The
+ * text is escaped token by token instead, links rendered the same way.
+ */
+function linkifyPlainText(text: string): string {
+  const options = new Options(linkifyOptions, renderLink)
+  return tokenize(text)
+    .map(token =>
+      token.isLink && options.check(token)
+        ? (options.render(token) as string)
+        : escapeHtml(token.toString())
+    )
+    .join('')
 }
 
 export class EventDescriptionBuilder {
@@ -238,6 +294,13 @@ export class EventDescriptionBuilder {
   }
 
   /**
+   * Turns the description into HTML holding clickable links.
+   *
+   * DESCRIPTION is plain text (RFC 5545), yet some clients (e.g. Google
+   * Calendar) write HTML in it. Only a description holding HTML markup is
+   * kept as HTML: the others, like the ones typed in the event form, are
+   * escaped so that `<`, `>` and `&` are shown as typed.
+   *
    * The tokenizer bundled in linkify-html throws on some markup browsers
    * accept, e.g. an end tag carrying an attribute (`</p class="x">`). Such a
    * description is then linkified once re-serialised by the DOM, which never
@@ -245,6 +308,11 @@ export class EventDescriptionBuilder {
    */
   public linkify(): this {
     if (!this.text) return this
+
+    if (!holdsHtmlMarkup(this.text)) {
+      this.text = linkifyPlainText(this.text)
+      return this
+    }
 
     this.text =
       tryLinkify(this.text) ??
@@ -336,6 +404,7 @@ export class EventDescriptionBuilder {
   }
 
   public buildPlainText(): string {
+    if (!holdsHtmlMarkup(this.text)) return this.text
     const doc = new DOMParser().parseFromString(this.text, 'text/html')
     return doc.body.textContent || ''
   }

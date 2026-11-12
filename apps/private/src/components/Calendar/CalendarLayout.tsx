@@ -42,6 +42,9 @@ export default function CalendarLayout(): JSX.Element {
   const calendars = useAppSelector(state => state.calendars.list)
   const tempcalendars = useAppSelector(state => state.calendars.templist)
   const view = useAppSelector(state => state.settings.view)
+  const keyboardShortcuts = useAppSelector(
+    state => state.settings.keyboardShortcuts
+  )
   // The menubar search hands its text over as the keywords
   const searchQuery = useAppSelector(
     state =>
@@ -153,7 +156,7 @@ export default function CalendarLayout(): JSX.Element {
   }, [])
 
   useCalendarShortcuts({
-    enabled: view === 'calendar' && !isMobile,
+    enabled: keyboardShortcuts && view === 'calendar' && !isMobile,
     onNavigate: action =>
       navigateCalendar(calendarRef.current, action, handleDateChange),
     onViewChange: handleViewChange,

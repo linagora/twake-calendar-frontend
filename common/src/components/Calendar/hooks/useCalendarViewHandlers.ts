@@ -104,12 +104,23 @@ export const useCalendarViewHandlers = (
     ),
     handleViewDidMount: useCallback(viewHandlers.handleViewDidMount, []),
     handleViewWillUnmount: useCallback(viewHandlers.handleViewWillUnmount, []),
-    handleEventContent: useCallback(viewHandlers.handleEventContent, [
+    handleEventClass: useCallback(viewHandlers.handleEventClass, [
       props.calendars,
       props.tempcalendars
     ]),
+    handleEventContent: useCallback(viewHandlers.handleEventContent, [
+      props.calendars,
+      props.tempcalendars,
+      props.timezone,
+      props.t,
+      props.userId
+    ]),
     handleEventDidMount: useCallback(viewHandlers.handleEventDidMount, [
-      props.calendars
+      props.calendars,
+      props.tempcalendars,
+      props.timezone,
+      props.t,
+      props.userId
     ]),
     handleNowIndicatorContent: useCallback(
       viewHandlers.handleNowIndicatorContent,
