@@ -5,7 +5,6 @@ import type { IntentService } from 'cozy-interapp'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useI18n } from 'twake-i18n'
-import { checkFrameAncestors, readAncestorOrigins } from './frameAncestors'
 import { hasLoginRequired, subscribeLoginRequired } from './loginRequired'
 import { isNewEventIntent, parseNewEventData } from './newEventIntent'
 import { NewEventIntentPage } from './NewEventIntentPage'
@@ -21,7 +20,6 @@ export type IntentMessage =
   | 'sessionExpired'
   | 'unsupported'
   | 'invalidData'
-  | 'untrustedFrame'
 
 /**
  * Why the intent cannot be served, as the whole page of the frame: the app
@@ -54,25 +52,16 @@ export function IntentMessageScreen({
   )
 }
 
-/** Cancels the intent; called again, it is ignored */
-function cancelIntent(service: IntentService): void {
-  try {
-    service.cancel()
-  } catch {
-    // Already answered
-  }
-}
-
 interface RejectedIntentProps {
   service: IntentService
-  message: Exclude<IntentMessage, IntentServiceError>
-  /** What the client gets; null: the intent is cancelled */
-  error: string | null
+  message: IntentMessage
+  /** What the client gets */
+  error: string
 }
 
 /**
- * Tells the client the intent fails or is cancelled, and the user why. In an
- * Effect, as it talks to the page around; the ref keeps it to once.
+ * Tells the client the intent fails, and the user why. In an Effect, as it
+ * talks to the page around; the ref keeps it to once.
  */
 function RejectedIntent({
   service,
@@ -84,8 +73,7 @@ function RejectedIntent({
   useEffect(() => {
     if (answeredRef.current) return
     answeredRef.current = true
-    if (error === null) cancelIntent(service)
-    else failIntent(service, new Error(error))
+    failIntent(service, new Error(error))
   }, [service, error])
 
   return <IntentMessageScreen message={message} />
@@ -113,15 +101,9 @@ function rejectionOf(
   service: IntentService,
   hasSessionEnded: boolean
 ): Omit<RejectedIntentProps, 'service'> | null {
-  const { action, type, frameAncestors } = service.getIntent().attributes
+  const { action, type } = service.getIntent().attributes
   if (hasSessionEnded) {
     return { message: 'sessionExpired', error: 'The session has ended' }
-  }
-  // The client answered the handshake: is the page framed by it only?
-  if (
-    checkFrameAncestors(frameAncestors, readAncestorOrigins()) === 'untrusted'
-  ) {
-    return { message: 'untrustedFrame', error: null }
   }
   if (!isNewEventIntent(action, type)) {
     return {

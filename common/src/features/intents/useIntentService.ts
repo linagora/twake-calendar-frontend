@@ -13,9 +13,16 @@ import { useEffect, useRef, useState } from 'react'
  *   refused the token
  * - `forbidden`: the stack does not let Calendar read the intent (its
  *   manifest or the token exchange are not set up)
+ * - `untrustedFrame`: a page the intent does not allow frames the client
+ *   app, or the stack does not say who may frame it: cozy-interapp told the
+ *   client the intent is cancelled
  * - `failed`: the stack or the client did not answer
  */
-export type IntentServiceError = 'unavailable' | 'forbidden' | 'failed'
+export type IntentServiceError =
+  | 'unavailable'
+  | 'forbidden'
+  | 'untrustedFrame'
+  | 'failed'
 
 /**
  * How long the client has to answer the `ready` message: an origin that is
@@ -74,6 +81,20 @@ function failLateClient(pending: Promise<IntentService>): void {
   )
 }
 
+// What cozy-interapp rejects with when the frame is not allowed
+// (createService with requireFrameAncestors): its only sign of that refusal
+const UNTRUSTED_FRAME_MESSAGE =
+  'Intent service is framed by a page the intent does not allow'
+
+function errorOf(error: unknown): IntentServiceError {
+  if (error instanceof Error && error.message === UNTRUSTED_FRAME_MESSAGE) {
+    return 'untrustedFrame'
+  }
+  return error instanceof SdkError && error.status === 403
+    ? 'forbidden'
+    : 'failed'
+}
+
 /** Reads the intent with the token of the stack, then waits for the client */
 async function startService(
   intentId: string,
@@ -81,17 +102,19 @@ async function startService(
 ): Promise<IntentServiceState> {
   const intents = new Intents({ fetch: makeIntentFetch(sdk) })
   try {
-    // The id given: cozy-interapp would read the first parameter only
-    const pending = intents.createService(intentId, window)
+    // The id given: cozy-interapp would read the first parameter only. Only
+    // the origins the stack allows may frame the page (they include the
+    // client): cozy-interapp checks them before the handshake
+    const pending = intents.createService(intentId, window, {
+      requireFrameAncestors: true
+    })
     const service = await withTimeout(pending, CLIENT_ANSWER_TIMEOUT_MS)
     if (service !== null) return { status: 'ready', service }
     failLateClient(pending)
     return failed('failed')
   } catch (error: unknown) {
     console.error('[intents] Cannot start the service', error)
-    return failed(
-      error instanceof SdkError && error.status === 403 ? 'forbidden' : 'failed'
-    )
+    return failed(errorOf(error))
   }
 }
 

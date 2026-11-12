@@ -9,8 +9,8 @@ declare module 'cozy-interapp' {
       /** Origin of the app that started the intent */
       client: string
       /**
-       * The origins that may frame a service of the intent (newer
-       * cozy-stack only, linagora/cozy-stack#4978)
+       * The origins that may frame a service of the intent
+       * (linagora/cozy-stack#4978)
        */
       frameAncestors?: unknown
     }
@@ -43,11 +43,15 @@ declare module 'cozy-interapp' {
     ): unknown
     /**
      * Reads the intent (`GET /intents/:id`), then waits for the data of the
-     * client (its answer to the `ready` message)
+     * client (its answer to the `ready` message). With
+     * `requireFrameAncestors`, a page framed by an origin the intent does not
+     * allow (`frameAncestors`, or none given) cancels the intent and rejects
+     * with `Intent service is framed by a page the intent does not allow`
      */
     createService(
       intentId: string,
-      serviceWindow: Window
+      serviceWindow: Window,
+      options?: { requireFrameAncestors?: boolean }
     ): Promise<IntentService>
   }
 }
