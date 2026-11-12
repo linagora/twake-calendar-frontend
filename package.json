@@ -40,7 +40,7 @@
     "react-error-boundary": "^6.1.6",
     "react-redux": "^9.3.1",
     "react-router": "^8.5.1",
-    "react-virtuoso": "^4.18.20",
+    "react-virtuoso": "^4.18.21",
     "redux-first-history": "^5.2.0",
     "temporal-polyfill": "^1.0.6",
     "twake-i18n": "^0.7.1"
@@ -100,7 +100,7 @@
     "jsdom": "^31.0.0",
     "preact": "^11.2.0",
     "rslint-config-cozy-app": "^0.2.0",
-    "rstack": "0.8.6",
+    "rstack": "0.9.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   },
