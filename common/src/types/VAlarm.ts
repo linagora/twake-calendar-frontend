@@ -1,6 +1,7 @@
 import {
   VCalComponent,
-  VObjectProperty
+  VObjectProperty,
+  VObjectValue
 } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { normalizeAlarmTrigger } from '@common/utils/normalizeAlarmTrigger'
@@ -8,9 +9,16 @@ import { normalizeAlarmTrigger } from '@common/utils/normalizeAlarmTrigger'
 export const DEFAULT_ALARM_DESCRIPTION =
   'This is an automatic alarm sent by Twake Calendar'
 
+export type AlarmTriggerParams = Record<string, VObjectValue | VObjectValue[]>
+
 export interface AlarmData {
   uid?: string
   trigger: string
+  // Value type of TRIGGER as read: 'date-time' for an absolute trigger
+  // (RFC 5545 §3.8.6.3), 'duration' (the default) for a relative one
+  triggerType?: string
+  // Parameters of TRIGGER as read, e.g. RELATED=END (RFC 5545 §3.2.14)
+  triggerParams?: AlarmTriggerParams
   action: string
   attendees?: userAttendee[]
   summary?: string
@@ -23,6 +31,8 @@ export interface AlarmData {
 export class VAlarm implements AlarmData {
   uid?: string
   trigger: string
+  triggerType?: string
+  triggerParams?: AlarmTriggerParams
   action: string
   attendees?: userAttendee[]
   summary?: string
@@ -32,6 +42,8 @@ export class VAlarm implements AlarmData {
   constructor({
     uid,
     trigger,
+    triggerType,
+    triggerParams,
     action,
     attendees,
     summary,
@@ -40,6 +52,8 @@ export class VAlarm implements AlarmData {
   }: AlarmData) {
     this.uid = uid
     this.trigger = normalizeAlarmTrigger(trigger)
+    this.triggerType = triggerType
+    this.triggerParams = triggerParams
     this.action = action
     this.attendees = attendees
     this.summary = summary
@@ -67,6 +81,8 @@ export class VAlarm implements AlarmData {
       return new VAlarm({
         uid: obj.uid,
         trigger: obj.trigger ?? '',
+        triggerType: obj.triggerType,
+        triggerParams: obj.triggerParams,
         action: obj.action ?? '',
         attendees,
         summary: obj.summary,
@@ -79,7 +95,12 @@ export class VAlarm implements AlarmData {
 
   asJcal(): VCalComponent {
     const props: VObjectProperty[] = [
-      ['trigger', {}, 'duration', this.trigger],
+      [
+        'trigger',
+        { ...this.triggerParams },
+        this.triggerType ?? 'duration',
+        this.trigger
+      ],
       ['action', {}, 'text', this.action]
     ]
     if (this.uid) {

@@ -127,3 +127,84 @@ describe('VALARM properties not modelled by Twake Calendar', () => {
     ])
   })
 })
+
+describe('VALARM TRIGGER value type and parameters', () => {
+  it('writes an absolute alarm trigger back as a DATE-TIME', () => {
+    const event = parseFetchedEvent(
+      base,
+      ics(
+        'BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER;VALUE=DATE-TIME:20250317T080000Z\r\nEND:VALARM'
+      ),
+      true
+    )
+
+    const trigger = writtenAlarm(event).getFirstProperty('trigger')!
+
+    expect(trigger.type).toBe('date-time')
+    expect(trigger.getFirstValue()?.toString()).toBe('2025-03-17T08:00:00Z')
+  })
+
+  it('keeps RELATED=END of a trigger relative to the end', () => {
+    const event = parseFetchedEvent(
+      base,
+      ics(
+        'BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER;RELATED=END:-PT5M\r\nEND:VALARM'
+      ),
+      true
+    )
+
+    const trigger = writtenAlarm(event).getFirstProperty('trigger')!
+
+    expect(trigger.type).toBe('duration')
+    expect(trigger.getParameter('related')).toBe('END')
+    expect(trigger.getFirstValue()?.toString()).toBe('-PT5M')
+  })
+
+  it('keeps them when the alarm is rebuilt with form defaults', () => {
+    const alarm = new VAlarm({
+      trigger: '2025-03-17T08:00:00Z',
+      triggerType: 'date-time',
+      action: 'DISPLAY'
+    })
+
+    const rebuilt = Valarms.fromFormValues(Valarms.fromList([alarm]), {
+      summary: 'Project review'
+    }).getAlarm(0)!
+
+    expect(rebuilt.asJcal()[1]).toContainEqual([
+      'trigger',
+      {},
+      'date-time',
+      '2025-03-17T08:00:00Z'
+    ])
+  })
+
+  it('survives a JSON round trip (session storage)', () => {
+    const alarm = new VAlarm({
+      trigger: '-PT5M',
+      triggerType: 'duration',
+      triggerParams: { related: 'END' },
+      action: 'DISPLAY'
+    })
+
+    const restored = VAlarm.fromJSON(JSON.parse(JSON.stringify(alarm)))
+
+    expect(restored.asJcal()[1]).toContainEqual([
+      'trigger',
+      { related: 'END' },
+      'duration',
+      '-PT5M'
+    ])
+  })
+
+  it('writes a plain duration for an alarm created in the form', () => {
+    const alarm = new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })
+
+    expect(alarm.asJcal()[1]).toContainEqual([
+      'trigger',
+      {},
+      'duration',
+      '-PT15M'
+    ])
+  })
+})

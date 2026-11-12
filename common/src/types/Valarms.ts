@@ -27,6 +27,8 @@ export class Valarms {
           new VAlarm({
             uid: alarm.uid,
             trigger: alarm.trigger,
+            triggerType: alarm.triggerType,
+            triggerParams: alarm.triggerParams,
             action: alarm.action,
             attendees: alarm.attendees ?? defaults.attendees,
             summary: alarm.summary ?? defaults.summary,
@@ -169,6 +171,8 @@ export class Valarms {
     return new VAlarm({
       uid: alarm.uid,
       trigger: alarm.trigger,
+      triggerType: alarm.triggerType,
+      triggerParams: alarm.triggerParams,
       action: alarm.action,
       attendees: remaining,
       summary: alarm.summary,
