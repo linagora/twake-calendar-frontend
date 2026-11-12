@@ -16,6 +16,8 @@ export const AttachementChip: React.FC<{
   const isDirectory = !attachment.fmttype && !hasExtension
 
   const safeHref = React.useMemo(() => {
+    // An inline attachment value is base64 content, not a link
+    if (attachment.isInline()) return undefined
     try {
       const url = new URL(attachment.uri, window.location.origin)
       return ['http:', 'https:'].includes(url.protocol)
@@ -24,7 +26,7 @@ export const AttachementChip: React.FC<{
     } catch {
       return undefined
     }
-  }, [attachment.uri])
+  }, [attachment])
 
   const openFile = (): void => {
     if (!safeHref) return

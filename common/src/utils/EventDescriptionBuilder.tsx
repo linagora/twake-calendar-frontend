@@ -331,7 +331,10 @@ export class EventDescriptionBuilder {
     meetingLink: string | null,
     t?: (key: string) => string
   ): this {
-    const hasAttachments = this.attachments?.length > 0
+    const hasAttachments = this.attachments?.some(
+      attachment =>
+        !attachment.isInline() || attachment.hasDisplayableFilename()
+    )
     if (!meetingLink && !hasAttachments) {
       return this
     }
@@ -371,13 +374,22 @@ export class EventDescriptionBuilder {
   }
 
   private buildAttachmentsText(attachmentsText: string): string {
-    let content = `\n${attachmentsText} :\n`
-    this.attachments.forEach(attachment => {
-      content += attachment.hasDisplayableFilename()
-        ? `• ${neutralizeSeparators(String(attachment.x_filename))}: ${neutralizeSeparatorsInUrl(attachment.uri)}\n`
-        : `• ${neutralizeSeparatorsInUrl(attachment.uri)}\n`
-    })
-    return content
+    const lines = this.attachments.map(attachment =>
+      this.attachmentLine(attachment)
+    )
+    return `\n${attachmentsText} :\n${lines.join('')}`
+  }
+
+  // An inline attachment holds the file content, not a link: only its name is listed
+  private attachmentLine(attachment: Attachment): string {
+    const name = attachment.hasDisplayableFilename()
+      ? neutralizeSeparators(String(attachment.x_filename))
+      : undefined
+    if (attachment.isInline()) {
+      return name ? `• ${name}\n` : ''
+    }
+    const uri = neutralizeSeparatorsInUrl(attachment.uri)
+    return name ? `• ${name}: ${uri}\n` : `• ${uri}\n`
   }
 
   /**
