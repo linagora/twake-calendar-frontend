@@ -20,7 +20,11 @@ export const getEventThunk = (create: ReducerCreators<CalendarState>) =>
     async (event, { rejectWithValue }) => {
       try {
         const response = await fetchEvent(event)
-        const fetchedEvent = parseFetchedEvent(event, response)
+        // The first VEVENT may be an overridden occurrence - one a guest
+        // answered alone, for instance - which carries no RRULE, and whose
+        // uid names that occurrence rather than the series: the rule shared
+        // by the occurrences is the one of the master (#2044)
+        const fetchedEvent = parseFetchedEvent(event, response, true)
 
         return {
           calId: event.calId,
