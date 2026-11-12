@@ -244,10 +244,22 @@ const renderMonthGrid = (
   )
 }
 
-/** All calendar days spanned by a period, for the agenda layout. */
+/**
+ * All calendar days spanned by a period, for the agenda layout. Steps from
+ * one local midnight to the next, the way the day cells are bounded: a day
+ * count from `diff` drops the hour lost by a spring clock change when the
+ * two ends of the period sit at different offsets.
+ */
 const scheduleDays = (period: PrintPeriod): Dayjs[] => {
-  const count = period.end.diff(period.start, 'day')
-  return Array.from({ length: count }, (_, i) => period.start.add(i, 'day'))
+  const days: Dayjs[] = []
+  for (
+    let day = period.start.startOf('day');
+    day.isBefore(period.end);
+    day = day.add(1, 'day').startOf('day')
+  ) {
+    days.push(day)
+  }
+  return days
 }
 
 const scheduleTime = (event: PrintEvent, allDayLabel: string): string =>
