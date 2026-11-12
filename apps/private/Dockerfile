@@ -16,14 +16,7 @@ RUN find /usr/share/nginx/html -type f ! -name '.env.js' ! -name 'version.js' ! 
 # Record the exposed port
 EXPOSE 80
 
-CMD sh -c 'if [ -f /usr/share/nginx/html/.env.js ] && grep -q -E "DEBUG\s*=\s*true" /usr/share/nginx/html/.env.js; then \
-             echo "map \$uri \$static_cache_control { default \"no-cache\"; }" > /etc/nginx/conf.d/cache_env.conf; \
-             echo "map \$uri \$html_cache_control { default \"no-cache\"; }" >> /etc/nginx/conf.d/cache_env.conf; \
-             echo "Debug mode detected. Disabling Nginx browser cache."; \
-           else \
-             echo "map \$uri \$static_cache_control { default \"public, max-age=31536000, immutable\"; }" > /etc/nginx/conf.d/cache_env.conf; \
-             echo "map \$uri \$html_cache_control { default \"no-store, no-cache, must-revalidate, proxy-revalidate\"; }" >> /etc/nginx/conf.d/cache_env.conf; \
-             echo "Production mode detected. Enabling Nginx browser cache."; \
-           fi && \
-           echo "map \$uri \$frame_ancestors_csp { default \"frame-ancestors ${FRAME_ANCESTORS:-'\''self'\''}\"; }" >> /etc/nginx/conf.d/cache_env.conf && \
-           nginx -g "daemon off;"'
+COPY nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
+RUN chmod +x /usr/local/bin/nginx-entrypoint.sh
+
+CMD ["/usr/local/bin/nginx-entrypoint.sh"]
