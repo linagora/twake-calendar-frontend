@@ -31,7 +31,6 @@ const KNOWN_PROPS = new Set([
   'dtend',
   'class',
   'x-openpaas-videoconference',
-  'x-openpaas-booking-link',
   'summary',
   'description',
   'location',
