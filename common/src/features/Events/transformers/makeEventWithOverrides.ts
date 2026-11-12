@@ -124,15 +124,23 @@ function findOverrideIndex(
     return exactIndexes[0]
   }
   if (exactIndexes.length > 1) {
+    // The TZID of the RECURRENCE-ID the event was read from tells the
+    // candidates apart, whatever zone the event is now written in. See #2067.
+    const sameTzid = exactIndexes.filter(
+      index =>
+        updatedEvent.recurrenceTzid !== undefined &&
+        getTzidParam(storedIds[index]?.[1]) === updatedEvent.recurrenceTzid
+    )
+    const candidates = sameTzid.length ? sameTzid : exactIndexes
     // A TZID the fallback zone only reads matches any wall clock: prefer the
     // candidates with a definite instant. See #2034.
     const inEventZone = isSameInstant(updatedEvent.timezone)
     const index = preferCertain(
-      exactIndexes,
+      candidates,
       index => inEventZone(storedIds[index]),
       index => isCertain(storedIds[index])
     )
-    return index ?? exactIndexes[0]
+    return index ?? candidates[0]
   }
   // A stored value without TZID is read in the zone of the series (#1938)
   const inSeriesZone = isSameInstant(

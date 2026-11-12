@@ -584,10 +584,11 @@ describe('makeEventWithOverrides — overrides sharing a wall-clock RECURRENCE-I
     ],
     []
   ]
-  // The Paris override, its TZID dropped by parseFetchedEvent
+  // The Paris override as parseFetchedEvent reads it: the TZID is kept apart
   const edited = {
     uid: 'series-1/2025-03-25T14:00:00',
     recurrenceId: '2025-03-25T14:00:00',
+    recurrenceTzid: 'Europe/Paris',
     timezone: 'Europe/Paris',
     start: '2025-03-25T13:30:00.000Z',
     end: '2025-03-25T14:30:00.000Z',
@@ -612,6 +613,83 @@ describe('makeEventWithOverrides — overrides sharing a wall-clock RECURRENCE-I
       )
       expect(prop(parisOut as VCalComponent, 'summary')?.[3]).toBe(
         'Afternoon shift, edited'
+      )
+    }
+  )
+
+  it.each([
+    ['Dhaka', [master, dhaka, paris]],
+    ['Paris', [master, paris, dhaka]]
+  ])(
+    'replaces the Paris override after its zone is changed in the form (%s stored first) (#2067)',
+    (_, stored) => {
+      const overrides = listOverrides(
+        makeEventWithOverrides(
+          { ...edited, timezone: 'America/New_York' },
+          structuredClone(stored)
+        )
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(dhaka)
+      const parisOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Europe/Paris'
+      )
+      expect(prop(parisOut as VCalComponent, 'summary')?.[3]).toBe(
+        'Afternoon shift, edited'
+      )
+    }
+  )
+
+  it.each([
+    ['Dhaka', [master, dhaka, paris]],
+    ['Paris', [master, paris, dhaka]]
+  ])(
+    'replaces the Paris override written in a zone moment does not know (%s stored first) (#2067)',
+    (_, stored) => {
+      const overrides = listOverrides(
+        makeEventWithOverrides(
+          { ...edited, timezone: 'Custom/Unknown' },
+          structuredClone(stored)
+        )
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(dhaka)
+      const parisOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Europe/Paris'
+      )
+      expect(prop(parisOut as VCalComponent, 'summary')?.[3]).toBe(
+        'Afternoon shift, edited'
+      )
+    }
+  )
+
+  it.each([
+    ['Dhaka', [master, dhaka, paris]],
+    ['Paris', [master, paris, dhaka]]
+  ])(
+    'replaces the Dhaka override moved to another zone (%s stored first) (#2067)',
+    (_, stored) => {
+      const overrides = listOverrides(
+        makeEventWithOverrides(
+          {
+            ...edited,
+            recurrenceTzid: 'Asia/Dhaka',
+            timezone: 'Europe/Paris',
+            title: 'Morning shift, edited'
+          },
+          structuredClone(stored)
+        )
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(paris)
+      const dhakaOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Asia/Dhaka'
+      )
+      expect(prop(dhakaOut as VCalComponent, 'summary')?.[3]).toBe(
+        'Morning shift, edited'
       )
     }
   )
