@@ -19,10 +19,7 @@ import { useEffect, useRef, useState } from 'react'
  * - `failed`: the stack or the client did not answer
  */
 export type IntentServiceError =
-  | 'unavailable'
-  | 'forbidden'
-  | 'untrustedFrame'
-  | 'failed'
+  'unavailable' | 'forbidden' | 'untrustedFrame' | 'failed'
 
 /**
  * How long the client has to answer the `ready` message: an origin that is

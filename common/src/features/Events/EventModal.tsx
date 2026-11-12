@@ -124,10 +124,7 @@ const EventPopover: React.FC<{
     userPersonalCalendars
   })
 
-  const { submitOnce, saving } = useSubmitOnce(
-    handleSubmit,
-    onSavingChange
-  )
+  const { submitOnce, saving } = useSubmitOnce(handleSubmit, onSavingChange)
 
   const performClose = useCallback(() => {
     clearEventFormTempData('create')

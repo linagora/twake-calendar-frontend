@@ -19,10 +19,7 @@ import {
 
 /** What the page says when it cannot serve the intent */
 export type IntentMessage =
-  | IntentServiceError
-  | 'sessionExpired'
-  | 'unsupported'
-  | 'invalidData'
+  IntentServiceError | 'sessionExpired' | 'unsupported' | 'invalidData'
 
 /**
  * Why the intent cannot be served, as the whole page of the frame: the app
