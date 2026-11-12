@@ -64,6 +64,9 @@ export function makeVevent(
       ...dateValue(event, event.recurrenceId, tzid)
     ])
   }
+  if (event.status) {
+    vevent[1].push(['status', {}, 'text', event.status])
+  }
   if (event.description) {
     vevent[1].push(['description', {}, 'text', event.description])
   }
