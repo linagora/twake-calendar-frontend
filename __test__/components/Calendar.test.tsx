@@ -2,6 +2,7 @@ import type { MockedFunction } from 'vitest'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import * as calendarDetailThunks from '@common/features/Calendars/CalendarSlice'
 import * as servicesModule from '@common/features/Calendars/CalendarSlice'
+import { setKeyboardShortcuts } from '@common/features/Settings/SettingsSlice'
 import { searchPeople } from '@common/features/User/UserDao'
 import CalendarLayout from '@private/components/Calendar/CalendarLayout'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
@@ -182,6 +183,55 @@ describe('CalendarSelection', () => {
     expect(skip).toHaveAttribute('href', '#main-content')
     expect(document.getElementById('main-content')).toHaveClass('calendar')
   })
+  describe('single key shortcuts (#2048)', () => {
+    const renderCalendar = async () => {
+      const rendered = await act(async () =>
+        renderWithProviders(<CalendarLayout />, {
+          user: preloadedState.user,
+          calendars: {
+            list: {
+              'user1/cal1': preloadedState.calendars.list['user1/cal1']
+            },
+            pending: false
+          }
+        })
+      )
+      await waitFor(() => {
+        expect(window.__calendarRef.current).not.toBeNull()
+      })
+      return rendered
+    }
+
+    it('switch the view while enabled', async () => {
+      await renderCalendar()
+
+      await act(async () => {
+        fireEvent.keyDown(document.body, { key: 'm' })
+      })
+
+      await waitFor(() => {
+        expect(window.__calendarRef.current?.view.type).toBe(
+          CALENDAR_VIEWS.dayGridMonth
+        )
+      })
+    })
+
+    it('do nothing once turned off in the settings', async () => {
+      const { store } = await renderCalendar()
+      const initialView = window.__calendarRef.current?.view.type
+      act(() => {
+        store.dispatch(setKeyboardShortcuts(false))
+      })
+
+      await act(async () => {
+        fireEvent.keyDown(document.body, { key: 'm' })
+      })
+
+      expect(window.__calendarRef.current?.view.type).toBe(initialView)
+      expect(initialView).not.toBe(CALENDAR_VIEWS.dayGridMonth)
+    })
+  })
+
   it('open accordeon when clicking on button only', async () => {
     await act(async () => {
       renderWithProviders(<CalendarLayout />, preloadedState)

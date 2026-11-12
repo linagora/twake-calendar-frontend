@@ -9,7 +9,11 @@ import { Switch } from '@common/ds/Switch/Switch'
 import { useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { updateUserConfigurations } from '@common/features/User/UserSlice'
-import { setDisplayWeekNumbers, setHideDeclinedEvents } from './SettingsSlice'
+import {
+  setDisplayWeekNumbers,
+  setHideDeclinedEvents,
+  setKeyboardShortcuts
+} from './SettingsSlice'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 interface CalendarEventsSettingsProps {
@@ -33,6 +37,10 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
   )
   const displayWeekNumbers = useAppSelector(
     state => state.settings?.displayWeekNumbers
+  )
+
+  const keyboardShortcuts = useAppSelector(
+    state => state.settings?.keyboardShortcuts
   )
 
   const latestHideDeclinedEventsRef = useRef<boolean | undefined>(undefined)
@@ -102,6 +110,27 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
             marginLeft: 0
           }}
         />
+        {/* The shortcuts only exist on desktop */}
+        {!isMobile && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={Boolean(keyboardShortcuts)}
+                onChange={() =>
+                  dispatch(setKeyboardShortcuts(!keyboardShortcuts))
+                }
+                aria-label={t('settings.keyboardShortcuts')}
+              />
+            }
+            label={t('settings.keyboardShortcuts')}
+            labelPlacement="start"
+            sx={{
+              minWidth: 400,
+              justifyContent: 'space-between',
+              marginLeft: 0
+            }}
+          />
+        )}
       </FormControl>
     </Box>
   )

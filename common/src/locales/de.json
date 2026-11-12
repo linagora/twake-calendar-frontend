@@ -409,6 +409,7 @@
     "notifications.emailDesc": "Für Termine, bei denen im Feld „Benachrichtigung“ eine Erinnerung eingestellt ist.",
     "alarmEmailsUpdateError": "Die Einstellung für E-Mail-Benachrichtigungen konnte nicht aktualisiert werden",
     "displayWeekNumbers": "Kalenderwoche anzeigen",
+    "keyboardShortcuts": "Tastenkombinationen aktivieren",
     "displayWeekNumbersUpdateError": "Die Anzeige der Kalenderwoche konnte nicht aktualisiert werden",
     "sync.empty": "Synchronisierungseinstellungen sind bald verfügbar",
     "calAndEvent": "Kalender und Termine",
