@@ -219,5 +219,53 @@ describe('Valarms', () => {
 
       expect(result.getAlarms()).toHaveLength(2)
     })
+
+    it('keeps apart alarms without UID sharing a trigger but not its parameters', () => {
+      const currentUser = createAttendee('current@example.com')
+      const relatedToEnd = new VAlarm({
+        trigger: '-PT5M',
+        triggerType: 'duration',
+        triggerParams: { related: 'END' },
+        action: 'EMAIL',
+        attendees: [currentUser]
+      })
+      const relatedToStart = new VAlarm({
+        trigger: '-PT5M',
+        triggerType: 'duration',
+        action: 'EMAIL',
+        attendees: [currentUser]
+      })
+      const originalAlarms = new Valarms([relatedToStart, relatedToEnd])
+
+      const result = originalAlarms.mergeForPersonalSettingsUpdate(
+        new Valarms([relatedToStart, relatedToEnd]),
+        currentUser
+      )
+
+      expect(result.getAlarms()).toEqual([relatedToStart, relatedToEnd])
+    })
+
+    it('drops only the deselected alarm among alarms sharing a trigger value', () => {
+      const currentUser = createAttendee('current@example.com')
+      const relatedToEnd = new VAlarm({
+        trigger: '-PT5M',
+        triggerParams: { RELATED: 'END' },
+        action: 'EMAIL',
+        attendees: [currentUser]
+      })
+      const relatedToStart = new VAlarm({
+        trigger: '-PT5M',
+        action: 'EMAIL',
+        attendees: [currentUser]
+      })
+      const originalAlarms = new Valarms([relatedToStart, relatedToEnd])
+
+      const result = originalAlarms.mergeForPersonalSettingsUpdate(
+        new Valarms([relatedToEnd]),
+        currentUser
+      )
+
+      expect(result.getAlarms()).toEqual([relatedToEnd])
+    })
   })
 })

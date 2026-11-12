@@ -93,6 +93,31 @@ export class VAlarm implements AlarmData {
     return new VAlarm({ trigger: '', action: '' })
   }
 
+  /**
+   * Whether both alarms fire at the same moment: same TRIGGER value, value
+   * type and parameters (a -PT5M relative to the end is not a -PT5M
+   * relative to the start).
+   */
+  hasSameTrigger(other: VAlarm): boolean {
+    return (
+      this.trigger === other.trigger &&
+      this.normalizedTriggerType() === other.normalizedTriggerType() &&
+      this.normalizedTriggerParams() === other.normalizedTriggerParams()
+    )
+  }
+
+  private normalizedTriggerType(): string {
+    return (this.triggerType ?? 'duration').toLowerCase()
+  }
+
+  private normalizedTriggerParams(): string {
+    return JSON.stringify(
+      Object.entries(this.triggerParams ?? {})
+        .map(([key, value]): [string, unknown] => [key.toLowerCase(), value])
+        .sort(([a], [b]) => a.localeCompare(b))
+    )
+  }
+
   asJcal(): VCalComponent {
     const props: VObjectProperty[] = [
       [

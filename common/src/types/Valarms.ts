@@ -223,7 +223,7 @@ export class Valarms {
     return formAlarms.getAlarms().map(formAlarm => {
       const originalAlarm = formAlarm.uid
         ? this._alarms.find(a => a.uid === formAlarm.uid)
-        : this._alarms.find(a => !a.uid && a.trigger === formAlarm.trigger)
+        : this._alarms.find(a => !a.uid && a.hasSameTrigger(formAlarm))
       return originalAlarm ?? formAlarm
     })
   }
@@ -240,7 +240,7 @@ export class Valarms {
         : formAlarms
             .getAlarms()
             .some(
-              formAlarm => !formAlarm.uid && formAlarm.trigger === alarm.trigger
+              formAlarm => !formAlarm.uid && formAlarm.hasSameTrigger(alarm)
             )
       if (isSelected) continue
 
