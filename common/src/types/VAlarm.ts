@@ -15,6 +15,9 @@ export interface AlarmData {
   attendees?: userAttendee[]
   summary?: string
   description?: string
+  // Properties not modelled here (REPEAT, DURATION, ATTACH, X-...), written
+  // back as read so that saving the event does not degrade the alarm
+  passthroughProps?: VObjectProperty[]
 }
 
 export class VAlarm implements AlarmData {
@@ -24,6 +27,7 @@ export class VAlarm implements AlarmData {
   attendees?: userAttendee[]
   summary?: string
   description?: string
+  passthroughProps?: VObjectProperty[]
 
   constructor({
     uid,
@@ -31,7 +35,8 @@ export class VAlarm implements AlarmData {
     action,
     attendees,
     summary,
-    description
+    description,
+    passthroughProps
   }: AlarmData) {
     this.uid = uid
     this.trigger = normalizeAlarmTrigger(trigger)
@@ -39,6 +44,7 @@ export class VAlarm implements AlarmData {
     this.attendees = attendees
     this.summary = summary
     this.description = description ?? DEFAULT_ALARM_DESCRIPTION
+    this.passthroughProps = passthroughProps
   }
 
   static fromJSON(json: unknown): VAlarm {
@@ -64,7 +70,8 @@ export class VAlarm implements AlarmData {
         action: obj.action ?? '',
         attendees,
         summary: obj.summary,
-        description: obj.description
+        description: obj.description,
+        passthroughProps: obj.passthroughProps
       })
     }
     return new VAlarm({ trigger: '', action: '' })
@@ -89,6 +96,15 @@ export class VAlarm implements AlarmData {
     if (this.description) {
       props.push(['description', {}, 'text', this.description])
     }
-    return ['valarm', props, []]
+    return ['valarm', [...props, ...this.unwrittenPassthroughProps(props)], []]
+  }
+
+  private unwrittenPassthroughProps(
+    written: VObjectProperty[]
+  ): VObjectProperty[] {
+    const writtenKeys = new Set(written.map(([key]) => key.toLowerCase()))
+    return (this.passthroughProps ?? []).filter(
+      ([key]) => !writtenKeys.has(key.toLowerCase())
+    )
   }
 }

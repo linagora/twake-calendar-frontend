@@ -329,6 +329,19 @@ function parseAlarmAttendees(
   return attendees
 }
 
+const KNOWN_ALARM_PROPS = new Set([
+  ...Object.keys(ALARM_PROPERTY_HANDLERS),
+  'attendee'
+])
+
+function parseAlarmPassthroughProps(
+  valarmProps: [string, unknown, unknown, unknown][]
+): VObjectProperty[] {
+  return valarmProps.filter(
+    ([key]) => !KNOWN_ALARM_PROPS.has(key.toLowerCase())
+  ) as VObjectProperty[]
+}
+
 // RFC 5545 §3.6.6: ACTION and TRIGGER are both required in a VALARM.
 // An alarm missing either one cannot be rebuilt, so it is ignored.
 function isCompleteAlarm(alarm: Partial<AlarmData>): alarm is AlarmData {
@@ -348,6 +361,9 @@ function parseSingleAlarm(
 
   const attendees = parseAlarmAttendees(valarmProps)
   if (attendees.length > 0) alarm.attendees = attendees
+
+  const passthroughProps = parseAlarmPassthroughProps(valarmProps)
+  if (passthroughProps.length > 0) alarm.passthroughProps = passthroughProps
 
   return isCompleteAlarm(alarm) ? new VAlarm(alarm) : undefined
 }
