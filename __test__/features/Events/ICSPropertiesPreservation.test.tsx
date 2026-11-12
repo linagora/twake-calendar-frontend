@@ -168,6 +168,46 @@ describe('parseCalendarEvent — passthroughProps', () => {
   })
 })
 
+describe('parseCalendarEvent — CLASS', () => {
+  const parseClass = (value: string): CalendarEvent['class'] =>
+    parseCalendarEvent({
+      data: baseVeventProps([['class', {}, 'text', value]]),
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    }).class
+
+  it.each(['PUBLIC', 'PRIVATE', 'CONFIDENTIAL'])('keeps %s', value => {
+    expect(parseClass(value)).toBe(value)
+  })
+
+  it('normalizes the case of a known value', () => {
+    expect(parseClass('confidential')).toBe('CONFIDENTIAL')
+  })
+
+  it.each(['X-SECRET', 'SOME-IANA-TOKEN'])(
+    'treats the unrecognized value %s as PRIVATE (RFC 5545 3.8.1.3)',
+    value => {
+      expect(parseClass(value)).toBe('PRIVATE')
+    }
+  )
+
+  it('never writes an unrecognized CLASS back as PUBLIC', () => {
+    const event = parseCalendarEvent({
+      data: baseVeventProps([['class', {}, 'text', 'X-SECRET']]),
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
+    const [, props] = makeVevent(event, 'Europe/Paris', undefined)
+    const classProps = (props as VObjectProperty[]).filter(
+      ([k]) => k === 'class'
+    )
+
+    expect(classProps).toEqual([['class', {}, 'text', 'PRIVATE']])
+  })
+})
+
 describe('makeVevent — passthroughProps round-trip', () => {
   it('injects passthroughProps into the vevent output', () => {
     const event = baseCalendarEvent({ passthroughProps: CUSTOM_PROPS })
