@@ -893,3 +893,17 @@ describe('formatDateTimeToICal – UTC fallback', () => {
     ).toBe('0615-06-13T09:00:00Z')
   })
 })
+
+describe('makeVevent – STATUS', () => {
+  it.each(['CANCELLED', 'TENTATIVE', 'CONFIRMED'])(
+    'writes STATUS:%s back',
+    status => {
+      const vevent = makeVevent(baseEvent({ status }), TZID)
+      expect(getProp(vevent, 'status')).toEqual(['status', {}, 'text', status])
+    }
+  )
+
+  it('omits STATUS when the event has none', () => {
+    expect(getProp(makeVevent(baseEvent(), TZID), 'status')).toBeUndefined()
+  })
+})
