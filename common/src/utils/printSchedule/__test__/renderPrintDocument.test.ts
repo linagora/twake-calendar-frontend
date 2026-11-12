@@ -414,4 +414,40 @@ describe('renderPrintDocument', () => {
 
     expect(html).toContain('Late call')
   })
+
+  it.each([
+    ['day', '2022-03-27', '2022-03-27T09:00:00Z'],
+    ['week', '2022-03-21', '2022-03-27T09:00:00Z'],
+    ['month', '2022-03-01', '2022-03-31T09:00:00Z']
+  ] as const)(
+    'lists the last day of a %s agenda page after the clocks went forward',
+    (scale, from, start) => {
+      const tz = 'Europe/London'
+      const day = dayjs.tz(from, tz).startOf('day')
+      const html = renderPrintDocument({
+        periods: buildPrintPeriods(scale, day, day),
+        calendars: [
+          {
+            events: selectPrintEvents(
+              [
+                makeEvent({
+                  start,
+                  end: start.replace('09:', '10:'),
+                  title: 'Spring call'
+                })
+              ],
+              tz,
+              LABELS.noTitle
+            )
+          }
+        ],
+        locale: 'en',
+        layout: 'schedule',
+        labels: LABELS
+      })
+
+      expect(html).toContain('Spring call')
+      expect(html).not.toContain(LABELS.noEvents)
+    }
+  )
 })
