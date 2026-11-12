@@ -106,13 +106,13 @@ describe('Show saved event preview', () => {
     const allDay = { ...saved, start: '2026-10-26', allday: true }
     const events = [
       {
-        uid: 'event/other-calendar',
+        uid: 'event/2026-10-26',
         calId: 'other/calendar',
         start: allDay.start
       },
-      { uid: 'unrelated/first', calId: saved.calId, start: allDay.start },
-      { uid: 'event/later', calId: saved.calId, start: '2026-10-27' },
-      { uid: 'event/first', calId: saved.calId, start: allDay.start }
+      { uid: 'unrelated/2026-10-26', calId: saved.calId, start: allDay.start },
+      { uid: 'event/2026-10-27', calId: saved.calId, start: '2026-10-27' },
+      { uid: 'event/2026-10-26', calId: saved.calId, start: allDay.start }
     ].map(({ uid, calId, start }) => ({
       id: uid,
       extendedProps: { uid, calId },
@@ -124,7 +124,7 @@ describe('Show saved event preview', () => {
       events
     )
     await act(async () => open(allDay))
-    expect(onOpen).toHaveBeenCalledWith('event/first', saved.calId, null)
+    expect(onOpen).toHaveBeenCalledWith('event/2026-10-26', saved.calId, null)
   })
 
   it.each([
@@ -186,10 +186,10 @@ describe('Show saved event preview', () => {
     const root = document.createElement('div')
     const events = ['2026-11-02T10:00:00Z', saved.start].map(
       (start, index) => ({
-        id: `${saved.calId}/event/occurrence-${index}`,
+        id: `${saved.calId}/event/${start}`,
         start: new Date(start),
         startStr: start,
-        extendedProps: { calId: saved.calId, uid: `event/occurrence-${index}` }
+        extendedProps: { calId: saved.calId, uid: `event/${start}` }
       })
     ) as unknown as EventApi[]
     for (const event of events) {
@@ -205,7 +205,7 @@ describe('Show saved event preview', () => {
     )
     await act(async () => open(saved))
     expect(onOpen).toHaveBeenCalledWith(
-      'event/occurrence-1',
+      `event/${saved.start}`,
       saved.calId,
       root.children[1]
     )
@@ -264,14 +264,14 @@ describe('Show saved event preview', () => {
       root,
       events
     )
-    const opening = open({ ...saved, uid: 'event/saved-occurrence' })
+    const opening = open({ ...saved, uid: 'event/20261026T100000Z' })
     await act(async () => {
       await Promise.resolve()
     })
     expect(onOpen).not.toHaveBeenCalled()
     events.push({
       id: 'expanded-chip',
-      extendedProps: { uid: 'event/expanded-occurrence', calId: saved.calId },
+      extendedProps: { uid: 'event/2026-10-26T10:00:00Z', calId: saved.calId },
       start: new Date(saved.start),
       startStr: saved.start
     } as unknown as EventApi)
@@ -283,7 +283,7 @@ describe('Show saved event preview', () => {
       await opening
     })
     expect(onOpen).toHaveBeenCalledWith(
-      'event/expanded-occurrence',
+      'event/2026-10-26T10:00:00Z',
       saved.calId,
       chip
     )

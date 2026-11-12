@@ -76,6 +76,22 @@ describe('RFC 5545 – UID', () => {
     expect(uid![3]).not.toContain('/') // base UUID should have no suffix
   })
 
+  it('writes back a uid holding a "/" unchanged (#2064)', () => {
+    const vevent = makeVevent(
+      baseEvent({ uid: 'invit/tion-1@example.com' }),
+      TZID
+    )
+    expect(getProp(vevent, 'uid')![3]).toBe('invit/tion-1@example.com')
+  })
+
+  it('strips only the occurrence suffix of a uid holding a "/" (#2064)', () => {
+    const vevent = makeVevent(
+      baseEvent({ uid: 'invit/tion-1@example.com/2025-03-17T09:00:00Z' }),
+      TZID
+    )
+    expect(getProp(vevent, 'uid')![3]).toBe('invit/tion-1@example.com')
+  })
+
   it('uid value type is "text" (RFC 5545 §3.8.4.7)', () => {
     const vevent = makeVevent(baseEvent(), TZID)
     const uid = getProp(vevent, 'uid')

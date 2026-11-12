@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { useSelectedCalendars } from '@common/utils/storage/useSelectedCalendars'
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from '@common/utils/storage/setSelectedCalendars'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import { User } from '@common/components/Attendees/types'
 
 export const useManageCalendarSelection = (): {
@@ -41,7 +41,7 @@ export const useManageCalendarSelection = (): {
       const isValid = initialLoadRef.current && calendarIds.length > 0 && userId
       if (isValid) {
         const personalCalendarIds = calendarIds.filter(
-          id => extractEventBaseUuid(id) === userId
+          id => extractCalendarOwnerId(id) === userId
         )
         const cached = localStorage.getItem('selectedCalendars')
         if (cached && cached.length > 0) {

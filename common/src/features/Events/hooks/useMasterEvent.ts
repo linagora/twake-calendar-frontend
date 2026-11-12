@@ -4,6 +4,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { findFieldValue } from '@common/features/Events/utils'
+import { splitEventKey } from '@common/utils/extractEventBaseUuid'
 
 const isOverride = ([name, props]: VCalComponent): boolean =>
   name.toLowerCase() === 'vevent' && !!findFieldValue(props, 'recurrence-id')
@@ -38,7 +39,9 @@ export function useMasterEvent(
 
     // An occurrence belongs to a series even when the grid lost its rule: a
     // refresh re-expands the series without it
-    const [baseUID, recurrenceId] = event.uid.split('/')
+    const { baseUid: baseUID, occurrenceKey: recurrenceId } = splitEventKey(
+      event.uid
+    )
     if (!event.repetition?.freq && !recurrenceId) {
       setMasterEvent(null)
       setIsLoadingMasterEvent(false)
