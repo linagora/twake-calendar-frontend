@@ -409,6 +409,7 @@
     "notifications.emailDesc": "Áp dụng cho các sự kiện có đặt lời nhắc trong trường “Thông báo”.",
     "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "displayWeekNumbers": "Hiển thị số tuần",
+    "keyboardShortcuts": "Bật phím tắt",
     "displayWeekNumbersUpdateError": "Không cập nhật được cách hiển thị số tuần",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "calAndEvent": "Lịch và sự kiện",

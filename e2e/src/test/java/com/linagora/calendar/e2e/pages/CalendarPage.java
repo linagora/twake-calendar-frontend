@@ -181,17 +181,31 @@ public class CalendarPage {
      * counting from today: successive calls would otherwise navigate from the wrong origin.
      */
     public CalendarPage goToMonth(java.time.YearMonth month) {
+        boolean monthView = currentViewClass().contains("fc-dayGridMonth-view");
         for (int guard = 0; guard < 60; guard++) {
             java.time.YearMonth displayed = displayedMonth();
             if (displayed.equals(month)) {
                 return this;
             }
+            java.time.YearMonth following = displayed.isBefore(month)
+                ? displayed.plusMonths(1) : displayed.minusMonths(1);
+            java.time.LocalDate firstDay = firstVisibleDate();
             if (displayed.isBefore(month)) {
                 next();
             } else {
                 previous();
             }
-            page.waitForTimeout(150);
+            // A fixed delay can read the old title and send another click before the
+            // previous navigation commits on a busy CI worker. Wait for the grid itself:
+            // an adjacent-month cell with the same date is not enough.
+            if (monthView) {
+                page.locator(".fc-dayGridMonth-view .fc-daygrid-day:not(.fc-day-other)[data-date='"
+                    + following.atDay(1) + "']").waitFor(
+                        new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE));
+                page.waitForCondition(() -> displayedMonth().equals(following));
+            } else {
+                page.waitForCondition(() -> !firstVisibleDate().equals(firstDay));
+            }
         }
         throw new AssertionError("Could not reach " + month + ", the grid shows " + periodTitle());
     }
@@ -416,8 +430,18 @@ public class CalendarPage {
         Locator row = page.locator("li:has(label[aria-label='" + calendarName + "'])");
         row.hover();
         row.locator("button").last().click();
-        page.locator("[role=menuitem]:visible").first().waitFor();
+        waitUntilCalendarMenuReady();
         return this;
+    }
+
+    private void waitUntilCalendarMenuReady() {
+        page.locator("[role=menuitem]:visible").first().waitFor();
+        // MUI's Grow transition can start after Playwright's stability check. A click
+        // calculated before it starts can land on another row as the menu expands.
+        // Wait for the rendered opacity, rather than the inline target or a fixed delay.
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+            page.locator(".MuiMenu-paper:visible"))
+            .hasCSS("opacity", "1");
     }
 
     /** What the overflow menu of a calendar offers. */
@@ -447,6 +471,7 @@ public class CalendarPage {
             .filter(new Locator.FilterOptions().setHasText(rowFragment)).first();
         row.hover();
         row.locator("button").last().click();
+        waitUntilCalendarMenuReady();
         page.getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions().setName("Modify")).click();
         return new CalendarModal(page).waitUntilOpen();
     }

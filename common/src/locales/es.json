@@ -409,6 +409,7 @@
     "notifications.emailDesc": "Para los eventos con un recordatorio en su campo «Notificación».",
     "alarmEmailsUpdateError": "No se ha podido actualizar el ajuste de notificaciones por correo electrónico",
     "displayWeekNumbers": "Mostrar el número de semana",
+    "keyboardShortcuts": "Activar los atajos de teclado",
     "displayWeekNumbersUpdateError": "No se ha podido actualizar la visualización del número de semana",
     "sync.empty": "Los ajustes de sincronización estarán disponibles próximamente",
     "calAndEvent": "Calendario y eventos",

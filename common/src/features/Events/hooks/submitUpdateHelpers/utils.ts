@@ -74,7 +74,8 @@ export function buildUpdatedAlarms(
         action: alarm.action,
         attendees: alarmAttendees,
         summary: values.title.trim(),
-        description: alarm.description
+        description: alarm.description,
+        passthroughProps: alarm.passthroughProps
       })
     })
   )

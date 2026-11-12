@@ -409,6 +409,7 @@
     "notifications.emailDesc": "Per gli eventi con un promemoria impostato nel campo «Notifica».",
     "alarmEmailsUpdateError": "Impossibile aggiornare l'impostazione delle notifiche via email",
     "displayWeekNumbers": "Mostra il numero della settimana",
+    "keyboardShortcuts": "Attiva le scorciatoie da tastiera",
     "displayWeekNumbersUpdateError": "Impossibile aggiornare la visualizzazione del numero della settimana",
     "sync.empty": "Le impostazioni di sincronizzazione saranno presto disponibili",
     "calAndEvent": "Calendario ed eventi",

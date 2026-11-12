@@ -42,6 +42,48 @@ describe('SettingsPage', () => {
     }
   }
 
+  describe('Keyboard shortcuts setting (#2048)', () => {
+    const withShortcuts = (keyboardShortcuts: boolean) => ({
+      ...preloadedState,
+      settings: { ...preloadedState.settings, keyboardShortcuts }
+    })
+    const shortcutsSwitch = () =>
+      screen.getByRole('switch', { name: /settings\.keyboardShortcuts/ })
+
+    it('shows the shortcuts as enabled', () => {
+      renderWithProviders(<SettingsPage />, withShortcuts(true))
+
+      expect(shortcutsSwitch()).toBeChecked()
+    })
+
+    it('turns the shortcuts off and remembers it in this browser', () => {
+      const { store } = renderWithProviders(
+        <SettingsPage />,
+        withShortcuts(true)
+      )
+
+      fireEvent.click(shortcutsSwitch())
+
+      expect(store.getState().settings.keyboardShortcuts).toBe(false)
+      expect(localStorage.getItem('keyboardShortcuts')).toBe('false')
+      expect(api.patch).not.toHaveBeenCalled()
+    })
+
+    it('turns the shortcuts back on', () => {
+      const { store } = renderWithProviders(
+        <SettingsPage />,
+        withShortcuts(false)
+      )
+
+      const toggle = shortcutsSwitch()
+      expect(toggle).not.toBeChecked()
+      fireEvent.click(toggle)
+
+      expect(store.getState().settings.keyboardShortcuts).toBe(true)
+      expect(localStorage.getItem('keyboardShortcuts')).toBe('true')
+    })
+  })
+
   it('renders settings page with sidebar and content layout', () => {
     renderWithProviders(<SettingsPage />, preloadedState)
 
