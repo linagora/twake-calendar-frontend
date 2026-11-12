@@ -11,7 +11,7 @@
       "@public/*": ["../apps/public/src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "../common/src/window.d.ts"],
   "references": [
     { "path": "../common" },
     { "path": "../apps/private" },

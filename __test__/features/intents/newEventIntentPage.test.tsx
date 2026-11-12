@@ -1,3 +1,4 @@
+import type { JSX } from 'react'
 import type { Mock } from 'vitest'
 import { setupStore } from '@common/app/store'
 import en from '@common/locales/en.json'
