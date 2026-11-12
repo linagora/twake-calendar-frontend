@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 ### Added
 
 - The form of a new event as the cozy-stack intent `CREATE io.cozy.calendar.events` on `/intents`:
-  Twake Chat opens it in a room, with the members of the room as attendees, and gets the event saved
+  Twake Chat opens it in a room, with the members of the room as attendees, and gets the event saved.
+  It needs cozy-stack with linagora/cozy-stack#4978 (`frameAncestors` of the intent): without them the intent is refused.
+  `INTENT_FRAME_ANCESTORS` sets the `frame-ancestors` of `/intents` in the private image (default `*`)
 - #1826 Deleting an event shows a notification with an undo button; the deletion is sent after 3 seconds unless undone
 - #2017 Toast notification when the participation status of an event is updated
 - #2048 "Enable keyboard shortcuts" switch in Settings → Calendar and events (desktop only), so the single key shortcuts can be turned off. The choice is remembered by the browser, and the shortcuts stay on by default

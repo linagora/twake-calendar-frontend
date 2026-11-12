@@ -8,7 +8,7 @@ RUN echo "var APP_VERSION = \"${BUILD_VERSION}\";" > /usr/share/nginx/html/versi
 # Initialize cache_env.conf with defaults so Nginx configuration checks pass during build
 RUN echo "map \$uri \$static_cache_control { default \"no-cache\"; }" > /etc/nginx/conf.d/cache_env.conf && \
     echo "map \$uri \$html_cache_control { default \"no-cache\"; }" >> /etc/nginx/conf.d/cache_env.conf && \
-    echo "map \$request_uri \$frame_ancestors_csp { \"~*^/intents([/?]|\$)\" \"frame-ancestors *\"; default \"frame-ancestors 'self'\"; }" >> /etc/nginx/conf.d/cache_env.conf
+    echo "map \$request_uri \$frame_ancestors_csp { \"~*^/intents([/?]|\$)\" \"frame-ancestors ${INTENT_FRAME_ANCESTORS:-*}\"; default \"frame-ancestors 'self'\"; }" >> /etc/nginx/conf.d/cache_env.conf
 
 # Compress static files at build-time (exclude runtime env config, version, and appList)
 RUN find /usr/share/nginx/html -type f ! -name '.env.js' ! -name 'version.js' ! -name 'appList.js' ! -name '.env.example.js' ! -name 'appList.example.js' -exec gzip -k -f {} \;
@@ -25,5 +25,5 @@ CMD sh -c 'if [ -f /usr/share/nginx/html/.env.js ] && grep -q -E "DEBUG\s*=\s*tr
              echo "map \$uri \$html_cache_control { default \"no-store, no-cache, must-revalidate, proxy-revalidate\"; }" >> /etc/nginx/conf.d/cache_env.conf; \
              echo "Production mode detected. Enabling Nginx browser cache."; \
            fi && \
-           echo "map \$request_uri \$frame_ancestors_csp { \"~*^/intents([/?]|\$)\" \"frame-ancestors *\"; default \"frame-ancestors ${FRAME_ANCESTORS:-'\''self'\''}\"; }" >> /etc/nginx/conf.d/cache_env.conf && \
+           echo "map \$request_uri \$frame_ancestors_csp { \"~*^/intents([/?]|\$)\" \"frame-ancestors ${INTENT_FRAME_ANCESTORS:-*}\"; default \"frame-ancestors ${FRAME_ANCESTORS:-'\''self'\''}\"; }" >> /etc/nginx/conf.d/cache_env.conf && \
            nginx -g "daemon off;"'
