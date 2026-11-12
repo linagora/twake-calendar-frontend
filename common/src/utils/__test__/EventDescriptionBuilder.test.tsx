@@ -228,6 +228,49 @@ describe('EventDescriptionBuilder', () => {
       expect(html).toContain('• https://files.example.com/agenda.pdf\n')
     })
 
+    it('lists an inline attachment by its file name alone', () => {
+      const inline = new Attachment(
+        'SGVsbG8gd29ybGQ=',
+        'text/plain',
+        'notes.txt',
+        'binary'
+      )
+      const html = new EventDescriptionBuilder('', [inline])
+        .withFooter(null)
+        .buildHtml()
+      expect(html).toContain('• notes.txt\n')
+      expect(html).not.toContain('SGVsbG8gd29ybGQ=')
+    })
+
+    it('adds no footer for an inline attachment without file name', () => {
+      const text = 'Meeting notes'
+      const inline = new Attachment(
+        'SGVsbG8gd29ybGQ=',
+        undefined,
+        undefined,
+        'binary'
+      )
+      const html = new EventDescriptionBuilder(text, [inline])
+        .withFooter(null)
+        .buildHtml()
+      expect(html).toBe(text)
+    })
+
+    it('skips a nameless inline attachment among listed ones', () => {
+      const inline = new Attachment(
+        'SGVsbG8gd29ybGQ=',
+        undefined,
+        undefined,
+        'binary'
+      )
+      const linked = new Attachment('https://example.com/f', 'type', 'f.pdf')
+      const html = new EventDescriptionBuilder('', [inline, linked])
+        .withFooter(null)
+        .buildHtml()
+      expect(html).toContain('Attachments :\n• f.pdf: https://example.com/f\n')
+      expect(html).not.toContain('SGVsbG8gd29ybGQ=')
+    })
+
     it('should append both meeting link and attachments', () => {
       const text = 'Meeting notes'
       const attach = new Attachment(

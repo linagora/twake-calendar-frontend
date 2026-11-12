@@ -188,7 +188,9 @@ export function restoreFormDataFromTemp(
           new Attachment(
             attachment.uri,
             attachment.fmttype,
-            attachment.x_filename
+            attachment.x_filename,
+            attachment.valueType,
+            attachment.otherParams
           )
       )
     )
