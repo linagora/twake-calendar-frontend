@@ -16,6 +16,9 @@ export interface UserAttendeeData {
   rsvp: 'TRUE' | 'FALSE'
   cn: string
   openpaasId?: string
+  // Stored parameters the model does not handle (DELEGATED-TO/-FROM, SENT-BY,
+  // LANGUAGE, SCHEDULE-STATUS, X-…): written back untouched
+  otherParams?: Record<string, string>
 }
 
 export type UserAttendeeOptions = Partial<UserAttendeeData>
@@ -28,6 +31,7 @@ export class userAttendee implements UserAttendeeData {
   rsvp: 'TRUE' | 'FALSE'
   cn: string
   openpaasId?: string
+  otherParams?: Record<string, string>
 
   constructor({
     cal_address,
@@ -36,7 +40,8 @@ export class userAttendee implements UserAttendeeData {
     cutype,
     rsvp,
     cn,
-    openpaasId
+    openpaasId,
+    otherParams
   }: UserAttendeeOptions = {}) {
     this.cal_address = cal_address ?? ''
     this.partstat = partstat ?? 'NEEDS-ACTION'
@@ -45,6 +50,10 @@ export class userAttendee implements UserAttendeeData {
     this.rsvp = rsvp ?? 'FALSE'
     this.cn = cn ?? ''
     this.openpaasId = openpaasId
+    this.otherParams =
+      otherParams && Object.keys(otherParams).length > 0
+        ? otherParams
+        : undefined
   }
 
   static fromOrganizer(organizer: userOrganiser | undefined): userAttendee {
@@ -116,6 +125,12 @@ export class userAttendee implements UserAttendeeData {
     if (this.cn) {
       params.cn = String(this.cn)
     }
+
+    Object.entries(this.otherParams ?? {})
+      .filter(([name]) => !(name in params))
+      .forEach(([name, value]) => {
+        params[name] = value
+      })
 
     return ['attendee', params, 'cal-address', this.asMailto()]
   }
