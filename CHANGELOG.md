@@ -1,4 +1,82 @@
 # Changelog
+
+## 2026-11-12 (9658c9f..83d6999)
+
+### Added
+
+- Update twake-mui to fix background
+- Added deletion snackbar and undo button ([#1850](https://github.com/linagora/twake-calendar-frontend/pull/1850))
+- Added toast for event participatiion update ([#2018](https://github.com/linagora/twake-calendar-frontend/pull/2018))
+
+### Changed
+
+- Migrate the shared API client to Ky 2
+- Keep the grouped dependency update compatible
+- Make browser login and Access tab checks tolerate delayed responses
+- Upgrade React and React DOM to 19 together
+- Type the synchronous attachment renderer for React 19
+- Migrate the calendar grid and plugins to FullCalendar 7
+- Use the inferred FullCalendar event input type
+- Find the FullCalendar time-grid scroll container
+- Let FullCalendar 7 observe grid size changes
+- Restore the time grid borders after the FullCalendar upgrade
+- Keep the refused drag clear of the save notification
+
+### Fixed
+
+- Keep the last valid duration after an end time before the start (#1931) ([#1935](https://github.com/linagora/twake-calendar-frontend/pull/1935))
+- Sign the Drive picker in without a Drive session ([#1930](https://github.com/linagora/twake-calendar-frontend/pull/1930))
+- Mask credentials in percent-encoded nested URLs ([#1947](https://github.com/linagora/twake-calendar-frontend/pull/1947))
+- Keep hyphenated parameter names like status-code unmasked
+- Mask parameters whose name is percent-encoded
+- Read an unknown series zone as UTC when answering all the events ([#1950](https://github.com/linagora/twake-calendar-frontend/pull/1950))
+- Move BYHOUR by the series shift even when it lists the new hour ([#1949](https://github.com/linagora/twake-calendar-frontend/pull/1949))
+- Write a UTC UNTIL when a floating series gets a TZID ([#1948](https://github.com/linagora/twake-calendar-frontend/pull/1948))
+- Mask email addresses with non-ASCII characters ([#1946](https://github.com/linagora/twake-calendar-frontend/pull/1946))
+- Keep the edited instant in the RECURRENCE-ID of a new override ([#1945](https://github.com/linagora/twake-calendar-frontend/pull/1945))
+- Validate addresses in linear time ([#1944](https://github.com/linagora/twake-calendar-frontend/pull/1944))
+- Write a new organizer listed twice once ([#1943](https://github.com/linagora/twake-calendar-frontend/pull/1943))
+- Remove the footer in one pass when separators follow it
+- Read and write a custom zone with its stored VTIMEZONE ([#1941](https://github.com/linagora/twake-calendar-frontend/pull/1941))
+- Move the overrides of a custom zone series with its VTIMEZONE ([#1941](https://github.com/linagora/twake-calendar-frontend/pull/1941))
+- Keep UTC series and recurrence ends right in a custom zone ([#1941](https://github.com/linagora/twake-calendar-frontend/pull/1941))
+- Scrub email addresses in linear time ([#1940](https://github.com/linagora/twake-calendar-frontend/pull/1940))
+- Edit the override read in the event zone among same wall-clock RECURRENCE-IDs ([#1939](https://github.com/linagora/twake-calendar-frontend/pull/1939))
+- Read a floating stored RECURRENCE-ID in the series zone ([#1938](https://github.com/linagora/twake-calendar-frontend/pull/1938))
+- Read the form's wall clock with moment-timezone ([#1937](https://github.com/linagora/twake-calendar-frontend/pull/1937))
+- Drop the data-* and aria-* attributes of a description ([#1979](https://github.com/linagora/twake-calendar-frontend/pull/1979))
+- Show no text for a start the preview cannot read ([#1983](https://github.com/linagora/twake-calendar-frontend/pull/1983))
+- Read an event whose RRULE has no FREQ without a repetition ([#1981](https://github.com/linagora/twake-calendar-frontend/pull/1981))
+- Give no made-up end to an event whose start cannot be read ([#1980](https://github.com/linagora/twake-calendar-frontend/pull/1980))
+- Leave out an UNTIL the preview cannot read ([#1984](https://github.com/linagora/twake-calendar-frontend/pull/1984))
+- Compare the instants of the events, not their wall clocks ([#1982](https://github.com/linagora/twake-calendar-frontend/pull/1982))
+- Read the day of a dragged series in its stored VTIMEZONE ([#1941](https://github.com/linagora/twake-calendar-frontend/pull/1941))
+- Edit the override of the instant among VTIMEZONE-only TZIDs ([#1977](https://github.com/linagora/twake-calendar-frontend/pull/1977))
+- Move a DATE-TIME UNTIL with the time of day of a series ([#1978](https://github.com/linagora/twake-calendar-frontend/pull/1978))
+- Read an event whose VTIMEZONE ical.js cannot expand ([#1993](https://github.com/linagora/twake-calendar-frontend/pull/1993))
+- Refuse a link scheme holding a digit in a description ([#1994](https://github.com/linagora/twake-calendar-frontend/pull/1994))
+- Read an RRULE count as a positive integer ([#1995](https://github.com/linagora/twake-calendar-frontend/pull/1995))
+- Compute a missing end from the start read in the event zone ([#1999](https://github.com/linagora/twake-calendar-frontend/pull/1999))
+- Compare a save with the minute the form shows ([#2000](https://github.com/linagora/twake-calendar-frontend/pull/2000))
+- Shift an override of another zone in the zone of the series ([#2001](https://github.com/linagora/twake-calendar-frontend/pull/2001))
+- Mask an address whose domain is percent-encoded UTF-8
+- Keep a user paragraph paired before a footer without notice
+- Keep the zone and the overrides of a custom zone series on save ([#1941](https://github.com/linagora/twake-calendar-frontend/pull/1941))
+- Open the edit form of a simple event in its stored zone
+- Fix double draggable modal bug ([#2021](https://github.com/linagora/twake-calendar-frontend/pull/2021))
+- Show the forms opened from an event link ([#2015](https://github.com/linagora/twake-calendar-frontend/pull/2015))
+- Resolve UI regression of calendar grid
+- Fix layer order of event chip and booking link chip
+- Show the RSVP page in the attendee's time zone ([#2026](https://github.com/linagora/twake-calendar-frontend/pull/2026))
+- Prefer an override with a definite instant among same wall-clock RECURRENCE-IDs (#2034) ([#2035](https://github.com/linagora/twake-calendar-frontend/pull/2035))
+- Re-anchor month-grid and all-day day ends on local midnight ([#2037](https://github.com/linagora/twake-calendar-frontend/pull/2037))
+- Read the series day of a custom zone in its VTIMEZONE (#2033) ([#2036](https://github.com/linagora/twake-calendar-frontend/pull/2036))
+- Let users turn off the single key shortcuts (#2048) ([#2051](https://github.com/linagora/twake-calendar-frontend/pull/2051))
+- Select the navigated month's day in the mini calendar after Next month (#2047) ([#2052](https://github.com/linagora/twake-calendar-frontend/pull/2052))
+- Show plain-text descriptions as typed in the preview (#2046) ([#2053](https://github.com/linagora/twake-calendar-frontend/pull/2053))
+- Keep the event chip name and answer class current (#2045) ([#2054](https://github.com/linagora/twake-calendar-frontend/pull/2054))
+- Read the rule of a series from its master on open (#2044) ([#2055](https://github.com/linagora/twake-calendar-frontend/pull/2055))
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
