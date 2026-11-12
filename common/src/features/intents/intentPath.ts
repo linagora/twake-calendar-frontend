@@ -34,7 +34,14 @@ export function isIntentsCallbackPath(pathname: string): boolean {
   return INTENTS_CALLBACK_PATTERN.test(pathname)
 }
 
-/** The redirect URI of the intents page, on the origin of the app's one */
-export function intentsRedirectUri(appRedirectUri: string): string {
-  return new URL(INTENTS_CALLBACK_PATH, appRedirectUri).href
+/**
+ * The redirect URI of the intents page, on the origin of the app's one; null
+ * when that one is no absolute URL (missing or relative in .env.js)
+ */
+export function intentsRedirectUri(appRedirectUri: string): string | null {
+  try {
+    return new URL(INTENTS_CALLBACK_PATH, appRedirectUri).href
+  } catch {
+    return null
+  }
 }

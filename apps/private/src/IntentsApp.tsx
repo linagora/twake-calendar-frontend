@@ -168,23 +168,40 @@ function IntentsLogin({
   )
 }
 
+// Why the page cannot serve an intent, or its sign-in then the intent
+function IntentsPageContent({
+  page,
+  canSignIn
+}: {
+  page: IntentsPage
+  canSignIn: boolean
+}): JSX.Element {
+  if (page.intentId === null) {
+    return <IntentMessageScreen message="unavailable" />
+  }
+  if (!canSignIn) return <IntentMessageScreen message="failed" />
+  return <IntentsLogin intentId={page.intentId} isCallback={page.isCallback} />
+}
+
 /**
  * The `/intents` page, framed by the app that started a cozy-stack intent
  * (Twake Chat): the calendar's theme and texts, no Twake bar, never the
  * calendar. Every path under `/intents` shows the intent or why it cannot be
- * served. Rendered instead of App by index.tsx, inside the store Provider.
+ * served. Without a redirect URI to come back to from the SSO (`canSignIn`
+ * false, index.tsx), it says it failed. Rendered instead of App by index.tsx,
+ * inside the store Provider.
  */
-export function IntentsApp(): JSX.Element {
+export function IntentsApp({
+  canSignIn = true
+}: {
+  canSignIn?: boolean
+}): JSX.Element {
   const [page] = useState(readIntentsPage)
   return (
     <TwakeMuiThemeProvider palette={paletteData} themeOptions={themeOptions}>
       <ColorSchemeSync />
       <AppI18n>
-        {page.intentId === null ? (
-          <IntentMessageScreen message="unavailable" />
-        ) : (
-          <IntentsLogin intentId={page.intentId} isCallback={page.isCallback} />
-        )}
+        <IntentsPageContent page={page} canSignIn={canSignIn} />
       </AppI18n>
     </TwakeMuiThemeProvider>
   )

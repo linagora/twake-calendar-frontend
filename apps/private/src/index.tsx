@@ -20,6 +20,10 @@ import { reportLoginRequired } from '@common/features/intents/loginRequired'
 // intent: every path under it is the intents page, never the calendar
 const isIntentsPage = isUnderIntentsPath(window.location.pathname)
 const ssoRedirectUri = window.SSO_REDIRECT_URI ?? ''
+// Null without a usable redirect URI: the intents page then says it failed
+const intentsRedirect = isIntentsPage
+  ? intentsRedirectUri(ssoRedirectUri)
+  : null
 
 initSentry()
 configureAuth({
@@ -28,9 +32,7 @@ configureAuth({
   scope: window.SSO_SCOPE ?? '',
   // The intents page has its own callback, which any page may frame, unlike
   // the callback of the calendar
-  redirectUri: isIntentsPage
-    ? intentsRedirectUri(ssoRedirectUri)
-    : ssoRedirectUri,
+  redirectUri: isIntentsPage ? (intentsRedirect ?? '') : ssoRedirectUri,
   postLogoutRedirectUri: window.SSO_POST_LOGOUT_REDIRECT ?? '',
   apiUrl: window.CALENDAR_BASE_URL,
   // TwakeSpace frames the embed routes, another app the intents page: their
@@ -53,7 +55,11 @@ root.render(
   <React.StrictMode>
     <Sentry.ErrorBoundary>
       <Provider store={store}>
-        {isIntentsPage ? <IntentsApp /> : <App />}
+        {isIntentsPage ? (
+          <IntentsApp canSignIn={intentsRedirect !== null} />
+        ) : (
+          <App />
+        )}
       </Provider>
     </Sentry.ErrorBoundary>
   </React.StrictMode>
