@@ -2,7 +2,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { api } from '@common/utils/apiUtils'
 import { isSafeColor } from '@common/utils/safeColor'
 import { DavSyncResponse } from './types/CalendarApiTypes'
-import { CalendarList } from './types/CalendarData'
+import { CalendarData, CalendarList } from './types/CalendarData'
 import { calendarDavPath } from './utils/calendarDavPath'
 
 export async function fetchCalendars(
@@ -26,12 +26,21 @@ export async function fetchCalendars(
 function withSafeColors(calendars: CalendarList): CalendarList {
   const list = calendars?._embedded?.['dav:calendar']
   if (!Array.isArray(list)) return calendars
-  list.forEach(cal => {
-    if (cal && 'apple:color' in cal && !isSafeColor(cal['apple:color'])) {
-      delete cal['apple:color']
+  return {
+    ...calendars,
+    _embedded: {
+      ...calendars._embedded,
+      'dav:calendar': list.map(withSafeColor)
     }
-  })
-  return calendars
+  }
+}
+
+function withSafeColor(calendar: CalendarData): CalendarData {
+  if (!calendar || !('apple:color' in calendar)) return calendar
+  if (isSafeColor(calendar['apple:color'])) return calendar
+  const withoutColor = { ...calendar }
+  delete withoutColor['apple:color']
+  return withoutColor
 }
 
 export async function fetchCalendar(

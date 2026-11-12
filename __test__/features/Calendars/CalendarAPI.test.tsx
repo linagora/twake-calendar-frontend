@@ -68,6 +68,27 @@ describe('Calendar DAO', () => {
     ])
   })
 
+  it('returns sanitized copies without altering the fetched calendars', async () => {
+    const injected = {
+      id: 'injected',
+      'apple:color': '#fff;}*{background:url(https://evil.example/x)}'
+    }
+    const safe = { id: 'safe', 'apple:color': '#A1B2C3' }
+    const response = { _embedded: { 'dav:calendar': [safe, injected] } }
+    ;(api.get as Mock).mockReturnValue({
+      json: vi.fn().mockResolvedValue(response)
+    })
+
+    const calendars = await fetchCalendars('user123')
+
+    expect(calendars).not.toBe(response)
+    expect(calendars._embedded['dav:calendar'][0]).toBe(safe)
+    expect(calendars._embedded['dav:calendar'][1]).toEqual({ id: 'injected' })
+    expect(injected['apple:color']).toBe(
+      '#fff;}*{background:url(https://evil.example/x)}'
+    )
+  })
+
   it('fetches calendar events for a given ID and match window', async () => {
     const calendarId = 'user1/calendar1'
     const match = { start: '2025-07-01', end: '2025-07-31' }
