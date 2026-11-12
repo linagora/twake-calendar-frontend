@@ -190,10 +190,15 @@ const PROPERTY_PARSERS: Record<
     parseDateProperty(params, value, event, false)
   },
   class: (params, value, event) => {
-    const classVal = safeString(value).toUpperCase()
-    if (['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(classVal)) {
-      event.class = classVal as CalendarEvent['class']
+    const classVal = safeString(value).trim().toUpperCase()
+    if (!classVal) {
+      return
     }
+    // RFC 5545 3.8.1.3: unrecognized x-name / iana-token values MUST be
+    // treated as PRIVATE, never defaulted to PUBLIC.
+    event.class = ['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(classVal)
+      ? (classVal as CalendarEvent['class'])
+      : 'PRIVATE'
   },
   'x-openpaas-videoconference': (params, value, event) => {
     event.x_openpass_videoconference = safeString(value)
