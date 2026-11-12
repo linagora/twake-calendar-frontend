@@ -273,6 +273,36 @@ describe('parseCalendarEvent', () => {
     })
 
     expect(result.uid).toBe('event-2/2025-07-18T09:00:00Z')
+    expect(result.recurrenceTzid).toBeUndefined()
+  })
+
+  it('keeps the TZID of the RECURRENCE-ID apart from its value (#2067)', () => {
+    const rawData: VObjectProperty[] = [
+      ['UID', {}, 'text', 'event-2'],
+      [
+        'RECURRENCE-ID',
+        { tzid: 'America/Sao_Paulo' },
+        'date-time',
+        '2021-10-24T00:00:00'
+      ],
+      [
+        'DTSTART',
+        { tzid: 'America/New_York' },
+        'date-time',
+        '2021-10-23T23:00:00'
+      ]
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+
+    expect(result.recurrenceId).toBe('2021-10-24T00:00:00')
+    expect(result.recurrenceTzid).toBe('America/Sao_Paulo')
+    expect(result.timezone).toBe('America/New_York')
   })
 
   it('returns error if UID or start is missing', () => {

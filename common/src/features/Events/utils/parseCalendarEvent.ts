@@ -302,6 +302,9 @@ function processEventUid(
   if (recurrenceId && event.uid) {
     event.uid = `${event.uid}/${occurrenceKey(recurrenceId, recurrenceTzid, event.timezone)}`
     event.recurrenceId = recurrenceId
+    if (recurrenceTzid) {
+      event.recurrenceTzid = recurrenceTzid
+    }
   }
 }
 

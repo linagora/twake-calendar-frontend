@@ -12,6 +12,8 @@ export interface CalendarEvent {
   calId: string
   uid: string
   recurrenceId?: string
+  // The TZID of the stored RECURRENCE-ID, which recurrenceId drops. See #2067.
+  recurrenceTzid?: string
   transp?: string
   start: string // ISO date string
   end?: string
