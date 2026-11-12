@@ -23,8 +23,10 @@ import { ColorSchemeSync } from '@common/features/Settings/ColorSchemeSync'
 import {
   getOpenPaasUserData,
   setTokens,
-  setUserData
+  setUserData,
+  setUserError
 } from '@common/features/User/UserSlice'
+import { isRejected } from '@reduxjs/toolkit'
 import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
 import paletteData from '@common/theme/palette.json'
 import { AppI18n } from './AppI18n'
@@ -62,15 +64,23 @@ function leaveCallback(intentId: string): void {
 }
 
 // The code exchanged, the user and their calendars loaded, as the callback
-// of the calendar does (CallbackResume): the form opens with them
+// of the calendar does (CallbackResume): the form opens with them. A thunk
+// never rejects: a failed load, a 401 too (twake-oidc does not report it on
+// the redirect URI), is kept as the error of the user, which the page reads
+// once the service started, to tell the client (IntentPage)
 async function completeIntentLogin(dispatch: AppDispatch): Promise<Phase> {
   try {
     const data = await completeLogin()
     if (data === null) return 'ready'
     dispatch(setUserData(data.userinfo))
     dispatch(setTokens(data.tokenSet))
-    await dispatch(getOpenPaasUserData())
-    await dispatch(getCalendarsList())
+    const loads = [
+      await dispatch(getOpenPaasUserData()),
+      await dispatch(getCalendarsList())
+    ]
+    if (loads.some(load => isRejected(load))) {
+      dispatch(setUserError('The user or their calendars could not be loaded'))
+    }
     return 'ready'
   } catch (error: unknown) {
     if (error instanceof LoginRequiredError) return 'login-required'

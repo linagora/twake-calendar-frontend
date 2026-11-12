@@ -32,7 +32,12 @@ export const CLIENT_ANSWER_TIMEOUT_MS = 30_000
 
 export type IntentServiceState =
   | { status: 'loading' }
-  | { status: 'ready'; service: IntentService }
+  | {
+      status: 'ready'
+      service: IntentService
+      /** The data of the client when it answered, read once */
+      data: unknown
+    }
   | { status: 'failed'; error: IntentServiceError }
 
 const failed = (error: IntentServiceError): IntentServiceState => ({
@@ -109,7 +114,10 @@ async function startService(
       requireFrameAncestors: true
     })
     const service = await withTimeout(pending, CLIENT_ANSWER_TIMEOUT_MS)
-    if (service !== null) return { status: 'ready', service }
+    // cozy-interapp replaces getData() on every later data of the client
+    if (service !== null) {
+      return { status: 'ready', service, data: service.getData() }
+    }
     failLateClient(pending)
     return failed('failed')
   } catch (error: unknown) {
