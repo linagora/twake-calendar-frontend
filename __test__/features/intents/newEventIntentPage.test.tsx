@@ -7,10 +7,12 @@ import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import { redirectTo } from '@common/utils/navigation'
 import { SdkAuthError, SdkError } from '@linagora/twake-sdk'
+import { captureException } from '@sentry/react'
 import { IntentsApp } from '@private/IntentsApp'
 import {
   act,
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -50,6 +52,44 @@ const { client, frame, sdk } = vi.hoisted(() => {
   return { client, frame, sdk }
 })
 
+// A render of the form that throws, when a test says so: the crash of a
+// component of the form, as a bug of the calendar would make it
+const crash = vi.hoisted(() => {
+  let isOn = false
+  const listeners = new Set<() => void>()
+  return {
+    error: new Error('A render of the form failed'),
+    isOn: (): boolean => isOn,
+    subscribe: (listener: () => void): (() => void) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    now: (): void => {
+      isOn = true
+      listeners.forEach(listener => listener())
+    },
+    reset: (): void => {
+      isOn = false
+    }
+  }
+})
+vi.mock('@common/features/Events/EventModal', async () => {
+  const actual = await vi.importActual<
+    typeof import('@common/features/Events/EventModal')
+  >('@common/features/Events/EventModal')
+  const { useSyncExternalStore } = await import('react')
+  const Form = actual.default
+  function CrashingForm(props: React.ComponentProps<typeof Form>): JSX.Element {
+    if (useSyncExternalStore(crash.subscribe, crash.isOn)) throw crash.error
+    return <Form {...props} />
+  }
+  return { ...actual, default: CrashingForm }
+})
+// What the app reports to Sentry
+vi.mock('@sentry/react', async () => ({
+  ...(await vi.importActual('@sentry/react')),
+  captureException: vi.fn()
+}))
 vi.mock('@linagora/twake-sdk', async () => ({
   ...(await vi.importActual<typeof import('@linagora/twake-sdk')>(
     '@linagora/twake-sdk'
@@ -103,12 +143,18 @@ const MY_CALENDARS = {
   }
 }
 
-// The intent as the stack keeps it: created by Twake Chat (`client`)
+// The intent as the stack keeps it: created by Twake Chat (`client`), with
+// the origins that may frame its service (linagora/cozy-stack#4978)
+const NEW_EVENT = {
+  action: 'CREATE',
+  type: 'io.cozy.calendar.events',
+  frameAncestors: [CHAT]
+}
 let stackIntent: {
   action: string
   type: string
   frameAncestors?: unknown
-} = { action: 'CREATE', type: 'io.cozy.calendar.events' }
+} = NEW_EVENT
 
 const intentDocument = (id: string): unknown => ({
   data: {
@@ -270,7 +316,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
   beforeEach(() => {
     entries = window.history.length
     frame.parent = client
-    stackIntent = { action: 'CREATE', type: 'io.cozy.calendar.events' }
+    stackIntent = NEW_EVENT
     sdk.status = 'waiting'
     sdk.login.mockImplementation(async () => {
       sdk.status = 'ready'
@@ -286,6 +332,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
   afterEach(() => {
     Reflect.deleteProperty(window.location, 'ancestorOrigins')
     sessionStorage.removeItem('eventFormTempData_create')
+    crash.reset()
   })
 
   describe('the form', () => {
@@ -333,6 +380,78 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
         '/intents/intent-1',
         expect.objectContaining({ method: 'GET' })
       )
+    })
+  })
+
+  describe('the form in the frame', () => {
+    // Framed, the form is the whole page: around it is the empty page of the
+    // frame (wider than the form), where MUI sees a click on its backdrop
+    const besideTheForm = async (): Promise<HTMLElement> =>
+      (await findForm()).closest('.MuiDialog-container') as HTMLElement
+
+    it('stays open, and tells the client nothing, when the user clicks beside it', async () => {
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+
+      await user.click(await besideTheForm())
+
+      await settle()
+      expect(screen.getByRole('textbox', { name: /title/i })).toBeVisible()
+      expect(answers()).toEqual([])
+    })
+
+    it('keeps the form while it saves when the user clicks beside it, and gives the client the event', async () => {
+      const answerSave = pendingSave()
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await user.type(await findForm(), 'Weekly sync')
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+      await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+
+      await user.click(await besideTheForm())
+
+      await settle()
+      expect(
+        screen.queryByRole('dialog', {
+          name: t('editModeDialog.discardChanges.title')
+        })
+      ).not.toBeInTheDocument()
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue(
+        'Weekly sync'
+      )
+      expect(answers()).toEqual([])
+
+      answerSave(true)
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('done'))
+    })
+
+    it('cannot be dragged out of the frame by its title', async () => {
+      // jsdom has neither PointerEvent nor pointer capture: the coordinates
+      // come from MouseEvent anyway
+      HTMLElement.prototype.setPointerCapture = vi.fn()
+      onTestFinished(() => {
+        Reflect.deleteProperty(HTMLElement.prototype, 'setPointerCapture')
+      })
+      const pointer = (
+        type: string,
+        element: HTMLElement,
+        init: MouseEventInit
+      ): void => {
+        fireEvent(element, new MouseEvent(type, { bubbles: true, ...init }))
+      }
+      openIntent()
+      await answerHandshake()
+      const form = (await findForm()).closest('.MuiDialog-paper') as HTMLElement
+      const title = within(form).getByText(t('event.createEvent'))
+
+      pointer('pointerdown', title, { buttons: 1, clientX: 100, clientY: 100 })
+      pointer('pointermove', form, { buttons: 1, clientX: 400, clientY: 500 })
+      pointer('pointerup', form, {})
+
+      expect(form.style.transform).toBe('')
     })
   })
 
@@ -630,7 +749,9 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
 
     // The user confirms Close while the server has not answered the save: the
     // event may still be created, so the outcome decides what the client gets
-    const closeWhileSaving = async (): Promise<(saved: boolean) => void> => {
+    const closeWhileSaving = async (
+      meanwhile: () => void = () => {}
+    ): Promise<(saved: boolean) => void> => {
       const answerSave = pendingSave()
       const user = userEvent.setup()
       openIntent()
@@ -638,6 +759,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       await user.type(await findForm(), 'Weekly sync')
       await user.click(screen.getByRole('button', { name: t('actions.save') }))
       await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+      act(meanwhile)
 
       await user.click(screen.getByRole('button', { name: t('actions.close') }))
       const discard = screen.queryByRole('dialog', {
@@ -678,6 +800,52 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       )
       await settle()
       expect(answers()).toHaveLength(1)
+      // The user closed it: the form does not come back
+      expect(
+        screen.queryByRole('textbox', { name: /title/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it('still waits for the save on close when another kind of save of the app failed meanwhile', async () => {
+      // The error the app tells of a failed update of an event
+      // (updateActions.ts), which is not the save of this form
+      const answerSave = await closeWhileSaving(() => {
+        window.dispatchEvent(
+          new CustomEvent('eventModalError', { detail: { type: 'update' } })
+        )
+      })
+
+      answerSave(true)
+
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('done'))
+    })
+
+    it('keeps the form when the client sends data of another shape meanwhile, and gives the client the event', async () => {
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await user.type(await findForm(), 'Weekly sync')
+
+      // cozy-interapp takes the new data of the client while the intent goes
+      // on: the page read the data of the intent once, when it opened
+      fromClient({
+        type: 'intent-intent-1:data',
+        data: { attendees: 'carol@example.com' }
+      })
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+
+      await waitFor(() => expect(answers()).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('done'))
+      expect(
+        (sentOfType('done')[0][0].document as { title: string }).title
+      ).toBe('Weekly sync')
+      expect(
+        screen.queryByRole('heading', {
+          level: 1,
+          name: t('intents.invalidData.title')
+        })
+      ).not.toBeInTheDocument()
     })
 
     it('opens a fresh event for each intent, never the draft a failed save left in an earlier one', async () => {
@@ -699,6 +867,66 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       expect(screen.getByText('carol@example.com')).toBeInTheDocument()
       expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
       expect(screen.queryByText('bob@example.com')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('a crash of the form', () => {
+    it('says it failed, gives the client an error, and reports the crash to Sentry', async () => {
+      openIntent()
+      await answerHandshake()
+      await findForm()
+
+      act(() => crash.now())
+
+      await findMessage('failed')
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('error'))
+      expect(
+        ((captureException as Mock).mock.calls as [unknown][]).map(([e]) => e)
+      ).toContain(crash.error)
+    })
+
+    // The form crashes once the save is sent: the server may still create
+    // the event, so its outcome decides what the client gets
+    const crashWhileSaving = async (): Promise<(saved: boolean) => void> => {
+      const answerSave = pendingSave()
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await user.type(await findForm(), 'Weekly sync')
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+      await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
+
+      act(() => crash.now())
+
+      await settle()
+      // Nothing told while the save is pending
+      expect(answers()).toEqual([])
+      return answerSave
+    }
+
+    it('gives the client the event, and no error, when the save then works', async () => {
+      const answerSave = await crashWhileSaving()
+
+      answerSave(true)
+
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      expect(
+        (sentOfType('done')[0][0].document as { title: string }).title
+      ).toBe('Weekly sync')
+      await settle()
+      expect(answers()).toEqual(sentOfType('done'))
+    })
+
+    it('gives the client an error when the save then fails', async () => {
+      const answerSave = await crashWhileSaving()
+
+      answerSave(false)
+
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      await findMessage('failed')
+      await settle()
+      expect(answers()).toEqual(sentOfType('error'))
     })
   })
 
@@ -735,7 +963,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       await noCalendarShownThenClosed()
     })
 
-    it('says the calendars could not be loaded once they fail, and gives the client null once the user closes it', async () => {
+    it('says it failed and gives the client an error once the calendars fail to load, never "no calendar"', async () => {
       ;(fetchCalendars as Mock).mockRejectedValue(new Error('Server down'))
       const store = openIntent(
         'intent-1',
@@ -754,7 +982,12 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
         await store.dispatch(getCalendarsList())
       })
 
-      await noCalendarShownThenClosed()
+      await findMessage('failed')
+      await waitFor(() => expect(sentOfType('error')).toHaveLength(1))
+      expect(answers()).toEqual(sentOfType('error'))
+      expect(
+        screen.queryByText(t('error.calendarsNotFound'))
+      ).not.toBeInTheDocument()
     })
 
     // Shared with the user, as the calendar form sees them: one it does not
@@ -868,7 +1101,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
 
   describe('an intent the page cannot serve', () => {
     it('fails an intent Calendar does not serve', async () => {
-      stackIntent = { action: 'PICK', type: 'io.cozy.files' }
+      stackIntent = { ...NEW_EVENT, action: 'PICK', type: 'io.cozy.files' }
       openIntent()
       await answerHandshake()
 
@@ -938,7 +1171,6 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
 
   describe('who frames the page', () => {
     it('serves the intent when only the client app frames it', async () => {
-      stackIntent = { ...stackIntent, frameAncestors: [CHAT] }
       setAncestorOrigins([CHAT])
       openIntent()
       await answerHandshake()
@@ -947,31 +1179,38 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       expect(answers()).toEqual([])
     })
 
-    it('cancels the intent when an unknown page frames the client app, and shows no form', async () => {
-      stackIntent = { ...stackIntent, frameAncestors: [CHAT] }
-      setAncestorOrigins([CHAT, 'https://evil.example'])
+    // cozy-interapp refuses such a frame before the client sends its data
+    // (createService with requireFrameAncestors): the client only gets the
+    // cancel, the user the reason
+    const refusedFrame = async (): Promise<void> => {
       openIntent()
-      await answerHandshake()
 
       await findMessage('untrustedFrame')
       await waitFor(() =>
-        expect(sentOfType('cancel')).toEqual([
-          [{ type: 'intent-intent-1:cancel' }, CHAT]
-        ])
+        expect(answers()).toEqual([[{ type: 'intent-intent-1:cancel' }, CHAT]])
       )
-      expect(sentOfType('done')).toEqual([])
-    })
+      await settle()
+      expect(answers()).toHaveLength(1)
+      expect(
+        screen.queryByRole('textbox', { name: /title/i })
+      ).not.toBeInTheDocument()
+    }
 
-    it('relies on the handshake when the stack does not give the origins (an older stack)', async () => {
+    it('cancels the intent when an unknown page frames the client app, and shows no form', async () => {
       setAncestorOrigins([CHAT, 'https://evil.example'])
-      openIntent()
-      await answerHandshake()
 
-      await findForm()
+      await refusedFrame()
     })
 
-    it('relies on the handshake when the browser does not tell the ancestors (Firefox)', async () => {
-      stackIntent = { ...stackIntent, frameAncestors: [CHAT] }
+    it('cancels the intent when the stack does not say who may frame it, and shows no form', async () => {
+      // Every stack Calendar serves gives them (linagora/cozy-stack#4978)
+      stackIntent = { action: 'CREATE', type: 'io.cozy.calendar.events' }
+      setAncestorOrigins([CHAT])
+
+      await refusedFrame()
+    })
+
+    it('relies on the handshake when the browser does not tell the ancestors', async () => {
       openIntent()
       await answerHandshake()
 

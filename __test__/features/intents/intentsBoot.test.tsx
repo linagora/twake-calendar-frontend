@@ -115,6 +115,30 @@ describe('the intents page as the browser loads it', () => {
     expect(redirectTo).not.toHaveBeenCalled()
   })
 
+  // A deployment whose .env.js lacks the redirect URI, or gives a path: the
+  // frame says it failed, it never stays blank
+  it.each(['', '/callback'])(
+    'says it failed on /intents when the redirect URI of the calendar is %j',
+    async redirectUri => {
+      const appRedirectUri = window.SSO_REDIRECT_URI
+      window.SSO_REDIRECT_URI = redirectUri
+      onTestFinished(() => {
+        window.SSO_REDIRECT_URI = appRedirectUri
+      })
+
+      await boot('/intents?intent=intent-1')
+
+      const heading = await screen.findByRole(
+        'heading',
+        { level: 1, name: t('intents.failed.title') },
+        { timeout: 10000 }
+      )
+      expect(screen.getByRole('main')).toContainElement(heading)
+      expect(startLogin).not.toHaveBeenCalled()
+      expect(redirectTo).not.toHaveBeenCalled()
+    }
+  )
+
   it('keeps the callback of the calendar for the calendar', async () => {
     await boot('/calendar')
 

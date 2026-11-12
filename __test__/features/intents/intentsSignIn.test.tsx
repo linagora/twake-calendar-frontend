@@ -11,7 +11,7 @@ import {
   startLogin
 } from '@linagora/twake-oidc'
 import { IntentsApp } from '@private/IntentsApp'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 
 // The frame of the intent signs in silently (prompt=none: a frame never shows
@@ -114,6 +114,29 @@ const openAt = (path: string): void => {
 
 const here = (): string => window.location.pathname + window.location.search
 
+type Message = { type: string }
+const sent = (): Message[] =>
+  (client.postMessage.mock.calls as [Message, string][]).map(([m]) => m)
+// How the intent ends for the client: the event, null, or an error
+const answers = (): Message[] =>
+  sent().filter(m => /:(done|cancel|error|exposeFrameRemoval)$/.test(m.type))
+const errorsSent = (): Message[] =>
+  sent().filter(m => m.type === 'intent-intent-1:error')
+
+// The SSO comes back with the user signed in, for the intent
+const signedInAtCallback = (): void => {
+  pendingSignIn(INTENT_PATH)
+  ;(completeLogin as Mock).mockResolvedValue({
+    tokenSet: { access_token: 'token', id_token: 'id-token-alice' },
+    userinfo: {
+      sub: 'test',
+      email: 'test@test.com',
+      workplaceFqdn: 'alice.workplace.test'
+    },
+    returnTo: INTENT_PATH
+  })
+}
+
 describe('the sign-in of the intents page', () => {
   beforeEach(() => {
     sdk.status = 'waiting'
@@ -127,7 +150,8 @@ describe('the sign-in of the intents page', () => {
         attributes: {
           action: 'CREATE',
           type: 'io.cozy.calendar.events',
-          client: CHAT
+          client: CHAT,
+          frameAncestors: [CHAT]
         }
       }
     })
@@ -187,6 +211,58 @@ describe('the sign-in of the intents page', () => {
     expect(startLogin).not.toHaveBeenCalled()
     expect(redirectTo).not.toHaveBeenCalled()
   })
+
+  // The callback loads the user and their calendars, as the one of the
+  // calendar does (CallbackResume): a load that fails is a failure of the
+  // page, which the client is told, never a list without a calendar
+  it.each([
+    [
+      'the user',
+      (): void => {
+        ;(fetchCurrentUser as Mock).mockRejectedValue(new Error('Server down'))
+      }
+    ],
+    [
+      'the calendars',
+      (): void => {
+        ;(fetchCalendars as Mock).mockRejectedValue(new Error('Server down'))
+      }
+    ]
+  ])(
+    'says it failed and gives the client an error when %s cannot be loaded after the sign-in',
+    async (_, failTheLoad) => {
+      failTheLoad()
+      signedInAtCallback()
+
+      openAt('/intents/callback?code=c&state=s')
+
+      // Chat answers the `ready` of the page with the members of the room
+      await waitFor(
+        () =>
+          expect(client.postMessage).toHaveBeenCalledWith(
+            { type: 'intent-intent-1:ready' },
+            CHAT
+          ),
+        { timeout: 10000 }
+      )
+      act(() => {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: { attendees: ['bob@example.com'] },
+            origin: CHAT,
+            source: client as unknown as Window
+          })
+        )
+      })
+      await findMessage('failed')
+      await waitFor(() => expect(errorsSent()).toHaveLength(1))
+      expect(answers()).toEqual(errorsSent())
+      expect(
+        screen.queryByText(t('error.calendarsNotFound'))
+      ).not.toBeInTheDocument()
+      expect(redirectTo).not.toHaveBeenCalled()
+    }
+  )
 
   it('says the session expired when the SSO refuses the silent sign-in, without a login form', async () => {
     pendingSignIn(INTENT_PATH)

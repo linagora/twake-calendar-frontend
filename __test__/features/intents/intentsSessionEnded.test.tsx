@@ -127,7 +127,8 @@ describe('the new event intent when the session ends while it saves', () => {
           action: 'CREATE',
           type: 'io.cozy.calendar.events',
           permissions: ['GET'],
-          client: CHAT
+          client: CHAT,
+          frameAncestors: [CHAT]
         }
       }
     })
