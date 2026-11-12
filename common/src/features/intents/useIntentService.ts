@@ -3,7 +3,7 @@ import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
 import { makeIntentFetch } from '@common/features/Tdrive/hooks/useTdrivePicker'
 import { ensureSdkSignedIn } from '@common/utils/sdkSession'
 import { SdkError, type Sdk } from '@linagora/twake-sdk'
-import Intents, { type IntentService } from 'cozy-interapp'
+import Intents, { type IntentServiceAPI } from 'cozy-interapp'
 import { useEffect, useRef, useState } from 'react'
 
 /**
@@ -31,7 +31,7 @@ export type IntentServiceState =
   | { status: 'loading' }
   | {
       status: 'ready'
-      service: IntentService
+      service: IntentServiceAPI
       /** The data of the client when it answered, read once */
       data: unknown
     }
@@ -43,7 +43,7 @@ const failed = (error: IntentServiceError): IntentServiceState => ({
 })
 
 /** The client gets the error; called again, it is ignored */
-export function failIntent(service: IntentService, error: Error): void {
+export function failIntent(service: IntentServiceAPI, error: Error): void {
   try {
     service.throw(error)
   } catch {
@@ -71,7 +71,7 @@ async function withTimeout<T>(
  * The client may still answer the handshake once the page gave up on it:
  * it then gets an error, or it would wait for an answer that never comes
  */
-function failLateClient(pending: Promise<IntentService>): void {
+function failLateClient(pending: Promise<IntentServiceAPI>): void {
   void pending.then(
     late =>
       failIntent(

@@ -4,11 +4,12 @@ import { Loading } from '@common/components/Loading/Loading'
 import EventPopover from '@common/features/Events/EventModal'
 import { newEventWithAttendees } from '@common/features/Events/newEventDeepLinkUtils'
 import type { CalendarEvent } from '@common/types/EventsTypes'
-import type { CalendarApi } from '@fullcalendar/core'
+import type { CalendarApi } from '@fullcalendar/react'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
 import { Button, Stack, Typography } from '@linagora/twake-mui'
 import { Portal } from '@mui/material'
-import type { IntentService } from 'cozy-interapp'
+import type { IntentServiceAPI } from 'cozy-interapp'
+import type { JSX } from 'react'
 import {
   useCallback,
   useEffect,
@@ -40,7 +41,7 @@ function NoCalendar({ onClose }: { onClose: () => void }): JSX.Element {
  * throws on a second answer; the ref drops it.
  */
 function useSettle(
-  service: IntentService
+  service: IntentServiceAPI
 ): (result: CreatedEvent | null) => void {
   const settledRef = useRef(false)
   return useCallback(
@@ -60,7 +61,7 @@ function useSettle(
  * their own. In an Effect, as it talks to the page around; the ref keeps it
  * to once, under StrictMode too (cozy-interapp throws on a second call).
  */
-function useNotifyShown(service: IntentService, isShown: boolean): void {
+function useNotifyShown(service: IntentServiceAPI, isShown: boolean): void {
   const notifiedRef = useRef(false)
   useEffect(() => {
     if (!isShown || notifiedRef.current) return
@@ -116,7 +117,7 @@ function useCloseForm({ isSaving, onSavingChange, settle }: SaveInFlight): {
 }
 
 export interface NewEventIntentPageProps {
-  service: IntentService
+  service: IntentServiceAPI
   /** Read once, when the form opens */
   initialAttendees: string[]
   /** The session ended (IntentPage): a save in flight is waited for */

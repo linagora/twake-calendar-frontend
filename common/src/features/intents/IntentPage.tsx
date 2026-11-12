@@ -3,7 +3,8 @@ import { reportCrash } from '@common/app/sentry'
 import { Loading } from '@common/components/Loading/Loading'
 import { Stack, Typography } from '@linagora/twake-mui'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
-import type { IntentService } from 'cozy-interapp'
+import type { IntentServiceAPI } from 'cozy-interapp'
+import type { JSX } from 'react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useI18n } from 'twake-i18n'
@@ -53,7 +54,7 @@ export function IntentMessageScreen({
 }
 
 interface RejectedIntentProps {
-  service: IntentService
+  service: IntentServiceAPI
   message: IntentMessage
   /** What the client gets */
   error: string
@@ -106,7 +107,7 @@ interface PageState {
 
 // Why the intent the client sent cannot be served, null when it can
 function rejectionOf(
-  service: IntentService,
+  service: IntentServiceAPI,
   { hasSessionEnded, hasLoadFailed }: PageState
 ): Omit<RejectedIntentProps, 'service'> | null {
   const { action, type } = service.getIntent().attributes
