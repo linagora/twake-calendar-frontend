@@ -1,12 +1,12 @@
 import type { JSX } from 'react'
-import * as Sentry from '@sentry/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
-import { type ErrorInfo, Suspense, useEffect, useMemo } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
 import { push } from 'redux-first-history'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { history, store } from '@common/app/store'
+import { reportCrash } from '@common/app/sentry'
 import { Error as ErrorPage } from '@common/components/Error/Error'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { UndoableActionsProvider } from '@common/components/UndoableActions/UndoableActionsProvider'
@@ -46,16 +46,6 @@ import {
 import { ColorSchemeSync } from '@common/features/Settings/ColorSchemeSync'
 import paletteData from '@common/theme/palette.json'
 import { AppI18n } from './AppI18n'
-
-const reportCrash = (error: unknown, errorInfo: ErrorInfo): void => {
-  Sentry.captureException(error, {
-    contexts: {
-      react: {
-        componentStack: errorInfo.componentStack
-      }
-    }
-  })
-}
 
 export default function App(): JSX.Element {
   const error = useAppSelector(state => state.user.error)
