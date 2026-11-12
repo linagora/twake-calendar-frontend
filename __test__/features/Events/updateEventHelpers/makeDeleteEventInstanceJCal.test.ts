@@ -740,4 +740,74 @@ describe('makeDeleteEventInstanceJCal', () => {
       expect(exdate![3]).toBe('2024-03-15T10:00:00Z')
     })
   })
+
+  describe('floating occurrence of a series without a known zone (#2066)', () => {
+    const kolkataOverride = (recurrenceId: string): VCalComponent => [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        ['recurrence-id', { tzid: 'Asia/Kolkata' }, 'date-time', recurrenceId],
+        [
+          'dtstart',
+          { tzid: 'Asia/Kolkata' },
+          'date-time',
+          '2022-02-09T10:30:00'
+        ]
+      ],
+      []
+    ]
+    const masterWithDtstart = (dtstart: VObjectProperty): VCalComponent => [
+      'vevent',
+      [
+        ['uid', {}, 'text', 'series-1'],
+        dtstart,
+        ['rrule', {}, 'recur', { freq: 'WEEKLY' }]
+      ],
+      []
+    ]
+    const overridesOf = (jCal: VCalComponent) =>
+      (jCal[2] as VCalComponent[]).filter(
+        ([name, props]) =>
+          name === 'vevent' && props.some(([k]) => k === 'recurrence-id')
+      )
+    const deleteFloatingOccurrence = (vevents: VCalComponent[]) =>
+      makeDeleteEventInstanceJCal(vevents, {
+        ...baseCalendarEvent,
+        recurrenceId: '2022-02-09T04:00:00',
+        start: '2022-02-09T04:00:00.000Z'
+      } as unknown as CalendarEvent)
+
+    it.each([
+      ['UTC', ['dtstart', {}, 'date-time', '2022-02-09T04:00:00Z']],
+      ['floating', ['dtstart', {}, 'date-time', '2022-02-09T04:00:00']],
+      [
+        'custom zone',
+        [
+          'dtstart',
+          { tzid: 'Customized Time Zone' },
+          'date-time',
+          '2022-02-09T04:00:00'
+        ]
+      ]
+    ] as [string, VObjectProperty][])(
+      'removes the TZID override of the deleted occurrence when the series DTSTART is %s',
+      (_, dtstart) => {
+        const result = deleteFloatingOccurrence([
+          masterWithDtstart(dtstart),
+          kolkataOverride('2022-02-09T09:30:00')
+        ])
+
+        expect(overridesOf(result)).toHaveLength(0)
+      }
+    )
+
+    it('keeps the TZID override of another occurrence', () => {
+      const result = deleteFloatingOccurrence([
+        masterWithDtstart(['dtstart', {}, 'date-time', '2022-02-09T04:00:00Z']),
+        kolkataOverride('2022-02-16T09:30:00')
+      ])
+
+      expect(overridesOf(result)).toHaveLength(1)
+    })
+  })
 })
