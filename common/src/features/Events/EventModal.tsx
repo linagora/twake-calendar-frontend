@@ -37,6 +37,12 @@ const EventPopover: React.FC<{
    * it does not close it), not draggable out of the frame
    */
   embedded?: boolean
+  /**
+   * Embedded: true once a save is sent, false once it failed (a saved one
+   * stays true). The one source of « a save is in flight » for the page
+   * around (NewEventIntentPage)
+   */
+  onSavingChange?: (isSaving: boolean) => void
 }> = ({
   open,
   onClose,
@@ -48,7 +54,8 @@ const EventPopover: React.FC<{
   anchorEl,
   currentView,
   onCreated,
-  embedded = false
+  embedded = false,
+  onSavingChange
 }) => {
   const { t } = useI18n()
 
@@ -117,7 +124,10 @@ const EventPopover: React.FC<{
     userPersonalCalendars
   })
 
-  const { submitOnce, saving } = useSubmitOnce(handleSubmit)
+  const { submitOnce, saving } = useSubmitOnce(
+    handleSubmit,
+    onSavingChange
+  )
 
   const performClose = useCallback(() => {
     clearEventFormTempData('create')
