@@ -266,13 +266,20 @@ const PROPERTY_PARSERS: Record<
   }
 }
 
+// The tables are object literals: an own-key lookup keeps names inherited from
+// Object.prototype (__proto__, constructor) ignored, like any unknown property
+function ownHandler<T>(table: Record<string, T>, key: string): T | undefined {
+  const name = key.toLowerCase()
+  return Object.hasOwn(table, name) ? table[name] : undefined
+}
+
 function parseEventProperty(
   prop: VObjectProperty,
   event: Partial<CalendarEvent>,
   context: PropertyContext
 ): void {
   const [key, params, , value] = prop
-  const parser = PROPERTY_PARSERS[key.toLowerCase()]
+  const parser = ownHandler(PROPERTY_PARSERS, key)
   if (parser) {
     parser(params, value, event, context)
   }
@@ -342,7 +349,7 @@ function parseSingleAlarm(
   const valarmProps = valarm[1]
 
   for (const [key, , , value] of valarmProps) {
-    const handler = ALARM_PROPERTY_HANDLERS[key.toLowerCase()]
+    const handler = ownHandler(ALARM_PROPERTY_HANDLERS, key)
     if (handler) handler(alarm, value as VObjectValue)
   }
 
