@@ -25,6 +25,7 @@ import {
 } from '@common/components/Calendar/utils/constants'
 import { createMouseHandlers } from './mouseHandlers'
 import { EventChipSchedule } from '@common/components/Event/EventChip/EventChipSchedule'
+import { EventElementSync } from './EventElementSync'
 
 const PARTSTAT_CLASS_MAP: Record<string, string> = {
   DECLINED: 'declined-event',
@@ -62,6 +63,7 @@ export interface ViewHandlers {
   handleDayHeaderWillUnmount: (arg: MountInfo<DayHeaderInfo>) => void
   handleViewDidMount: (arg: MountInfo<ViewDisplayInfo>) => void
   handleViewWillUnmount: (arg: MountInfo<ViewDisplayInfo>) => void
+  handleEventClass: (arg: EventDisplayInfo) => string
   handleEventContent: (arg: EventDisplayInfo) => React.ReactElement
   handleEventDidMount: (arg: MountInfo<EventDisplayInfo>) => void
 }
@@ -225,77 +227,84 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     }
   }
 
-  const handleEventContent = (arg: EventDisplayInfo): React.ReactElement => {
-    if (isListView(arg.view.type)) {
-      return React.createElement(EventChipSchedule, {
-        arg,
-        calendars,
-        tempcalendars,
-        timezone,
-        upcommingEventId
-      })
-    }
-    return React.createElement(EventChip, {
-      arg,
-      calendars,
-      tempcalendars,
-      errorHandler
-    })
-  }
-
-  const handleEventDidMount = (arg: MountInfo<EventDisplayInfo>): void => {
-    if (arg.event.id) {
-      arg.el.setAttribute('data-event-id', arg.event.id)
-    }
-
-    const extendedProps = arg.event.extendedProps as {
+  const eventDetails = (
+    event: EventDisplayInfo['event']
+  ): { calendar?: Calendar; partstat?: string } => {
+    const extendedProps = event.extendedProps as {
       attendee?: userAttendee[]
       organizer?: { cal_address?: string }
       calId: string
     }
-
-    const calendar =
-      calendars[extendedProps.calId] ?? tempcalendars[extendedProps.calId]
-    const partstat = getCalendarOwnerAttendee(
-      calendars[extendedProps.calId],
-      extendedProps.attendee,
-      extendedProps.organizer
-    )?.partstat
-
-    // FullCalendar already opens a focused event on Enter and Space
-    if (
-      !isListView(arg.view.type) &&
-      arg.el.tabIndex === 0 &&
-      arg.event.start
-    ) {
-      arg.el.setAttribute('role', 'button')
-      arg.el.setAttribute(
-        'aria-label',
-        eventAccessibleLabel({
-          title: arg.event.title,
-          start: arg.event.start,
-          end: arg.event.end,
-          allDay: arg.event.allDay,
-          calendarName: calendarLabel(calendar, userId, t),
-          partstat,
-          timeZone: timezone,
-          t
-        })
-      )
-    }
-
-    if (!partstat) return
-
-    const statusClass = PARTSTAT_CLASS_MAP[partstat]
-    if (statusClass) {
-      arg.el.classList.remove(
-        'declined-event',
-        'tentative-event',
-        'needs-action-event'
-      )
-      arg.el.classList.add(statusClass)
+    return {
+      calendar:
+        calendars[extendedProps.calId] ?? tempcalendars[extendedProps.calId],
+      partstat: getCalendarOwnerAttendee(
+        calendars[extendedProps.calId],
+        extendedProps.attendee,
+        extendedProps.organizer
+      )?.partstat
     }
   }
+
+  // Re-evaluated by FullCalendar on every render, unlike eventDidMount
+  const handleEventClass = ({ event }: EventDisplayInfo): string => {
+    const { partstat } = eventDetails(event)
+    return (partstat && PARTSTAT_CLASS_MAP[partstat]) ?? ''
+  }
+
+  const syncEventElement = (el: HTMLElement, arg: EventDisplayInfo): void => {
+    if (arg.event.id) {
+      el.setAttribute('data-event-id', arg.event.id)
+    }
+
+    // FullCalendar already opens a focused event on Enter and Space
+    if (isListView(arg.view.type) || el.tabIndex !== 0 || !arg.event.start) {
+      return
+    }
+
+    const { calendar, partstat } = eventDetails(arg.event)
+    el.setAttribute('role', 'button')
+    el.setAttribute(
+      'aria-label',
+      eventAccessibleLabel({
+        title: arg.event.title,
+        start: arg.event.start,
+        end: arg.event.end,
+        allDay: arg.event.allDay,
+        calendarName: calendarLabel(calendar, userId, t),
+        partstat,
+        timeZone: timezone,
+        t
+      })
+    )
+  }
+
+  const eventChip = (arg: EventDisplayInfo): React.ReactElement =>
+    isListView(arg.view.type)
+      ? React.createElement(EventChipSchedule, {
+          arg,
+          calendars,
+          tempcalendars,
+          timezone,
+          upcommingEventId
+        })
+      : React.createElement(EventChip, {
+          arg,
+          calendars,
+          tempcalendars,
+          errorHandler
+        })
+
+  // An answer or a move re-renders the content without remounting the element
+  const handleEventContent = (arg: EventDisplayInfo): React.ReactElement =>
+    React.createElement(
+      EventElementSync,
+      { sync: (el: HTMLElement) => syncEventElement(el, arg) },
+      eventChip(arg)
+    )
+
+  const handleEventDidMount = (arg: MountInfo<EventDisplayInfo>): void =>
+    syncEventElement(arg.el, arg)
 
   return {
     handleNowIndicatorContent,
@@ -304,6 +313,7 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     handleDayHeaderWillUnmount,
     handleViewDidMount,
     handleViewWillUnmount,
+    handleEventClass,
     handleEventContent,
     handleEventDidMount
   }
