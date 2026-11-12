@@ -1,15 +1,4 @@
 declare module '*.styl'
-declare module 'cozy-interapp' {
-  export default class Intents {
-    constructor(options?: Record<string, unknown>)
-    create(
-      action: string,
-      type: string,
-      data?: Record<string, unknown>,
-      permissions?: string[]
-    ): unknown
-  }
-}
 
 declare module 'classnames' {
   type ClassValue =
