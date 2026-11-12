@@ -364,8 +364,10 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
 
   const datesSet = (arg: DatesSetInfo): void => {
     onViewChange?.(arg.view.type)
+    // the calendar that fired the event: calendarRef may not point to it yet,
+    // and arg.start is the first cell of the grid, not the date navigated to
     const calendarCurrentDate =
-      calendarRef.current?.getDate() || new Date(arg.start)
+      arg.view.calendar.getDate() || new Date(arg.view.currentStart)
     setDisplayedDateAndRange(calendarCurrentDate)
     const today = new Date()
 
