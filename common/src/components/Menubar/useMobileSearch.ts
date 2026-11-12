@@ -14,7 +14,7 @@ import { buildQuery } from '@common/features/Search/searchUtils'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import { useCallback, useMemo, useState } from 'react'
 
 type FilterKey = 'organizers' | 'attendees'
@@ -89,7 +89,7 @@ export function useCalendars(): CalendarsResult {
   const personalCalendars = useMemo(
     (): Calendar[] =>
       userId
-        ? calendars.filter(c => extractEventBaseUuid(c.id) === userId)
+        ? calendars.filter(c => extractCalendarOwnerId(c.id) === userId)
         : [],
     [calendars, userId]
   )
@@ -97,7 +97,8 @@ export function useCalendars(): CalendarsResult {
     (): Calendar[] =>
       userId
         ? calendars.filter(
-            c => extractEventBaseUuid(c.id) !== userId && !c.owner?.teamCalendar
+            c =>
+              extractCalendarOwnerId(c.id) !== userId && !c.owner?.teamCalendar
           )
         : [],
     [calendars, userId]
@@ -107,7 +108,8 @@ export function useCalendars(): CalendarsResult {
     (): Calendar[] =>
       userId
         ? calendars.filter(
-            c => extractEventBaseUuid(c.id) !== userId && c.owner?.teamCalendar
+            c =>
+              extractCalendarOwnerId(c.id) !== userId && c.owner?.teamCalendar
           )
         : [],
     [calendars, userId]

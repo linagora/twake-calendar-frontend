@@ -60,6 +60,12 @@ export function makeDeleteEventInstanceJCal(
   const dtstartProp = masterProps.find(([k]) => k.toLowerCase() === 'dtstart')
   const dtstartTzid = getTzidParam(dtstartProp?.[1])
 
+  // The zone a floating value is read in. seriesEvent.timezone comes from the
+  // DTSTART TZID only: it is undefined for a UTC or floating DTSTART and unknown
+  // for a custom zone, so every comparison below anchors on this same zone
+  // rather than falling back to a wall-clock string match. See #2066.
+  const seriesZone = knownZone(dtstartTzid, seriesEvent.timezone || 'UTC')
+
   const valueType = seriesEvent.allday ? 'date' : 'date-time'
   const useTzidForm = !seriesEvent.allday && Boolean(dtstartTzid)
   const exdateParams: Record<string, string> = useTzidForm
@@ -68,10 +74,7 @@ export function makeDeleteEventInstanceJCal(
 
   let exdateProperty = exdateValue as VObjectValue
   if (useTzidForm) {
-    const zoned = moment.tz(
-      exdateValue,
-      knownZone(dtstartTzid, seriesEvent.timezone || 'UTC')
-    )
+    const zoned = moment.tz(exdateValue, seriesZone)
     exdateProperty = zoned.format('YYYY-MM-DDTHH:mm:ss')
   }
 
@@ -86,7 +89,7 @@ export function makeDeleteEventInstanceJCal(
         value: exdateProperty,
         tzid: useTzidForm ? ianaTzid(dtstartTzid) : undefined
       },
-      seriesEvent.timezone
+      seriesZone
     )
   })
 
@@ -111,7 +114,7 @@ export function makeDeleteEventInstanceJCal(
     return !sameRecurrence(
       { value: recurrenceIdProp[3], tzid: overrideTzid },
       { value: exdateValue },
-      seriesEvent.timezone
+      seriesZone
     ) // Remove matching override
   })
 

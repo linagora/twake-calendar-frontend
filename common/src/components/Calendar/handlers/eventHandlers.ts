@@ -27,6 +27,7 @@ import {
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
+import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import {
   CalendarApi,
   DateSelectInfo,
@@ -304,7 +305,7 @@ export const createEventHandlers = (
   }): Promise<void> => {
     const masterEventToFetch = {
       ...event,
-      uid: event.uid.split('/')[0]
+      uid: extractEventBaseUuid(event.uid)
     }
     const response = await fetchEvent(masterEventToFetch)
     const master = parseFetchedEvent(masterEventToFetch, response, true)

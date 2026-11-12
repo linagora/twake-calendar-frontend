@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #1949 #1978 #2001 #2033 Editing all the events of a series keeps `BYHOUR`, `UNTIL`, the overrides, `EXDATE`s and `RDATE`s consistent when the time of day changes
 - #1948 A recurring event whose time zone is set on edit is saved with a UTC `UNTIL`
 - #1945 Editing an occurrence in the hour repeated at the end of summer time edits the right occurrence
-- #1938 #1939 #1977 #2034 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
+- #1938 #1939 #1977 #2034 #2067 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
 - #1950 Answering "All the events" works for a series whose time zone is unknown
 - #1943 A new organizer listed twice among the attendees is written once, with their answer kept
 - Removing the footer of a description no longer leaves it in the form or loses a note written after it
@@ -34,10 +34,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #1993 An event whose VTIMEZONE cannot be expanded can still be opened
 - #2015 The forms opened from an event link are shown, centred
 - #1981 #1980 #1983 #1984 #1995 Events with an `RRULE` without `FREQ`, an unreadable start, `UNTIL` or `COUNT` are still shown and can be opened, without "Invalid Date" or made-up ends
-- #1982 #2037 The printed schedule puts events on the right days, including on 25-hour days
+- #1982 #2037 #2059 The printed schedule puts events on the right days, including on 25-hour days and across a spring DST change
 - #2046 Plain-text descriptions are shown as typed in the preview, including text between angle brackets
 - #2044 Opening a series whose answered occurrence is stored before its master reads the rule of the series
 - #2072 The `REPEAT`, `DURATION`, `ATTACH` and `X-` properties of an alarm are kept when the event is saved
+- #2077 The `DELEGATED-TO`, `DELEGATED-FROM`, `SENT-BY`, `LANGUAGE`, `SCHEDULE-STATUS` and `X-` parameters of attendees are kept when the event is saved
+- #2063 The status of an event (cancelled, tentative) is kept when it is saved instead of becoming confirmed
+- #2071 An unrecognized event class is treated as private instead of being saved as public
+- #2068 #2069 Events with a property named like `__proto__` are no longer dropped from the calendar
+- #2065 A Windows time zone name (such as "Pacific Standard Time (Mexico)") is read in its IANA zone even when a VTIMEZONE is stored, so editing all the events or one occurrence no longer shifts or duplicates overrides
+- #2066 Deleting an occurrence of a series without a known time zone removes its override
+- #2064 An event whose UID contains a "/" is saved under its own UID
 - #2047 The mini calendar selects the day of the navigated month after Next month
 - #2045 The name and answer class of an event chip stay current after an answer, a move or a change of calendar
 - #1805 Fixed the double draggable modal
@@ -46,9 +53,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 ### Security
 
 - Secrets and email addresses are better scrubbed from Sentry reports: credentials in percent-encoded nested URLs and parameter names, non-ASCII and percent-encoded addresses, with no loss of unrelated parameters such as `status-code`
+- #2074 Email addresses glued after another address are now masked in Sentry reports
 - #1940 #1944 Prevented ReDoS in the email scrubbing of Sentry reports and in attendee address validation (reachable through the `/newEvent?attendee=` deep link)
 - #1979 The `data-*` and `aria-*` attributes of event descriptions are dropped
 - #1994 Links whose scheme contains a digit are refused in event descriptions
+
+### Kept from before
+
+- #1938 #1939 #1977 #2034 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
+- #1982 #2037 The printed schedule puts events on the right days, including on 25-hour days
 
 ## [1.4.0] - 2026-11-04
 

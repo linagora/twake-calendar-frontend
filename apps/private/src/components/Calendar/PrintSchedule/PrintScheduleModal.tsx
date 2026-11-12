@@ -3,7 +3,7 @@ import { store } from '@common/app/store'
 import { extractEvents } from '@common/components/Calendar/utils/calendarUtils'
 import { getCalendarDetail } from '@common/features/Calendars/CalendarSlice'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
@@ -124,7 +124,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
     const calendar = calendarsList[calId]
     if (!calendar) return undefined
     const ownerName = makeDisplayName(calendar)
-    const isOwnCalendar = extractEventBaseUuid(calId) === userId
+    const isOwnCalendar = extractCalendarOwnerId(calId) === userId
     return {
       calendarName: renameDefault(
         calendar.name,

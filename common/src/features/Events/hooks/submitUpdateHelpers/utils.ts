@@ -14,7 +14,10 @@ import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import {
+  extractEventBaseUuid,
+  splitEventKey
+} from '@common/utils/extractEventBaseUuid'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 import { rewriteAttendeesForOrganizerChange } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
 import {
@@ -287,7 +290,9 @@ export function prepareUpdateData({
   const targetCalendar = calList[values.calendarid]
   if (!targetCalendar) return null
 
-  const [baseUID, recurrenceId] = event.uid.split('/')
+  const { baseUid: baseUID, occurrenceKey: recurrenceId } = splitEventKey(
+    event.uid
+  )
 
   const { startISO, endISO } = keepStoredSeconds(
     event,

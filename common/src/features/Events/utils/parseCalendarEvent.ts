@@ -31,7 +31,6 @@ const KNOWN_PROPS = new Set([
   'dtend',
   'class',
   'x-openpaas-videoconference',
-  'x-openpaas-booking-link',
   'summary',
   'description',
   'location',
@@ -92,7 +91,8 @@ function parseAttendeeProperty(
   value: VObjectValue,
   event: Partial<CalendarEvent>
 ): void {
-  const paramsObj = params as Record<string, string>
+  const paramsObj = (params ?? {}) as Record<string, string>
+  const { cn, partstat, rsvp, role, cutype, ...otherParams } = paramsObj
   const calAddress = safeString(value).replace(/^mailto:/i, '')
 
   if (!event.attendee) {
@@ -106,12 +106,13 @@ function parseAttendeeProperty(
   if (!alreadyExists) {
     event.attendee.push(
       new userAttendee({
-        cn: paramsObj?.cn,
+        cn,
         cal_address: calAddress,
-        partstat: paramsObj?.partstat as userAttendee['partstat'],
-        rsvp: paramsObj?.rsvp as userAttendee['rsvp'],
-        role: paramsObj?.role as userAttendee['role'],
-        cutype: paramsObj?.cutype as userAttendee['cutype']
+        partstat: partstat as userAttendee['partstat'],
+        rsvp: rsvp as userAttendee['rsvp'],
+        role: role as userAttendee['role'],
+        cutype: cutype as userAttendee['cutype'],
+        otherParams
       })
     )
   }
@@ -190,10 +191,15 @@ const PROPERTY_PARSERS: Record<
     parseDateProperty(params, value, event, false)
   },
   class: (params, value, event) => {
-    const classVal = safeString(value).toUpperCase()
-    if (['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(classVal)) {
-      event.class = classVal as CalendarEvent['class']
+    const classVal = safeString(value).trim().toUpperCase()
+    if (!classVal) {
+      return
     }
+    // RFC 5545 3.8.1.3: unrecognized x-name / iana-token values MUST be
+    // treated as PRIVATE, never defaulted to PUBLIC.
+    event.class = ['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(classVal)
+      ? (classVal as CalendarEvent['class'])
+      : 'PRIVATE'
   },
   'x-openpaas-videoconference': (params, value, event) => {
     event.x_openpass_videoconference = safeString(value)
@@ -266,13 +272,20 @@ const PROPERTY_PARSERS: Record<
   }
 }
 
+// The tables are object literals: an own-key lookup keeps names inherited from
+// Object.prototype (__proto__, constructor) ignored, like any unknown property
+function ownHandler<T>(table: Record<string, T>, key: string): T | undefined {
+  const name = key.toLowerCase()
+  return Object.hasOwn(table, name) ? table[name] : undefined
+}
+
 function parseEventProperty(
   prop: VObjectProperty,
   event: Partial<CalendarEvent>,
   context: PropertyContext
 ): void {
   const [key, params, , value] = prop
-  const parser = PROPERTY_PARSERS[key.toLowerCase()]
+  const parser = ownHandler(PROPERTY_PARSERS, key)
   if (parser) {
     parser(params, value, event, context)
   }
@@ -288,6 +301,9 @@ function processEventUid(
   if (recurrenceId && event.uid) {
     event.uid = `${event.uid}/${occurrenceKey(recurrenceId, recurrenceTzid, event.timezone)}`
     event.recurrenceId = recurrenceId
+    if (recurrenceTzid) {
+      event.recurrenceTzid = recurrenceTzid
+    }
   }
 }
 
@@ -355,7 +371,7 @@ function parseSingleAlarm(
   const valarmProps = valarm[1]
 
   for (const [key, , , value] of valarmProps) {
-    const handler = ALARM_PROPERTY_HANDLERS[key.toLowerCase()]
+    const handler = ownHandler(ALARM_PROPERTY_HANDLERS, key)
     if (handler) handler(alarm, value as VObjectValue)
   }
 

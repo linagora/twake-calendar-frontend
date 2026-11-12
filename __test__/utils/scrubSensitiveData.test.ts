@@ -91,6 +91,60 @@ describe('scrubSensitiveData', () => {
       )
     })
 
+    it('masks an address glued after another one', () => {
+      expect(
+        scrubText(
+          'GET /api/x?body=Contact%20alice@example.org%0Abob@example.net'
+        )
+      ).toBe('GET /api/x?body=[email][email]')
+      expect(scrubText('alice@example.org-bob@example.net')).not.toMatch(/bob/)
+      expect(scrubText('alice@example.org2bob@example.net')).toBe(
+        '[email][email]'
+      )
+      expect(
+        scrubText('ri8f1x@jym8h82g.mah8zcr.z548s8@3.1x.kxk"')
+      ).not.toContain('@')
+    })
+
+    it('masks the domain of an address glued by letters after another one', () => {
+      expect(scrubText('alice@example.orgbob@example.net')).toBe('[email]')
+      expect(scrubText('alice@example.orgbob%40example.net')).toBe('[email]')
+      expect(scrubText('alice@example.org@example.net')).toBe('[email]')
+      expect(
+        scrubText('a alice@example.orgbob@example.netcarol@example.com b')
+      ).toBe('a [email] b')
+    })
+
+    it('keeps the text glued after an address that has no domain', () => {
+      expect(scrubText('alice@example.org@nowhere')).toBe('[email]@nowhere')
+    })
+
+    it('is idempotent on glued addresses', () => {
+      for (const text of [
+        'alice@example.org2bob@example.net',
+        'alice@example.org2bob',
+        'alice@example.orgbob@example.net',
+        'x@@alice@example.org-suffix@nowhere',
+        'GET /api/x?body=Contact%20alice@example.org%0Abob@example.net'
+      ]) {
+        const once = scrubText(text)
+        expect(scrubText(once)).toBe(once)
+      }
+    })
+
+    it('keeps the text glued after an address that is not an address', () => {
+      expect(scrubText('alice@example.org2bob')).toBe('[email]2bob')
+    })
+
+    it('masks a run of glued addresses in linear time', () => {
+      for (const unit of ['a@b.cc2', 'a@b.cc%0A', 'a@b.cc-x%40', 'a@b.cca']) {
+        const text = unit.repeat(Math.floor(65536 / unit.length))
+        const t0 = performance.now()
+        expect(scrubText(text)).not.toContain('a@')
+        expect(performance.now() - t0).toBeLessThan(200)
+      }
+    })
+
     it('scrubs a long run without an address in linear time', () => {
       for (const unit of [
         'a.',

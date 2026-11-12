@@ -2,7 +2,7 @@ import type { JSX } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { canAdministerCalendar } from '@common/features/Calendars/utils/calendarPermissions'
 import { Calendar } from '@common/types/CalendarTypes'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import {
   Box,
   TextField,
@@ -51,7 +51,7 @@ export function SettingsTab({
   const [toggleDesc, setToggleDesc] = useState(Boolean(description))
   const userData = useAppSelector(state => state.user.userData)
   const userId = userData?.openpaasId ?? ''
-  const isOwn = calendar ? extractEventBaseUuid(calendar.id) === userId : true
+  const isOwn = calendar ? extractCalendarOwnerId(calendar.id) === userId : true
   // The public visibility is managed by whoever administers the calendar: its
   // owner, or an administrator of a shared, team or resource calendar.
   const canManageVisibility = calendar

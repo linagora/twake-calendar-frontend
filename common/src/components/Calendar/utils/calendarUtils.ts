@@ -6,7 +6,7 @@ import { isHiddenByPendingDeletion } from '@common/features/Events/eventDeletion
 import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee'
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
@@ -169,7 +169,7 @@ function buildConvertedEvent({
   )
 
   const isOrganiser = isEventOrganiser(event, effectiveEmail, calendar)
-  const isPersonalEvent = extractEventBaseUuid(event.calId) === userId
+  const isPersonalEvent = extractCalendarOwnerId(event.calId) === userId
 
   const { class: classification, color, ...eventProps } = event
   const convertedEvent: ConvertedEvent = {

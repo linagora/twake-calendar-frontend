@@ -2,7 +2,7 @@ import { useAppSelector } from '@common/app/hooks'
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
 import { ensureSdkSignedIn } from '@common/utils/sdkSession'
 import type { Sdk } from '@linagora/twake-sdk'
-import Intents from 'cozy-interapp'
+import Intents, { type StartedIntent } from 'cozy-interapp'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
@@ -126,20 +126,8 @@ interface StartTdrivePickerOptions {
   containerRef: React.RefObject<HTMLDivElement | null>
   readyCallbackRef: React.MutableRefObject<(() => void) | null>
   cancellationRef: PickerCancellation
-  intentRef: React.MutableRefObject<StartedCozyIntent | null>
+  intentRef: React.MutableRefObject<StartedIntent | null>
   t: (key: string) => string
-}
-
-// cozy-interapp attaches stop() to the promise returned by start(), not to
-// the intent returned by create(): stop() destroys the intent iframe.
-type StartedCozyIntent = Promise<unknown> & { stop: () => void }
-
-// The intent returned by create() is the intent creation request promise.
-type CozyIntent = Promise<unknown> & {
-  start: (
-    element: HTMLElement,
-    options: { onReady?: () => void; onReadyToUse?: () => void }
-  ) => StartedCozyIntent
 }
 
 async function startTdrivePicker({
@@ -170,7 +158,7 @@ async function startTdrivePicker({
       displayCloseButton: true
     },
     ['GET']
-  ) as CozyIntent
+  )
 
   if (!containerRef.current) {
     throw new Error('Picker container is not mounted')
@@ -223,7 +211,7 @@ export function useTdrivePicker({
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const intentRef = useRef<StartedCozyIntent | null>(null)
+  const intentRef = useRef<StartedIntent | null>(null)
   const readyCallbackRef = useRef<(() => void) | null>(null)
   const activeCancellationRef = useRef<PickerCancellation | null>(null)
 

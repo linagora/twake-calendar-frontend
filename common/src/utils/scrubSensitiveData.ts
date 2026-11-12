@@ -42,14 +42,25 @@ const ENCODED_SENSITIVE_PARAM_REGEX = new RegExp(
 const BOOKING_TOKEN_PATH_REGEX = /(\/booking\/confirmed\/)[^/?#\s"'<>]+/gi
 // Unicode classes: internationalized mailboxes and domains (ünal@例え.jp) are
 // masked too. \p{M} keeps combining marks (decomposed accents, Indic scripts).
-// A match only starts at the beginning of a run of local part characters:
-// starting inside the run would scan the rest of it again at every position,
-// in time quadratic in its length.
 // A domain only accepts percent-encoded non-ASCII bytes (%80 to %FF, UTF-8): the
 // encoded separators (%40, %2C...) still end it, which keeps the scan linear and
 // what follows the address unmasked.
-const EMAIL_REGEX =
-  /(?<![\p{L}\p{M}\p{N}._%+-])[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/giu
+// The text is cut into runs of address characters (local part characters and
+// `@`). Inside a run, an address is only looked for at the start of a local
+// part (start of the run, after an `@`) or right where the previous address
+// ended, as in `alice@example.org2bob@example.net`: starting at every position
+// would scan the rest of the run again each time, in time quadratic in its
+// length.
+const LOCAL_PART_SKIP_REGEX = /[\p{L}\p{M}\p{N}._%+-]*@*/uy
+const ADDRESS_RUN_REGEX =
+  /(?<![\p{L}\p{M}\p{N}._%+@-])[\p{L}\p{M}\p{N}._%+@-]+/gu
+const EMAIL_AT_POSITION_REGEX =
+  /[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/iuy
+// The domain of an address glued after another one by letters only, as in
+// `alice@example.orgbob@example.net`: the top level domain of the first address
+// swallowed the local part of the second one, leaving `@example.net`.
+const GLUED_DOMAIN_AT_POSITION_REGEX =
+  /(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/iuy
 
 const MAX_DEPTH = 10
 
@@ -62,7 +73,59 @@ export function scrubText(text: string): string {
     .replace(SENSITIVE_PARAM_REGEX, `$1$2=${FILTERED}`)
     .replace(ENCODED_SENSITIVE_PARAM_REGEX, `$1$2%3D${FILTERED}`)
     .replace(BOOKING_TOKEN_PATH_REGEX, `$1${FILTERED}`)
-    .replace(EMAIL_REGEX, EMAIL_MASK)
+    .replace(ADDRESS_RUN_REGEX, maskEmailsInRun)
+}
+
+function maskEmailsInRun(run: string): string {
+  let masked = ''
+  let position = 0
+  while (position < run.length) {
+    const addressEnd = emailEndAt(run, position)
+    if (addressEnd !== undefined) {
+      masked += EMAIL_MASK
+      position = skipGluedDomains(run, addressEnd)
+    } else {
+      const nextStart = nextLocalPartStart(run, position)
+      masked += run.slice(position, nextStart)
+      position = nextStart
+    }
+  }
+  return masked
+}
+
+function emailEndAt(run: string, position: number): number | undefined {
+  return matchEndAt(EMAIL_AT_POSITION_REGEX, run, position)
+}
+
+// The domains glued right after a masked address are masked with it: the
+// boundary between the addresses cannot be told apart, so the whole run goes.
+// A loop rather than a recursion: a long run of glued addresses would overflow
+// the stack.
+function skipGluedDomains(run: string, position: number): number {
+  let end = position
+  let domainEnd = matchEndAt(GLUED_DOMAIN_AT_POSITION_REGEX, run, end)
+  while (domainEnd !== undefined) {
+    end = domainEnd
+    domainEnd = matchEndAt(GLUED_DOMAIN_AT_POSITION_REGEX, run, end)
+  }
+  return end
+}
+
+function matchEndAt(
+  stickyRegex: RegExp,
+  run: string,
+  position: number
+): number | undefined {
+  stickyRegex.lastIndex = position
+  return stickyRegex.test(run) ? stickyRegex.lastIndex : undefined
+}
+
+// Skips the local part starting at `position` and the `@` that follow it. A run
+// only holds such characters, so this always moves forward.
+function nextLocalPartStart(run: string, position: number): number {
+  LOCAL_PART_SKIP_REGEX.lastIndex = position
+  LOCAL_PART_SKIP_REGEX.test(run)
+  return Math.max(LOCAL_PART_SKIP_REGEX.lastIndex, position + 1)
 }
 
 /**
