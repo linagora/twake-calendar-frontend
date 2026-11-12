@@ -1,0 +1,3 @@
+# Agents
+
+- `CHANGELOG.md` is managed by twake-changelog, the changelog automation of the Twake software factory: it reviews the commits merged since its last pass and opens a pull request writing them into `[Unreleased]`, and a section per version released since. Do not edit `CHANGELOG.md` in a change: give your commit a subject a user can read (conventional commits: `feat:`, `fix:`, `feat!:` for a breaking change), name its issue or pull request, and put what an operator must do when upgrading under `BREAKING CHANGE:` or an `Upgrade` section of the commit message. To fix a wording, edit it in the pull request of twake-changelog.
