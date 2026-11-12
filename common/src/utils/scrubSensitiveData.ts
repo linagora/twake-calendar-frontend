@@ -56,6 +56,11 @@ const ADDRESS_RUN_REGEX =
   /(?<![\p{L}\p{M}\p{N}._%+@-])[\p{L}\p{M}\p{N}._%+@-]+/gu
 const EMAIL_AT_POSITION_REGEX =
   /[\p{L}\p{M}\p{N}._%+-]+(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/iuy
+// The domain of an address glued after another one by letters only, as in
+// `alice@example.orgbob@example.net`: the top level domain of the first address
+// swallowed the local part of the second one, leaving `@example.net`.
+const GLUED_DOMAIN_AT_POSITION_REGEX =
+  /(?:@|%40)(?:[\p{L}\p{M}\p{N}.-]|%[89A-F][0-9A-F])+\.(?:[\p{L}\p{M}]|%[89A-F][0-9A-F]){2,}/iuy
 
 const MAX_DEPTH = 10
 
@@ -78,7 +83,7 @@ function maskEmailsInRun(run: string): string {
     const addressEnd = emailEndAt(run, position)
     if (addressEnd !== undefined) {
       masked += EMAIL_MASK
-      position = addressEnd
+      position = skipGluedDomains(run, addressEnd)
     } else {
       const nextStart = nextLocalPartStart(run, position)
       masked += run.slice(position, nextStart)
@@ -89,10 +94,30 @@ function maskEmailsInRun(run: string): string {
 }
 
 function emailEndAt(run: string, position: number): number | undefined {
-  EMAIL_AT_POSITION_REGEX.lastIndex = position
-  return EMAIL_AT_POSITION_REGEX.test(run)
-    ? EMAIL_AT_POSITION_REGEX.lastIndex
-    : undefined
+  return matchEndAt(EMAIL_AT_POSITION_REGEX, run, position)
+}
+
+// The domains glued right after a masked address are masked with it: the
+// boundary between the addresses cannot be told apart, so the whole run goes.
+// A loop rather than a recursion: a long run of glued addresses would overflow
+// the stack.
+function skipGluedDomains(run: string, position: number): number {
+  let end = position
+  let domainEnd = matchEndAt(GLUED_DOMAIN_AT_POSITION_REGEX, run, end)
+  while (domainEnd !== undefined) {
+    end = domainEnd
+    domainEnd = matchEndAt(GLUED_DOMAIN_AT_POSITION_REGEX, run, end)
+  }
+  return end
+}
+
+function matchEndAt(
+  stickyRegex: RegExp,
+  run: string,
+  position: number
+): number | undefined {
+  stickyRegex.lastIndex = position
+  return stickyRegex.test(run) ? stickyRegex.lastIndex : undefined
 }
 
 // Skips the local part starting at `position` and the `@` that follow it. A run
