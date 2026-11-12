@@ -92,7 +92,8 @@ function parseAttendeeProperty(
   value: VObjectValue,
   event: Partial<CalendarEvent>
 ): void {
-  const paramsObj = params as Record<string, string>
+  const paramsObj = (params ?? {}) as Record<string, string>
+  const { cn, partstat, rsvp, role, cutype, ...otherParams } = paramsObj
   const calAddress = safeString(value).replace(/^mailto:/i, '')
 
   if (!event.attendee) {
@@ -106,12 +107,13 @@ function parseAttendeeProperty(
   if (!alreadyExists) {
     event.attendee.push(
       new userAttendee({
-        cn: paramsObj?.cn,
+        cn,
         cal_address: calAddress,
-        partstat: paramsObj?.partstat as userAttendee['partstat'],
-        rsvp: paramsObj?.rsvp as userAttendee['rsvp'],
-        role: paramsObj?.role as userAttendee['role'],
-        cutype: paramsObj?.cutype as userAttendee['cutype']
+        partstat: partstat as userAttendee['partstat'],
+        rsvp: rsvp as userAttendee['rsvp'],
+        role: role as userAttendee['role'],
+        cutype: cutype as userAttendee['cutype'],
+        otherParams
       })
     )
   }
