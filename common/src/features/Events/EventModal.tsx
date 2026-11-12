@@ -33,7 +33,8 @@ const EventPopover: React.FC<{
   onCreated?: (event: CalendarEvent) => void
   /**
    * Framed by another page, the form is all the page shows: no expand arrow
-   * (More options still opens the full form), no backdrop
+   * (More options still opens the full form), no backdrop (a click beside
+   * it does not close it), not draggable out of the frame
    */
   embedded?: boolean
 }> = ({
@@ -175,7 +176,7 @@ const EventPopover: React.FC<{
         // Framed, the form is the whole page: the error of a failed save,
         // beside it, must stay reachable with the keyboard
         disableEnforceFocus={embedded}
-        draggable={!showMore}
+        draggable={!showMore && !embedded}
         actions={
           <EventActions
             showExpandedBtn={!showMore}
