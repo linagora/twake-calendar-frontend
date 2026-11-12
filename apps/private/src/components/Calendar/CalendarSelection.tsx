@@ -22,7 +22,7 @@ import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { defaultColors } from '@common/utils/defaultColors'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { extractCalendarOwnerId } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
 import { setVisibleBookingLinks } from '@common/utils/storage/setVisibleBookingLinks'
@@ -478,7 +478,7 @@ const getCalendarCategory = (
   id: string,
   userId: string
 ): keyof CalendarBuckets => {
-  if (extractEventBaseUuid(id) === userId) return 'personal'
+  if (extractCalendarOwnerId(id) === userId) return 'personal'
   const owner = cal?.owner
   if (owner?.resource) return 'resources'
   if (owner?.teamCalendar) return 'teams'
