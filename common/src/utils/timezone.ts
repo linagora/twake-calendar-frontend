@@ -113,10 +113,20 @@ function toIcalTimezone(vtimezone: VCalComponent): ICAL.Timezone | undefined {
   }
 }
 
+/**
+ * Whether the TZID reads as a moment zone, directly or through the alias table
+ * (a Windows name such as "Pacific Standard Time (Mexico)"): the client reads,
+ * shows and rewrites such a TZID in that zone, so a VTIMEZONE stored under the
+ * same name must not give it other offsets.
+ */
+function hasMomentZone(tzid: string): boolean {
+  return isMomentZone(tzid) || isMomentZone(resolveTimezone(tzid))
+}
+
 // The TZID registered for the VTIMEZONE, if it is a custom one
 function registerCustomTimezone(vtimezone: VCalComponent): string[] {
   const tzid = vtimezoneTzid(vtimezone)
-  if (!tzid || isMomentZone(tzid) || ICAL.TimezoneService.has(tzid)) {
+  if (!tzid || hasMomentZone(tzid) || ICAL.TimezoneService.has(tzid)) {
     return []
   }
   const zone = toIcalTimezone(vtimezone)
@@ -273,7 +283,7 @@ function wallClockInZoneToISO(
 export function storedTimezone(
   timezone: string | undefined
 ): ICAL.Timezone | undefined {
-  if (!timezone || isMomentZone(timezone)) return undefined
+  if (!timezone || hasMomentZone(timezone)) return undefined
   return icalTimezone(timezone)
 }
 
