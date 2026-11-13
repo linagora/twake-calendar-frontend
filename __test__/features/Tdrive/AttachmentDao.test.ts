@@ -1,9 +1,10 @@
 import {
   toAttachmentUploadFailure,
+  UPLOAD_TIMEOUT_MS,
   uploadAttachment
 } from '@common/features/Tdrive/AttachmentDao'
 import { api } from '@common/utils/apiUtils'
-import { HTTPError } from 'ky'
+import { HTTPError, TimeoutError } from 'ky'
 
 vi.mock('@common/utils/apiUtils', () => ({
   api: { post: vi.fn() }
@@ -44,6 +45,15 @@ describe('uploadAttachment', () => {
           'X-Filename': 'compte%20rendu%20%C3%A9.pdf'
         }
       })
+    )
+  })
+
+  it('gives up on a stalled upload after a while', async () => {
+    await uploadAttachment(new File(['a'], 'a.txt'))
+
+    expect(mockPost).toHaveBeenCalledWith(
+      'api/attachments',
+      expect.objectContaining({ timeout: UPLOAD_TIMEOUT_MS })
     )
   })
 
@@ -88,6 +98,11 @@ describe('toAttachmentUploadFailure', () => {
 
   it('has nothing to tell on a 401: the user signs in again', () => {
     expect(toAttachmentUploadFailure(httpError(401))).toBeNull()
+  })
+
+  it('tells a request that timed out in the browser as a timeout', () => {
+    const request = new Request('https://calendar.example.com/api/attachments')
+    expect(toAttachmentUploadFailure(new TimeoutError(request))).toBe('timeout')
   })
 
   it('reports a network error as a failed upload', () => {
