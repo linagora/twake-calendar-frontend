@@ -28,9 +28,12 @@ export function parseMoment(
 ): moment.Moment | null {
   if (!prop || typeof prop[3] !== 'string') return null
   const tzidParam = getTzidParam(prop[1])
-  // A TZID only defined by a stored VTIMEZONE is read with it
-  const tzid = storedTimezone(tzidParam)
-    ? (tzidParam as string)
+  // A TZID only defined by a stored VTIMEZONE is read with it. A floating
+  // value is read in the fallback zone, stored VTIMEZONE included, as
+  // parseFetchedEvent reads it: as UTC it would not match the series
+  const zone = tzidParam ?? fallbackTimezone
+  const tzid = storedTimezone(zone)
+    ? zone
     : knownZone(tzidParam, fallbackTimezone)
   const val = prop[3]
   const m = val.endsWith('Z') ? moment.utc(val) : readWallClock(val, tzid)
