@@ -220,6 +220,24 @@ describe('scrubSensitiveData', () => {
         '?return=https%3A%2F%2Fcal.example%2Fcb%3Fstate%3D[Filtered]%26iss%3Dsso%23top'
       )
     })
+
+    it('is idempotent when a lone % follows an encoded value', () => {
+      const text =
+        '&redirect_uri=https%3A%2F%2Fcal.example%2Fcb%3Fcode%3Dabc123%zz-alice@example.org'
+      const once = scrubText(text)
+      expect(once).not.toContain('abc123')
+      expect(once).not.toContain('alice')
+      expect(scrubText(once)).toBe(once)
+      expect(scrubDeep(scrubDeep({ message: text }))).toEqual(
+        scrubDeep({ message: text })
+      )
+    })
+
+    it('keeps the encoded separators ending an encoded value after a lone %', () => {
+      expect(scrubText('%3Fcode%3Dab%zz%26iss%3Dsso%23top')).toBe(
+        '%3Fcode%3D[Filtered]%26iss%3Dsso%23top'
+      )
+    })
   })
 
   describe('scrubUrl', () => {
