@@ -270,11 +270,12 @@ class AlarmsTest extends TwakeCalendarE2ETest {
             .expand().notification("10 minutes").save();
         awaitAttached(calendar.eventCard(title));
 
-        assertThat(alarms(probe.singleEvent(organizer))).singleElement()
-            .satisfies(alarm -> assertThat(Ics.property(alarm, "ATTENDEE").orElseThrow())
-                .as("the reminder is addressed to the person who asked for it")
-                .contains(organizer.email())
-                .doesNotContain(guest.email()));
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(alarms(probe.singleEvent(organizer))).singleElement()
+                .satisfies(alarm -> assertThat(Ics.property(alarm, "ATTENDEE").orElseThrow())
+                    .as("the reminder is addressed to the person who asked for it")
+                    .contains(organizer.email())
+                    .doesNotContain(guest.email())));
     }
 
     @Test
