@@ -74,6 +74,8 @@ export function buildUpdatedAlarms(
       return new VAlarm({
         uid: alarm.uid,
         trigger: alarm.trigger,
+        triggerType: alarm.triggerType,
+        triggerParams: alarm.triggerParams,
         action: alarm.action,
         attendees: alarmAttendees,
         summary: values.title.trim(),

@@ -17,8 +17,8 @@ import { buildDelegatedEventURL } from './buildDelegatedEventURL'
 import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'
 import { WKST_NUM_TO_DAY } from './wkstUtils'
-import { Attachment } from '@common/types/Attachment'
-import { AlarmData, VAlarm } from '@common/types/VAlarm'
+import { Attachment, AttachmentParams } from '@common/types/Attachment'
+import { AlarmData, AlarmTriggerParams, VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { getTzidParam } from '@common/features/Events/transformers/recurrenceInstant'
@@ -175,7 +175,8 @@ const PROPERTY_PARSERS: Record<
     params: unknown,
     value: VObjectValue,
     event: Partial<CalendarEvent>,
-    context: PropertyContext
+    context: PropertyContext,
+    valueType: string
   ) => void
 > = {
   uid: (params, value, event) => {
@@ -259,14 +260,13 @@ const PROPERTY_PARSERS: Record<
   rrule: (params, value, event) => {
     parseRruleProperty(value, event)
   },
-  attach: (params, value, event) => {
-    const paramsObj = (params ?? {}) as Record<string, string | undefined>
+  attach: (params, value, event, context, valueType) => {
     if (!event.attach) event.attach = []
     event.attach.push(
-      new Attachment(
-        safeString(value),
-        paramsObj.fmttype,
-        paramsObj['x-filename']
+      Attachment.fromJcal(
+        params as AttachmentParams | undefined,
+        valueType,
+        safeString(value)
       )
     )
   }
@@ -284,10 +284,10 @@ function parseEventProperty(
   event: Partial<CalendarEvent>,
   context: PropertyContext
 ): void {
-  const [key, params, , value] = prop
+  const [key, params, valueType, value] = prop
   const parser = ownHandler(PROPERTY_PARSERS, key)
   if (parser) {
-    parser(params, value, event, context)
+    parser(params, value, event, context, valueType)
   }
 }
 
@@ -309,7 +309,9 @@ function processEventUid(
 
 type AlarmPropertyHandler = (
   alarm: Partial<AlarmData>,
-  value: VObjectValue
+  value: VObjectValue,
+  params: AlarmTriggerParams,
+  type: string
 ) => void
 
 const ALARM_PROPERTY_HANDLERS: Record<string, AlarmPropertyHandler> = {
@@ -319,8 +321,10 @@ const ALARM_PROPERTY_HANDLERS: Record<string, AlarmPropertyHandler> = {
   action: (alarm, value) => {
     alarm.action = safeString(value)
   },
-  trigger: (alarm, value) => {
+  trigger: (alarm, value, params, type) => {
     alarm.trigger = safeString(value)
+    alarm.triggerType = type
+    if (Object.keys(params).length > 0) alarm.triggerParams = params
   },
   description: (alarm, value) => {
     alarm.description = safeString(value)
@@ -370,9 +374,15 @@ function parseSingleAlarm(
   const alarm: Partial<AlarmData> = {}
   const valarmProps = valarm[1]
 
-  for (const [key, , , value] of valarmProps) {
+  for (const [key, params, type, value] of valarmProps) {
     const handler = ownHandler(ALARM_PROPERTY_HANDLERS, key)
-    if (handler) handler(alarm, value as VObjectValue)
+    if (handler)
+      handler(
+        alarm,
+        value as VObjectValue,
+        (params ?? {}) as AlarmTriggerParams,
+        String(type)
+      )
   }
 
   const attendees = parseAlarmAttendees(valarmProps)
