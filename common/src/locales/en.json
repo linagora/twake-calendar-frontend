@@ -98,7 +98,11 @@
     "saveToDrive": "Save to my Drive",
     "saving": "Saving to Drive…",
     "saved": "File saved to your Drive",
-    "saveError": "Could not confirm that the file was saved. Check your Drive before trying again."
+    "saveError": "Could not confirm that the file was saved. Check your Drive before trying again.",
+    "savedToDrive": "“%{name}” saved to your Drive",
+    "organise": "Organise",
+    "movedTo": "Moved to %{path}",
+    "organiseError": "Failed to open Drive. Please try again."
   },
   "search": {
     "searchIn": "Search in",
