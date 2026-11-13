@@ -61,23 +61,30 @@ interface PropertyContext {
   recurrenceId?: string
   recurrenceTzid?: string
   duration?: string
+  // RFC 5545 §3.2.19: the TZID of DTEND applies to DTEND only, and may differ
+  // from the one of DTSTART (a flight from Paris to New York)
+  endTimezone?: string
 }
 
 function parseDateProperty(
   params: unknown,
   value: VObjectValue,
   event: Partial<CalendarEvent>,
-  isStart: boolean
+  isStart: boolean,
+  context?: PropertyContext
 ): void {
   const dateStr = safeString(value)
+  const detectedTz = inferTimezoneFromValue(params as Record<string, string>)
   if (isStart) {
     event.start = dateStr
   } else {
     event.end = dateStr
+    if (context) {
+      context.endTimezone = detectedTz
+    }
   }
 
   if (isStart || !event.timezone) {
-    const detectedTz = inferTimezoneFromValue(params as Record<string, string>)
     if (detectedTz) {
       event.timezone = detectedTz
     }
@@ -188,8 +195,8 @@ const PROPERTY_PARSERS: Record<
   dtstart: (params, value, event) => {
     parseDateProperty(params, value, event, true)
   },
-  dtend: (params, value, event) => {
-    parseDateProperty(params, value, event, false)
+  dtend: (params, value, event, context) => {
+    parseDateProperty(params, value, event, false, context)
   },
   class: (params, value, event) => {
     const classVal = safeString(value).trim().toUpperCase()
@@ -437,7 +444,8 @@ function computeMissingEnd(
 
 function processEventDates(
   event: Partial<CalendarEvent>,
-  duration?: string
+  duration?: string,
+  endTimezone?: string
 ): void {
   const eventTimezone = event.timezone
 
@@ -459,9 +467,12 @@ function processEventDates(
         convertEventDateTimeToISO(event.start, eventTimezone) ?? event.start
     }
 
+    // Read in its own zone, the end is an instant the later conversions in
+    // the zone of the event leave alone
     if (event.end) {
       event.end =
-        convertEventDateTimeToISO(event.end, eventTimezone) ?? event.end
+        convertEventDateTimeToISO(event.end, endTimezone ?? eventTimezone) ??
+        event.end
     }
   }
 }
@@ -517,7 +528,7 @@ export function parseCalendarEvent({
     event.error = `missing crucial event param in calendar ${calendar.id} `
   }
 
-  processEventDates(event, context.duration)
+  processEventDates(event, context.duration, context.endTimezone)
 
   if (event.repetition) {
     event.repetition = RepetitionObject.fromFormValues(event.repetition, {
