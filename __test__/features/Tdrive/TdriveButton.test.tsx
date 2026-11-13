@@ -246,6 +246,14 @@ describe('TdriveButton', () => {
     )
     const file = new File(['%PDF'], 'report.pdf', { type: 'application/pdf' })
 
+    beforeEach(() => {
+      window.ENABLE_ATTACHMENT_UPLOAD = true
+    })
+
+    afterEach(() => {
+      window.ENABLE_ATTACHMENT_UPLOAD = undefined
+    })
+
     // The modal body is the drop zone: the button sits in one, as in the
     // event modals
     const renderButton = (showMore: boolean) => {
@@ -286,13 +294,25 @@ describe('TdriveButton', () => {
       return setAttachments
     }
 
+    it('takes no files when the upload is not enabled', () => {
+      window.ENABLE_ATTACHMENT_UPLOAD = false
+      renderButton(false)
+      const dataTransfer = { types: ['Files'], files: [file] }
+
+      fireEvent.dragEnter(modalBody(), { dataTransfer })
+      fireEvent.drop(modalBody(), { dataTransfer })
+
+      expect(
+        screen.queryByText('event.form.dropAttachments')
+      ).not.toBeInTheDocument()
+      expect(mockUploadAttachment).not.toHaveBeenCalled()
+    })
+
     it('shows a loader chip while the file uploads', async () => {
       mockUploadAttachment.mockResolvedValue(driveAttachment)
 
       dndAttachment()
-      expect(
-        screen.getByRole('progressbar')
-      ).toBeInTheDocument()
+      expect(screen.getByRole('progressbar')).toBeInTheDocument()
     })
 
     it('uploads the files dropped anywhere on the modal body', async () => {

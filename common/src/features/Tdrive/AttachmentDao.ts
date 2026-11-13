@@ -1,9 +1,14 @@
 import { Attachment } from '@common/types/Attachment'
 import { api } from '@common/utils/apiUtils'
-import { isHTTPError } from 'ky'
+import { isHTTPError, isTimeoutError } from 'ky'
 
 // The side service rejects an upload without a content type
 const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
+
+// Long enough to send the 50 MiB the side service accepts over a slow
+// connection, short enough that a stalled request frees its place in the
+// upload queue
+export const UPLOAD_TIMEOUT_MS = 5 * 60 * 1000
 
 export type AttachmentUploadFailure =
   'unavailable' | 'rejected' | 'tooLarge' | 'timeout' | 'failed'
@@ -29,9 +34,8 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
       'Content-Type': file.type || DEFAULT_CONTENT_TYPE,
       'X-Filename': encodeURIComponent(file.name)
     },
-    // A large file takes longer to send than the default timeout allows: the
-    // side service bounds the Drive upload itself
-    timeout: false
+    // A large file takes longer to send than the default timeout allows
+    timeout: UPLOAD_TIMEOUT_MS
   })
   const { uri } = await response.json<{ uri: string }>()
   return new Attachment(uri, file.type || undefined, file.name)
@@ -44,6 +48,7 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
 export function toAttachmentUploadFailure(
   error: unknown
 ): AttachmentUploadFailure | null {
+  if (isTimeoutError(error)) return 'timeout'
   if (!isHTTPError(error)) return 'failed'
   if (error.response.status === 401) return null
   // A 502 and anything undocumented: Drive failed upstream

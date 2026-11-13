@@ -92,7 +92,10 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   } = useTdrivePicker({ onFilesSelected })
   const { pendingUploads, uploadFailure, uploadFiles, dismissUploadFailure } =
     useAttachmentUpload({ attachments, setAttachments })
-  useDialogFileDrop(uploadFiles, t('event.form.dropAttachments'))
+  useDialogFileDrop(
+    window.ENABLE_ATTACHMENT_UPLOAD ? uploadFiles : undefined,
+    t('event.form.dropAttachments')
+  )
 
   // Over once the files are in, or once the field is gone: its uploads are
   // dropped then

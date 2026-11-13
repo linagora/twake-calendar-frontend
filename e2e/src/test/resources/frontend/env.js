@@ -45,6 +45,7 @@ var BOOKING_LINK_ENABLED = true
 var ENABLE_EVENT_ATTACHMENTS = false
 var ENABLE_REFRESH_BUTTON = true
 var TDRIVE_ENABLED = false
+var ENABLE_ATTACHMENT_UPLOAD = false
 var ENABLE_CREATE_BOOKING = true
 // Where the private app points a booking link. The public SPA answers on that hostname,
 // remapped like every other one by the browser's resolver rules.

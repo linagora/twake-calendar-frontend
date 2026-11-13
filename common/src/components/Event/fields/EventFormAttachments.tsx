@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
 import { useAppSelector } from '@common/app/hooks'
@@ -25,14 +25,21 @@ export const EventFormAttachments: React.FC<{
   const platformURL = useAppSelector(selectPlatformURL)
   const hasVisibleAttachments = v.attachments.some(a => isSafeHttpUrl(a.uri))
 
+  // The picker hands its files back long after it opened: uploads may have
+  // added attachments in between, read the list as it is then
+  const attachmentsRef = useRef(v.attachments)
+  useEffect(() => {
+    attachmentsRef.current = v.attachments
+  }, [v.attachments])
+
   const handleTdriveFilesSelected = useCallback(
     (files: TdriveFile[]): void => {
       const attachments = files.map(
         file => new Attachment(file.url, file.mimeType ?? undefined, file.name)
       )
-      setAttachments([...v.attachments, ...attachments])
+      setAttachments([...attachmentsRef.current, ...attachments])
     },
-    [v.attachments, setAttachments]
+    [setAttachments]
   )
 
   if (isTdrivePickerAvailable(platformURL)) {

@@ -70,6 +70,10 @@ var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain
 // platform, so it needs the workplace FQDN from the SSO (workplaceFqdn in
 // SSO_SCOPE) or WORKPLACE_FQDN_FALLBACK.
 var TDRIVE_ENABLED = false
+// Uploads the files dropped on the event form to the user's Drive and attaches
+// their link. Needs TDRIVE_ENABLED, and the attachment upload route of the side
+// service (twp.drive.enabled).
+var ENABLE_ATTACHMENT_UPLOAD = false
 var ENABLE_REFRESH_BUTTON = false 
 // The Twake bar, the platform top bar, shows the apps and the account of the
 // user's Cozy when SSO_SCOPE includes workplaceFqdn (or WORKPLACE_FQDN_FALLBACK

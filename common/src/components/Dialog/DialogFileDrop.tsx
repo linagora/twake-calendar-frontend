@@ -24,17 +24,17 @@ const hasFiles = (event: DragEvent | React.DragEvent): boolean =>
 
 /**
  * Takes the files dropped on the body of the dialog around, for as long as
- * the caller is mounted.
+ * the caller is mounted. Without a handler, the dialog takes no files.
  */
 export function useDialogFileDrop(
-  onFilesDropped: FilesHandler['onFilesDropped'],
+  onFilesDropped: FilesHandler['onFilesDropped'] | undefined,
   label: string
 ): void {
   const register = useContext(DialogFileDropContext)
-  useEffect(
-    () => register?.({ onFilesDropped, label }),
-    [register, onFilesDropped, label]
-  )
+  useEffect(() => {
+    if (!onFilesDropped) return
+    return register?.({ onFilesDropped, label })
+  }, [register, onFilesDropped, label])
 }
 
 interface DropArea {

@@ -58,6 +58,7 @@ describe('EventPopover with attachments uploading', () => {
     vi.clearAllMocks()
     sessionStorage.clear()
     window.TDRIVE_ENABLED = true
+    window.ENABLE_ATTACHMENT_UPLOAD = true
     mockUploadAttachment.mockReturnValue(
       new Promise(resolve => {
         finishUpload = resolve
@@ -67,6 +68,7 @@ describe('EventPopover with attachments uploading', () => {
 
   afterEach(() => {
     window.TDRIVE_ENABLED = undefined
+    window.ENABLE_ATTACHMENT_UPLOAD = undefined
   })
 
   const renderWithUploadRunning = (): void => {

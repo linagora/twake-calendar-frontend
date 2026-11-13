@@ -5,6 +5,7 @@ import {
   toAttachmentUploadFailure,
   uploadAttachment
 } from '../AttachmentDao'
+import { useUploadQueue } from './useUploadQueue'
 
 export interface PendingUpload {
   id: string
@@ -64,9 +65,6 @@ export function useAttachmentUpload({
     }
   }, [])
 
-  const queueRef = useRef<QueuedUpload[]>([])
-  const activeCountRef = useRef(0)
-
   const uploadFile = useCallback(
     async ({ file, pending }: QueuedUpload): Promise<void> => {
       try {
@@ -89,20 +87,7 @@ export function useAttachmentUpload({
     [setAttachments]
   )
 
-  const startQueuedUploads = useCallback((): void => {
-    while (
-      isMountedRef.current &&
-      activeCountRef.current < MAX_PARALLEL_UPLOADS
-    ) {
-      const queued = queueRef.current.shift()
-      if (!queued) return
-      activeCountRef.current += 1
-      void uploadFile(queued).finally(() => {
-        activeCountRef.current -= 1
-        startQueuedUploads()
-      })
-    }
-  }, [uploadFile])
+  const enqueueUploads = useUploadQueue(uploadFile, MAX_PARALLEL_UPLOADS)
 
   const uploadFiles = useCallback(
     (files: File[]): void => {
@@ -114,11 +99,10 @@ export function useAttachmentUpload({
           type: file.type
         }
       }))
-      queueRef.current.push(...queued)
       setPendingUploads(prev => [...prev, ...queued.map(q => q.pending)])
-      startQueuedUploads()
+      enqueueUploads(queued)
     },
-    [startQueuedUploads]
+    [enqueueUploads]
   )
 
   const dismissUploadFailure = useCallback(() => setUploadFailure(null), [])
