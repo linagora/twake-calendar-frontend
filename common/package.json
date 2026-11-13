@@ -10,7 +10,7 @@
     "@linagora/twake-bar": "^1.1.2",
     "@linagora/twake-embed": "^3.7.0",
     "@linagora/twake-icons": "^3.0.0",
-    "@linagora/twake-mui": "^19.1.1",
+    "@linagora/twake-mui": "^19.6.0",
     "@linagora/twake-oidc": "^1.3.0",
     "@linagora/twake-sdk": "^1.2.0",
     "@linagora/twake-utils": "^1.2.1",
