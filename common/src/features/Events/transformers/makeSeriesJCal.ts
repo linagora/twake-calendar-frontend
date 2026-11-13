@@ -346,6 +346,41 @@ const withStoredRecurrenceSet = (
   ] as VCalComponent
 }
 
+const STORED_DATE_TIME_FIELDS = new Set(['dtstart', 'dtend'])
+
+// The stored value of a DTSTART / DTEND the save leaves at the same instant in
+// the same zone. A wall clock in a DST gap and the one after the gap are the
+// same instant: written from the instant, it would come back later, and so
+// would every occurrence derived from it (RFC 5545 3.3.10)
+const storedDateTime = (
+  prop: VObjectProperty,
+  oldProps: VObjectProperty[],
+  tz: string
+): VObjectProperty => {
+  if (!STORED_DATE_TIME_FIELDS.has(propName(prop))) return prop
+  const stored = findFieldValue(oldProps, propName(prop))
+  const isSameSlot =
+    stored?.[2] === 'date-time' &&
+    prop[2] === 'date-time' &&
+    getTzidParam(stored[1]) === getTzidParam(prop[1]) &&
+    Number.isFinite(parseInstant(prop, tz)) &&
+    parseInstant(stored, tz) === parseInstant(prop, tz)
+  return isSameSlot && stored ? stored : prop
+}
+
+const withStoredDateTimes = (
+  updatedMaster: VCalComponent,
+  oldMaster: VCalComponent,
+  tz: string
+): VCalComponent => {
+  const [name, props, ...components] = updatedMaster
+  return [
+    name,
+    props.map(prop => storedDateTime(prop, oldMaster[1], tz)),
+    ...components
+  ] as VCalComponent
+}
+
 // The rule built from the form only holds the parts the form models: merge it
 // with the stored rule so that the other parts are not dropped
 const withStoredRrule = (
@@ -566,7 +601,11 @@ export const makeSeriesJCal = (
   const event = { ...savedEvent, timezone: tzid }
   const finalVevents = withStoredTimezones(storedVtimezones, () => {
     const updatedMaster = withStoredRrule(
-      makeVevent(event, tzid, true) as VCalComponent,
+      withStoredDateTimes(
+        makeVevent(event, tzid, true) as VCalComponent,
+        oldMaster,
+        tzid || 'UTC'
+      ),
       oldMaster,
       event
     )
