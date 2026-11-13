@@ -106,6 +106,10 @@ function applyTimezoneToDateFields(
   if (endISO) {
     eventjson.end = endISO
   }
+  // A floating snapshot would be read in the zone of the browser (#2108)
+  if (eventjson.implicitEnd && eventjson.end) {
+    eventjson.implicitEnd = { start: eventjson.start, end: eventjson.end }
+  }
 }
 
 export function parseFetchedEvent(

@@ -20,6 +20,26 @@ function dateValue(
     : [{}, 'date-time', value]
 }
 
+function sameInstant(a: string, b: string): boolean {
+  return new Date(a).getTime() === new Date(b).getTime()
+}
+
+/**
+ * A timed event stored without DTEND nor DURATION ends when it starts
+ * (RFC 5545 §3.6.1). Its end in the model is made up for display: it is not
+ * written back while the dates stay as they were read. See #2108.
+ */
+function hasUntouchedImplicitEnd(event: CalendarEvent): boolean {
+  const implicit = event.implicitEnd
+  return (
+    !!implicit &&
+    !event.allday &&
+    !!event.end &&
+    sameInstant(event.start, implicit.start) &&
+    sameInstant(event.end, implicit.end)
+  )
+}
+
 /** Without a `tzid`, the date-times are written in UTC. */
 export function makeVevent(
   event: CalendarEvent,
@@ -51,7 +71,7 @@ export function makeVevent(
     vevent.push(valarms)
   }
 
-  if (event.end) {
+  if (event.end && !hasUntouchedImplicitEnd(event)) {
     vevent[1].push(['dtend', ...dateValue(event, event.end, tzid)])
   }
   if (event.organizer) {

@@ -457,6 +457,7 @@ function processEventDates(
       .format('YYYY-MM-DD')
   }
 
+  const endsWhenItStarts = !event.end && !event.allday && !duration
   if (!event.end) {
     event.end = computeMissingEnd(event.start, eventTimezone, duration)
   }
@@ -474,6 +475,11 @@ function processEventDates(
         convertEventDateTimeToISO(event.end, endTimezone ?? eventTimezone) ??
         event.end
     }
+  }
+
+  // RFC 5545 §3.6.1: the 30 minutes given above are for display only
+  if (endsWhenItStarts && event.start && event.end) {
+    event.implicitEnd = { start: event.start, end: event.end }
   }
 }
 
