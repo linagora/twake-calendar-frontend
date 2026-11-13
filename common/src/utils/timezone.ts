@@ -45,11 +45,23 @@ function findTimezone(tzid: string): ICAL.Timezone {
   throw new Error(`Unknown timezone alias: ${tzid}`)
 }
 
+/**
+ * The zone of the table a TZID stands for. An alias may point to another alias
+ * ("Pacific Standard Time (Mexico)" → America/Santa_Isabel → America/Tijuana):
+ * the chain is followed up to a zone, so that a save writes a TZID the table
+ * has a VTIMEZONE for. A name outside the table, or a chain that loops or ends
+ * on no zone, stays as given, as an unknown zone.
+ */
 export function resolveTimezone(tzName: string): string {
-  if (findTimezoneData(tzName)) {
-    return tzName
+  const seen = new Set<string>()
+  let current = tzName
+  while (!findTimezoneData(current) && !seen.has(current)) {
+    seen.add(current)
+    const aliasTo = findTimezoneAlias(current)
+    if (!aliasTo) return tzName
+    current = aliasTo
   }
-  return findTimezoneAlias(tzName) ?? tzName
+  return findTimezoneData(current) ? current : tzName
 }
 
 /**

@@ -9,18 +9,21 @@ import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
 function dateValue(
   event: CalendarEvent,
   date: string,
-  tzid: string
+  tzid: string | undefined
 ): [Record<string, string>, string, string] {
   if (event.allday) {
     return [{}, 'date', formatDateToICal(new Date(date))]
   }
   const value = formatDateTimeToICal(new Date(date), tzid)
-  return [value.endsWith('Z') ? {} : { tzid }, 'date-time', value]
+  return tzid && !value.endsWith('Z')
+    ? [{ tzid }, 'date-time', value]
+    : [{}, 'date-time', value]
 }
 
+/** Without a `tzid`, the date-times are written in UTC. */
 export function makeVevent(
   event: CalendarEvent,
-  tzid: string,
+  tzid?: string,
   isMasterEvent?: boolean
 ): [string, unknown[]] {
   let isOccurrence = false
