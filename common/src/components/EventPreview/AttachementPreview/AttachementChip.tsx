@@ -1,13 +1,20 @@
 import { Attachment } from '@common/types/Attachment'
 import { FileTypeFolder, getFileTypeIcon, Icon } from '@linagora/twake-icons'
-import { Box, Chip, Tooltip, Typography } from '@linagora/twake-mui'
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Tooltip,
+  Typography
+} from '@linagora/twake-mui'
 import React, { MouseEvent } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 
 export const AttachementChip: React.FC<{
   attachment: Attachment
   onDelete?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void
-}> = ({ attachment, onDelete }) => {
+  loading?: boolean
+}> = ({ attachment, onDelete, loading }) => {
   const filename = attachment.x_filename ?? ''
   const lastDot = filename.lastIndexOf('.')
   const hasExtension = lastDot > 0 && lastDot < filename.length - 1
@@ -29,7 +36,7 @@ export const AttachementChip: React.FC<{
   }, [attachment])
 
   const openFile = (): void => {
-    if (!safeHref) return
+    if (loading || !safeHref) return
     window.open(safeHref, '_blank', 'noopener noreferrer')
   }
 
@@ -79,6 +86,7 @@ export const AttachementChip: React.FC<{
           }
           label={label}
           onDelete={onDelete}
+          endIcon={loading && <CircularProgress size={16} />}
           deleteIcon={<CloseIcon sx={{ width: '16px', height: '16px' }} />}
           onClick={openFile}
         />

@@ -52,6 +52,7 @@ const EventUpdateModalInternal: React.FC<
   const editableInitialValues = useEditableInitialValues(initialValues)
 
   const [isFormDirty, setIsFormDirty] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const guard = useUnsavedChangesGuard(open && isFormDirty)
   const handleClose = useCallback(() => {
     guard.requestClose(() => {
@@ -66,6 +67,7 @@ const EventUpdateModalInternal: React.FC<
       isEdit
       onClose={handleClose}
       onSave={handleSave}
+      isSaveDisabled={isUploading}
       onExpanded={() => setShowMore(s => !s)}
     />
   )
@@ -117,6 +119,7 @@ const EventUpdateModalInternal: React.FC<
             tempStorageKey="update"
             tempStorageContext={tempContext}
             onDirtyChange={setIsFormDirty}
+            onUploadingChange={setIsUploading}
           />
         )}
       </ResponsiveDialog>

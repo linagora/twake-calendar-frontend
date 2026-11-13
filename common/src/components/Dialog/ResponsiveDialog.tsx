@@ -21,8 +21,16 @@ import Tooltip from '@common/components/Tooltip'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
-import React, { ReactNode, useContext, useId, useMemo, useState } from 'react'
+import React, {
+  ReactNode,
+  useContext,
+  useId,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useI18n } from 'twake-i18n'
+import { DialogFileDropProvider, useDialogFileDropArea } from './DialogFileDrop'
 import useDynamicPosition from './useDynamicPosition'
 
 const visuallyHidden: SxProps<Theme> = {
@@ -395,170 +403,180 @@ function ResponsiveDialog({
 
   const currentSpacing = isExpanded ? expandedSpacing : normalSpacing
 
+  // The body takes the files dropped on it, when something inside asks for
+  // them (event attachments)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const fileDrop = useDialogFileDropArea({ open, contentRef })
+
   return (
     <DragContext.Provider value={dragContextValue}>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth={false}
-        fullScreen={isMobile}
-        fullWidth
-        transitionDuration={isPendingPosition || isExpanded ? 0 : 300}
-        {...otherDialogProps}
-        slotProps={{
-          ...otherDialogProps.slotProps,
-          // MUI hands aria-labelledby to the dialog element, not aria-label
-          ...(ariaLabel
-            ? {
-                paper: {
-                  ...otherDialogProps.slotProps?.paper,
-                  'aria-label': ariaLabel
-                }
-              }
-            : {}),
-          ...(isDynamic || isExpanded
-            ? {
-                transition: {
-                  ...otherDialogProps.slotProps?.transition,
-                  timeout: 0
-                }
-              }
-            : {})
-        }}
-        sx={
-          [
-            ...(baseSx ? [baseSx] : []),
-            ...(Array.isArray(sx) ? (sx as SxProps<Theme>[]) : sx ? [sx] : [])
-          ] as SxProps<Theme>
-        }
-        style={isExpanded ? { zIndex: 1200 } : undefined}
-        PaperComponent={DraggablePaper}
-        aria-labelledby={ariaLabel ? undefined : titleTextId}
-      >
-        {/* Only the title is the heading: the header buttons stay out of it */}
-        <DialogTitle
-          component="div"
-          {...dialogTitleProps}
-          id={titleId}
-          className="draggable-dialog-title"
-          sx={
-            [
-              // twake-mui pads titles with 24px, too loose for the header buttons
-              { py: 1.5 },
-              titleSx,
-              isDraggable ? { cursor: 'move', userSelect: 'none' } : {},
-              isMobile ? { px: 2 } : {}
-            ] as SxProps<Theme>
-          }
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {showsBackButton && (
-                <IconButton
-                  onClick={onExpandToggle}
-                  aria-label={t('eventPreview.showLess')}
-                  size="xsmall"
-                  sx={{ marginLeft: '-8px' }}
-                >
-                  <ArrowBackIcon sx={{ fontSize: 30 }} />
-                </IconButton>
-              )}
-              {/* The back button replaces the title on screen, but the
-                  dialog keeps it as its name */}
-              {/* A text title is the dialog's heading; other titles (e.g.
-                  tabs) are no heading */}
-              {title && (
-                <Typography
-                  component={typeof title === 'string' ? 'h2' : 'span'}
-                  variant="inherit"
-                  id={titleTextId}
-                  sx={
-                    showsBackButton ? visuallyHidden : { display: 'contents' }
+      <DialogFileDropProvider value={fileDrop.register}>
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth={false}
+          fullScreen={isMobile}
+          fullWidth
+          transitionDuration={isPendingPosition || isExpanded ? 0 : 300}
+          {...otherDialogProps}
+          slotProps={{
+            ...otherDialogProps.slotProps,
+            // MUI hands aria-labelledby to the dialog element, not aria-label
+            ...(ariaLabel
+              ? {
+                  paper: {
+                    ...otherDialogProps.slotProps?.paper,
+                    'aria-label': ariaLabel
                   }
-                >
-                  {title}
-                </Typography>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {headerRightAction}
-              {showHeaderActions && !showsBackButton && (
-                <>
-                  {onExpandToggle && !isMobile && (
-                    <Tooltip title={expandText}>
-                      <IconButton
-                        onClick={onExpandToggle}
-                        aria-label={t('tooltip.expand')}
-                        size="xsmall"
-                        sx={{ marginRight: 1 }}
-                      >
-                        <OpenInFullIcon sx={{ padding: '2px' }} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  <IconButton
-                    onClick={onClose}
-                    aria-label={t('actions.close')}
-                    size="xsmall"
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </>
-              )}
-            </Box>
-          </Box>
-        </DialogTitle>
-        <DialogContent
-          dividers={dividers}
+                }
+              : {}),
+            ...(isDynamic || isExpanded
+              ? {
+                  transition: {
+                    ...otherDialogProps.slotProps?.transition,
+                    timeout: 0
+                  }
+                }
+              : {})
+          }}
           sx={
             [
-              baseContentSx,
-              ...(Array.isArray(contentSx)
-                ? (contentSx as SxProps<Theme>[])
-                : contentSx
-                  ? [contentSx]
-                  : [])
+              ...(baseSx ? [baseSx] : []),
+              ...(Array.isArray(sx) ? (sx as SxProps<Theme>[]) : sx ? [sx] : [])
             ] as SxProps<Theme>
           }
-          {...dialogContentProps}
+          style={isExpanded ? { zIndex: 1200 } : undefined}
+          PaperComponent={DraggablePaper}
+          aria-labelledby={ariaLabel ? undefined : titleTextId}
         >
-          {isExpanded ? (
-            <Stack spacing={currentSpacing} sx={contentWrapperSx}>
-              {children}
-            </Stack>
-          ) : (
-            <Stack spacing={currentSpacing}>{children}</Stack>
-          )}
-        </DialogContent>
-        {actions && (
-          <DialogActions
-            sx={{
-              borderTop: actionsBorderTop
-                ? (theme: Theme): string =>
-                    `1px solid ${theme.vars.palette.divider}`
-                : undefined,
-              justifyContent: actionsJustifyContent,
-              px: isMobile ? 2 : undefined,
-              // twake-mui spaces the actions with a margin, which leaves the
-              // border flush with the buttons: space them inside it instead
-              ...(actionsBorderTop && {
-                m: 0,
-                py: '22px',
-                px: isMobile ? 2 : 4
-              })
-            }}
+          {/* Only the title is the heading: the header buttons stay out of it */}
+          <DialogTitle
+            component="div"
+            {...dialogTitleProps}
+            id={titleId}
+            className="draggable-dialog-title"
+            sx={
+              [
+                // twake-mui pads titles with 24px, too loose for the header buttons
+                { py: 1.5 },
+                titleSx,
+                isDraggable ? { cursor: 'move', userSelect: 'none' } : {},
+                isMobile ? { px: 2 } : {}
+              ] as SxProps<Theme>
+            }
           >
-            {actions}
-          </DialogActions>
-        )}
-      </Dialog>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {showsBackButton && (
+                  <IconButton
+                    onClick={onExpandToggle}
+                    aria-label={t('eventPreview.showLess')}
+                    size="xsmall"
+                    sx={{ marginLeft: '-8px' }}
+                  >
+                    <ArrowBackIcon sx={{ fontSize: 30 }} />
+                  </IconButton>
+                )}
+                {/* The back button replaces the title on screen, but the
+                  dialog keeps it as its name */}
+                {/* A text title is the dialog's heading; other titles (e.g.
+                  tabs) are no heading */}
+                {title && (
+                  <Typography
+                    component={typeof title === 'string' ? 'h2' : 'span'}
+                    variant="inherit"
+                    id={titleTextId}
+                    sx={
+                      showsBackButton ? visuallyHidden : { display: 'contents' }
+                    }
+                  >
+                    {title}
+                  </Typography>
+                )}
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {headerRightAction}
+                {showHeaderActions && !showsBackButton && (
+                  <>
+                    {onExpandToggle && !isMobile && (
+                      <Tooltip title={expandText}>
+                        <IconButton
+                          onClick={onExpandToggle}
+                          aria-label={t('tooltip.expand')}
+                          size="xsmall"
+                          sx={{ marginRight: 1 }}
+                        >
+                          <OpenInFullIcon sx={{ padding: '2px' }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <IconButton
+                      onClick={onClose}
+                      aria-label={t('actions.close')}
+                      size="xsmall"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </>
+                )}
+              </Box>
+            </Box>
+          </DialogTitle>
+          <DialogContent
+            ref={contentRef}
+            {...fileDrop.contentHandlers}
+            dividers={dividers}
+            sx={
+              [
+                baseContentSx,
+                ...(Array.isArray(contentSx)
+                  ? (contentSx as SxProps<Theme>[])
+                  : contentSx
+                    ? [contentSx]
+                    : [])
+              ] as SxProps<Theme>
+            }
+            {...dialogContentProps}
+          >
+            {isExpanded ? (
+              <Stack spacing={currentSpacing} sx={contentWrapperSx}>
+                {children}
+              </Stack>
+            ) : (
+              <Stack spacing={currentSpacing}>{children}</Stack>
+            )}
+          </DialogContent>
+          {fileDrop.overlay}
+          {actions && (
+            <DialogActions
+              sx={{
+                borderTop: actionsBorderTop
+                  ? (theme: Theme): string =>
+                      `1px solid ${theme.vars.palette.divider}`
+                  : undefined,
+                justifyContent: actionsJustifyContent,
+                px: isMobile ? 2 : undefined,
+                // twake-mui spaces the actions with a margin, which leaves the
+                // border flush with the buttons: space them inside it instead
+                ...(actionsBorderTop && {
+                  m: 0,
+                  py: '22px',
+                  px: isMobile ? 2 : 4
+                })
+              }}
+            >
+              {actions}
+            </DialogActions>
+          )}
+        </Dialog>
+      </DialogFileDropProvider>
     </DragContext.Provider>
   )
 }
