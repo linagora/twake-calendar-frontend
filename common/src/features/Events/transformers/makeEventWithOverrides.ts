@@ -95,25 +95,32 @@ function findOverrideIndex(
     return -1
   }
   const storedIds = vevents.map(findRecurrenceId)
-  const isCertain = (storedId: VObjectProperty | undefined): boolean =>
-    storedId !== undefined && hasCertainInstant(storedId, storedVtimezones)
+  const isCertain =
+    (zone: string | undefined) =>
+    (storedId: VObjectProperty | undefined): boolean =>
+      storedId !== undefined &&
+      hasCertainInstant(
+        storedId,
+        storedVtimezones,
+        readingZone(zone, storedVtimezones)
+      )
   const isSameInstant =
     (zone: string | undefined) =>
     (storedId: VObjectProperty | undefined): boolean => {
       if (!storedId) return false
       const tzid = storedTzid(storedId, storedVtimezones)
-      const raw = storedId[3]
-      // A custom TZID without an IANA location still has a definite instant
-      // when its stored VTIMEZONE supplies the offset. Do not read its wall
-      // clock in the fallback zone: that can select a different override.
-      const value =
-        typeof raw === 'string' &&
-        tzid &&
-        storedTimezone(tzid) &&
-        !/Z$/.test(raw)
-          ? readWallClock(raw, tzid).toISOString()
-          : raw
-      return sameRecurrence({ value, tzid }, { value: id }, zone)
+      const fallbackZone = readingZone(zone, storedVtimezones)
+      // A custom zone without an IANA location still has a definite instant
+      // when its stored VTIMEZONE supplies the offset, for a value with that
+      // TZID as for a floating value read in that series zone. Do not read its
+      // wall clock in the fallback zone: that can select a different override.
+      // A tz-naive in-memory id is read in that zone too. See #2107.
+      const value = readInStoredZone(storedId[3], tzid ?? fallbackZone)
+      return sameRecurrence(
+        { value, tzid },
+        { value: readInStoredZone(id, fallbackZone) },
+        fallbackZone
+      )
     }
   const exactIndexes = /Z$/.test(id)
     ? []
@@ -135,22 +142,23 @@ function findOverrideIndex(
     // A TZID the fallback zone only reads matches any wall clock: prefer the
     // candidates with a definite instant. See #2034.
     const inEventZone = isSameInstant(updatedEvent.timezone)
+    const certainInEventZone = isCertain(updatedEvent.timezone)
     const index = preferCertain(
       candidates,
       index => inEventZone(storedIds[index]),
-      index => isCertain(storedIds[index])
+      index => certainInEventZone(storedIds[index])
     )
     return index ?? candidates[0]
   }
   // A stored value without TZID is read in the zone of the series (#1938)
-  const inSeriesZone = isSameInstant(
-    seriesZone(vevents) ?? updatedEvent.timezone
-  )
+  const zone = seriesZone(vevents) ?? updatedEvent.timezone
+  const inSeriesZone = isSameInstant(zone)
+  const certainInSeriesZone = isCertain(zone)
   return (
     preferCertain(
       storedIds.map((_, index) => index),
       index => inSeriesZone(storedIds[index]),
-      index => isCertain(storedIds[index])
+      index => certainInSeriesZone(storedIds[index])
     ) ?? -1
   )
 }
@@ -173,23 +181,46 @@ function storedTzid(
   storedId: VObjectProperty,
   storedVtimezones: VCalComponent[]
 ): string | undefined {
-  const tzid = getTzidParam(storedId[1])
-  if (!tzid || isMomentZone(resolveTimezone(tzid))) {
-    return tzid
-  }
-  return vtimezoneLocation(tzid, storedVtimezones) ?? tzid
+  return readingZone(getTzidParam(storedId[1]), storedVtimezones)
 }
 
+function readingZone(
+  zone: string | undefined,
+  storedVtimezones: VCalComponent[]
+): string | undefined {
+  if (!zone || isMomentZone(resolveTimezone(zone))) {
+    return zone
+  }
+  return vtimezoneLocation(zone, storedVtimezones) ?? zone
+}
+
+// A wall clock in a zone only a stored VTIMEZONE defines, as its UTC instant
+function readInStoredZone(raw: unknown, zone: string | undefined): unknown {
+  return typeof raw === 'string' &&
+    zone &&
+    storedTimezone(zone) &&
+    !/Z$/.test(raw)
+    ? readWallClock(raw, zone).toISOString()
+    : raw
+}
+
+// A floating value is read in the fallback zone: its instant is definite only
+// when that zone can be read. See #2107.
 function hasCertainInstant(
   storedId: VObjectProperty,
-  storedVtimezones: VCalComponent[]
+  storedVtimezones: VCalComponent[],
+  fallbackZone: string | undefined
 ): boolean {
-  const tzid = storedTzid(storedId, storedVtimezones)
+  if (typeof storedId[3] === 'string' && /Z$/.test(storedId[3])) {
+    return true
+  }
+  return isReadableZone(storedTzid(storedId, storedVtimezones) ?? fallbackZone)
+}
+
+function isReadableZone(zone: string | undefined): boolean {
   return (
-    (typeof storedId[3] === 'string' && /Z$/.test(storedId[3])) ||
-    !tzid ||
-    Boolean(storedTimezone(tzid)) ||
-    isMomentZone(resolveTimezone(tzid))
+    zone !== undefined &&
+    (Boolean(storedTimezone(zone)) || isMomentZone(resolveTimezone(zone)))
   )
 }
 
