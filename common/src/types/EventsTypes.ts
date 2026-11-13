@@ -17,6 +17,11 @@ export interface CalendarEvent {
   transp?: string
   start: string // ISO date string
   end?: string
+  // Set when the stored timed event had neither DTEND nor DURATION: it ends
+  // when it starts (RFC 5545 §3.6.1) and `end` is only a display convenience.
+  // Holds the dates as read, so that a save leaving them untouched writes no
+  // DTEND. See #2108.
+  implicitEnd?: { start: string; end: string }
   class?: 'PRIVATE' | 'PUBLIC' | 'CONFIDENTIAL'
   x_openpass_videoconference?: string
   bookingLinkPublicId?: string
