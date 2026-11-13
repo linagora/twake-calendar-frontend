@@ -5,6 +5,8 @@ import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
 import { Attachment } from '@common/types/Attachment'
 import { ensureSdkSignedIn } from '@common/utils/sdkSession'
 import { isDriveAttachmentUrl } from '../helpers/driveUpload'
+import { SavedDriveFile } from '../types'
+import { toSavedDriveFile } from './useTdriveMove'
 import { makeIntentFetch } from './useTdrivePicker'
 
 type StartedIntent = Promise<unknown> & { stop: () => void }
@@ -110,8 +112,11 @@ interface SaveToDriveState {
   available: boolean
   containerRef: React.RefObject<HTMLDivElement | null>
   status: UploadStatus
+  // The file the UPLOAD intent stored, to let the user organise it
+  savedFile: SavedDriveFile | null
   save: () => Promise<void>
   dismiss: () => void
+  dismissSaved: () => void
 }
 
 export function useSaveToDrive(attachment: Attachment): SaveToDriveState {
@@ -121,10 +126,12 @@ export function useSaveToDrive(attachment: Attachment): SaveToDriveState {
   const activeRef = useRef<AbortController | null>(null)
   const intentRef = useRef<StartedIntent | null>(null)
   const [status, setStatus] = useState<UploadStatus>('idle')
+  const [savedFile, setSavedFile] = useState<SavedDriveFile | null>(null)
   const isDriveAttachment = isDriveAttachmentUrl(
     attachment.uri,
     window.WORKPLACE_FQDN_FALLBACK
   )
+
   const available = Boolean(
     window.TDRIVE_ENABLED &&
     idToken &&
@@ -157,7 +164,10 @@ export function useSaveToDrive(attachment: Attachment): SaveToDriveState {
         intentRef,
         signal: controller.signal
       })
-      if (!controller.signal.aborted) setStatus(result ? 'success' : 'idle')
+      if (!controller.signal.aborted) {
+        setStatus(result ? 'success' : 'idle')
+        setSavedFile(toSavedDriveFile(result))
+      }
     } catch {
       // Never log errors containing share tokens or signed download URLs.
       if (containerRef.current) setStatus('error')
@@ -172,7 +182,9 @@ export function useSaveToDrive(attachment: Attachment): SaveToDriveState {
     available,
     containerRef,
     status,
+    savedFile,
     save,
-    dismiss: () => setStatus('idle')
+    dismiss: () => setStatus('idle'),
+    dismissSaved: () => setSavedFile(null)
   }
 }

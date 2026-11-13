@@ -98,7 +98,11 @@
     "saveToDrive": "In meinem Drive speichern",
     "saving": "Wird in Drive gespeichert…",
     "saved": "Datei in Ihrem Drive gespeichert",
-    "saveError": "Das Speichern konnte nicht bestätigt werden. Prüfen Sie Ihr Drive, bevor Sie es erneut versuchen."
+    "saveError": "Das Speichern konnte nicht bestätigt werden. Prüfen Sie Ihr Drive, bevor Sie es erneut versuchen.",
+    "savedToDrive": "„%{name}“ in Ihrem Drive gespeichert",
+    "organise": "Organisieren",
+    "movedTo": "Verschoben nach %{path}",
+    "organiseError": "Drive konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
   },
   "search": {
     "searchIn": "Suchen in",

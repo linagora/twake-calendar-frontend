@@ -1,5 +1,7 @@
 export { TdriveButton } from './components/TdriveButton'
 export { TdrivePickerDialog } from './components/TdrivePickerDialog'
+export { DriveSaveSnackbar } from './components/DriveSaveSnackbar'
 export { useTdrivePicker } from './hooks/useTdrivePicker'
+export { useTdriveMove, toSavedDriveFile } from './hooks/useTdriveMove'
 export { isTdrivePickerAvailable } from './helpers/isTdrivePickerAvailable'
-export type { TdriveFile } from './types'
+export type { TdriveFile, SavedDriveFile, MovedDriveFile } from './types'

@@ -12,6 +12,7 @@ import React, { MouseEvent } from 'react'
 import { alpha, type CSSObject } from '@mui/material/styles'
 import CloseIcon from '@mui/icons-material/Close'
 import { AttachmentUploadEndIcon } from '@common/features/Tdrive/components/AttachmentUploadEndIcon'
+import { DriveSaveSnackbar } from '@common/features/Tdrive/components/DriveSaveSnackbar'
 import { useSaveToDrive } from '@common/features/Tdrive/hooks/useSaveToDrive'
 import { useI18n } from 'twake-i18n'
 
@@ -33,9 +34,15 @@ export const AttachementChip: React.FC<AttachementChipProps> = props => {
 
 const AttachmentChipWithSave: React.FC<AttachementChipProps> = props => {
   const { t } = useI18n()
-  const { available, containerRef, status, save, dismiss } = useSaveToDrive(
-    props.attachment
-  )
+  const {
+    available,
+    containerRef,
+    status,
+    savedFile,
+    save,
+    dismiss,
+    dismissSaved
+  } = useSaveToDrive(props.attachment)
   return (
     <>
       <AttachmentChipContent
@@ -59,6 +66,7 @@ const AttachmentChipWithSave: React.FC<AttachementChipProps> = props => {
           {t('tdrive.saveError')}
         </Alert>
       </Snackbar>
+      <DriveSaveSnackbar file={savedFile} onClose={dismissSaved} />
     </>
   )
 }
