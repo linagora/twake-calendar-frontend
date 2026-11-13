@@ -1053,3 +1053,101 @@ describe('makeEventWithOverrides — same wall clock under a TZID with no defini
     )
   })
 })
+
+describe('makeEventWithOverrides — floating RECURRENCE-ID in a VTIMEZONE-only series zone (#2107)', () => {
+  const prop = (v: VCalComponent, name: string) =>
+    (v[1] as VObjectProperty[]).find(([k]) => k === name)
+  const vtimezone: VCalComponent = [
+    'vtimezone',
+    [['tzid', {}, 'text', 'Customized Time Zone']],
+    [
+      [
+        'standard',
+        [
+          ['dtstart', {}, 'date-time', '1970-01-01T00:00:00'],
+          ['tzoffsetfrom', {}, 'utc-offset', '+01:00'],
+          ['tzoffsetto', {}, 'utc-offset', '+01:00']
+        ],
+        []
+      ]
+    ]
+  ]
+  const master: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      [
+        'dtstart',
+        { tzid: 'Customized Time Zone' },
+        'date-time',
+        '2025-03-03T10:00:00'
+      ],
+      ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+      ['summary', {}, 'text', 'Weekly sync']
+    ],
+    []
+  ]
+  const floating: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['recurrence-id', {}, 'date-time', '2025-03-10T10:00:00'],
+      ['dtstart', {}, 'date-time', '2025-03-10T10:00:00'],
+      ['summary', {}, 'text', 'Weekly sync'],
+      ['status', {}, 'text', 'CANCELLED']
+    ],
+    []
+  ]
+  const utc: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['recurrence-id', {}, 'date-time', '2025-03-10T10:00:00Z'],
+      ['dtstart', {}, 'date-time', '2025-03-10T12:00:00Z'],
+      ['summary', {}, 'text', 'Moved occurrence']
+    ],
+    []
+  ]
+  const editedAt = (recurrenceId: string) =>
+    ({
+      uid: `series-1/${recurrenceId}`,
+      calId: 'u1/cal1',
+      recurrenceId,
+      timezone: 'Customized Time Zone',
+      start: '2025-03-10T12:00:00.000Z',
+      end: '2025-03-10T13:00:00.000Z',
+      allday: false,
+      attendee: [],
+      title: 'Edited'
+    }) as unknown as CalendarEvent
+  const veventsOf = (out: VCalComponent) =>
+    (out[2] as VCalComponent[]).filter(([n]) => n === 'vevent')
+
+  it('replaces the override stored with the exact UTC value, not a floating one with the same digits', () => {
+    const vevents = veventsOf(
+      makeEventWithOverrides(
+        editedAt('2025-03-10T10:00:00Z'),
+        [master, floating, utc],
+        [vtimezone]
+      )
+    )
+
+    expect(vevents[1]).toEqual(floating)
+    expect(prop(vevents[2], 'recurrence-id')?.[3]).toBe('2025-03-10T10:00:00Z')
+    expect(prop(vevents[2], 'summary')?.[3]).toBe('Edited')
+  })
+
+  it('reads the floating override in the series zone from its VTIMEZONE', () => {
+    const vevents = veventsOf(
+      makeEventWithOverrides(
+        editedAt('2025-03-10T09:00:00Z'),
+        [master, floating, utc],
+        [vtimezone]
+      )
+    )
+
+    expect(vevents[2]).toEqual(utc)
+    expect(prop(vevents[1], 'recurrence-id')?.[3]).toBe('2025-03-10T10:00:00')
+    expect(prop(vevents[1], 'summary')?.[3]).toBe('Edited')
+  })
+})
