@@ -112,3 +112,21 @@ describe('the DTEND of a saved event', () => {
     )
   })
 })
+
+describe('a floating timed event without DTEND nor DURATION', () => {
+  const browserTimezone = process.env.TZ
+
+  beforeAll(() => {
+    process.env.TZ = 'America/New_York'
+  })
+
+  afterAll(() => {
+    process.env.TZ = browserTimezone
+  })
+
+  it('is saved without DTEND in a browser away from UTC', () => {
+    const parsed = parseFetchedEvent(base, ics('DTSTART:20250317T100000'), true)
+
+    expect(writtenVevent(parsed).getFirstProperty('dtend')).toBeNull()
+  })
+})
