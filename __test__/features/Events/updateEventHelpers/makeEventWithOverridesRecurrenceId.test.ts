@@ -695,6 +695,108 @@ describe('makeEventWithOverrides — overrides sharing a wall-clock RECURRENCE-I
   )
 })
 
+describe('makeEventWithOverrides — floating and TZID overrides sharing a wall clock (#2104)', () => {
+  const prop = (v: VCalComponent, name: string): VObjectProperty | undefined =>
+    (v[1] as VObjectProperty[]).find(([k]) => k === name)
+
+  const master: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      [
+        'dtstart',
+        { tzid: 'America/New_York' },
+        'date-time',
+        '2025-03-03T10:00:00'
+      ],
+      ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
+      ['summary', {}, 'text', 'Weekly sync']
+    ],
+    []
+  ]
+  // 10:00 Minsk == 07:00Z, another instant than the floating override
+  const minsk: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      [
+        'recurrence-id',
+        { tzid: 'Europe/Minsk' },
+        'date-time',
+        '2025-03-10T10:00:00'
+      ],
+      ['dtstart', { tzid: 'Europe/Minsk' }, 'date-time', '2025-03-10T10:00:00'],
+      ['summary', {}, 'text', 'Weekly sync'],
+      ['status', {}, 'text', 'CANCELLED']
+    ],
+    []
+  ]
+  // Read in the series zone: 10:00 New York == 14:00Z
+  const floating: VCalComponent = [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'series-1'],
+      ['recurrence-id', {}, 'date-time', '2025-03-10T10:00:00'],
+      ['dtstart', { tzid: 'Europe/Minsk' }, 'date-time', '2025-03-10T19:00:00'],
+      ['summary', {}, 'text', 'Moved occurrence']
+    ],
+    []
+  ]
+  // The floating override as parseFetchedEvent reads it: no recurrenceTzid
+  const edited = {
+    uid: 'series-1/2025-03-10T10:00:00',
+    calId: 'u1/cal1',
+    recurrenceId: '2025-03-10T10:00:00',
+    timezone: 'Europe/Minsk',
+    start: '2025-03-10T17:00:00.000Z',
+    end: '2025-03-10T18:00:00.000Z',
+    allday: false,
+    attendee: [],
+    title: 'Edited'
+  } as unknown as CalendarEvent
+
+  it.each([
+    ['Minsk', [master, minsk, floating]],
+    ['floating', [master, floating, minsk]]
+  ])(
+    'replaces the floating override, not the TZID one (%s stored first)',
+    (_, stored) => {
+      const overrides = listOverrides(
+        makeEventWithOverrides(edited, structuredClone(stored))
+      )
+
+      expect(overrides).toHaveLength(2)
+      expect(overrides).toContainEqual(minsk)
+      const floatingOut = overrides.find(
+        v => prop(v, 'recurrence-id')?.[1]?.tzid === undefined
+      )
+      expect(prop(floatingOut as VCalComponent, 'recurrence-id')).toEqual([
+        'recurrence-id',
+        {},
+        'date-time',
+        '2025-03-10T10:00:00'
+      ])
+      expect(prop(floatingOut as VCalComponent, 'summary')?.[3]).toBe('Edited')
+    }
+  )
+
+  it('replaces the Minsk override when the event was read from it', () => {
+    const overrides = listOverrides(
+      makeEventWithOverrides(
+        { ...edited, recurrenceTzid: 'Europe/Minsk' },
+        structuredClone([master, floating, minsk])
+      )
+    )
+
+    expect(overrides).toHaveLength(2)
+    expect(overrides).toContainEqual(floating)
+    const minskOut = overrides.find(
+      v => prop(v, 'recurrence-id')?.[1]?.tzid === 'Europe/Minsk'
+    )
+    expect(prop(minskOut as VCalComponent, 'summary')?.[3]).toBe('Edited')
+  })
+})
+
 describe('makeEventWithOverrides — floating override after a zone change (#1938)', () => {
   function floatingMaster(): VCalComponent {
     return [

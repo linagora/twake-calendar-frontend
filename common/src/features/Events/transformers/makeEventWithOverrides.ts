@@ -126,9 +126,10 @@ function findOverrideIndex(
   if (exactIndexes.length > 1) {
     // The TZID of the RECURRENCE-ID the event was read from tells the
     // candidates apart, whatever zone the event is now written in. See #2067.
+    // Its absence does too: an event read from a floating RECURRENCE-ID is the
+    // floating candidate, not a TZID one sharing its wall clock. See #2104.
     const sameTzid = exactIndexes.filter(
       index =>
-        updatedEvent.recurrenceTzid !== undefined &&
         getTzidParam(storedIds[index]?.[1]) === updatedEvent.recurrenceTzid
     )
     const candidates = sameTzid.length ? sameTzid : exactIndexes
