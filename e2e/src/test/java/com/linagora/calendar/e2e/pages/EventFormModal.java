@@ -587,12 +587,19 @@ public class EventFormModal {
      * clicked. The list must therefore be properly closed before handing back.
      */
     public EventFormModal notification(String labelContains) {
-        notificationSelect().click();
-        page.getByRole(AriaRole.OPTION)
-            .filter(new Locator.FilterOptions().setHasText(labelContains))
-            .first()
-            .click();
-        closeOptionList();
+        for (int attempt = 1; attempt <= 2; attempt++) {
+            notificationSelect().click();
+            page.getByRole(AriaRole.OPTION)
+                .filter(new Locator.FilterOptions().setHasText(labelContains))
+                .first()
+                .click();
+            closeOptionList();
+            if (notification().contains(labelContains)) {
+                return this;
+            }
+        }
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(notificationSelect())
+            .containsText(labelContains);
         return this;
     }
 
