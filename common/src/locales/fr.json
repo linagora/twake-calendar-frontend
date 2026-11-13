@@ -749,5 +749,35 @@
   "embed": {
     "signInRequired": "Vous êtes déconnecté. Reconnectez-vous pour voir ce calendrier.",
     "calendarUnavailable": "Ce calendrier n'est pas disponible. Vous n'en êtes peut-être pas membre."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Twake Calendar ne peut pas s'ouvrir ici",
+      "description": "Ouvrez Twake Calendar pour créer votre événement."
+    },
+    "forbidden": {
+      "title": "Twake Calendar n'est pas autorisé à répondre ici",
+      "description": "Votre administrateur doit autoriser Twake Calendar à répondre à cette application."
+    },
+    "failed": {
+      "title": "Twake Calendar n'a pas pu se charger",
+      "description": "Fermez cette fenêtre et réessayez."
+    },
+    "sessionExpired": {
+      "title": "Votre session a expiré",
+      "description": "Ouvrez Twake Calendar pour vous reconnecter, puis réessayez."
+    },
+    "unsupported": {
+      "title": "Twake Calendar ne peut pas faire cela",
+      "description": "Cette application a demandé à Twake Calendar une action qu'il ne propose pas."
+    },
+    "invalidData": {
+      "title": "Cet événement ne peut pas être créé",
+      "description": "Cette application a envoyé un événement que Twake Calendar ne sait pas lire."
+    },
+    "untrustedFrame": {
+      "title": "Twake Calendar ne peut pas s'ouvrir dans cette page",
+      "description": "Une autre page affiche cette application : ouvrez Twake Calendar directement pour créer votre événement."
+    }
   }
 }

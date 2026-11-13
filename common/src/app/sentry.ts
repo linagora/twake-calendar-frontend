@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react'
+import type { ErrorInfo } from 'react'
 import { scrubDeep } from '@common/utils/scrubSensitiveData'
 
 /**
@@ -21,4 +22,19 @@ export function initSentry(): void {
       beforeBreadcrumb: breadcrumb => scrubDeep(breadcrumb)
     })
   }
+}
+
+/**
+ * Reports a crash an ErrorBoundary caught to Sentry, with the component
+ * stack: the root Sentry.ErrorBoundary never sees an error caught lower.
+ * Used by App and IntentPage.
+ */
+export function reportCrash(error: unknown, errorInfo: ErrorInfo): void {
+  Sentry.captureException(error, {
+    contexts: {
+      react: {
+        componentStack: errorInfo.componentStack
+      }
+    }
+  })
 }

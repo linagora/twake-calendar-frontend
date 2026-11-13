@@ -53,6 +53,26 @@ describe('the frame of TwakeSpace', () => {
     expect(postMessage).not.toHaveBeenCalled()
   })
 
+  it('leaves the intents page framed by Twake Chat alone: no twake-embed message, no overlay', () => {
+    history.replace('/intents?intent=intent-1')
+    expect(connectCalendarToTwakeSpace(parent)).toBeNull()
+
+    // Nor on the callback of its silent sign in
+    history.replace('/intents/callback?code=c&state=s')
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({
+        code_verifier: 'v',
+        state: 's',
+        returnTo: '/intents?intent=intent-1'
+      })
+    )
+    const space = connectCalendarToTwakeSpace(parent)
+    sessionStorage.removeItem('redirectState')
+    expect(space).toBeNull()
+    expect(postMessage).not.toHaveBeenCalled()
+  })
+
   it('connects on the callback of the silent sign in of an embed route', () => {
     history.replace('/callback?code=c&state=s')
     expect(connectCalendarToTwakeSpace(parent)).toBeNull()

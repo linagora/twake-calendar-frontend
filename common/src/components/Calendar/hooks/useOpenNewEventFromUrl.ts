@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { PENDING_NEW_EVENT_ATTENDEES_KEY } from '@common/features/Events/newEventDeepLinkUtils'
-import { userAttendee } from '@common/features/User/models/attendee'
+import {
+  newEventWithAttendees,
+  PENDING_NEW_EVENT_ATTENDEES_KEY
+} from '@common/features/Events/newEventDeepLinkUtils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
@@ -54,15 +56,7 @@ export function useOpenNewEventFromUrl({
 
     const emails = parsePendingAttendees(raw)
 
-    setTempEvent({
-      start: '',
-      end: '',
-      allday: false,
-      attendee: emails.map(
-        email =>
-          new userAttendee({ cal_address: email, cn: email, rsvp: 'TRUE' })
-      )
-    } as CalendarEvent)
+    setTempEvent(newEventWithAttendees(emails))
     setAnchorEl(document.body)
   }, [userId, calendars, setTempEvent, setAnchorEl])
 }

@@ -387,7 +387,10 @@ function ResponsiveDialog({
     event: unknown,
     reason: 'backdropClick' | 'escapeKeyDown'
   ): void => {
-    if (isExpanded && reason === 'backdropClick') {
+    // Expanded, or without a backdrop (framed, the form is the whole page),
+    // a click beside the dialog is no request to close it
+    const hasNoBackdrop = isExpanded || otherDialogProps.hideBackdrop
+    if (hasNoBackdrop && reason === 'backdropClick') {
       return
     }
     onClose()

@@ -751,5 +751,35 @@
   "embed": {
     "signInRequired": "Вы вышли из системы. Войдите снова, чтобы увидеть этот календарь.",
     "calendarUnavailable": "Этот календарь недоступен. Возможно, вы не являетесь его участником."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Twake Calendar не может открыться здесь",
+      "description": "Откройте Twake Calendar, чтобы создать событие."
+    },
+    "forbidden": {
+      "title": "Twake Calendar не может отвечать здесь",
+      "description": "Администратор должен разрешить Twake Calendar отвечать этому приложению."
+    },
+    "failed": {
+      "title": "Не удалось загрузить Twake Calendar",
+      "description": "Закройте это окно и попробуйте снова."
+    },
+    "sessionExpired": {
+      "title": "Срок действия сеанса истёк",
+      "description": "Откройте Twake Calendar, чтобы войти снова, затем повторите попытку."
+    },
+    "unsupported": {
+      "title": "Twake Calendar не может это сделать",
+      "description": "Это приложение запросило у Twake Calendar действие, которое он не поддерживает."
+    },
+    "invalidData": {
+      "title": "Не удаётся создать это событие",
+      "description": "Это приложение отправило событие, которое Twake Calendar не может прочитать."
+    },
+    "untrustedFrame": {
+      "title": "Twake Calendar не может открыться на этой странице",
+      "description": "Это приложение показано на другой странице: откройте Twake Calendar напрямую, чтобы создать событие."
+    }
   }
 }

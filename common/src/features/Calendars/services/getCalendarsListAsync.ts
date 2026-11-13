@@ -27,7 +27,9 @@ import { getOwnerOrResourceData } from './helpers'
 
 const theme = createTheme()
 
-const CALENDAR_HOME_NOT_FOUND_ERROR = 'TRANSLATION:error.calendarsNotFound'
+/** The error of a calendar home the server does not have (a 404): no calendar */
+export const CALENDAR_HOME_NOT_FOUND_ERROR =
+  'TRANSLATION:error.calendarsNotFound'
 
 // A 404 on the calendar home (the calendar was hard deleted server side) must
 // not prevent the application from starting: report it as null so the caller

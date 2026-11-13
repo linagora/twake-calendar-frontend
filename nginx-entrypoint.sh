@@ -20,10 +20,18 @@ fi
 default_frame_ancestors="'self'"
 frame_ancestors="${FRAME_ANCESTORS:-$default_frame_ancestors}"
 
+# The private image sets INTENT_FRAME_ANCESTORS (default *): its intents
+# page, /intents and every path under it, is framed by the app of the intent
+if [ -n "${INTENT_FRAME_ANCESTORS:-}" ]; then
+  frame_ancestors_map="map \$request_uri \$frame_ancestors_csp { \"~*^/intents([/?]|\$)\" \"frame-ancestors $INTENT_FRAME_ANCESTORS\"; default \"frame-ancestors $frame_ancestors\"; }"
+else
+  frame_ancestors_map="map \$uri \$frame_ancestors_csp { default \"frame-ancestors $frame_ancestors\"; }"
+fi
+
 cat > "$CACHE_ENV_CONF" <<EOF
 map \$uri \$static_cache_control { default "$static_cache_control"; }
 map \$uri \$html_cache_control { default "$html_cache_control"; }
-map \$uri \$frame_ancestors_csp { default "frame-ancestors $frame_ancestors"; }
+$frame_ancestors_map
 EOF
 
 exec nginx -g 'daemon off;'

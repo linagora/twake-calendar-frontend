@@ -751,5 +751,35 @@
   "embed": {
     "signInRequired": "Bạn đã đăng xuất. Hãy đăng nhập lại để xem lịch này.",
     "calendarUnavailable": "Lịch này không khả dụng. Có thể bạn không phải là thành viên của lịch."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Không thể mở Twake Calendar tại đây",
+      "description": "Hãy mở Twake Calendar để tạo sự kiện của bạn."
+    },
+    "forbidden": {
+      "title": "Twake Calendar không được phép phản hồi tại đây",
+      "description": "Quản trị viên cần cho phép Twake Calendar phản hồi ứng dụng này."
+    },
+    "failed": {
+      "title": "Không thể tải Twake Calendar",
+      "description": "Hãy đóng cửa sổ này và thử lại."
+    },
+    "sessionExpired": {
+      "title": "Phiên của bạn đã hết hạn",
+      "description": "Hãy mở Twake Calendar để đăng nhập lại, sau đó thử lại."
+    },
+    "unsupported": {
+      "title": "Twake Calendar không thể thực hiện việc này",
+      "description": "Ứng dụng này yêu cầu Twake Calendar một thao tác mà nó không hỗ trợ."
+    },
+    "invalidData": {
+      "title": "Không thể tạo sự kiện này",
+      "description": "Ứng dụng này đã gửi một sự kiện mà Twake Calendar không đọc được."
+    },
+    "untrustedFrame": {
+      "title": "Không thể mở Twake Calendar trong trang này",
+      "description": "Một trang khác đang hiển thị ứng dụng này: hãy mở trực tiếp Twake Calendar để tạo sự kiện của bạn."
+    }
   }
 }

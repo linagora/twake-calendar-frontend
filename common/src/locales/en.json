@@ -749,5 +749,35 @@
   "embed": {
     "signInRequired": "You are signed out. Sign in again to see this calendar.",
     "calendarUnavailable": "This calendar is not available. You may not be a member of it."
+  },
+  "intents": {
+    "unavailable": {
+      "title": "Twake Calendar cannot open here",
+      "description": "Open Twake Calendar to create your event."
+    },
+    "forbidden": {
+      "title": "Twake Calendar is not allowed to answer here",
+      "description": "Your administrator has to let Twake Calendar answer this app."
+    },
+    "failed": {
+      "title": "Twake Calendar could not load",
+      "description": "Close this window and try again."
+    },
+    "sessionExpired": {
+      "title": "Your session has expired",
+      "description": "Open Twake Calendar to sign in again, then try again."
+    },
+    "unsupported": {
+      "title": "Twake Calendar cannot do this",
+      "description": "This app asked Twake Calendar for something it does not offer."
+    },
+    "invalidData": {
+      "title": "This event cannot be created",
+      "description": "This app sent an event Twake Calendar cannot read."
+    },
+    "untrustedFrame": {
+      "title": "Twake Calendar cannot open in this page",
+      "description": "Another page shows this app: open Twake Calendar directly to create your event."
+    }
   }
 }
