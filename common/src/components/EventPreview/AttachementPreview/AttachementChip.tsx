@@ -1,13 +1,83 @@
 import { Attachment } from '@common/types/Attachment'
 import { FileTypeFolder, getFileTypeIcon, Icon } from '@linagora/twake-icons'
-import { Box, Chip, Tooltip, Typography } from '@linagora/twake-mui'
+import {
+  Alert,
+  Box,
+  Chip,
+  Snackbar,
+  Tooltip,
+  Typography
+} from '@linagora/twake-mui'
 import React, { MouseEvent } from 'react'
+import { alpha, type CSSObject } from '@mui/material/styles'
 import CloseIcon from '@mui/icons-material/Close'
+import { AttachmentUploadEndIcon } from '@common/features/Tdrive/components/AttachmentUploadEndIcon'
+import { DriveSaveSnackbar } from '@common/features/Tdrive/components/DriveSaveSnackbar'
+import { useSaveToDrive } from '@common/features/Tdrive/hooks/useSaveToDrive'
+import { useI18n } from 'twake-i18n'
 
-export const AttachementChip: React.FC<{
+interface AttachementChipProps {
   attachment: Attachment
+  isOrganizer?: boolean
   onDelete?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void
-}> = ({ attachment, onDelete }) => {
+}
+
+export const AttachementChip: React.FC<AttachementChipProps> = props => {
+  const canSave =
+    props.isOrganizer === false && !props.onDelete && window.TDRIVE_ENABLED
+  return canSave ? (
+    <AttachmentChipWithSave {...props} />
+  ) : (
+    <AttachmentChipContent {...props} />
+  )
+}
+
+const AttachmentChipWithSave: React.FC<AttachementChipProps> = props => {
+  const { t } = useI18n()
+  const {
+    available,
+    containerRef,
+    status,
+    savedFile,
+    save,
+    dismiss,
+    dismissSaved
+  } = useSaveToDrive(props.attachment)
+  return (
+    <>
+      <AttachmentChipContent
+        {...props}
+        isSaved={status === 'success'}
+        endIcon={
+          available ? (
+            <AttachmentUploadEndIcon status={status} onSave={save} />
+          ) : undefined
+        }
+      />
+      <Box ref={containerRef} sx={{ display: 'none' }} />
+      <Snackbar
+        open={status === 'error'}
+        autoHideDuration={6000}
+        onClose={(_event, reason) => {
+          if (reason !== 'clickaway') dismiss()
+        }}
+      >
+        <Alert severity="error" onClose={dismiss}>
+          {t('tdrive.saveError')}
+        </Alert>
+      </Snackbar>
+      <DriveSaveSnackbar file={savedFile} onClose={dismissSaved} />
+    </>
+  )
+}
+
+const AttachmentChipContent: React.FC<{
+  attachment: Attachment
+  endIcon?: React.ReactNode
+  isSaved?: boolean
+  onDelete?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void
+}> = ({ attachment, onDelete, endIcon, isSaved }) => {
+  const [isEndIconActive, setIsEndIconActive] = React.useState(false)
   const filename = attachment.x_filename ?? ''
   const lastDot = filename.lastIndexOf('.')
   const hasExtension = lastDot > 0 && lastDot < filename.length - 1
@@ -64,10 +134,20 @@ export const AttachementChip: React.FC<{
   )
 
   return (
-    <Tooltip title={filename} placement="top">
+    <Tooltip title={isEndIconActive ? '' : filename} placement="top">
       <Box>
         <Chip
           square
+          sx={
+            isSaved
+              ? (theme): CSSObject => ({
+                  bgcolor: alpha(theme.palette.success.main, 0.08),
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.success.main, 0.12)
+                  }
+                })
+              : undefined
+          }
           icon={
             <Icon
               icon={
@@ -78,6 +158,18 @@ export const AttachementChip: React.FC<{
             />
           }
           label={label}
+          endIcon={
+            endIcon ? (
+              <span
+                onMouseEnter={() => setIsEndIconActive(true)}
+                onMouseLeave={() => setIsEndIconActive(false)}
+                onFocus={() => setIsEndIconActive(true)}
+                onBlur={() => setIsEndIconActive(false)}
+              >
+                {endIcon}
+              </span>
+            ) : undefined
+          }
           onDelete={onDelete}
           deleteIcon={<CloseIcon sx={{ width: '16px', height: '16px' }} />}
           onClick={openFile}

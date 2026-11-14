@@ -173,6 +173,7 @@ const EventPreviewModal: React.FC<{
         <EventPreviewDetails
           event={event}
           isOwn={isOwn}
+          isOrganizer={isOrganizer}
           isNotPrivate={isNotPrivate}
           isResourceEventPreview={calendar.owner?.resource}
           isTeamCalendar={calendar.owner?.teamCalendar}

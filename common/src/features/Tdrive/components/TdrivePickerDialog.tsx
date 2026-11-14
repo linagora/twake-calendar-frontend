@@ -13,6 +13,10 @@ interface TdrivePickerDialogProps {
   containerRef: React.RefObject<HTMLDivElement | null>
   onReadyToUse: (callback: () => void) => void
   onFileSelected: (file: TdriveFile) => void
+  // Whether Escape and the backdrop still close the dialog once the intent is
+  // ready: a service that owns its cancellation, like MOVE, must not be
+  // closed under it while it is busy
+  dismissibleWhenReady?: boolean
 }
 
 interface PickerContentProps {
@@ -64,7 +68,8 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
   open,
   onClose,
   containerRef,
-  onReadyToUse
+  onReadyToUse,
+  dismissibleWhenReady = true
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -80,7 +85,7 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={isReady && !dismissibleWhenReady ? undefined : onClose}
       fullWidth
       fullScreen={isMobile}
       onTransitionEnter={handleTransitionEnter}

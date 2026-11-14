@@ -94,7 +94,15 @@
     "open": "Открыть"
   },
   "tdrive": {
-    "addAsAttachment": "Добавить как вложение"
+    "addAsAttachment": "Добавить как вложение",
+    "saveToDrive": "Сохранить в мой Drive",
+    "saving": "Сохранение в Drive…",
+    "saved": "Файл сохранён в вашем Drive",
+    "saveError": "Не удалось подтвердить сохранение файла. Проверьте Drive перед повторной попыткой.",
+    "savedToDrive": "«%{name}» сохранён в вашем Drive",
+    "organise": "Упорядочить",
+    "movedTo": "Перемещено в %{path}",
+    "organiseError": "Не удалось открыть Drive. Попробуйте ещё раз."
   },
   "search": {
     "searchIn": "Поиск в",

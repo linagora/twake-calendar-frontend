@@ -94,7 +94,15 @@
     "open": "Apri"
   },
   "tdrive": {
-    "addAsAttachment": "Aggiungi come allegato"
+    "addAsAttachment": "Aggiungi come allegato",
+    "saveToDrive": "Salva nel mio Drive",
+    "saving": "Salvataggio su Drive…",
+    "saved": "File salvato nel tuo Drive",
+    "saveError": "Impossibile confermare il salvataggio del file. Controlla il tuo Drive prima di riprovare.",
+    "savedToDrive": "“%{name}” salvato nel tuo Drive",
+    "organise": "Organizza",
+    "movedTo": "Spostato in %{path}",
+    "organiseError": "Impossibile aprire Drive. Riprova."
   },
   "search": {
     "searchIn": "Cerca in",

@@ -94,7 +94,15 @@
     "open": "Mở"
   },
   "tdrive": {
-    "addAsAttachment": "Thêm làm tệp đính kèm"
+    "addAsAttachment": "Thêm làm tệp đính kèm",
+    "saveToDrive": "Lưu vào Drive của tôi",
+    "saving": "Đang lưu vào Drive…",
+    "saved": "Đã lưu tệp vào Drive của bạn",
+    "saveError": "Không thể xác nhận tệp đã được lưu. Hãy kiểm tra Drive trước khi thử lại.",
+    "savedToDrive": "Đã lưu “%{name}” vào Drive của bạn",
+    "organise": "Sắp xếp",
+    "movedTo": "Đã chuyển đến %{path}",
+    "organiseError": "Không thể mở Drive. Vui lòng thử lại."
   },
   "search": {
     "searchIn": "Tìm kiếm trong",

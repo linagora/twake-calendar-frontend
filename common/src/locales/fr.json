@@ -94,7 +94,15 @@
     "open": "Ouvrir"
   },
   "tdrive": {
-    "addAsAttachment": "Ajouter en pièce jointe"
+    "addAsAttachment": "Ajouter en pièce jointe",
+    "saveToDrive": "Enregistrer dans mon Drive",
+    "saving": "Enregistrement dans le Drive…",
+    "saved": "Fichier enregistré dans votre Drive",
+    "saveError": "Impossible de confirmer l’enregistrement du fichier. Vérifiez votre Drive avant de réessayer.",
+    "savedToDrive": "« %{name} » enregistré dans votre Drive",
+    "organise": "Organiser",
+    "movedTo": "Déplacé vers %{path}",
+    "organiseError": "Impossible d’ouvrir le Drive. Veuillez réessayer."
   },
   "search": {
     "searchIn": "Rechercher dans",
