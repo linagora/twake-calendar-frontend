@@ -94,7 +94,11 @@
     "open": "Open"
   },
   "tdrive": {
-    "addAsAttachment": "Add as attachment"
+    "addAsAttachment": "Add as attachment",
+    "saveToDrive": "Save to my Drive",
+    "saving": "Saving to Drive…",
+    "saved": "File saved to your Drive",
+    "saveError": "Could not confirm that the file was saved. Check your Drive before trying again."
   },
   "search": {
     "searchIn": "Search in",
