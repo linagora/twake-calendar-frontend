@@ -10,22 +10,30 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #1826 Deleting an event shows a notification with an undo button; the deletion is sent after 3 seconds unless undone
 - #2017 Toast notification when the participation status of an event is updated
 - #2048 "Enable keyboard shortcuts" switch in Settings → Calendar and events (desktop only), so the single key shortcuts can be turned off. The choice is remembered by the browser, and the shortcuts stay on by default
+- #2022 The new event form can be shown alone on `/embed/newEvent`, as the CREATE `io.cozy.calendar.events` intent, so Twake Chat can create an event with the members of a room as attendees
 
 ### Changed
 
 - #2026 The RSVP page shows the event in the attendee's time zone, the browser one by default, and lets the attendee pick another
 - #1931 An end time before the start keeps the last valid duration instead of moving the end or creating a multi-day event
 - #1930 The Drive picker signs in without a Drive session and reports a failure to open after 30 s instead of loading forever
+- #2093 Fixed the Tdrive picker in Space
 - #1941 Events and series in a custom time zone (such as "Customized Time Zone" from Outlook) are read and saved with their stored VTIMEZONE, keeping their zone, overrides and recurrence ends instead of being shifted
 - #1949 #1978 #2001 #2033 Editing all the events of a series keeps `BYHOUR`, `UNTIL`, the overrides, `EXDATE`s and `RDATE`s consistent when the time of day changes
+- #2106 Changing the time of all the events of a series whose start has no time zone next to a custom VTIMEZONE moves its overrides and `EXDATE`s by the right amount
+- #2111 Renaming a series or adding an attendee no longer moves a start that falls in the gap of a spring DST change
 - #1948 A recurring event whose time zone is set on edit is saved with a UTC `UNTIL`
 - #1945 Editing an occurrence in the hour repeated at the end of summer time edits the right occurrence
 - #1938 #1939 #1977 #2034 #2067 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
+- #2104 #2107 Editing one occurrence no longer overwrites another override that has the same wall clock but no time zone
 - #1950 Answering "All the events" works for a series whose time zone is unknown
 - #1943 A new organizer listed twice among the attendees is written once, with their answer kept
 - Removing the footer of a description no longer leaves it in the form or loses a note written after it
 - #1937 Saving an unchanged event no longer moves it by one hour, nor resets the attendees' answers, in zones where browser and application time zone data disagree (e.g. Africa/Casablanca)
 - #1999 #2000 An event without an end, or in a repeated hour, is read and compared in its own zone, so an unchanged save no longer invites everyone again
+- #2108 An event with a start time and neither end nor duration is saved without a made-up 30-minute end
+- #2105 An event whose end is in a different time zone than its start (a flight from Paris to New York) shows and saves the right end
+- #2109 A saved event always carries the VTIMEZONE of its time zone, including zones such as Etc/GMT-14 and Windows names
 - Opening the edit form of a simple event shows it in its stored time zone instead of the browser one
 - #1993 An event whose VTIMEZONE cannot be expanded can still be opened
 - #2015 The forms opened from an event link are shown, centred
@@ -34,6 +42,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #2046 Plain-text descriptions are shown as typed in the preview, including text between angle brackets
 - #2044 Opening a series whose answered occurrence is stored before its master reads the rule of the series
 - #2072 The `REPEAT`, `DURATION`, `ATTACH` and `X-` properties of an alarm are kept when the event is saved
+- #2060 The type and parameters of an alarm `TRIGGER` are kept when the event is saved, so an absolute reminder or one relative to the end no longer changes
+- #2062 Attachments keep their value type and parameters (inline data, `SIZE`, `MANAGED-ID`, `X-` parameters) when the event is saved
+- #2061 A booked event keeps its link to the booking when it is saved
 - #2077 The `DELEGATED-TO`, `DELEGATED-FROM`, `SENT-BY`, `LANGUAGE`, `SCHEDULE-STATUS` and `X-` parameters of attendees are kept when the event is saved
 - #2063 The status of an event (cancelled, tentative) is kept when it is saved instead of becoming confirmed
 - #2071 An unrecognized event class is treated as private instead of being saved as public
@@ -43,8 +54,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #2064 An event whose UID contains a "/" is saved under its own UID
 - #2047 The mini calendar selects the day of the navigated month after Next month
 - #2045 The name and answer class of an event chip stay current after an answer, a move or a change of calendar
+- #2049 All-day event chips are named after their calendar day in time zones east of UTC
 - #1805 Fixed the double draggable modal
 - Updated twake-mui to fix the background
+- #2094 The Docker images stop nginx gracefully on SIGTERM instead of waiting for the kill timeout
 
 ### Security
 
