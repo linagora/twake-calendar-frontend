@@ -143,7 +143,8 @@ export const EventResourceRow: React.FC<{
 export const EventDescriptionRow: React.FC<{
   description?: string
   attach?: Attachment[]
-}> = ({ description, attach }) => {
+  isOrganizer?: boolean
+}> = ({ description, attach, isOrganizer }) => {
   const builder = new EventDescriptionBuilder(description ?? '', attach ?? [])
     .removeFooter()
     .linkify()
@@ -162,7 +163,10 @@ export const EventDescriptionRow: React.FC<{
       html={builder.buildHtml()}
       content={
         displayableAttach.length > 0 && (
-          <AttachementPreview attachments={displayableAttach} />
+          <AttachementPreview
+            attachments={displayableAttach}
+            isOrganizer={isOrganizer}
+          />
         )
       }
     />

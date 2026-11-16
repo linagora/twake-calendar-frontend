@@ -19,6 +19,7 @@ import { PrivateEventPreview } from './PrivateEventPreview'
 export interface EventPreviewDetailsProps {
   event: CalendarEvent
   isOwn: boolean
+  isOrganizer?: boolean
   isNotPrivate: boolean
   isResourceEventPreview?: boolean
   calendarName?: string
@@ -38,6 +39,7 @@ export const infoIconSx = (theme: Theme): SxProps<Theme> => ({
 export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
   event,
   isOwn,
+  isOrganizer,
   isNotPrivate,
   isResourceEventPreview,
   calendarName,
@@ -106,6 +108,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
       <EventDescriptionRow
         description={event.description}
         attach={event.attach}
+        isOrganizer={isOrganizer}
       />
 
       <EventAlarmRow alarms={event.alarms} ownerEmail={ownerEmail} />

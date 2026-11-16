@@ -94,7 +94,11 @@
     "open": "Öffnen"
   },
   "tdrive": {
-    "addAsAttachment": "Als Anhang hinzufügen"
+    "addAsAttachment": "Als Anhang hinzufügen",
+    "saveToDrive": "In meinem Drive speichern",
+    "saving": "Wird in Drive gespeichert…",
+    "saved": "Datei in Ihrem Drive gespeichert",
+    "saveError": "Das Speichern konnte nicht bestätigt werden. Prüfen Sie Ihr Drive, bevor Sie es erneut versuchen."
   },
   "search": {
     "searchIn": "Suchen in",

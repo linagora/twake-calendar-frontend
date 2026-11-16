@@ -94,7 +94,11 @@
     "open": "Abrir"
   },
   "tdrive": {
-    "addAsAttachment": "Añadir como archivo adjunto"
+    "addAsAttachment": "Añadir como archivo adjunto",
+    "saveToDrive": "Guardar en mi Drive",
+    "saving": "Guardando en Drive…",
+    "saved": "Archivo guardado en tu Drive",
+    "saveError": "No se pudo confirmar que se guardó el archivo. Revisa tu Drive antes de volver a intentarlo."
   },
   "search": {
     "searchIn": "Buscar en",

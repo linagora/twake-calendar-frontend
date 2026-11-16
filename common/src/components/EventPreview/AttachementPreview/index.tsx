@@ -8,10 +8,12 @@ const ATTACHMENT_DISPLAY_LIMIT = 2
 
 interface AttachementPreviewProps {
   attachments: Attachment[]
+  isOrganizer?: boolean
 }
 
 export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
-  attachments
+  attachments,
+  isOrganizer
 }) => {
   const { t } = useI18n()
   const [showAllAttachments, setShowAllAttachments] = useState(false)
@@ -32,8 +34,15 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
     >
       {renderAttachments({
         attachments: displayableAttachments,
-        slice: 'first'
+        slice: 'first',
+        isOrganizer
       })}
+      {showAllAttachments &&
+        renderAttachments({
+          attachments: displayableAttachments,
+          slice: 'rest',
+          isOrganizer
+        })}
       {displayableAttachments.length > ATTACHMENT_DISPLAY_LIMIT && (
         <Button
           variant="text"
@@ -46,21 +55,18 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
             : t('eventPreview.showMore')}
         </Button>
       )}
-      {showAllAttachments &&
-        renderAttachments({
-          attachments: displayableAttachments,
-          slice: 'rest'
-        })}
     </Box>
   )
 }
 
 const renderAttachments = ({
   attachments,
-  slice
+  slice,
+  isOrganizer
 }: {
   attachments: Attachment[]
   slice: 'first' | 'rest'
+  isOrganizer?: boolean
 }): React.JSX.Element[] => {
   const sliced =
     slice === 'first'
@@ -71,6 +77,7 @@ const renderAttachments = ({
     <AttachementChip
       key={`${attachment.uri}-${slice === 'rest' ? ATTACHMENT_DISPLAY_LIMIT + index : index}`}
       attachment={attachment}
+      isOrganizer={isOrganizer}
     />
   ))
 }

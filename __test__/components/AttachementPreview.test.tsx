@@ -1,6 +1,6 @@
 import { AttachementPreview } from '@common/components/EventPreview/AttachementPreview'
 import { Attachment } from '@common/types/Attachment'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 
 vi.mock('twake-i18n', () => ({
@@ -13,11 +13,15 @@ vi.mock(
   '@common/components/EventPreview/AttachementPreview/AttachementChip',
   () => ({
     AttachementChip: ({
-      attachment
+      attachment,
+      isOrganizer
     }: {
       attachment: { x_filename?: string; uri: string }
+      isOrganizer?: boolean
     }) => (
-      <div data-testid="chip">{attachment.x_filename ?? attachment.uri}</div>
+      <div data-testid="chip" data-organizer={String(isOrganizer)}>
+        {attachment.x_filename ?? attachment.uri}
+      </div>
     )
   })
 )
@@ -49,5 +53,79 @@ describe('AttachementPreview', () => {
     )
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it.each([true, false])(
+    'passes organizer status %s to collapsed and expanded attachments',
+    isOrganizer => {
+      render(
+        <AttachementPreview
+          isOrganizer={isOrganizer}
+          attachments={[
+            new Attachment(
+              'https://example.com/one.pdf',
+              'application/pdf',
+              'one.pdf'
+            ),
+            new Attachment(
+              'https://example.com/two.pdf',
+              'application/pdf',
+              'two.pdf'
+            ),
+            new Attachment(
+              'https://example.com/three.pdf',
+              'application/pdf',
+              'three.pdf'
+            )
+          ]}
+        />
+      )
+      fireEvent.click(
+        screen.getByRole('button', { name: 'eventPreview.showMore' })
+      )
+      const chips = screen.getAllByTestId('chip')
+      expect(chips).toHaveLength(3)
+      chips.forEach(chip =>
+        expect(chip).toHaveAttribute('data-organizer', String(isOrganizer))
+      )
+    }
+  )
+
+  it('places the Show less button after all expanded attachment chips', () => {
+    render(
+      <AttachementPreview
+        attachments={[
+          new Attachment(
+            'https://example.com/one.pdf',
+            'application/pdf',
+            'one.pdf'
+          ),
+          new Attachment(
+            'https://example.com/two.pdf',
+            'application/pdf',
+            'two.pdf'
+          ),
+          new Attachment(
+            'https://example.com/three.pdf',
+            'application/pdf',
+            'three.pdf'
+          )
+        ]}
+      />
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'eventPreview.showMore' })
+    )
+
+    const chips = screen.getAllByTestId('chip')
+    const showLessButton = screen.getByRole('button', {
+      name: 'eventPreview.showLess'
+    })
+    const lastChip = chips[chips.length - 1]
+    expect(
+      lastChip.compareDocumentPosition(showLessButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
   })
 })
