@@ -154,6 +154,7 @@ export interface UseEventFormValuesReturn {
   setShowRepeat: (v: boolean) => void
   setHasEndDateChanged: (v: boolean) => void
   setAttachments: (v: EventFormValues['attachments']) => void
+  addAttachments: (added: EventFormValues['attachments']) => void
   setOrganizer: (v: userOrganiser | undefined) => void
   handleAllDayChange: (
     newAllDay: boolean,

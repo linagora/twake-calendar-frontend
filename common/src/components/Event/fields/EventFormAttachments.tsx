@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
 import { useAppSelector } from '@common/app/hooks'
@@ -18,20 +18,21 @@ const showInputLabel = (showMore: boolean, label: string): string =>
 export const EventFormAttachments: React.FC<{
   v: EventFormValues
   setAttachments: (v: Attachment[]) => void
+  addAttachments: (added: Attachment[]) => void
   showMore: boolean
   isExpanded: boolean
   onUploadingChange?: (isUploading: boolean) => void
-}> = ({ v, setAttachments, showMore, isExpanded, onUploadingChange }) => {
+}> = ({
+  v,
+  setAttachments,
+  addAttachments,
+  showMore,
+  isExpanded,
+  onUploadingChange
+}) => {
   const { t } = useI18n()
   const platformURL = useAppSelector(selectPlatformURL)
   const hasVisibleAttachments = v.attachments.some(a => isSafeHttpUrl(a.uri))
-
-  // The picker hands its files back long after it opened: uploads may have
-  // added attachments in between, read the list as it is then
-  const attachmentsRef = useRef(v.attachments)
-  useEffect(() => {
-    attachmentsRef.current = v.attachments
-  }, [v.attachments])
 
   const handleTdriveFilesSelected = useCallback(
     (files: TdriveFile[]): void => {
@@ -45,9 +46,11 @@ export const EventFormAttachments: React.FC<{
             sizeParams(file.size)
           )
       )
-      setAttachments([...attachmentsRef.current, ...attachments])
+      // The picker hands its files back long after it opened: uploads may have
+      // added attachments in between
+      addAttachments(attachments)
     },
-    [setAttachments]
+    [addAttachments]
   )
 
   if (isTdrivePickerAvailable(platformURL)) {
@@ -57,6 +60,7 @@ export const EventFormAttachments: React.FC<{
         showMore={showMore}
         attachments={v.attachments}
         setAttachments={setAttachments}
+        addAttachments={addAttachments}
         onUploadingChange={onUploadingChange}
       />
     )

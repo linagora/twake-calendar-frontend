@@ -289,19 +289,20 @@ describe('TdriveButton', () => {
     // The modal body is the drop zone: the button sits in one, as in the
     // event modals
     const renderButton = (showMore: boolean) => {
-      const setAttachments = vi.fn()
+      const addAttachments = vi.fn()
       render(
         <ResponsiveDialog open onClose={vi.fn()} title="event">
           <TdriveButton
             onFilesSelected={mockOnFilesSelected}
             showMore={showMore}
             attachments={[]}
-            setAttachments={setAttachments}
+            setAttachments={vi.fn()}
+            addAttachments={addAttachments}
           />
         </ResponsiveDialog>,
         { wrapper: Wrapper }
       )
-      return setAttachments
+      return addAttachments
     }
 
     const modalBody = (): HTMLElement => {
@@ -311,7 +312,7 @@ describe('TdriveButton', () => {
     }
 
     const dndAttachment = () => {
-      const setAttachments = renderButton(false)
+      const addAttachments = renderButton(false)
       const dataTransfer = { types: ['Files'], files: [file] }
 
       fireEvent.dragEnter(modalBody(), { dataTransfer })
@@ -323,7 +324,7 @@ describe('TdriveButton', () => {
       ).not.toBeInTheDocument()
       expect(mockUploadAttachment).toHaveBeenCalledWith(file)
 
-      return setAttachments
+      return addAttachments
     }
 
     it('takes no files when the upload is not enabled', () => {
@@ -350,9 +351,9 @@ describe('TdriveButton', () => {
     it('uploads the files dropped anywhere on the modal body', async () => {
       mockUploadAttachment.mockResolvedValue(driveAttachment)
 
-      const setAttachments = dndAttachment()
+      const addAttachments = dndAttachment()
       await vi.waitFor(() =>
-        expect(setAttachments).toHaveBeenCalledWith([driveAttachment])
+        expect(addAttachments).toHaveBeenCalledWith([driveAttachment])
       )
     })
 

@@ -28,6 +28,7 @@ interface TdriveButtonProps {
   showMore: boolean
   attachments: Attachment[]
   setAttachments: (attachments: Attachment[]) => void
+  addAttachments: (added: Attachment[]) => void
   onUploadingChange?: (isUploading: boolean) => void
 }
 
@@ -78,6 +79,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   showMore,
   attachments,
   setAttachments,
+  addAttachments,
   onUploadingChange
 }) => {
   const { t } = useI18n()
@@ -93,7 +95,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
     onReadyToUse
   } = useTdrivePicker({ onFilesSelected, limits })
   const { pendingUploads, uploadFailure, uploadFiles, dismissUploadFailure } =
-    useAttachmentUpload({ attachments, setAttachments })
+    useAttachmentUpload({ addAttachments })
   useDialogFileDrop(
     window.ENABLE_ATTACHMENT_UPLOAD ? uploadFiles : undefined,
     t('event.form.dropAttachments')

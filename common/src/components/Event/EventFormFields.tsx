@@ -180,6 +180,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       setShowRepeat,
       setHasEndDateChanged,
       setAttachments,
+      addAttachments,
       setOrganizer,
       handleAllDayChange
     } = useEventFormValues({
@@ -326,6 +327,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
         <EventFormAttachments
           v={v}
           setAttachments={setAttachments}
+          addAttachments={addAttachments}
           showMore={showMore}
           isExpanded={isExpanded}
           onUploadingChange={setIsUploading}

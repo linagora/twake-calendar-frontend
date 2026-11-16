@@ -25,8 +25,7 @@ interface QueuedUpload {
 }
 
 interface UseAttachmentUploadProps {
-  attachments: Attachment[]
-  setAttachments: (attachments: Attachment[]) => void
+  addAttachments: (added: Attachment[]) => void
 }
 
 interface UseAttachmentUploadReturn {
@@ -42,19 +41,11 @@ interface UseAttachmentUploadReturn {
  * others are queued, and they are added in the order they finish.
  */
 export function useAttachmentUpload({
-  attachments,
-  setAttachments
+  addAttachments
 }: UseAttachmentUploadProps): UseAttachmentUploadReturn {
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([])
   const [uploadFailure, setUploadFailure] =
     useState<AttachmentUploadFailure | null>(null)
-
-  // Uploads finish after the render that started them: each one adds its
-  // attachment to the latest list, including those added by the others
-  const attachmentsRef = useRef(attachments)
-  useEffect(() => {
-    attachmentsRef.current = attachments
-  }, [attachments])
 
   // A form closed mid-upload drops what comes back
   const isMountedRef = useRef(true)
@@ -70,9 +61,7 @@ export function useAttachmentUpload({
       try {
         const attachment = await uploadAttachment(file)
         if (!isMountedRef.current) return
-        const next = [...attachmentsRef.current, attachment]
-        attachmentsRef.current = next
-        setAttachments(next)
+        addAttachments([attachment])
       } catch (error) {
         if (!isMountedRef.current) return
         console.error('Attachment upload failed', error)
@@ -84,7 +73,7 @@ export function useAttachmentUpload({
         }
       }
     },
-    [setAttachments]
+    [addAttachments]
   )
 
   const enqueueUploads = useUploadQueue(uploadFile, MAX_PARALLEL_UPLOADS)

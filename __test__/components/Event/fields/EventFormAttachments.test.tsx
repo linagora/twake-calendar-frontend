@@ -116,31 +116,31 @@ describe('EventFormAttachments', () => {
     window.TDRIVE_ENABLED = undefined
   })
 
-  it('keeps the attachments uploaded while the Drive picker was open', () => {
+  it('appends the picked files instead of replacing the list it opened with', () => {
     const existing = new Attachment('https://drive.example.com/a', '', 'a.pdf')
-    const uploaded = new Attachment('https://drive.example.com/b', '', 'b.pdf')
     const setAttachments = vi.fn()
-    const renderField = (attachments: Attachment[]) => (
+    const addAttachments = vi.fn()
+    render(
       <EventFormAttachments
-        v={{ ...DEFAULT_FORM_VALUES, attachments }}
+        v={{ ...DEFAULT_FORM_VALUES, attachments: [existing] }}
         setAttachments={setAttachments}
+        addAttachments={addAttachments}
         showMore
         isExpanded
       />
     )
-    const { rerender } = render(renderField([existing]))
 
-    // An upload finishes while the picker is open
-    rerender(renderField([existing, uploaded]))
     picker.onFilesSelected?.([
       { url: 'https://drive.example.com/c', name: 'c.pdf' } as TdriveFile
     ])
 
-    expect(setAttachments).toHaveBeenCalledWith([
-      existing,
-      uploaded,
+    expect(addAttachments).toHaveBeenCalledWith([
       expect.objectContaining({ uri: 'https://drive.example.com/c' })
     ])
+<<<<<<< HEAD
 >>>>>>> 5c07450c (fixup! [#2031] added dnd zone in attachment and api call)
+=======
+    expect(setAttachments).not.toHaveBeenCalled()
+>>>>>>> 9f1dca32 (fixup! [#2030] added move intent for files added to drive)
   })
 })

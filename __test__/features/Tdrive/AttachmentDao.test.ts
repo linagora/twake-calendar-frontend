@@ -29,23 +29,21 @@ describe('uploadAttachment', () => {
     })
   })
 
-  it('sends the raw file with its type and encoded name', async () => {
+  it('sends the file as the single part of a multipart form', async () => {
     const file = new File(['%PDF'], 'compte rendu é.pdf', {
       type: 'application/pdf'
     })
 
     await uploadAttachment(file)
 
-    expect(mockPost).toHaveBeenCalledWith(
-      'api/attachments',
-      expect.objectContaining({
-        body: file,
-        headers: {
-          'Content-Type': 'application/pdf',
-          'X-Filename': 'compte%20rendu%20%C3%A9.pdf'
-        }
-      })
-    )
+    const [, options] = mockPost.mock.calls[0]
+    expect(options.headers).toBeUndefined()
+    const body = options.body as FormData
+    expect(body).toBeInstanceOf(FormData)
+    expect([...body.keys()]).toEqual(['file'])
+    const part = body.get('file') as File
+    expect(part.name).toBe('compte rendu é.pdf')
+    expect(part.type).toBe('application/pdf')
   })
 
   it('gives up on a stalled upload after a while', async () => {
@@ -67,19 +65,9 @@ describe('uploadAttachment', () => {
     expect(attachment.x_filename).toBe('report.pdf')
   })
 
-  it('sends a file of unknown type as binary data', async () => {
-    const file = new File(['data'], 'notes')
+  it('leaves the type of a file of unknown type unset', async () => {
+    const attachment = await uploadAttachment(new File(['data'], 'notes'))
 
-    const attachment = await uploadAttachment(file)
-
-    expect(mockPost).toHaveBeenCalledWith(
-      'api/attachments',
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          'Content-Type': 'application/octet-stream'
-        })
-      })
-    )
     expect(attachment.fmttype).toBeUndefined()
   })
 })

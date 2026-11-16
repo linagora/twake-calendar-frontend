@@ -4,7 +4,7 @@ import {
 } from '@common/features/Tdrive/hooks/useAttachmentUpload'
 import { Attachment } from '@common/types/Attachment'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 vi.mock('@common/features/Tdrive/AttachmentDao', async () => ({
   ...(await vi.importActual('@common/features/Tdrive/AttachmentDao')),
@@ -31,13 +31,17 @@ const deferred = <T,>() => {
 const attachmentFor = (name: string): Attachment =>
   new Attachment(`https://drive.example.com/public?sharecode=${name}`, '', name)
 
-// The form keeps its attachments in state: the hook reads them back each render
+// The form keeps its attachments in state and appends to them as they come
 const renderUploadHook = (initial: Attachment[] = []) =>
   renderHook(() => {
     const [attachments, setAttachments] = useState(initial)
+    const addAttachments = useCallback(
+      (added: Attachment[]) => setAttachments(prev => [...prev, ...added]),
+      []
+    )
     return {
       attachments,
-      ...useAttachmentUpload({ attachments, setAttachments })
+      ...useAttachmentUpload({ addAttachments })
     }
   })
 
@@ -108,16 +112,16 @@ describe('useAttachmentUpload', () => {
   it('drops an upload that finishes after the form closed', async () => {
     const upload = deferred<Attachment>()
     mockUpload.mockReturnValue(upload.promise)
-    const setAttachments = vi.fn()
+    const addAttachments = vi.fn()
     const { result, unmount } = renderHook(() =>
-      useAttachmentUpload({ attachments: [], setAttachments })
+      useAttachmentUpload({ addAttachments })
     )
 
     act(() => result.current.uploadFiles([new File(['a'], 'a.txt')]))
     unmount()
     await act(async () => upload.resolve(attachmentFor('a.txt')))
 
-    expect(setAttachments).not.toHaveBeenCalled()
+    expect(addAttachments).not.toHaveBeenCalled()
   })
   it('uploads a few files at a time and queues the others', async () => {
     const uploads = Array.from({ length: MAX_PARALLEL_UPLOADS + 2 }, () =>

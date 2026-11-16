@@ -2,9 +2,6 @@ import { Attachment } from '@common/types/Attachment'
 import { api } from '@common/utils/apiUtils'
 import { isHTTPError, isTimeoutError } from 'ky'
 
-// The side service rejects an upload without a content type
-const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
-
 // Long enough to send the 50 MiB the side service accepts over a slow
 // connection, short enough that a stalled request frees its place in the
 // upload queue
@@ -17,7 +14,8 @@ export type AttachmentUploadFailure =
 const FAILURE_BY_STATUS: Record<number, AttachmentUploadFailure> = {
   // Drive attachment storage is disabled: the route is not registered
   404: 'unavailable',
-  // Invalid file name or type, or no Drive instance found for the user
+  // Invalid multipart data or file name, or no Drive instance found for the
+  // user
   400: 'rejected',
   413: 'tooLarge',
   504: 'timeout'
@@ -28,12 +26,12 @@ const FAILURE_BY_STATUS: Record<number, AttachmentUploadFailure> = {
  * service, and returns the attachment pointing at its public read-only link.
  */
 export async function uploadAttachment(file: File): Promise<Attachment> {
+  // A single part named file: the browser sets its name, its type and the
+  // boundary of the request
+  const body = new FormData()
+  body.append('file', file, file.name)
   const response = await api.post('api/attachments', {
-    body: file,
-    headers: {
-      'Content-Type': file.type || DEFAULT_CONTENT_TYPE,
-      'X-Filename': encodeURIComponent(file.name)
-    },
+    body,
     // A large file takes longer to send than the default timeout allows
     timeout: UPLOAD_TIMEOUT_MS
   })
