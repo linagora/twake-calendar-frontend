@@ -110,7 +110,17 @@ export const DriveSaveSnackbar: React.FC<DriveSaveSnackbarProps> = ({
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <ActionAlert message={message} onClose={handleClose} action={action} />
+        <ActionAlert
+          message={message}
+          onClose={handleClose}
+          action={action}
+          // The message wraps, e.g. around a long file name, not the button
+          sx={{
+            '& .MuiAlert-message': { minWidth: 0, overflowWrap: 'anywhere' },
+            '& .MuiAlert-action': { flexShrink: 0 },
+            '& .MuiAlert-action .MuiButton-root': { whiteSpace: 'nowrap' }
+          }}
+        />
       </Snackbar>
 
       <TdrivePickerDialog
