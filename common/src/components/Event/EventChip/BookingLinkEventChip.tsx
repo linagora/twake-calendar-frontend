@@ -9,7 +9,8 @@ import {
   getCardStyle,
   getEventDuration,
   getTitleStyle,
-  useCompactMode
+  useCompactMode,
+  useSchemeBackground
 } from './EventChipUtils'
 import { defaultColors } from '@common/utils/defaultColors'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
@@ -43,6 +44,7 @@ export const BaseBookingLinkChip: React.FC<BaseBookingLinkChipProps> = ({
   const cardRef = useRef<HTMLDivElement>(null)
   const showCompact = useCompactMode(cardRef)
   const theme = useTheme()
+  const paperBackground = useSchemeBackground('paper')
   const chipColor = data.color
 
   // Create colors object for getBestColor
@@ -54,7 +56,7 @@ export const BaseBookingLinkChip: React.FC<BaseBookingLinkChipProps> = ({
     : defaultColors[0]
 
   // Color and contrast logic
-  const bestColor = getBestColor(colors)
+  const bestColor = getBestColor(colors, paperBackground)
 
   // Style calculation - booking links are always treated as BOOKING
   const cardStyle = getCardStyle(bestColor, data.durationMinutes, 'BOOKING')
