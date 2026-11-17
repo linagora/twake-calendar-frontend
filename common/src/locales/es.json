@@ -312,7 +312,8 @@
     "invalidEmail": "%{email} no es una dirección de correo electrónico válida",
     "searchError": "No se pueden obtener los contactos en este momento. Inténtelo de nuevo.",
     "noResults": "Sin resultados",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "removeParticipant": "Quitar a %{name}"
   },
   "error": {
     "title": "Se ha producido un error",

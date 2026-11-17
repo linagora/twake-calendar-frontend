@@ -4,6 +4,7 @@ import { Box, Chip, Icon, IconButton, useTheme } from '@linagora/twake-mui'
 import CircleIcon from '@mui/icons-material/Circle'
 import CloseIcon from '@mui/icons-material/Close'
 import { ReactElement } from 'react'
+import { useI18n } from 'twake-i18n'
 import { AttendeePopover } from './AttendeePopover'
 import { User } from './types'
 
@@ -28,6 +29,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   index
 }) => {
   const theme = useTheme()
+  const { t } = useI18n()
 
   const isString = typeof option === 'string'
   const label = isString ? option : option.displayName || option.email
@@ -63,6 +65,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
           height: '20px'
         }}
         size="small"
+        aria-label={t('peopleSearch.removeParticipant', { name: label })}
       >
         <CloseIcon fontSize="small" />
       </IconButton>

@@ -312,7 +312,8 @@
     "invalidEmail": "%{email} is not a valid email address",
     "searchError": "Unable to fetch contacts right now. Please try again.",
     "noResults": "No results",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "removeParticipant": "Remove %{name}"
   },
   "error": {
     "title": "Something went wrong",

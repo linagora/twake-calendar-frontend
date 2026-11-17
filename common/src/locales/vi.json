@@ -312,7 +312,8 @@
     "invalidEmail": "%{email} không phải địa chỉ email hợp lệ",
     "searchError": "Không thể lấy danh bạ. Vui lòng thử lại.",
     "noResults": "Không có kết quả",
-    "loading": "Đang tải..."
+    "loading": "Đang tải...",
+    "removeParticipant": "Xóa %{name}"
   },
   "error": {
     "title": "Đã xảy ra lỗi",
