@@ -312,7 +312,8 @@
     "invalidEmail": "%{email} ist keine gültige E-Mail-Adresse",
     "searchError": "Kontakte können derzeit nicht abgerufen werden. Bitte versuchen Sie es erneut.",
     "noResults": "Keine Ergebnisse",
-    "loading": "Wird geladen..."
+    "loading": "Wird geladen...",
+    "removeParticipant": "%{name} entfernen"
   },
   "error": {
     "title": "Etwas ist schiefgelaufen",

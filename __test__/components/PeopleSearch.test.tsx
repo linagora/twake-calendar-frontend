@@ -291,6 +291,23 @@ describe('PeopleSearch', () => {
         screen.getByRole('combobox', { name: 'Check availability' })
       ).toBeInTheDocument()
     })
+
+    it('names the remove button of a chip after the participant', () => {
+      setup([
+        {
+          email: 'bob@example.com',
+          displayName: 'bob',
+          avatarUrl: '',
+          openpaasId: 'bob-id'
+        }
+      ])
+
+      expect(
+        screen.getByRole('button', {
+          name: 'peopleSearch.removeParticipant(name=bob)'
+        })
+      ).toBeInTheDocument()
+    })
   })
 
   describe('paste multiple attendees', () => {
