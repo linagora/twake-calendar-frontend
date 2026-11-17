@@ -1,6 +1,7 @@
 import {
   calendarLabel,
-  eventAccessibleLabel
+  eventAccessibleLabel,
+  ownAnswer
 } from '@common/components/Event/utils/eventAccessibleLabel'
 import { Calendar } from '@common/types/CalendarTypes'
 import en from '@common/locales/en.json'
@@ -110,5 +111,17 @@ describe('eventAccessibleLabel', () => {
     expect(calendarLabel(calendar, 'bob-id', t)).toBe(
       t('calendar.defaultCalendarName', { name: 'alice alice' })
     )
+  })
+
+  it("does not announce the answer of another user's calendar as the user's own (#2132)", () => {
+    const calendar = {
+      id: 'alice-id/alice-id',
+      name: '#default'
+    } as unknown as Calendar
+
+    expect(ownAnswer(calendar, 'alice-id', 'NEEDS-ACTION')).toBe('NEEDS-ACTION')
+    expect(ownAnswer(calendar, 'bob-id', 'NEEDS-ACTION')).toBeUndefined()
+    expect(ownAnswer(calendar, undefined, 'DECLINED')).toBeUndefined()
+    expect(ownAnswer(undefined, 'bob-id', 'DECLINED')).toBeUndefined()
   })
 })

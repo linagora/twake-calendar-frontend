@@ -38,19 +38,23 @@ const calendars = {
   } as unknown as Calendar
 }
 
-const handlers = createViewHandlers({
-  calendarRef: { current: null } as React.RefObject<CalendarApi | null>,
-  setSelectedDate: vi.fn(),
-  setSelectedMiniDate: vi.fn(),
-  calendars,
-  tempcalendars: {},
-  errorHandler: {} as EventErrorHandler,
-  timezone: 'Europe/Paris',
-  isTablet: false,
-  isMobile: false,
-  t,
-  userId: 'alice'
-} as ViewHandlersProps)
+const handlersOf = (userId: string): ReturnType<typeof createViewHandlers> =>
+  createViewHandlers({
+    calendarRef: { current: null } as React.RefObject<CalendarApi | null>,
+    setSelectedDate: vi.fn(),
+    setSelectedMiniDate: vi.fn(),
+    calendars,
+    tempcalendars: {},
+    errorHandler: {} as EventErrorHandler,
+    timezone: 'Europe/Paris',
+    isTablet: false,
+    isMobile: false,
+    t,
+    userId
+  } as ViewHandlersProps)
+
+// bob views his own calendar
+const handlers = handlersOf('bob')
 
 const eventArg = (partstat: string): EventDisplayInfo =>
   ({
@@ -93,6 +97,18 @@ describe('event element answer', () => {
     )
 
     expect(getByTestId('event').getAttribute('role')).toBe('button')
+    expect(getByTestId('event').getAttribute('aria-label')).toBe(
+      'Weekly QA21, Wednesday, 11 November 2026, 19:00 – 20:00, Work'
+    )
+  })
+
+  it("does not announce the owner's answer as the user's on a shared calendar (#2132)", () => {
+    const { getByTestId } = render(
+      renderInEventElement(
+        handlersOf('alice').handleEventContent(eventArg('NEEDS-ACTION'))
+      )
+    )
+
     expect(getByTestId('event').getAttribute('aria-label')).toBe(
       'Weekly QA21, Wednesday, 11 November 2026, 19:00 – 20:00, Work'
     )
