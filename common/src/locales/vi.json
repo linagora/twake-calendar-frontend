@@ -376,7 +376,8 @@
   },
   "a11y": {
     "skipToContent": "Đi tới nội dung",
-    "calendarsHeading": "Lịch"
+    "calendarsHeading": "Lịch",
+    "timedEventsRowHeader": "Sự kiện có giờ"
   },
   "pageTitle": {
     "search": "Kết quả tìm kiếm cho “%{query}”",

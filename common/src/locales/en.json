@@ -376,7 +376,8 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "calendarsHeading": "Calendars"
+    "calendarsHeading": "Calendars",
+    "timedEventsRowHeader": "Timed events"
   },
   "pageTitle": {
     "search": "Search results for “%{query}”",
