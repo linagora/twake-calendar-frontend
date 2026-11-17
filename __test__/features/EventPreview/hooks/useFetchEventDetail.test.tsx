@@ -104,7 +104,7 @@ describe('useFetchEventDetail', () => {
     expect(result.current.attendeeEmail).toBe('user@example.com')
     expect(result.current.links).toEqual(mockResponse.links)
 
-    expect(mockFetchEvent).toHaveBeenCalledWith('valid-jwt')
+    expect(mockFetchEvent).toHaveBeenCalledWith('valid-jwt', undefined)
     expect(mockParseFetchedEvent).toHaveBeenCalledWith(
       {
         URL: '',
@@ -116,6 +116,25 @@ describe('useFetchEventDetail', () => {
       },
       mockResponse.eventJSON
     )
+  })
+
+  test('forwards the action of the link', async () => {
+    mockFetchEvent.mockResolvedValueOnce({
+      eventJSON: ['vcalendar', []],
+      attendeeEmail: 'user@example.com',
+      links: { yes: 'url-yes', no: 'url-no', maybe: 'url-maybe' }
+    })
+    mockParseFetchedEvent.mockReturnValueOnce({ uid: 'event-uuid-123' })
+
+    const { result } = renderHook(
+      () => useFetchEventDetail('valid-jwt', 'calId-123', 'REJECTED'),
+      { wrapper }
+    )
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+    expect(mockFetchEvent).toHaveBeenCalledWith('valid-jwt', 'REJECTED')
   })
 
   test('handles fetch event error and sets error state', async () => {

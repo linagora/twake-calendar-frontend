@@ -1,24 +1,32 @@
 import { useSearchParams } from 'react-router'
 import { useMemo } from 'react'
 import { PartStat } from '@common/features/User/models/attendee'
+import { ParticipationAction, toParticipationAction } from '../EventDao'
 
 interface EventFromDecodedToken {
   calendarURI: string
   uid: string
-  action: PartStat | 'REJECTED'
+  // Only in tokens signed before the answer moved to the link
+  action?: ParticipationAction
   organizerEmail: string
   attendeeEmail: string
 }
 
-export interface ParsedToken extends Omit<
-  EventFromDecodedToken,
-  'calendarURI' | 'uid'
-> {
+export interface ParsedToken {
   calId: string
   eventId: string
   jwt: string
-  action: PartStat
+  organizerEmail: string
+  attendeeEmail: string
+  // The answer of the link, to send back to the server
+  participationAction: ParticipationAction | undefined
+  // The same answer, as the attendee's participation status
+  action: PartStat | undefined
 }
+
+const toPartStat = (
+  action: ParticipationAction | undefined
+): PartStat | undefined => (action === 'REJECTED' ? 'DECLINED' : action)
 
 function decodeJwt(token: string): EventFromDecodedToken | null {
   try {
@@ -42,6 +50,7 @@ function decodeJwt(token: string): EventFromDecodedToken | null {
 export function useParseToken(): ParsedToken | null {
   const [searchParams] = useSearchParams()
   const jwt = searchParams.get('jwt')
+  const linkAction = searchParams.get('action')
 
   return useMemo(() => {
     if (!jwt) return null
@@ -49,15 +58,19 @@ export function useParseToken(): ParsedToken | null {
     const decoded = decodeJwt(jwt)
     if (!decoded) return null
 
+    const participationAction =
+      toParticipationAction(linkAction) ?? toParticipationAction(decoded.action)
+
     return {
       jwt,
       calId: decoded.calendarURI || '',
       eventId: decoded.uid || '',
-      action: decoded.action === 'REJECTED' ? 'DECLINED' : decoded.action,
+      participationAction,
+      action: toPartStat(participationAction),
       organizerEmail: decoded.organizerEmail || '',
       attendeeEmail: decoded.attendeeEmail || ''
     }
-  }, [jwt])
+  }, [jwt, linkAction])
 }
 
 export default useParseToken

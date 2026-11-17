@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { fetchEvent } from '../EventDao'
+import { fetchEvent, toParticipationAction } from '../EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'
 
 export const useRsvpAction = (
@@ -33,9 +33,12 @@ export const useRsvpAction = (
     try {
       const urlObj = new URL(url)
       const newJwt = urlObj.searchParams.get('jwt')
+      const newAction = toParticipationAction(urlObj.searchParams.get('action'))
       if (newJwt) {
-        await fetchEvent(newJwt)
-        setSearchParams({ jwt: newJwt })
+        await fetchEvent(newJwt, newAction)
+        setSearchParams(
+          newAction ? { jwt: newJwt, action: newAction } : { jwt: newJwt }
+        )
         setToastOpen(true)
       }
     } catch (e) {
