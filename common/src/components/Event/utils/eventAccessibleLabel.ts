@@ -20,6 +20,24 @@ export interface EventAccessibleLabelParams {
   t: Translate
 }
 
+const isOwnCalendar = (
+  calendar: Calendar | undefined,
+  userId: string | undefined
+): boolean => !!userId && calendar?.id?.split('/')[0] === userId
+
+/**
+ * The answer to announce as the user's own ("Awaiting your response"): only
+ * on the user's calendars. On a shared, delegated or team calendar the answer
+ * is the owner's, not the user's.
+ */
+export function ownAnswer(
+  calendar: Calendar | undefined,
+  userId: string | undefined,
+  partstat: string | undefined
+): string | undefined {
+  return isOwnCalendar(calendar, userId) ? partstat : undefined
+}
+
 /** The calendar name the sidebar shows, e.g. not "#default" */
 export function calendarLabel(
   calendar: Calendar | undefined,
@@ -32,7 +50,7 @@ export function calendarLabel(
     makeDisplayName(calendar) ?? '',
     // renameDefault only passes string params
     t as Parameters<typeof renameDefault>[2],
-    calendar.id?.split('/')[0] === userId
+    isOwnCalendar(calendar, userId)
   )
 }
 

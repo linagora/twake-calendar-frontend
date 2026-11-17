@@ -6,7 +6,8 @@ import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee
 import {
   allDayDate,
   calendarLabel,
-  eventAccessibleLabel
+  eventAccessibleLabel,
+  ownAnswer
 } from '@common/components/Event/utils/eventAccessibleLabel'
 import {
   CalendarApi,
@@ -274,7 +275,7 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
         end: allDay ? (endStr ? allDayDate(endStr) : null) : arg.event.end,
         allDay,
         calendarName: calendarLabel(calendar, userId, t),
-        partstat,
+        partstat: ownAnswer(calendar, userId, partstat),
         timeZone: timezone,
         t
       })

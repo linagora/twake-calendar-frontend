@@ -20,7 +20,8 @@ import { useEventPreview } from './useEventPreview'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import {
   calendarLabel,
-  eventAccessibleLabel
+  eventAccessibleLabel,
+  ownAnswer
 } from '@common/components/Event/utils/eventAccessibleLabel'
 
 const MobileSearchResultsPage: React.FC = () => {
@@ -135,7 +136,11 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
           end: endDate,
           allDay: !!eventData.data.allDay,
           calendarName: calendarLabel(calendar, userId, t),
-          partstat: ownerPartstatOf(calendar, eventData.data),
+          partstat: ownAnswer(
+            calendar,
+            userId,
+            ownerPartstatOf(calendar, eventData.data)
+          ),
           timeZone,
           t
         })}
