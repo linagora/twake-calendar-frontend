@@ -368,20 +368,87 @@ function toCalendarIdPaths(
   )
 }
 
-function triggerCalendarRefresh(
+type CalendarRange = { start: Date; end: Date }
+
+/**
+ * Sync-token refreshes in flight, by calendar. A burst of notifications on a
+ * calendar (an import sends one per event) must not start one refresh per
+ * notification: they would all read the same sync token, so each would fetch
+ * and expand every change, flooding the DAV server. While a refresh runs, the
+ * notifications only ask for one more, started once it is over, from the
+ * sync token it stored, over the range displayed when last asked.
+ */
+const syncRefreshesInFlight = new Map<string, { rerunRange?: CalendarRange }>()
+
+function syncRefreshKey(calendarId: string, type: 'temp' | undefined): string {
+  return `${type ?? 'list'}:${calendarId}`
+}
+
+function storedCalendar(
+  calendarId: string,
+  type: 'temp' | undefined
+): Calendar | undefined {
+  const calendars = store.getState().calendars
+  return type === 'temp'
+    ? calendars?.templist?.[calendarId]
+    : calendars?.list?.[calendarId]
+}
+
+/**
+ * The calendar of a notification can be older than the store: a debounced
+ * refresh fires with the calendar captured by an earlier notification, after
+ * a refresh stored a newer sync token. Starting from it would fetch again the
+ * changes already applied.
+ */
+function withStoredSyncToken(
+  calendar: Calendar,
+  type: 'temp' | undefined
+): Calendar {
+  const stored = storedCalendar(calendar.id, type)
+  return stored?.syncToken ? stored : calendar
+}
+
+function refreshWithSyncToken(
   dispatch: AppDispatch,
   calendar: Calendar,
   type: 'temp' | undefined,
-  range: { start: Date; end: Date }
+  range: CalendarRange
 ): void {
-  if (calendar.syncToken) {
-    void dispatch(
+  const key = syncRefreshKey(calendar.id, type)
+  const inFlight = syncRefreshesInFlight.get(key)
+  if (inFlight) {
+    inFlight.rerunRange = range
+    return
+  }
+
+  const refresh: { rerunRange?: CalendarRange } = {}
+  syncRefreshesInFlight.set(key, refresh)
+  void Promise.resolve(
+    dispatch(
       refreshCalendarWithSyncToken({
-        calendar,
+        calendar: withStoredSyncToken(calendar, type),
         calType: type,
         calendarRange: range
       })
     )
+  ).finally(() => {
+    syncRefreshesInFlight.delete(key)
+    if (!refresh.rerunRange) return
+    const latest = storedCalendar(calendar.id, type)
+    if (latest) {
+      triggerCalendarRefresh(dispatch, latest, type, refresh.rerunRange)
+    }
+  })
+}
+
+function triggerCalendarRefresh(
+  dispatch: AppDispatch,
+  calendar: Calendar,
+  type: 'temp' | undefined,
+  range: CalendarRange
+): void {
+  if (calendar.syncToken) {
+    refreshWithSyncToken(dispatch, calendar, type, range)
   } else {
     dispatch(emptyEventsCal({ calId: calendar.id, calType: type }))
     void dispatch(
