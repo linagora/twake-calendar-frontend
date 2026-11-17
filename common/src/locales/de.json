@@ -376,7 +376,8 @@
   },
   "a11y": {
     "skipToContent": "Zum Inhalt springen",
-    "calendarsHeading": "Kalender"
+    "calendarsHeading": "Kalender",
+    "timedEventsRowHeader": "Termine mit Uhrzeit"
   },
   "pageTitle": {
     "search": "Suchergebnisse für „%{query}“",

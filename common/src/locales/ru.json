@@ -376,7 +376,8 @@
   },
   "a11y": {
     "skipToContent": "Перейти к содержимому",
-    "calendarsHeading": "Календари"
+    "calendarsHeading": "Календари",
+    "timedEventsRowHeader": "События со временем"
   },
   "pageTitle": {
     "search": "Результаты поиска: «%{query}»",
