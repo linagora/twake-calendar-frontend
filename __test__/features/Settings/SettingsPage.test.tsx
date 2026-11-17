@@ -84,6 +84,22 @@ describe('SettingsPage', () => {
     })
   })
 
+  it('names each settings switch once (#2135)', () => {
+    renderWithProviders(<SettingsPage />, {
+      ...preloadedState,
+      settings: { ...preloadedState.settings, keyboardShortcuts: true }
+    })
+
+    ;[
+      'settings.timeZoneBrowserDefault',
+      'settings.showDeclinedEvent',
+      'settings.displayWeekNumbers',
+      'settings.keyboardShortcuts'
+    ].forEach(name =>
+      expect(screen.getByRole('switch', { name })).toBeInTheDocument()
+    )
+  })
+
   it('renders settings page with sidebar and content layout', () => {
     renderWithProviders(<SettingsPage />, preloadedState)
 

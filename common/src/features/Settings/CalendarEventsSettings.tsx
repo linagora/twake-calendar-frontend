@@ -83,7 +83,6 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
             <Switch
               checked={Boolean(!hideDeclinedEvents)}
               onChange={() => handleHideDeclinedEvents(!hideDeclinedEvents)}
-              aria-label={t('settings.showDeclinedEvent')}
             />
           }
           label={t('settings.showDeclinedEvent')}
@@ -99,7 +98,6 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
             <Switch
               checked={Boolean(displayWeekNumbers)}
               onChange={() => handleDisplayWeekNumbers(!displayWeekNumbers)}
-              aria-label={t('settings.displayWeekNumbers')}
             />
           }
           label={t('settings.displayWeekNumbers')}
@@ -119,7 +117,6 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
                 onChange={() =>
                   dispatch(setKeyboardShortcuts(!keyboardShortcuts))
                 }
-                aria-label={t('settings.keyboardShortcuts')}
               />
             }
             label={t('settings.keyboardShortcuts')}
