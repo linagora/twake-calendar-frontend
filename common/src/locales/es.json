@@ -98,7 +98,11 @@
     "saveToDrive": "Guardar en mi Drive",
     "saving": "Guardando en Drive…",
     "saved": "Archivo guardado en tu Drive",
-    "saveError": "No se pudo confirmar que se guardó el archivo. Revisa tu Drive antes de volver a intentarlo."
+    "saveError": "No se pudo confirmar que se guardó el archivo. Revisa tu Drive antes de volver a intentarlo.",
+    "savedToDrive": "“%{name}” guardado en tu Drive",
+    "organise": "Organizar",
+    "movedTo": "Movido a %{path}",
+    "organiseError": "No se pudo abrir Drive. Inténtalo de nuevo."
   },
   "search": {
     "searchIn": "Buscar en",
