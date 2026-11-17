@@ -30,8 +30,11 @@ const renderDialog = (children: React.ReactNode, open = true) =>
     </TwakeMuiThemeProvider>
   )
 
-const modalBody = (): HTMLElement =>
-  document.querySelector<HTMLElement>('.MuiDialogContent-root')!
+const modalBody = (): HTMLElement => {
+  const body = document.querySelector<HTMLElement>('.MuiDialogContent-root')
+  if (!body) throw new Error('The dialog has no body')
+  return body
+}
 
 describe('Dialog file drop', () => {
   it('leaves a dialog where nothing takes files alone', () => {

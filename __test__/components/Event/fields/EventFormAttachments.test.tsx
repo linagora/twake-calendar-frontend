@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * @vitest-environment jsdom
  */
@@ -22,29 +21,18 @@ vi.mock('@common/features/Tdrive/helpers/isTdrivePickerAvailable', () => ({
   isTdrivePickerAvailable: () => true
 }))
 
-let pickFiles: (files: TdriveFile[]) => void = () => undefined
-
-=======
-import { DEFAULT_FORM_VALUES } from '@common/components/Event/EventFormFields.types'
-import { EventFormAttachments } from '@common/components/Event/fields/EventFormAttachments'
-import type { TdriveFile } from '@common/features/Tdrive/types'
-import { Attachment } from '@common/types/Attachment'
-import { render } from '@testing-library/react'
-
 const picker = vi.hoisted(() => ({
   onFilesSelected: null as ((files: TdriveFile[]) => void) | null
 }))
 
 // The picker keeps the callback it was opened with until the user picks
->>>>>>> 5c07450c (fixup! [#2031] added dnd zone in attachment and api call)
 vi.mock('@common/features/Tdrive/components/TdriveButton', () => ({
   TdriveButton: ({
     onFilesSelected
   }: {
     onFilesSelected: (files: TdriveFile[]) => void
   }) => {
-<<<<<<< HEAD
-    pickFiles = onFilesSelected
+    picker.onFilesSelected ??= onFilesSelected
     return null
   }
 }))
@@ -59,20 +47,25 @@ const pickedFile: TdriveFile = {
 }
 
 const pickAndAttach = (file: TdriveFile): Attachment[] => {
-  const setAttachments = vi.fn()
+  const addAttachments = vi.fn()
   render(
     <EventFormAttachments
       v={{ ...DEFAULT_FORM_VALUES, attachments: [] }}
-      setAttachments={setAttachments}
+      setAttachments={vi.fn()}
+      addAttachments={addAttachments}
       showMore={false}
       isExpanded={false}
     />
   )
-  pickFiles([file])
-  return setAttachments.mock.calls[0][0] as Attachment[]
+  picker.onFilesSelected?.([file])
+  return addAttachments.mock.calls[0][0] as Attachment[]
 }
 
 describe('EventFormAttachments', () => {
+  beforeEach(() => {
+    picker.onFilesSelected = null
+  })
+
   afterEach(() => {
     window.TDRIVE_MAX_TOTAL_FILE_SIZE = undefined
   })
@@ -96,24 +89,6 @@ describe('EventFormAttachments', () => {
     const [attachment] = pickAndAttach({ ...pickedFile, size: undefined })
 
     expect(attachment.otherParams).toEqual({})
-=======
-    picker.onFilesSelected ??= onFilesSelected
-    return null
-  }
-}))
-vi.mock('@common/app/hooks', () => ({
-  useAppSelector: () => 'https://alice.example.com'
-}))
-vi.mock('twake-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))
-
-describe('EventFormAttachments', () => {
-  beforeEach(() => {
-    picker.onFilesSelected = null
-    window.TDRIVE_ENABLED = true
-  })
-
-  afterEach(() => {
-    window.TDRIVE_ENABLED = undefined
   })
 
   it('appends the picked files instead of replacing the list it opened with', () => {
@@ -137,10 +112,6 @@ describe('EventFormAttachments', () => {
     expect(addAttachments).toHaveBeenCalledWith([
       expect.objectContaining({ uri: 'https://drive.example.com/c' })
     ])
-<<<<<<< HEAD
->>>>>>> 5c07450c (fixup! [#2031] added dnd zone in attachment and api call)
-=======
     expect(setAttachments).not.toHaveBeenCalled()
->>>>>>> 9f1dca32 (fixup! [#2030] added move intent for files added to drive)
   })
 })
