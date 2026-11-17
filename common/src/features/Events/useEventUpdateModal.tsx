@@ -10,7 +10,7 @@ import {
 } from '@common/utils/eventFormTempStorage'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Calendar } from '@common/types/CalendarTypes'
-import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
+import { useEventTargetCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { Valarms } from '@common/types/Valarms'
 import { userOrganiser } from '@common/features/User/userDataTypes'
@@ -45,9 +45,10 @@ export function useEventUpdateModal(
   const calList = useAppSelector(state => state.calendars.list)
   const user = useAppSelector(state => state.user)
 
-  const userPersonalCalendars = useUserPersonalCalendars(
+  const userPersonalCalendars = useEventTargetCalendars(
     calList,
-    user.userData?.openpaasId
+    user.userData?.openpaasId,
+    calId
   )
 
   const [showMore, setShowMore] = useState(false)
