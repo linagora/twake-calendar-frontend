@@ -7,7 +7,9 @@ import {
   decomposeColor,
   getContrastRatio,
   getLuminance,
-  lighten
+  lighten,
+  useColorScheme,
+  useTheme
 } from '@linagora/twake-mui'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -38,6 +40,16 @@ export function getEventDuration(event: EventDisplayInfo['event']): number {
     'minutes'
   )
 }
+
+// The color, not the CSS variable, of a background of the active color scheme:
+// getBestColor needs it to measure the contrast
+export function useSchemeBackground(key: 'default' | 'paper'): string {
+  const theme = useTheme()
+  const { mode, systemMode } = useColorScheme()
+  const resolvedMode = (mode === 'system' ? systemMode : mode) ?? 'light'
+  return theme.colorSchemes[resolvedMode]?.palette.background[key] ?? '#fff'
+}
+
 export function getBestColor(
   colors: { light: string; dark: string },
   background = '#fff'
@@ -58,9 +70,18 @@ function pickBestColor(
   background: string
 ): string {
   // getAccessiblePair falls back to white or black when it finds no tinted
-  // pair: keep the calendar's hue rather than a colorless variant
+  // pair: keep the calendar's hue rather than a colorless variant. The pair of
+  // a very light color is a darkened gray-ish tint that looks colorless too:
+  // on a light background, where nothing darkens the color afterwards, keep
+  // the hue only when it stays readable
   if (isColorless(colors.dark) !== isColorless(colors.light)) {
-    return isColorless(colors.dark) ? colors.light : colors.dark
+    const hued = isColorless(colors.dark) ? colors.light : colors.dark
+    if (
+      getLuminance(background) < 0.5 ||
+      getContrastRatio(hued, background) >= MIN_UI_CONTRAST
+    ) {
+      return hued
+    }
   }
   const contrastToDark = getContrastRatio(colors.dark, background)
   const contrastToLight = getContrastRatio(colors.light, background)

@@ -37,7 +37,6 @@ import {
   ListItem,
   Tooltip,
   Typography,
-  useColorScheme,
   useTheme
 } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
@@ -61,7 +60,10 @@ import { handleCopyLink } from '@calendar/common/src/utils/handleCopyLink'
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 import { PrintScheduleModal } from './PrintSchedule/PrintScheduleModal'
 import WebAssetOffOutlinedIcon from '@mui/icons-material/WebAssetOffOutlined'
-import { getBestColor } from '@common/components/Event/EventChip/EventChipUtils'
+import {
+  getBestColor,
+  useSchemeBackground
+} from '@common/components/Event/EventChip/EventChipUtils'
 
 type CalendarModalTab = 'settings' | 'access'
 
@@ -773,11 +775,7 @@ const CalendarSelector: React.FC<{
   hideOwner
 }) => {
   const { t } = useI18n()
-  const theme = useTheme()
-  const { mode, systemMode } = useColorScheme()
-  const resolvedMode = (mode === 'system' ? systemMode : mode) ?? 'light'
-  const background =
-    theme.colorSchemes[resolvedMode]?.palette.background.default ?? '#fff'
+  const background = useSchemeBackground('default')
   const color = getBestColor(calendars[id].color, background)
   const dispatch = useAppDispatch()
   const calLink = useAppSelector(state => state.calendars.list[id].link) ?? ''

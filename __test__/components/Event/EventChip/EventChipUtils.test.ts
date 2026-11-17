@@ -2,7 +2,10 @@
  * @vitest-environment jsdom
  */
 
-import { getEffectiveColor } from '@common/components/Event/EventChip/EventChipUtils'
+import {
+  getBestColor,
+  getEffectiveColor
+} from '@common/components/Event/EventChip/EventChipUtils'
 import { createTheme } from '@mui/material/styles'
 import { Calendar } from '@common/types/CalendarTypes'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
@@ -59,5 +62,26 @@ describe('getEffectiveColor', () => {
     expect(result.light).toBe('#00ff00')
     expect(result.dark).toBe('#000000')
     expect(getAccessiblePair).not.toHaveBeenCalled()
+  })
+})
+
+describe('getBestColor', () => {
+  it('uses the dark pair of a very light color on a light background', () => {
+    // The pair of a very light color is darkened to a near gray
+    const colors = { light: '#e1d0bf', dark: '#5a534c' }
+
+    expect(getBestColor(colors, '#fff')).toBe('#5a534c')
+  })
+
+  it('keeps the hue over a colorless fallback when it is readable', () => {
+    const colors = { light: '#0654b1', dark: '#ffffff' }
+
+    expect(getBestColor(colors, '#fff')).toBe('#0654b1')
+  })
+
+  it('keeps the light hue on a dark background', () => {
+    const colors = { light: '#e1d0bf', dark: '#5a534c' }
+
+    expect(getBestColor(colors, '#121212')).toBe('#e1d0bf')
   })
 })

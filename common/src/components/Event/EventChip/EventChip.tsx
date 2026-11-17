@@ -22,7 +22,8 @@ import {
   getEventTimes,
   getTitleStyle,
   IconDisplayConfig,
-  useCompactMode
+  useCompactMode,
+  useSchemeBackground
 } from './EventChipUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee'
@@ -41,6 +42,7 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
   const cardRef = useRef<HTMLDivElement>(null)
   const showCompact = useCompactMode(cardRef)
   const theme = useTheme()
+  const paperBackground = useSchemeBackground('paper')
 
   const calendars = useAppSelector(state => state.calendars.list)
   const tempcalendars = useAppSelector(state => state.calendars.templist)
@@ -113,7 +115,11 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
       colors as Record<string, string> | string | undefined,
       bookingLinkColor
     )
-    const bestColor = getBestColor(effectiveColor)
+    // getCardStyle paints the chips awaiting an answer white in both schemes
+    const bestColor = getBestColor(
+      effectiveColor,
+      displayPartstat === 'NEEDS-ACTION' ? '#fff' : paperBackground
+    )
 
     // Icon display configuration
     const IconDisplayed: IconDisplayConfig = {
