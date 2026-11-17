@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { fetchEvent } from '../EventDao'
+import { fetchEvent, ParticipationAction } from '../EventDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { useI18n } from 'twake-i18n'
 import { getSanitizedHttpErrorMessage } from './useEventDetailError'
@@ -23,7 +23,8 @@ export interface EventDetailResult {
 
 export const useFetchEventDetail = (
   jwt: string | null,
-  calId: string
+  calId: string,
+  action?: ParticipationAction
 ): EventDetailResult => {
   const { t } = useI18n()
   const [data, setData] = useState<{
@@ -55,7 +56,7 @@ export const useFetchEventDetail = (
       setError(false)
       setErrorDetail(undefined)
       try {
-        const response = await fetchEvent(jwt)
+        const response = await fetchEvent(jwt, action)
         if (!isMounted) return
 
         const initialEvent: CalendarEvent = {
@@ -94,7 +95,7 @@ export const useFetchEventDetail = (
     return (): void => {
       isMounted = false
     }
-  }, [jwt, calId, t])
+  }, [jwt, calId, action, t])
 
   return {
     event: data.event,

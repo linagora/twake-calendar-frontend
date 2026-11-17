@@ -37,11 +37,17 @@ export const EventPreviewPage: React.FC = () => {
   )
 
   const decodedClaims = useParseToken()
-  const { jwt = '', calId = '', action = undefined } = decodedClaims || {}
+  const {
+    jwt = '',
+    calId = '',
+    action = undefined,
+    participationAction = undefined
+  } = decodedClaims || {}
 
   const { event, links, loading, error, errorDetail } = useFetchEventDetail(
     jwt,
-    calId
+    calId,
+    participationAction
   )
 
   const { toastOpen, setToastOpen, handleRsvpChoice } = useRsvpAction(

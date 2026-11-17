@@ -35,7 +35,8 @@ describe('useParseToken', () => {
   )
 
   const renderWithPayload = (
-    payload: object
+    payload: object,
+    query = ''
   ): {
     token: string
     result: { current: ReturnType<typeof useParseToken> }
@@ -46,7 +47,7 @@ describe('useParseToken', () => {
     }: {
       children: React.ReactNode
     }): React.JSX.Element => (
-      <MemoryRouter initialEntries={[`/?jwt=${token}`]}>
+      <MemoryRouter initialEntries={[`/?jwt=${token}${query}`]}>
         {children}
       </MemoryRouter>
     )
@@ -69,13 +70,15 @@ describe('useParseToken', () => {
   const assertParsedToken = (
     resultCurrent: ReturnType<typeof useParseToken>,
     expectedJwt: string,
-    expectedAction: string
+    expectedAction: string | undefined,
+    expectedParticipationAction: string | undefined
   ): void => {
     expect(resultCurrent).toEqual({
       jwt: expectedJwt,
       calId: basePayload.calendarURI,
       eventId: basePayload.uid,
       action: expectedAction,
+      participationAction: expectedParticipationAction,
       organizerEmail: basePayload.organizerEmail,
       attendeeEmail: basePayload.attendeeEmail
     })
@@ -107,7 +110,7 @@ describe('useParseToken', () => {
       ...basePayload,
       action: 'ACCEPTED'
     })
-    assertParsedToken(result.current, token, 'ACCEPTED')
+    assertParsedToken(result.current, token, 'ACCEPTED', 'ACCEPTED')
   })
 
   test('normalizes action REJECTED to DECLINED', (): void => {
@@ -115,6 +118,40 @@ describe('useParseToken', () => {
       ...basePayload,
       action: 'REJECTED'
     })
-    assertParsedToken(result.current, token, 'DECLINED')
+    assertParsedToken(result.current, token, 'DECLINED', 'REJECTED')
+  })
+
+  test('reads the action of the link when the token holds none', (): void => {
+    const { token, result } = renderWithPayload(
+      basePayload,
+      '&action=TENTATIVE'
+    )
+    assertParsedToken(result.current, token, 'TENTATIVE', 'TENTATIVE')
+  })
+
+  test('normalizes the REJECTED action of the link to DECLINED', (): void => {
+    const { token, result } = renderWithPayload(basePayload, '&action=REJECTED')
+    assertParsedToken(result.current, token, 'DECLINED', 'REJECTED')
+  })
+
+  test('prefers the action of the link over the one of the token', (): void => {
+    const { token, result } = renderWithPayload(
+      { ...basePayload, action: 'ACCEPTED' },
+      '&action=REJECTED'
+    )
+    assertParsedToken(result.current, token, 'DECLINED', 'REJECTED')
+  })
+
+  test('falls back to the action of the token when the link one is unknown', (): void => {
+    const { token, result } = renderWithPayload(
+      { ...basePayload, action: 'ACCEPTED' },
+      '&action=DECLINED'
+    )
+    assertParsedToken(result.current, token, 'ACCEPTED', 'ACCEPTED')
+  })
+
+  test('has no action when neither the link nor the token holds one', (): void => {
+    const { token, result } = renderWithPayload(basePayload)
+    assertParsedToken(result.current, token, undefined, undefined)
   })
 })
