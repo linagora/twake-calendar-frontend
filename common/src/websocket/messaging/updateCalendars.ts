@@ -394,6 +394,20 @@ function storedCalendar(
     : calendars?.list?.[calendarId]
 }
 
+/**
+ * The calendar of a notification can be older than the store: a debounced
+ * refresh fires with the calendar captured by an earlier notification, after
+ * a refresh stored a newer sync token. Starting from it would fetch again the
+ * changes already applied.
+ */
+function withStoredSyncToken(
+  calendar: Calendar,
+  type: 'temp' | undefined
+): Calendar {
+  const stored = storedCalendar(calendar.id, type)
+  return stored?.syncToken ? stored : calendar
+}
+
 function refreshWithSyncToken(
   dispatch: AppDispatch,
   calendar: Calendar,
@@ -412,7 +426,7 @@ function refreshWithSyncToken(
   void Promise.resolve(
     dispatch(
       refreshCalendarWithSyncToken({
-        calendar,
+        calendar: withStoredSyncToken(calendar, type),
         calType: type,
         calendarRange: range
       })

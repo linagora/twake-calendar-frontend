@@ -266,6 +266,25 @@ describe('websocket messages storm', () => {
       })
     })
 
+    it('starts the debounced refresh from the sync token stored by the one before', async () => {
+      window.WS_DEBOUNCE_PERIOD_MS = 500
+      notifyImportedEvents(2)
+      ;(store.getState as Mock).mockReturnValue(
+        stateWith(refreshedTeamCalendar)
+      )
+      finishRefresh()
+      await vi.advanceTimersByTimeAsync(0)
+
+      await vi.advanceTimersByTimeAsync(500)
+
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
+      expect(refreshCalendarWithSyncToken).toHaveBeenLastCalledWith({
+        calendar: refreshedTeamCalendar,
+        calType: undefined,
+        calendarRange: mockRange
+      })
+    })
+
     it('does not refresh again when no notification came during the refresh', async () => {
       notifyImportedEvents(1)
 
