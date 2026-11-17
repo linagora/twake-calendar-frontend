@@ -8,7 +8,10 @@ import {
   scheduleEventDeletion,
   undoEventDeletion
 } from '@common/features/Events/eventDeletion'
-import { canWriteToTeamCalendar } from '@common/features/Calendars/utils/calendarPermissions'
+import {
+  canWriteToTeamCalendar,
+  withoutOtherResourceCalendars
+} from '@common/features/Calendars/utils/calendarPermissions'
 import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
 import { ToUserData } from '@common/features/User/type/OpenPaasUserData'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
@@ -220,7 +223,7 @@ export function useEventPreviewState(
     return undefined
   })()
 
-  const userPersonalCalendars: Calendar[] = Object.values(
+  const writableCalendars: Calendar[] = Object.values(
     calendars.list || {}
   ).filter(
     (cal): boolean | undefined =>
@@ -234,8 +237,14 @@ export function useEventPreviewState(
   // only offer it from a calendar the user could pick as a destination. This
   // keeps bookings organized by someone else in a resource calendar (or any
   // delegated calendar) where they are.
-  const canMove =
-    canModify && userPersonalCalendars.some(cal => cal.id === calId)
+  const canMove = canModify && writableCalendars.some(cal => cal.id === calId)
+
+  // A resource is booked by inviting it, never by moving an event into its
+  // calendar: the administrator of a resource is not offered it as a target.
+  const userPersonalCalendars = withoutOtherResourceCalendars(
+    writableCalendars,
+    calId
+  )
 
   // Action handlers
   const handleEditClick = (): void => {

@@ -1,16 +1,16 @@
 import type { RootState } from '@common/app/store'
-import { canWriteToCalendar } from '@common/features/Calendars/utils/calendarPermissions'
+import { canHoldUserEvents } from '@common/features/Calendars/utils/calendarPermissions'
 import { CALENDAR_HOME_NOT_FOUND_ERROR } from '@common/features/Calendars/services/getCalendarsListAsync'
 
 /**
  * A calendar the form can save into, as the form chooses them (EventModal):
- * the user's own, or one delegated to them with the right to write. Used by
- * NewEventIntentPage.
+ * the user's own, or one delegated to them with the right to write, but no
+ * resource calendar. Used by NewEventIntentPage.
  */
 export function hasWritableCalendar(state: RootState): boolean {
   const userId = state.user.userData?.openpaasId ?? ''
   return Object.values(state.calendars.list).some(cal =>
-    canWriteToCalendar(cal, userId)
+    canHoldUserEvents(cal, userId)
   )
 }
 

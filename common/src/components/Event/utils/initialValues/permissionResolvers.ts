@@ -1,6 +1,6 @@
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { canWriteToCalendar } from '@common/features/Calendars/utils/calendarPermissions'
+import { canHoldUserEvents } from '@common/features/Calendars/utils/calendarPermissions'
 
 export interface ResolveFormCalendarIdParams {
   event: CalendarEvent
@@ -25,7 +25,7 @@ export function resolveFormCalendarId({
   const eventCalId = event.calId
   const sourceCalendar = eventCalId ? calList[eventCalId] : null
 
-  if (sourceCalendar && canWriteToCalendar(sourceCalendar, userId)) {
+  if (sourceCalendar && canHoldUserEvents(sourceCalendar, userId)) {
     return eventCalId
   }
 
