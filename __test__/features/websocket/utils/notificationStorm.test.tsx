@@ -77,7 +77,7 @@ describe('websocket messages storm', () => {
     mockAccumulators.currentDebouncePeriod = 0
     mockAccumulators.delayedRefreshTimers = new Map()
   })
-  it('debounces calendar updates during message storm', () => {
+  it('debounces calendar updates during message storm', async () => {
     const mockMessage = {
       '/calendars/cal1/entry1': {
         syncToken: 'ldsk'
@@ -91,14 +91,14 @@ describe('websocket messages storm', () => {
     // Dispatch called once because of leading edge
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
 
-    // Trailing edge
-    vi.advanceTimersByTime(500)
+    // Trailing edge, once the leading refresh is over
+    await vi.advanceTimersByTimeAsync(500)
 
     // only one call for the last message + leading edge message
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
   })
 
-  it('debounces calendar updates during message storm with multiple updates', () => {
+  it('debounces calendar updates during message storm with multiple updates', async () => {
     // Send a storm with mixed messages
     for (let i = 0; i < 50; i++) {
       if (i % 3 === 0)
@@ -124,8 +124,8 @@ describe('websocket messages storm', () => {
     // Each calendar's leading edge triggers immediately (3 calendars)
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(3)
 
-    // Trailing edge
-    vi.advanceTimersByTime(500)
+    // Trailing edge, once the leading refreshes are over
+    await vi.advanceTimersByTimeAsync(500)
 
     // Trailing edge updates once per calendar (3 calls) + the 3 leading edge calls = 6 calls
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(6)
@@ -201,6 +201,88 @@ describe('websocket messages storm', () => {
       calendar: customState.calendars.list['user1/cal1'],
       calType: undefined,
       calendarRange: mockRange
+    })
+  })
+
+  describe('a notification burst on a calendar of another owner', () => {
+    const teamCalendar = { id: 'team/cal', name: 'Team A', syncToken: 'old' }
+    const refreshedTeamCalendar = { ...teamCalendar, syncToken: 'new' }
+    const stateWith = (calendar: typeof teamCalendar): RootState =>
+      ({
+        user: { userData: { openpaasId: 'alice' } },
+        calendars: { list: { 'team/cal': calendar }, templist: {} }
+      }) as unknown as RootState
+    const notifyImportedEvents = (count: number): void => {
+      for (let i = 0; i < count; i++) {
+        updateCalendars(
+          { '/calendars/team/cal': { syncToken: `token${i}` } },
+          mockDispatch,
+          mockAccumulators
+        )
+      }
+    }
+    let finishRefresh: () => void
+
+    beforeEach(() => {
+      window.WS_DEBOUNCE_PERIOD_MS = 0
+      window.WS_SKIP_DELAY_MS = 2000
+      ;(store.getState as Mock).mockReturnValue(stateWith(teamCalendar))
+      mockDispatch.mockImplementation(
+        () =>
+          new Promise<void>(resolve => {
+            finishRefresh = resolve
+          })
+      )
+    })
+
+    afterEach(async () => {
+      // Settle every refresh left in flight, not to hold the next tests back
+      mockDispatch.mockResolvedValue(undefined)
+      finishRefresh()
+      await vi.runAllTimersAsync()
+      mockDispatch.mockReset()
+    })
+
+    it('starts one refresh while it is in flight', () => {
+      notifyImportedEvents(16)
+
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
+    })
+
+    it('refreshes once more from the stored sync token when it is over', async () => {
+      notifyImportedEvents(16)
+      ;(store.getState as Mock).mockReturnValue(
+        stateWith(refreshedTeamCalendar)
+      )
+
+      finishRefresh()
+      await vi.advanceTimersByTimeAsync(0)
+
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
+      expect(refreshCalendarWithSyncToken).toHaveBeenLastCalledWith({
+        calendar: refreshedTeamCalendar,
+        calType: undefined,
+        calendarRange: mockRange
+      })
+    })
+
+    it('does not refresh again when no notification came during the refresh', async () => {
+      notifyImportedEvents(1)
+
+      finishRefresh()
+      await vi.advanceTimersByTimeAsync(0)
+
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
+    })
+
+    it('refreshes again on a notification received after the refresh', async () => {
+      notifyImportedEvents(1)
+      finishRefresh()
+      await vi.advanceTimersByTimeAsync(0)
+
+      notifyImportedEvents(1)
+
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
     })
   })
 })
