@@ -115,7 +115,6 @@ export const TimezoneSelector: React.FC<TimezoneSelectorProps> = ({
               <Switch
                 checked={isBrowserDefault}
                 onChange={() => handleTimeZoneDefaultChange(!isBrowserDefault)}
-                aria-label={t('settings.timeZoneBrowserDefault')}
               />
             }
             label={t('settings.timeZoneBrowserDefault')}
