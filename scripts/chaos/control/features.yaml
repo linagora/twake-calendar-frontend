@@ -49,7 +49,8 @@ features:
     description: a user publishes a booking link; a visitor, not signed in, sees its free slots, books one, sees and cancels the booking
 impacts:
   # "No Service"
-  mongodb: all
+  # "No Service", but the web apps are static files served without the database: web_app must keep loading
+  mongodb: [sso_sign_in, calendars, events, contacts, caldav_basic_auth, people_search, event_search, invitation_email, invitation_delivery, alarm_scheduled, realtime, booking_link]
   # "No search: no people / contact autocomplete (POST /api/people/search), no event search"
   opensearch: [people_search, event_search]
   # "No reaction to calendar changes: no event search indexing, no alarm scheduled, no invitation / notification email, no
