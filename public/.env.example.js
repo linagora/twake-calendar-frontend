@@ -70,10 +70,14 @@ var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain
 // platform, so it needs the workplace FQDN from the SSO (workplaceFqdn in
 // SSO_SCOPE) or WORKPLACE_FQDN_FALLBACK.
 var TDRIVE_ENABLED = false
+// Size limits of the files picked in Tdrive, enforced by the Drive picker: a
+// Drive whose picker ignores its maxFileSize and availableSize options does
+// not enforce them. Folders shared as links have no size, so neither limit
+// applies to them.
 // Maximum size, in bytes, of a file picked in Tdrive. Unset to disable.
 // var TDRIVE_MAX_FILE_SIZE = 10485760; // optional
-// Maximum total size, in bytes, of the Tdrive files of one event. Unset to
-// disable.
+// Maximum total size, in bytes, of the attachments of one event: the files
+// already attached that declare a size count towards it. Unset to disable.
 // var TDRIVE_MAX_TOTAL_FILE_SIZE = 26214400; // optional
 var ENABLE_REFRESH_BUTTON = false 
 // The Twake bar, the platform top bar, shows the apps and the account of the
