@@ -45,6 +45,8 @@ const KNOWN_PROPS = new Set([
   'rrule'
 ])
 
+const TEAM_CALENDAR_ID_REGEX = /^[\w-]+$/
+
 const DATE_REGEX = /^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])|\d{8})$/
 
 function safeString(value: VObjectValue): string {
@@ -216,7 +218,10 @@ const PROPERTY_PARSERS: Record<
     event.bookingLinkPublicId = safeString(value)
   },
   'x-openpaas-team-calendar-id': (params, value, event) => {
-    event.teamCalendarId = safeString(value)
+    const teamCalendarId = safeString(value)
+    if (TEAM_CALENDAR_ID_REGEX.test(teamCalendarId)) {
+      event.teamCalendarId = teamCalendarId
+    }
   },
   summary: (params, value, event) => {
     event.title = safeString(value)

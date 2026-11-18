@@ -241,6 +241,47 @@ describe('parseCalendarEvent', () => {
     expect(result.allday).toBe(true)
   })
 
+  it('keeps a well formed X-OPENPAAS-TEAM-CALENDAR-ID', () => {
+    const rawData: VObjectProperty[] = [
+      ['UID', {}, 'text', 'event-2'],
+      ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z'],
+      ['X-OPENPAAS-TEAM-CALENDAR-ID', {}, 'text', '64f1a2b3c4d5e6f7a8b9c0d1']
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+
+    expect(result.teamCalendarId).toBe('64f1a2b3c4d5e6f7a8b9c0d1')
+  })
+
+  it.each([
+    '../../calendar/api/calendars/u/u/secret-link?shouldResetLink=true#',
+    'team/calendar',
+    'team?x=1',
+    'team#frag',
+    '..',
+    ''
+  ])('ignores a malformed X-OPENPAAS-TEAM-CALENDAR-ID %j', teamCalendarId => {
+    const rawData: VObjectProperty[] = [
+      ['UID', {}, 'text', 'event-2'],
+      ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z'],
+      ['X-OPENPAAS-TEAM-CALENDAR-ID', {}, 'text', teamCalendarId]
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+
+    expect(result.teamCalendarId).toBeUndefined()
+  })
+
   it('parses a string recurrence interval as a number', () => {
     const rawData: VObjectProperty[] = [
       ['UID', {}, 'text', 'event-2'],
