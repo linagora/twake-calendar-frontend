@@ -39,7 +39,10 @@ export const sizeParams = (size: number | undefined): Record<string, string> =>
  * TDRIVE_MAX_TOTAL_FILE_SIZE (all the files of one event), the files already
  * attached counting towards the total. Both are disabled when unset.
  *
- * Attachments that declare no size, e.g. added by another client, count as 0.
+ * The total covers every attachment of the event that declares a size, not
+ * only those picked in Tdrive: an ATTACH carries no marker of its source, and
+ * the limit bounds what the event links to. Attachments that declare no size,
+ * e.g. added by another client, count as 0.
  */
 export const drivePickLimits = (attachments: Attachment[]): DrivePickLimits => {
   const maxFileSize = asLimit(window.TDRIVE_MAX_FILE_SIZE)
