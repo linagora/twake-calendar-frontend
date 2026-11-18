@@ -1,0 +1,63 @@
+# The directory of the chaos stack (dc=open-paas.org,dc=lng): the e2e seed
+# (e2e/src/test/resources/twake-calendar-side-service-conf/ldap_populate.ldif) plus the accounts start.sh registers in
+# the side service, alice and bob. Every account signs in as <uid>@open-paas.org with the password "secret".
+dn: dc=open-paas.org,dc=lng
+objectClass: dcObject
+objectClass: organization
+dc: open-paas.org
+o: example organization
+
+dn: ou=users,dc=open-paas.org,dc=lng
+objectClass: organizationalUnit
+ou: users
+
+dn: uid=ldap_user1,ou=users,dc=open-paas.org,dc=lng
+objectClass: inetOrgPerson
+uid: ldap_user1
+cn: ldap_user1
+givenName: ldapUser1Firstname
+sn: ldapUser1Surname
+mail: ldap_user1@open-paas.org
+userPassword: secret
+description: ldap_user1
+
+dn: uid=ldap_user2,ou=users,dc=open-paas.org,dc=lng
+objectClass: inetOrgPerson
+uid: ldap_user2
+cn: ldap_user2
+givenName: ldapUser2Firstname
+sn: ldapUser2Surname
+mail: ldap_user2@open-paas.org
+userPassword: secret123
+description: ldap_user2
+
+dn: uid=alice,ou=users,dc=open-paas.org,dc=lng
+objectClass: inetOrgPerson
+uid: alice
+cn: alice
+givenName: alice
+sn: alice
+mail: alice@open-paas.org
+userPassword: secret
+
+dn: uid=bob,ou=users,dc=open-paas.org,dc=lng
+objectClass: inetOrgPerson
+uid: bob
+cn: bob
+givenName: bob
+sn: bob
+mail: bob@open-paas.org
+userPassword: secret
+
+dn: ou=lists,dc=open-paas.org,dc=lng
+objectClass: organizationalUnit
+ou: lists
+
+dn: cn=group,ou=lists,dc=open-paas.org,dc=lng
+objectclass: groupofnames
+businessCategory: openList
+cn: group
+ou: lists
+description: group@lists.open-paas.org
+member: uid=ldap_user1,ou=users,dc=open-paas.org,dc=lng
+member: uid=ldap_user2,ou=users,dc=open-paas.org,dc=lng

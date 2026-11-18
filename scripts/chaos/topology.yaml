@@ -1,0 +1,36 @@
+# What twake-chaos acts on: each component of claims.yaml and the compose services that are its nodes, the application.
+# `healthy`: a command (run on the host, common.sh sourced) that succeeds once the component has recovered by itself
+# (its cluster whole again), before the next scenario starts; `repair`: a command that brings it back when it does not by
+# itself (twake-chaos runs it while `healthy` fails).
+project: tcalendar-chaos
+app:
+  services: [twake-calendar-side-service, sabre_dav, proxy, frontend, public]
+  # the side service up, and esn-sabre answering through the proxy (an anonymous request: 401)
+  healthcheck: "curl -sf -o /dev/null \"http://127.0.0.1:$CHAOS_WEBADMIN_PORT/healthcheck/checks/Guice%20application%20lifecycle\" && curl -s -o /dev/null -w '%{http_code}' -H 'Host: dav' http://127.0.0.1:$CHAOS_API_PORT/ | grep -qx 401"
+components:
+  mongodb:
+    services: [mongo1, mongo2, mongo3]
+    # the replica set whole: 3 members up, one primary, two secondaries
+    healthy: "mongo_healthy"
+  opensearch:
+    services: [opensearch1, opensearch2, opensearch3]
+    # the 3 nodes, green, no shard initializing or relocating: a node back is not enough, its shards must have recovered
+    healthy: "opensearch_healthy"
+  rabbitMQ:
+    services: [rabbitmq1, rabbitmq2, rabbitmq3]
+    # the 3 nodes running in the cluster, every quorum queue with its 3 members online
+    healthy: "rabbitmq_healthy"
+  redis:
+    services: [redis1, redis2, redis3]
+    # its layout back (common.sh): one master owning slots per node, each with its replica online; after a failover the
+    # promoted replica keeps the slots until `repair` gives them back
+    healthy: "redis_healthy"
+    repair: "redis_rebalance"
+  ldap:
+    services: [ldap]
+    healthy: "compose exec -T ldap ldapsearch -x -H ldap://localhost:389 -D cn=admin,dc=open-paas.org,dc=lng -w admin -b ou=users,dc=open-paas.org,dc=lng -s base >/dev/null"
+  smtp:
+    services: [mock-smtp]
+    healthy: "curl -sf -o /dev/null http://127.0.0.1:$CHAOS_SMTP_API_PORT/smtpMails"
+# not claimed, part of the stack: never faulted
+support: [sso]

@@ -1,0 +1,72 @@
+# The main features of Twake Calendar, as its users and administrators rely on them, each checked by a script of this
+# folder (lib.sh: what they share). A signed-in user's features use the session of a previous sign-in (an SSO token kept
+# in $CHAOS_RUN/control-tokens, as a browser keeps it); sso_sign_in checks a new sign-in. NOTES.md: what the runs showed.
+timeout_seconds: 60
+features:
+  sso_sign_in:
+    script: sso_sign_in.sh
+    description: a user signs in through the SSO (Dex, the password checked in the LDAP); the new token is accepted by the REST API (GET /api/user)
+  web_app:
+    script: web_app.sh
+    description: the private SPA (calendar) and the public SPA (booking pages, answers from mails) load, with their configuration and scripts
+  calendars:
+    script: calendars.sh
+    description: a signed-in user lists their calendars, creates one, finds it in the list and deletes it (DAV through the side service)
+  events:
+    script: events.sh
+    description: a signed-in user creates an event, sees it in the view of its day (REPORT), opens it, renames it and deletes it
+  contacts:
+    script: contacts.sh
+    description: a signed-in user lists their address books, creates a contact, reads it back and deletes it (CardDAV through the side service)
+  caldav_basic_auth:
+    script: caldav_basic_auth.sh
+    description: a native CalDAV client signs in with login and password (Basic, esn-sabre directly) and discovers and lists its calendars
+  people_search:
+    script: people_search.sh
+    description: the attendee autocomplete (POST /api/people/search, user and contact) proposes the other user of the domain (OpenSearch)
+  event_search:
+    script: event_search.sh
+    description: an event just created is found by a word of its title in the event search (indexed from esn-sabre's RabbitMQ events into OpenSearch)
+    async: true
+  invitation_email:
+    script: invitation_email.sh
+    description: an event with an attendee sends the attendee an invitation mail (RabbitMQ, then SMTP; caught by the mail catcher)
+    async: true
+  invitation_delivery:
+    script: invitation_delivery.sh
+    description: an event with an attendee appears in the attendee's calendar (iTIP local delivery through RabbitMQ and the side service)
+    async: true
+  alarm_scheduled:
+    script: alarm_scheduled.sh
+    description: an email reminder set on an event is scheduled for its recipient at its due time (RabbitMQ, the side service's alarm schedule in MongoDB); not the mail itself, never sent on this stack (NOTES.md)
+    async: true
+  realtime:
+    script: realtime.sh
+    description: the web app's WebSocket (ticket, /ws, the calendar registered) is pushed the calendar's new sync token when an event is written
+    async: true
+  booking_link:
+    script: booking_link.sh
+    description: a user publishes a booking link; a visitor, not signed in, sees its free slots, books one, sees and cancels the booking
+impacts:
+  # "No Service"
+  mongodb: all
+  # "No search: no people / contact autocomplete (POST /api/people/search), no event search"
+  opensearch: [people_search, event_search]
+  # "No reaction to calendar changes: no event search indexing, no alarm scheduled, no invitation / notification email, no
+  # invitation delivered to the attendees' calendars by the side service; reading and writing one's own calendars and
+  # contacts keeps working". The realtime push of a calendar change is such a reaction (the side service relays the
+  # changes esn-sabre publishes): realtime is mapped here. Notification emails other than the invitation (updates,
+  # cancellations, replies): not checked separately, invitation_email stands for them.
+  rabbitMQ: [event_search, alarm_scheduled, invitation_email, invitation_delivery, realtime]
+  # "No realtime (websocket notifications of calendar changes)". "Tokens are checked with the identity server at every
+  # request (no cache)": a degradation, no feature stops (every signed-in feature checks the token is still accepted).
+  redis: [realtime]
+  # "No new sign-in (the SSO authenticates against the directory), no basic authentication to DAV". "No domain members
+  # synchronisation": not checkable on this stack, the side service has no LDAP configured (its webadmin route
+  # POST /addressbook/domain-members/{domain}?task=sync answers 404). "Signed-in users keep working": every other feature,
+  # with the session of an earlier sign-in.
+  ldap: [sso_sign_in, caldav_basic_auth]
+  # "No mail sent (invitations, alarms, notifications)": invitation_email. The alarm mails cannot be checked (the alarm
+  # scheduler is disabled on this stack, NOTES.md). "Retained, resent with POST /unsentMails?action=resend; the
+  # UnsentMails healthcheck is degraded": what an administrator sees and does, not a feature that stops; not checked.
+  smtp: [invitation_email]

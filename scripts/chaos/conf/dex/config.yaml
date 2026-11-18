@@ -1,0 +1,64 @@
+# Dex, the OIDC provider of the chaos stack: the e2e configuration (e2e/src/test/resources/oidc/dex_config.yaml) with the
+# password grant added, for the control scripts to sign in headless (`password` grant, the LDAP connector).
+issuer: https://sso:5554
+
+storage:
+  type: memory
+
+sessions:
+  cookieName: 'dex_session'
+  absoluteLifetime: '24h'
+  validIfNotUsedFor: '12h'
+  ssoSharedWithDefault: 'all'
+
+web:
+  # https for the browser, plain http for the side service and the control scripts
+  https: 0.0.0.0:5554
+  tlsCert: /etc/dex/tls.crt
+  tlsKey: /etc/dex/tls.key
+  http: 0.0.0.0:5556
+  allowedOrigins:
+    - '*'
+  logger:
+    level: 'info'
+
+staticClients:
+  # Public client used by the SPA (PKCE, no secret) and by the control scripts (password grant)
+  - id: twake-calendar
+    name: 'Twake Calendar'
+    public: true
+    redirectURIs:
+      - 'http://localhost:8099/callback'
+
+  # Confidential client the side service uses to introspect access tokens
+  - id: tcalendar-side-service
+    name: 'Twake Calendar Side Service'
+    secret: 'secret123'
+    redirectURIs:
+      - 'http://api/callback'
+
+enablePasswordDB: false
+
+connectors:
+  - type: ldap
+    id: ldap
+    name: LDAP
+    config:
+      host: esn_ldap:389
+      insecureNoSSL: true
+      bindDN: cn=admin,dc=open-paas.org,dc=lng
+      bindPW: admin
+      usernamePrompt: Email address
+      userSearch:
+        baseDN: ou=users,dc=open-paas.org,dc=lng
+        filter: '(objectClass=inetOrgPerson)'
+        username: mail
+        idAttr: uid
+        emailAttr: mail
+        nameAttr: cn
+
+oauth2:
+  skipApprovalScreen: true
+  responseTypes: ['code']
+  grantTypes: ['authorization_code', 'refresh_token', 'password']
+  passwordConnector: ldap
