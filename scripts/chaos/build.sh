@@ -13,12 +13,23 @@ pull() {
   docker image inspect "$1" >/dev/null 2>&1 && [ "${2:-}" != always ] || docker pull --quiet "$1"
 }
 
+in_node() {  # in_node <command>: in the checkout, node:24 in docker
+  docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm \
+    -v "$REPO_DIR:/app" -w /app "${NODE_IMAGE:-node:24}" sh -c "$1"
+}
+
 # the bundle of an app (private / public), always rebuilt: a stale dist is code nobody ships (pre-build.sh's warning)
 bundle() {
   echo "==> The $1 SPA bundle (npm run build:$1, node:24 in docker)"
-  docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm \
-    -v "$REPO_DIR:/app" -w /app "${NODE_IMAGE:-node:24}" sh -c "[ -d node_modules ] || npm ci; npm run build:$1"
+  in_node "npm run build:$1"
 }
+
+# the dependencies of the commit's lockfile, installed once before either bundle: a node_modules left by another commit
+# would build the bundles with its dependencies
+if [ "$WEB_IMAGE" = "$BUILT_WEB_IMAGE" ] || [ "$PUBLIC_IMAGE" = "$BUILT_PUBLIC_IMAGE" ]; then
+  echo "==> The dependencies (npm ci, node:24 in docker)"
+  in_node "npm ci"
+fi
 
 if [ "$WEB_IMAGE" != "$BUILT_WEB_IMAGE" ]; then
   echo "==> Using $WEB_IMAGE (WEB_IMAGE): no build"

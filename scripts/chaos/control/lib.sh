@@ -26,6 +26,8 @@ HTTP_TIMEOUT="${HTTP_TIMEOUT:-15}"
 # is the feature sso_sign_in, which never uses this cache. Dex keeps its signing keys in memory: the cache is keyed by its
 # container's start time, a restarted Dex invalidates it.
 TOKEN_CACHE_DIR="$CHAOS_RUN/control-tokens"
+# a probe's whole run: features.yaml's timeout_seconds
+PROBE_BUDGET="${PROBE_BUDGET:-60}"
 
 sso_started_at() {
   docker inspect -f '{{.State.StartedAt}}' "$CHAOS_PROJECT-sso-1" 2>/dev/null | tr -c 'A-Za-z0-9\n' '_'
@@ -41,17 +43,21 @@ EOF
 
 # session_token <email>: prints a valid access token of the account (cached, or a new sign-in); returns 1 when none
 session_token() {
-  local email="$1" key file token exp
+  local email="$1" key file token cached="" exp=0
   key="$(sso_started_at)"
   file="$TOKEN_CACHE_DIR/${email}.${key:-unknown}"
   if [ -s "$file" ]; then
-    token="$(cat "$file")"
-    exp="$(jwt_exp "$token")"
-    # valid for 10 more minutes at least: a probe never starts with a token about to expire
-    if [ "$exp" -gt $(( $(date +%s) + 600 )) ]; then echo "$token"; return 0; fi
+    cached="$(cat "$file")"
+    exp="$(jwt_exp "$cached")"
+    # valid for 10 more minutes at least: renewed early, a probe never starts with a token about to expire
+    if [ "$exp" -gt $(( $(date +%s) + 600 )) ]; then echo "$cached"; return 0; fi
   fi
   token="$(sso_token "$email" "$CHAOS_PASSWORD" 2>/dev/null)"
-  [ -n "$token" ] || return 1
+  if [ -z "$token" ]; then
+    # no new sign-in (the LDAP down): the cached session as long as it outlasts the probe (features.yaml's timeout)
+    if [ "$exp" -gt $(( $(date +%s) + PROBE_BUDGET )) ]; then echo "$cached"; return 0; fi
+    return 1
+  fi
   mkdir -p "$TOKEN_CACHE_DIR" && chmod 700 "$TOKEN_CACHE_DIR"
   find "$TOKEN_CACHE_DIR" -name "${email}.*" ! -name "${email}.${key:-unknown}" -delete 2>/dev/null
   printf '%s' "$token" > "$file.tmp" && mv "$file.tmp" "$file"
@@ -63,10 +69,14 @@ session_token() {
 API="$CHAOS_API_URL"
 
 # api <token> <curl args...>: a request to the REST API as the web app sends it; the body on stdout, then a last line
-# with the HTTP status (000: no answer)
+# with the HTTP status (000: no complete answer). A transfer that fails after the status line (a body cut, a timeout)
+# still has curl write that status: it is replaced by 000, its body never taken for a served one. Returns curl's code.
 api() {
-  local token="$1"; shift
-  curl -s --max-time "$HTTP_TIMEOUT" -H "Host: $CHAOS_API_HOST" -H "Authorization: Bearer $token" -w '\n%{http_code}' "$@"
+  local token="$1" out rc; shift
+  out="$(curl -s --max-time "$HTTP_TIMEOUT" -H "Host: $CHAOS_API_HOST" -H "Authorization: Bearer $token" -w '\n%{http_code}' "$@")"
+  rc=$?
+  if [ "$rc" = 0 ]; then printf '%s\n' "$out"; else printf '%s\n000\n' "$(sed '$d' <<<"$out")"; fi
+  return "$rc"
 }
 
 # split the output of api: body / status
@@ -119,15 +129,18 @@ delete_matching() {
 }
 
 # ------------------------------------------------------------------------------------------------- polling
-# poll <seconds> <interval> <command...>: runs the command until it succeeds; returns 1 at the deadline
+# poll <seconds> <interval> <command...>: runs the command until it succeeds; returns 1 at the deadline. No attempt
+# starts after it, a success observed after it does not count, the sleep never carries past it. POLL_DEADLINE (on
+# $SECONDS): what the command can bound its own steps with.
 poll() {
   local timeout="$1" interval="$2"; shift 2
-  local deadline=$((SECONDS + timeout))
-  while :; do
-    "$@" && return 0
-    [ $SECONDS -ge $deadline ] && return 1
-    sleep "$interval"
+  POLL_DEADLINE=$((SECONDS + timeout))
+  while [ $SECONDS -lt $POLL_DEADLINE ]; do
+    "$@" && { [ $SECONDS -le $POLL_DEADLINE ]; return; }
+    [ $SECONDS -lt $POLL_DEADLINE ] || return 1
+    sleep "$(( POLL_DEADLINE - SECONDS < interval ? POLL_DEADLINE - SECONDS : interval ))"
   done
+  return 1
 }
 
 # the async features' wait: their timeout in features.yaml minus a margin for their setup

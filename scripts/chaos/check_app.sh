@@ -12,10 +12,11 @@ failed=0
 
 step() {  # step <name> <expected status regex> <curl args...>: prints the status and the time taken
   local name="$1" expected="$2"; shift 2
-  local out code time
-  out="$(curl -s -o /dev/null -w '%{http_code} %{time_total}' --max-time 60 "$@")"
+  local out code time rc
+  out="$(curl -s -o /dev/null -w '%{http_code} %{time_total}' --max-time 60 "$@")"; rc=$?
   code="${out% *}"; time="${out#* }"
-  if [[ "$code" =~ ^($expected)$ ]]; then echo "ok    $name $code ${time}s"; else echo "FAIL  $name $code ${time}s"; failed=1; fi
+  # a transfer that fails after the status line (a body that stalls) still writes that status: curl's exit code tells
+  if [ "$rc" = 0 ] && [[ "$code" =~ ^($expected)$ ]]; then echo "ok    $name $code ${time}s"; else echo "FAIL  $name $code ${time}s$([ "$rc" = 0 ] || echo " (curl exit $rc)")"; failed=1; fi
 }
 
 start=$SECONDS

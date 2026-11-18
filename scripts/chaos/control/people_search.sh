@@ -10,7 +10,7 @@
 
 FIXTURE_ID=twake-chaos-user2
 seed_fixture() {
-  local node code doc
+  local node code doc missing=""
   doc="$(jq -cn --arg e "$CHAOS_USER2" --arg d "$CHAOS_DOMAIN" \
     '{contactId: "7c0f4f4e-6c1b-4f0e-9a51-6f8b6f2c0b0b", domain: $d, email: $e, firstname: ($e | split("@")[0]), surname: ($e | split("@")[0])}')"
   for node in opensearch1 opensearch2 opensearch3; do
@@ -18,10 +18,15 @@ seed_fixture() {
       "localhost:9200/domain_contact/_doc/$FIXTURE_ID" 2>/dev/null)"
     case "$code" in
       200) return 0 ;;
-      404) docker exec "$CHAOS_PROJECT-$node-1" curl -s -m 10 -o /dev/null -X PUT -H 'Content-Type: application/json' \
-             "localhost:9200/domain_contact/_doc/$FIXTURE_ID?refresh=true" -d "$doc" 2>/dev/null; return 0 ;;
+      404) missing=1
+           # written (200 / 201), or the next node tries
+           code="$(docker exec "$CHAOS_PROJECT-$node-1" curl -s -m 10 -o /dev/null -w '%{http_code}' -X PUT \
+             -H 'Content-Type: application/json' "localhost:9200/domain_contact/_doc/$FIXTURE_ID?refresh=true" -d "$doc" 2>/dev/null)" \
+             && [[ "$code" =~ ^20[01]$ ]] && return 0 ;;
     esac
   done
+  # missing and written nowhere: a search without its contact proves nothing
+  [ -z "$missing" ] || broken "the fixture contact of $CHAOS_USER2 cannot be indexed in OpenSearch (last answer: HTTP ${code:-000})"
   return 0  # OpenSearch unreachable: the search below tells
 }
 

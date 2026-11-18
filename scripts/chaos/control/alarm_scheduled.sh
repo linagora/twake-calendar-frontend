@@ -23,11 +23,14 @@ lines+="SUMMARY:chaos $uid"$'\r\n'"DESCRIPTION:twake-chaos reminder"$'\r\n'"END:
 code="$(put_event "$U_TOKEN" "$url" "$(ics_event "$uid" "chaos $uid" "$start" "$end" "$lines")")"
 [ "$code" = 201 ] || fail "event with a reminder not created (PUT: HTTP $code)"
 
-# the reminder in the schedule, on the primary of the replica set: prints its recipient and due time
+# the reminder in the schedule, on the primary of the replica set: prints its recipient and due time. Each node's read
+# bounded from the host (a node paused under mongosh freezes it, docker exec waits): the next node while poll's wait lasts
 scheduled() {
-  local n out
+  local n out left
   for n in $MONGO_NODES; do
-    out="$(docker exec "$CHAOS_PROJECT-$n-1" mongosh --quiet esn_docker --eval "
+    left=$((POLL_DEADLINE - SECONDS))
+    [ "$left" -gt 0 ] || return 1
+    out="$(timeout -k 2 "$(( left < 10 ? left : 10 ))" docker exec "$CHAOS_PROJECT-$n-1" mongosh --quiet esn_docker --eval "
       if (db.hello().isWritablePrimary) {
         const a = db.twake_calendar_alarm_events.findOne({eventUid: '$uid'});
         print(a ? a.recipient + ' ' + a.alarmTime.toISOString() : 'none');

@@ -121,7 +121,13 @@ sys.exit(not (h["number_of_nodes"] == 3 and h["status"] == "green" and not h["ti
 rabbitmq_healthy() {
   compose exec -T rabbitmq1 rabbitmqctl -q cluster_status --formatter json 2>/dev/null \
     | python3 -c 'import json,sys; sys.exit(len(json.load(sys.stdin)["running_nodes"])!=3)' 2>/dev/null || return 1
-  compose exec -T rabbitmq1 rabbitmq-diagnostics -q check_if_node_is_quorum_critical >/dev/null 2>&1
+  # each queue's members and those online, read from the queues themselves: the node-local quorum diagnostic
+  # (check_if_node_is_quorum_critical) leaves out a queue marked crashed, the nodes all running
+  compose exec -T rabbitmq1 rabbitmqctl -q list_queues name type members online --formatter json --timeout 15 2>/dev/null \
+    | python3 -c '
+import json, sys
+quorum = [q for q in json.load(sys.stdin) if q.get("type") == "quorum"]  # an exclusive / classic queue: not replicated
+sys.exit(not quorum or any(len(q.get("members") or []) != 3 or len(q.get("online") or []) != 3 for q in quorum))' 2>/dev/null
 }
 
 wait_healthy() {  # wait_healthy <seconds> <service>...
@@ -139,9 +145,11 @@ wait_healthy() {  # wait_healthy <seconds> <service>...
   done
 }
 
-# A bearer token of Dex for an account (password grant of the web app's client): sso_token <email> <password>
+# A bearer token of Dex for an account (password grant of the web app's client): sso_token <email> <password>. Bounded:
+# a Dex that accepts the connection and never answers fails the attempt (start.sh retries it)
 sso_token() {
-  curl -s -u "$CHAOS_OIDC_CLIENT:" -d grant_type=password --data-urlencode "username=$1" --data-urlencode "password=$2" \
-    -d 'scope=openid email profile' "http://127.0.0.1:$CHAOS_SSO_PORT/token" \
+  curl -s --max-time "${HTTP_TIMEOUT:-15}" -u "$CHAOS_OIDC_CLIENT:" -d grant_type=password \
+    --data-urlencode "username=$1" --data-urlencode "password=$2" -d 'scope=openid email profile' \
+    "http://127.0.0.1:$CHAOS_SSO_PORT/token" \
     | sed -n 's/.*"access_token" *: *"\([^"]*\)".*/\1/p'
 }

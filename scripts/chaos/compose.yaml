@@ -63,7 +63,8 @@ x-redis: &redis
   volumes:
     - ./conf/redis/node.sh:/node.sh:ro
   healthcheck:
-    test: ["CMD-SHELL", "redis-cli -p 6379 ping && redis-cli -p 6380 ping"]
+    # -e: an error reply (LOADING, the AOF replayed after a restart) fails the check, redis-cli exits 0 on it otherwise
+    test: ["CMD-SHELL", "redis-cli -e -p 6379 ping && redis-cli -e -p 6380 ping"]
     interval: 5s
     timeout: 5s
     retries: 30

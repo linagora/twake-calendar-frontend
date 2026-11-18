@@ -32,6 +32,9 @@ Each container has a memory limit (~11 GB in all), heaps sized under it.
 
 ## Usage
 
+The Docker host (or its VM) needs `vm.max_map_count` at 262144 at least: OpenSearch refuses to start below it (a
+bootstrap check), and `start.sh` would wait for nodes that never become healthy (`sudo sysctl -w vm.max_map_count=262144`).
+
 ```bash
 scripts/chaos/build.sh   # the SPAs of this commit (npm and nginx images, in docker), Dex and the proxy; WEB_IMAGE / PUBLIC_IMAGE: pulled instead
 scripts/chaos/start.sh   # the backing services, the clusters formed and checked, the application healthy, an SSO sign-in reaching the API

@@ -10,10 +10,16 @@ set -euo pipefail
 . "$(dirname "$0")/common.sh"
 
 mkdir -p "$CHAOS_RUN"
-# the JWT keys of the side service (it signs the tokens esn-sabre checks with the public one)
+# the JWT keys of the side service (it signs the tokens esn-sabre checks with the public one). Each file in place once
+# whole: a start interrupted between the two derives the public key from the private one on the next
 if [ ! -s "$CHAOS_RUN/jwt_privatekey" ]; then
-  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$CHAOS_RUN/jwt_privatekey" 2>/dev/null
-  openssl rsa -in "$CHAOS_RUN/jwt_privatekey" -pubout -out "$CHAOS_RUN/jwt_publickey" 2>/dev/null
+  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$CHAOS_RUN/jwt_privatekey.tmp" 2>/dev/null
+  mv "$CHAOS_RUN/jwt_privatekey.tmp" "$CHAOS_RUN/jwt_privatekey"
+  rm -f "$CHAOS_RUN/jwt_publickey"
+fi
+if [ ! -s "$CHAOS_RUN/jwt_publickey" ]; then
+  openssl rsa -in "$CHAOS_RUN/jwt_privatekey" -pubout -out "$CHAOS_RUN/jwt_publickey.tmp" 2>/dev/null
+  mv "$CHAOS_RUN/jwt_publickey.tmp" "$CHAOS_RUN/jwt_publickey"
 fi
 chmod 644 "$CHAOS_RUN/jwt_privatekey" "$CHAOS_RUN/jwt_publickey"
 
@@ -56,7 +62,9 @@ for replica in $REDIS_NODES; do
   master="${REDIS_REPLICA_OF[$replica]}"
   [ "$(redis_role "$replica" 6380)" = slave ] && continue
   id="$(compose exec -T "$master" redis-cli -p 6379 cluster myid | tr -d '\r')"
-  if compose exec -T redis1 redis-cli -p 6379 cluster nodes | grep -q "^[0-9a-f]* $replica:6380"; then
+  # known to the cluster by its node id (CLUSTER NODES shows its address as IP:6380@bus-port,hostname, not its name)
+  own="$(compose exec -T "$replica" redis-cli -p 6380 cluster myid | tr -d '\r')"
+  if compose exec -T redis1 redis-cli -p 6379 cluster nodes | grep -q "^$own "; then
     compose exec -T "$replica" redis-cli -p 6380 cluster replicate "$id" >/dev/null   # known, not a replica yet
   else
     compose exec -T redis1 redis-cli --cluster add-node "$replica:6380" redis1:6379 --cluster-slave --cluster-master-id "$id" >/dev/null
@@ -70,7 +78,7 @@ done
 
 echo "==> OpenSearch: the 3 nodes in the cluster"
 for i in $(seq 1 120); do
-  n="$(compose exec -T opensearch1 curl -s 'http://localhost:9200/_cluster/health' 2>/dev/null | sed -n 's/.*"number_of_nodes":\([0-9]*\).*/\1/p' || true)"
+  n="$(compose exec -T opensearch1 curl -s -m 10 'http://localhost:9200/_cluster/health' 2>/dev/null | sed -n 's/.*"number_of_nodes":\([0-9]*\).*/\1/p' || true)"
   [ "$n" = 3 ] && break
   [ "$i" = 120 ] && { echo "OpenSearch has ${n:-no} node(s)" >&2; compose logs --tail 60 opensearch1 >&2; exit 1; }
   sleep 3
@@ -85,9 +93,10 @@ for i in $(seq 1 60); do
 done
 
 echo "==> The SSO and the mail catcher"
+# every request of the retry loops bounded (-m): one that is accepted and never answered is a failed attempt
 for i in $(seq 1 40); do
-  curl -sf -o /dev/null "http://127.0.0.1:$CHAOS_SSO_PORT/.well-known/openid-configuration" \
-    && curl -sf -o /dev/null "http://127.0.0.1:$CHAOS_SMTP_API_PORT/smtpMails" && break
+  curl -sf -m 15 -o /dev/null "http://127.0.0.1:$CHAOS_SSO_PORT/.well-known/openid-configuration" \
+    && curl -sf -m 15 -o /dev/null "http://127.0.0.1:$CHAOS_SMTP_API_PORT/smtpMails" && break
   [ "$i" = 40 ] && { echo "Dex or the mail catcher does not answer" >&2; compose logs --tail 40 sso mock-smtp >&2; exit 1; }
   sleep 3
 done
@@ -116,7 +125,7 @@ echo "==> The accounts, registered in the side service"
 for email in $CHAOS_USER $CHAOS_USER2; do
   uid="${email%@*}"
   id="$(openssl rand -hex 12)"
-  status="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+  status="$(curl -s -m 30 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
     -d "{\"email\":\"$email\",\"firstname\":\"$uid\",\"lastname\":\"$uid\",\"id\":\"$id\"}" \
     "http://127.0.0.1:$CHAOS_WEBADMIN_PORT/registeredUsers")"
   case "$status" in
@@ -147,9 +156,9 @@ echo "==> An account signs in (SSO, password grant) and reaches the REST API and
 for i in $(seq 1 40); do
   token="$(sso_token "$CHAOS_USER" "$CHAOS_PASSWORD" || true)"
   if [ -n "$token" ]; then
-    user_id="$(curl -sf -H 'Host: api' -H "Authorization: Bearer $token" "http://127.0.0.1:$CHAOS_API_PORT/api/user" \
+    user_id="$(curl -sf -m 15 -H 'Host: api' -H "Authorization: Bearer $token" "http://127.0.0.1:$CHAOS_API_PORT/api/user" \
       | python3 -c 'import json,sys; print(json.load(sys.stdin)["_id"])' 2>/dev/null || true)"
-    [ -n "$user_id" ] && curl -sf -o /dev/null -H 'Host: api' -H "Authorization: Bearer $token" -H 'Accept: application/calendar+json' \
+    [ -n "$user_id" ] && curl -sf -m 15 -o /dev/null -H 'Host: api' -H "Authorization: Bearer $token" -H 'Accept: application/calendar+json' \
       "http://127.0.0.1:$CHAOS_API_PORT/dav/calendars/$user_id.json?personal=true&withRights=true" && break
   fi
   [ "$i" = 40 ] && { echo "$CHAOS_USER cannot reach the API through the SSO (token: ${token:+yes}${token:-no}, user: ${user_id:-none})" >&2; exit 1; }

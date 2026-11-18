@@ -84,26 +84,29 @@ def read_exact(n):
     return data
 
 
-def messages(deadline):
-    """The JSON text messages received until the deadline (pings answered)."""
-    fragments = b""
+def read_frame():
+    """One frame: its first byte (FIN bit, opcode) and its payload, unmasked."""
+    b1, b2 = read_exact(2)
+    n = b2 & 0x7F
+    if n == 126:
+        n = struct.unpack("!H", read_exact(2))[0]
+    elif n == 127:
+        n = struct.unpack("!Q", read_exact(8))[0]
+    if not b2 & 0x80:
+        return b1, read_exact(n)
+    m = read_exact(4)
+    return b1, bytes(b ^ m[i % 4] for i, b in enumerate(read_exact(n)))
+
+
+def data_frames(deadline):
+    """The data frames received until the deadline; pings answered, a close ends the connection."""
     while True:
         left = deadline - time.time()
         if left <= 0:
             return
         sock.settimeout(left)
         try:
-            b1, b2 = read_exact(2)
-            n = b2 & 0x7F
-            if n == 126:
-                n = struct.unpack("!H", read_exact(2))[0]
-            elif n == 127:
-                n = struct.unpack("!Q", read_exact(8))[0]
-            if b2 & 0x80:
-                m = read_exact(4)
-                payload = bytes(b ^ m[i % 4] for i, b in enumerate(read_exact(n)))
-            else:
-                payload = read_exact(n)
+            b1, payload = read_frame()
         except socket.timeout:
             return
         opcode = b1 & 0x0F
@@ -112,13 +115,21 @@ def messages(deadline):
         elif opcode == 0x8:
             raise EOFError
         elif opcode in (0x1, 0x0):
-            fragments += payload
-            if b1 & 0x80:
-                try:
-                    yield json.loads(fragments)
-                except ValueError:
-                    pass
-                fragments = b""
+            yield b1 & 0x80, payload
+
+
+def messages(deadline):
+    """The JSON text messages received until the deadline (fragments joined, what is not JSON skipped)."""
+    fragments = b""
+    for fin, payload in data_frames(deadline):
+        fragments += payload
+        if not fin:
+            continue
+        try:
+            yield json.loads(fragments)
+        except ValueError:
+            pass
+        fragments = b""
 
 
 try:
