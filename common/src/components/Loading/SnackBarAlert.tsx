@@ -76,6 +76,7 @@ export function SnackbarAlert({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
+        variant="filled"
         severity={severity}
         action={action}
         onClose={() => setOpen(false)}

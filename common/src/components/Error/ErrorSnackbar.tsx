@@ -38,6 +38,7 @@ export function ErrorSnackbar({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
+        variant="filled"
         severity="error"
         onClose={handleCloseSnackbar}
         sx={{ width: '100%' }}
@@ -81,6 +82,7 @@ export function EventErrorSnackbar({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
+        variant="filled"
         severity="error"
         onClose={onClose}
         sx={{ width: '100%' }}

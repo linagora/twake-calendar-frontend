@@ -122,7 +122,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
         onClose={handleErrorClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="error" onClose={handleErrorClose}>
+        <Alert variant="filled" severity="error" onClose={handleErrorClose}>
           {t('event.form.tdrivePickerError')}
         </Alert>
       </Snackbar>
