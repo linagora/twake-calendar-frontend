@@ -22,6 +22,9 @@ declare global {
     VIDEO_CONFERENCE_BASE_URL: string
     MEET_BACKEND_INTEGRATION: boolean | undefined
     TDRIVE_ENABLED: boolean | undefined
+    // Bytes, unset to disable
+    TDRIVE_MAX_FILE_SIZE: number | undefined
+    TDRIVE_MAX_TOTAL_FILE_SIZE: number | undefined
     WORKPLACE_FQDN_FALLBACK: string | undefined
     SUPPORT_URL: string
     PRIVACY_URL: string

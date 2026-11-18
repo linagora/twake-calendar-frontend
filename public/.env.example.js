@@ -70,6 +70,11 @@ var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain
 // platform, so it needs the workplace FQDN from the SSO (workplaceFqdn in
 // SSO_SCOPE) or WORKPLACE_FQDN_FALLBACK.
 var TDRIVE_ENABLED = false
+// Maximum size, in bytes, of a file picked in Tdrive. Unset to disable.
+// var TDRIVE_MAX_FILE_SIZE = 10485760; // optional
+// Maximum total size, in bytes, of the Tdrive files of one event. Unset to
+// disable.
+// var TDRIVE_MAX_TOTAL_FILE_SIZE = 26214400; // optional
 var ENABLE_REFRESH_BUTTON = false 
 // The Twake bar, the platform top bar, shows the apps and the account of the
 // user's Cozy when SSO_SCOPE includes workplaceFqdn (or WORKPLACE_FQDN_FALLBACK

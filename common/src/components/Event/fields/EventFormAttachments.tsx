@@ -3,6 +3,7 @@ import { useI18n } from 'twake-i18n'
 import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
 import { useAppSelector } from '@common/app/hooks'
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
+import { sizeParams } from '@common/features/Tdrive/helpers/drivePickLimits'
 import { isTdrivePickerAvailable } from '@common/features/Tdrive/helpers/isTdrivePickerAvailable'
 import { TdriveFile } from '@common/features/Tdrive/types'
 import { Attachment } from '@common/types/Attachment'
@@ -27,7 +28,14 @@ export const EventFormAttachments: React.FC<{
   const handleTdriveFilesSelected = useCallback(
     (files: TdriveFile[]): void => {
       const attachments = files.map(
-        file => new Attachment(file.url, file.mimeType ?? undefined, file.name)
+        file =>
+          new Attachment(
+            file.url,
+            file.mimeType ?? undefined,
+            file.name,
+            'uri',
+            sizeParams(file.size)
+          )
       )
       setAttachments([...v.attachments, ...attachments])
     },

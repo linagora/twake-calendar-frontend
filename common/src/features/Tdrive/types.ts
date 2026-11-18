@@ -4,6 +4,8 @@ export interface TdriveFile {
   url: string
   type: 'sharingLink' | 'downloadLink'
   mimeType: string | null
+  // Bytes, as reported by the picker
+  size?: number
 }
 
 /** A file the user stored in their own Drive, e.g. by the UPLOAD intent */
