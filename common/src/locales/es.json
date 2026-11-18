@@ -444,6 +444,7 @@
       "tooltip": "Los demás le ven como disponible durante el horario de este evento."
     },
     "attendingQuestion": "¿Asistirá?",
+    "answerOfQuestion": "Respuesta de %{name}:",
     "wantToChangeQuestion": "¿Desea cambiar?",
     "authorizeQuestion": "¿Autorizar?",
     "proposeNewTime": "Nueva hora",

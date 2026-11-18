@@ -8,6 +8,15 @@ import { EventCounterModal } from './EventCounterModal'
 import { RSVPSection } from './RSVPSection'
 import { CounterProposalSection } from './CounterProposalSection'
 import { useAttendanceValidationAuthorization } from './useAttendanceValidationAuthorization'
+import { Calendar } from '@common/types/CalendarTypes'
+import { makeDisplayName } from '@common/utils/makeDisplayName'
+
+// On a calendar shared with the viewer, the answer shown is its owner's
+function answeredForName(calendar: Calendar): string | undefined {
+  const { delegated, owner } = calendar
+  if (!delegated || owner?.teamCalendar || owner?.resource) return undefined
+  return makeDisplayName(calendar) ?? owner?.emails?.[0]
+}
 
 interface AttendanceValidationProps {
   contextualizedEvent: ContextualizedEvent
@@ -69,6 +78,7 @@ export function AttendanceValidation({
       <RSVPSection
         isMobile={isMobile}
         isResource={!!calendar.owner?.resource}
+        answeredForName={answeredForName(calendar)}
         commonButtonProps={commonButtonProps}
       />
       {!hideCounterProposalSection && (

@@ -444,6 +444,7 @@
       "tooltip": "Andere sehen Sie während dieses Termins als verfügbar."
     },
     "attendingQuestion": "Teilnehmen?",
+    "answerOfQuestion": "Antwort von %{name}:",
     "wantToChangeQuestion": "Möchten Sie das ändern?",
     "authorizeQuestion": "Zulassen?",
     "proposeNewTime": "Neue Zeit",

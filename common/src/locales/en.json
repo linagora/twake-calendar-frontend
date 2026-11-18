@@ -444,6 +444,7 @@
       "tooltip": "Others see you as available during the time range of this event."
     },
     "attendingQuestion": "Attending?",
+    "answerOfQuestion": "%{name}'s answer:",
     "wantToChangeQuestion": "Want to change?",
     "authorizeQuestion": "Authorize?",
     "proposeNewTime": "New time",
