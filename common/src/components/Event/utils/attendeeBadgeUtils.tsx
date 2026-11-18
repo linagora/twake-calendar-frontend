@@ -173,6 +173,7 @@ function renderTeamOrganizerFullBadge({
     <Box
       key={key}
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         gap: 1.5,
@@ -273,6 +274,7 @@ function renderFullAttendeeBadge({
     <Box
       key={key}
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         gap: 1.5,
