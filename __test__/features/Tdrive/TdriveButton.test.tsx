@@ -6,6 +6,7 @@ import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
 import { Provider } from 'react-redux'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { setupStore } from '@common/app/store'
+import { Attachment } from '@common/types/Attachment'
 
 vi.mock('twake-i18n', () => ({
   useI18n: () => ({
@@ -212,6 +213,38 @@ describe('TdriveButton', () => {
       expect(mockOpenPicker).toHaveBeenCalledTimes(1)
       expect(mockClosePicker).not.toHaveBeenCalled()
       expect(mockDismissOpenPickerError).not.toHaveBeenCalled()
+    })
+  })
+
+  it('leaves the picker the room the attached files leave', () => {
+    window.TDRIVE_MAX_FILE_SIZE = 1000
+    window.TDRIVE_MAX_TOTAL_FILE_SIZE = 5000
+    try {
+      render(
+        React.createElement(TdriveButton, {
+          onFilesSelected: mockOnFilesSelected,
+          showMore: false,
+          attachments: [
+            new Attachment(
+              'https://drive.example.com/s/a',
+              'application/pdf',
+              'a.pdf',
+              'uri',
+              { size: '1200' }
+            )
+          ],
+          setAttachments: vi.fn()
+        }),
+        { wrapper: Wrapper }
+      )
+    } finally {
+      window.TDRIVE_MAX_FILE_SIZE = undefined
+      window.TDRIVE_MAX_TOTAL_FILE_SIZE = undefined
+    }
+
+    expect(mockUseTdrivePicker).toHaveBeenCalledWith({
+      onFilesSelected: mockOnFilesSelected,
+      limits: { maxFileSize: 1000, availableSize: 3800 }
     })
   })
 

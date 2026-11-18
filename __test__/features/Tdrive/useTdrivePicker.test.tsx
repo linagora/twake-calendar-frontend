@@ -269,6 +269,71 @@ describe('useTdrivePicker', () => {
     expect(result.current.isOpen).toBe(false)
   })
 
+  it('has the picker enforce the size limits', async () => {
+    const { result } = renderHook(
+      () =>
+        useTdrivePicker({
+          onFilesSelected: vi.fn(),
+          limits: { maxFileSize: 1000, availableSize: 5000 }
+        }),
+      { wrapper: createWrapper(defaultUserState) }
+    )
+
+    mountContainer(result)
+    await act(async () => {
+      await result.current.openPicker()
+    })
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      'PICK',
+      'io.cozy.files',
+      expect.objectContaining({
+        sharingLink: {
+          label: 'tdrive.addAsAttachment',
+          maxFileSize: 1000,
+          availableSize: 5000
+        }
+      }),
+      ['GET']
+    )
+  })
+
+  it('keeps the size of the picked files', async () => {
+    const onFilesSelected = vi.fn()
+    mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
+      onReadyToUse?.()
+      return Promise.resolve([
+        {
+          id: 'file-123',
+          name: 'report.pdf',
+          size: 4096,
+          mimeType: 'application/pdf',
+          sharingLink: 'https://drive.example.com/file-123'
+        }
+      ])
+    })
+
+    const { result } = renderHook(() => useTdrivePicker({ onFilesSelected }), {
+      wrapper: createWrapper(defaultUserState)
+    })
+
+    mountContainer(result)
+    await act(async () => {
+      await result.current.openPicker()
+    })
+
+    expect(onFilesSelected).toHaveBeenCalledWith([
+      {
+        id: 'file-123',
+        name: 'report.pdf',
+        url: 'https://drive.example.com/file-123',
+        type: 'sharingLink',
+        mimeType: 'application/pdf',
+        size: 4096
+      }
+    ])
+  })
+
   it('closes picker and resets state', async () => {
     // start() calls onReadyToUse but never resolves — simulates picker staying open
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {

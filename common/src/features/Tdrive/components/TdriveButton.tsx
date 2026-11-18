@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { SectionPreviewRow } from '@common/components/Event/components/SectionPreviewRow'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { AttachmentField } from '@common/components/Event/fields/AttachmentField'
 import { Box, Button, Snackbar, Alert } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import { drivePickLimits } from '../helpers/drivePickLimits'
 import { useTdrivePicker } from '../hooks/useTdrivePicker'
 import { TdriveFile } from '../types'
 import { TdrivePickerDialog } from './TdrivePickerDialog'
@@ -68,6 +69,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const limits = useMemo(() => drivePickLimits(attachments), [attachments])
   const {
     isOpen,
     containerRef,
@@ -76,7 +78,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
     closePicker,
     dismissOpenPickerError,
     onReadyToUse
-  } = useTdrivePicker({ onFilesSelected })
+  } = useTdrivePicker({ onFilesSelected, limits })
 
   // A click away from the alert may be the click that reopens the picker:
   // only the timeout and the alert's close button dismiss it.

@@ -5,6 +5,7 @@ import type { Sdk } from '@linagora/twake-sdk'
 import Intents, { type StartedIntent } from 'cozy-interapp'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import type { DrivePickLimits } from '../helpers/drivePickLimits'
 import { TdriveFile } from '../types'
 
 const INTENT_REQUEST_TIMEOUT_MS = 30000
@@ -47,6 +48,7 @@ interface UseTdrivePickerReturn {
 
 interface UseTdrivePickerProps {
   onFilesSelected: (files: TdriveFile[]) => void
+  limits?: DrivePickLimits
 }
 
 function convertSingleResult(doc: Record<string, unknown>): TdriveFile | null {
@@ -59,12 +61,18 @@ function convertSingleResult(doc: Record<string, unknown>): TdriveFile | null {
 
   if (!id || !url) return null
 
+  const size =
+    typeof doc.size === 'number' && Number.isFinite(doc.size) && doc.size > 0
+      ? doc.size
+      : undefined
+
   return {
     id,
     name,
     url,
     type: 'sharingLink',
-    mimeType: str(doc.mimeType) ?? null
+    mimeType: str(doc.mimeType) ?? null,
+    ...(size === undefined ? {} : { size })
   }
 }
 
@@ -127,6 +135,7 @@ interface StartTdrivePickerOptions {
   readyCallbackRef: React.MutableRefObject<(() => void) | null>
   cancellationRef: PickerCancellation
   intentRef: React.MutableRefObject<StartedIntent | null>
+  limits: DrivePickLimits
   t: (key: string) => string
 }
 
@@ -137,6 +146,7 @@ async function startTdrivePicker({
   readyCallbackRef,
   cancellationRef,
   intentRef,
+  limits,
   t
 }: StartTdrivePickerOptions): Promise<TdriveFile[]> {
   const sdk = await ensureSdkSignedIn(platformURL, idToken)
@@ -153,7 +163,8 @@ async function startTdrivePicker({
     {
       theme: { type: 'light' },
       multiple: true,
-      sharingLink: { label: t('tdrive.addAsAttachment') },
+      // The picker disables its button for a selection over the limits
+      sharingLink: { label: t('tdrive.addAsAttachment'), ...limits },
       downloadLink: null,
       displayCloseButton: true
     },
@@ -200,8 +211,11 @@ async function startTdrivePicker({
   return convertIntentResultToFiles(result)
 }
 
+const NO_LIMITS: DrivePickLimits = {}
+
 export function useTdrivePicker({
-  onFilesSelected
+  onFilesSelected,
+  limits = NO_LIMITS
 }: UseTdrivePickerProps): UseTdrivePickerReturn {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
@@ -248,6 +262,7 @@ export function useTdrivePicker({
         readyCallbackRef,
         cancellationRef,
         intentRef,
+        limits,
         t
       })
 
@@ -267,7 +282,7 @@ export function useTdrivePicker({
         setIsOpen(false)
       }
     }
-  }, [isOpen, platformURL, idToken, onFilesSelected, t])
+  }, [isOpen, platformURL, idToken, onFilesSelected, limits, t])
 
   const closePicker = useCallback(() => {
     activeCancellationRef.current?.cancel()
