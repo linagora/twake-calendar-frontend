@@ -43,6 +43,8 @@ define.fmt({
   ignorePatterns: [
     // Markdown docs (formatting handled manually)
     '*.md',
-    'public/.env.example.js'
+    'public/.env.example.js',
+    // the chaos environment (QA tooling, its files generated and updated by twake-chaos)
+    'scripts/chaos/**'
   ]
 })

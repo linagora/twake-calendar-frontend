@@ -1,0 +1,63 @@
+# What Twake Calendar claims when one of the services it relies on fails. twake-chaos checks each claim on the chaos stack
+# (compose.yaml) and records what does not hold.
+#
+#   faultTolerance     nodes of the component that can be lost with no impact at all (absent: a single node, none)
+#   downImpact         what stops working while the whole component is down; every other feature keeps working
+#   accidentRecovery   live: once the component is back, everything works again without restarting the application
+#   requiredOnStartup  true: the application may refuse to start without it; false: it starts, degraded as downImpact says
+#
+# No product document states these claims as such: each is written from what the documentation says the component is
+# used for (the sources in the comments: twake-calendar-side-service's docs/, esn-sabre's doc/) and from the code, with
+# the replication the deployment documentation allows (a list of nodes) as the fault tolerance. The maintainers may
+# correct them: this file is theirs from now on.
+components:
+  # side service docs/architecture.md: "MongoDB is used as a primary data store"; docs/configuration/configuration.md:
+  # mongo.url, "Url for the MongoDB server(s)" (a replica set). esn-sabre doc/storage/MONGO.md: the calendars, events,
+  # address books and contacts, and the users it reads from the ESN database.
+  mongodb:
+    faultTolerance: 1
+    downImpact: "No Service"
+    accidentRecovery: live
+    requiredOnStartup: true
+  # side service docs/architecture.md: OpenSearch serves the user and contact search (people search API) and the event
+  # search (an index maintained from the events esn-sabre publishes); docs/configuration/opensearch.md: opensearch.hosts,
+  # opensearch.nb.replica.
+  opensearch:
+    faultTolerance: 1
+    downImpact: "No search: no people / contact autocomplete (POST /api/people/search), no event search"
+    accidentRecovery: live
+    requiredOnStartup: true
+  # side service docs/architecture.md: "RabbitMQ is used in order to react to change performed atop the esn-sabre DAV
+  # server"; docs/implementationNotes.md: alarms are scheduled from the events of esn-sabre; esn-sabre
+  # doc/storage/RABBITMQ.md: event, alarm, notification email and iTIP local delivery messages. Reconnection:
+  # scheduled.consumer.reconnection.enabled (the side service's sample rabbitmq.properties).
+  rabbitMQ:
+    faultTolerance: 1
+    downImpact: "No reaction to calendar changes: no event search indexing, no alarm scheduled, no invitation / notification email, no invitation delivered to the attendees' calendars by the side service; reading and writing one's own calendars and contacts keeps working"
+    accidentRecovery: live
+    requiredOnStartup: true
+  # side service docs/architecture.md: "Redis is used as a cache to store OpenID connect access token hash thus lowering
+  # the load on the identity server"; docs/apis/openpaasApi.md: the introspect / userinfo data cached "either locally or in
+  # redis"; the code (RedisEventBusModule): the event bus of the websocket notifications.
+  # Topology: a Redis Cluster, as in production (the maintainers, 2026-11-18): 3 masters, each with a replica on another
+  # node (conf/side-service/redis.properties redis.topology=cluster).
+  # The maintainers' claim (2026-11-18), valid once the token cache fails fast (twake-chaos issue 01 of the side service:
+  # today every signed-in request hangs on the cache with Redis down).
+  redis:
+    faultTolerance: 1
+    downImpact: "No realtime; the OIDC token cache is lost and tokens are checked with the identity server (slower), once the client fails fast"
+    accidentRecovery: live
+    requiredOnStartup: true
+  # side service docs/architecture.md: LDAP for the domain members and basic authentication; the e2e's Dex
+  # (e2e/src/test/resources/oidc/dex_config.yaml) signs users in against it; esn-sabre doc/storage/LDAP.md: basic
+  # authentication to DAV.
+  ldap:
+    downImpact: "No new sign-in (the SSO authenticates against the directory), no basic authentication to DAV, no domain members synchronisation; signed-in users keep working"
+    accidentRecovery: live
+    requiredOnStartup: false
+  # side service docs/apis/webadmin.md, "Unsent mails routes": the mails it fails to deliver over SMTP are retained and can
+  # be re-emitted (POST /unsentMails?action=resend); the UnsentMails healthcheck reports degraded meanwhile.
+  smtp:
+    downImpact: "No mail sent (invitations, alarms, notifications): retained, resent with POST /unsentMails?action=resend; the UnsentMails healthcheck is degraded"
+    accidentRecovery: live
+    requiredOnStartup: false
