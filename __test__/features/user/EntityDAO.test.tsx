@@ -45,5 +45,17 @@ describe('EntityDAO', () => {
       expect(api.get).toHaveBeenCalledWith('api/entity/res-456')
       expect(result).toEqual(mockResponse)
     })
+
+    it('should encode the id so it cannot escape the entity path', async () => {
+      mockApiGet.mockReturnValue({
+        json: vi.fn().mockResolvedValue({})
+      })
+
+      await fetchEntityById('../../calendar/api/x?y=1#')
+
+      expect(api.get).toHaveBeenCalledWith(
+        'api/entity/..%2F..%2Fcalendar%2Fapi%2Fx%3Fy%3D1%23'
+      )
+    })
   })
 })
