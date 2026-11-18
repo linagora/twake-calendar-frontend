@@ -444,6 +444,7 @@
       "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
+    "answerOfQuestion": "Ответ %{name}:",
     "wantToChangeQuestion": "Хотите изменить?",
     "authorizeQuestion": "Авторизовать?",
     "proposeNewTime": "Предложить новое время",

@@ -22,15 +22,24 @@ export interface CommonButtonProps {
 interface RSVPSectionProps {
   isMobile: boolean
   isResource: boolean
+  // Set when the answer shown is not the viewer's but this person's
+  answeredForName?: string
   commonButtonProps: CommonButtonProps
 }
 
 export function RSVPSection({
   isMobile,
   isResource,
+  answeredForName,
   commonButtonProps
 }: RSVPSectionProps): JSX.Element {
   const { t } = useI18n()
+  const question = ((): string => {
+    if (isResource) return t('eventPreview.authorizeQuestion')
+    if (answeredForName)
+      return t('eventPreview.answerOfQuestion', { name: answeredForName })
+    return t('eventPreview.attendingQuestion')
+  })()
   return (
     <Box
       sx={{
@@ -42,9 +51,7 @@ export function RSVPSection({
     >
       {!isMobile && (
         <Typography variant="body2" sx={{ marginRight: 1 }}>
-          {isResource
-            ? t('eventPreview.authorizeQuestion')
-            : t('eventPreview.attendingQuestion')}
+          {question}
         </Typography>
       )}
       <Box sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}>

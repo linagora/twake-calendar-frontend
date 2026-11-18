@@ -104,7 +104,12 @@ describe('AttendanceValidation - delegation', () => {
         id: 'user2/cal1',
         name: 'Delegated Cal',
         delegated: true,
-        owner: { emails: ['owner@example.com'] },
+        access: { read: true, write: true },
+        owner: {
+          emails: ['owner@example.com'],
+          firstname: 'Olivia',
+          lastname: 'Owner'
+        },
         events: {}
       } as Calendar,
       currentUserAttendee: {
@@ -138,8 +143,84 @@ describe('AttendanceValidation - delegation', () => {
           setOpenEditModePopup={noopSetFunc}
         />
       )
-      // delegated flag alone should keep it visible
+      // write delegation alone should keep it visible
       expect(container.firstChild).not.toBeNull()
+    })
+
+    it("labels the row with the owner's name, not as the viewer's answer", () => {
+      const { getByText, queryByText } = render(
+        <AttendanceValidation
+          contextualizedEvent={delegatedContext}
+          user={makeUser('alice@example.com')}
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      )
+      expect(getByText('eventPreview.answerOfQuestion')).toBeTruthy()
+      expect(queryByText('eventPreview.attendingQuestion')).toBeNull()
+    })
+
+    it('returns null for a read-only delegate', () => {
+      const { container } = render(
+        <AttendanceValidation
+          contextualizedEvent={{
+            ...delegatedContext,
+            calendar: {
+              ...delegatedContext.calendar,
+              access: { read: true, write: false }
+            } as Calendar
+          }}
+          user={makeUser('alice@example.com')}
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      )
+      expect(container.firstChild).toBeNull()
+    })
+  })
+
+  describe('team calendar', () => {
+    const teamContext = makeContext({
+      isOwn: true, // every member counts among the owners
+      calendar: {
+        id: 'team1/cal1',
+        name: 'Team A',
+        delegated: true,
+        access: { read: true, write: false },
+        owner: { emails: ['alice@example.com'], teamCalendar: true },
+        events: {}
+      } as Calendar,
+      currentUserAttendee: undefined
+    })
+
+    it('returns null when the member is not an attendee', () => {
+      const { container } = render(
+        <AttendanceValidation
+          contextualizedEvent={teamContext}
+          user={makeUser('alice@example.com')}
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      )
+      expect(container.firstChild).toBeNull()
+    })
+
+    it("asks the member for their own answer when they're an attendee", () => {
+      const { getByText } = render(
+        <AttendanceValidation
+          contextualizedEvent={{
+            ...teamContext,
+            currentUserAttendee: {
+              cal_address: 'alice@example.com',
+              partstat: 'NEEDS-ACTION'
+            } as userAttendee
+          }}
+          user={makeUser('alice@example.com')}
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      )
+      expect(getByText('eventPreview.attendingQuestion')).toBeTruthy()
     })
   })
 

@@ -7,16 +7,30 @@ interface UseAttendanceValidationAuthorizationResult {
   isAuthorized: boolean
 }
 
-function checkHasNoAttendeesOrOrganizer(event: CalendarEvent): boolean {
-  return !(event.attendee?.length > 0) && !event.organizer
+function isTeamCalendar(calendar: Calendar): boolean {
+  return Boolean(calendar.owner?.teamCalendar)
 }
 
-function checkIsDelegatedPublicEvent(
+// The owner of a calendar shared with write right may be answered for: the
+// delegate answers on their behalf. A read-only delegate cannot answer, and
+// the answer shown would be the owner's, not theirs.
+function checkIsWriteDelegatedPublicEvent(
   calendar: Calendar,
   event: CalendarEvent
 ): boolean {
-  if (!calendar.delegated) return false
+  if (!calendar.delegated || isTeamCalendar(calendar)) return false
+  if (!calendar.access?.write) return false
   return !event.class || event.class === 'PUBLIC'
+}
+
+// Every member of a team calendar counts among its owners: only those invited
+// to the event have an answer to give.
+function checkIsOwnCalendarAnswer(
+  contextualizedEvent: ContextualizedEvent
+): boolean {
+  const { currentUserAttendee, isOwn, calendar } = contextualizedEvent
+  if (!isOwn) return false
+  return !isTeamCalendar(calendar) || !!currentUserAttendee
 }
 
 function checkIsAdminOfResource(
@@ -31,17 +45,12 @@ export function useAttendanceValidationAuthorization(
   contextualizedEvent: ContextualizedEvent,
   user: userData | undefined
 ): UseAttendanceValidationAuthorizationResult {
-  const { currentUserAttendee, isOwn, calendar, event } = contextualizedEvent
-  const openpaasId = user?.openpaasId
-
-  const noAttendeesOrOrganizer = checkHasNoAttendeesOrOrganizer(event)
-  const createByTheUser = !!(currentUserAttendee || noAttendeesOrOrganizer)
+  const { calendar, event } = contextualizedEvent
 
   const isAuthorized =
-    (createByTheUser && isOwn) ||
-    isOwn ||
-    checkIsDelegatedPublicEvent(calendar, event) ||
-    checkIsAdminOfResource(calendar.owner, openpaasId)
+    checkIsOwnCalendarAnswer(contextualizedEvent) ||
+    checkIsWriteDelegatedPublicEvent(calendar, event) ||
+    checkIsAdminOfResource(calendar.owner, user?.openpaasId)
 
   return { isAuthorized }
 }
