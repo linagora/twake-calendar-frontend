@@ -177,6 +177,9 @@ const EventPreviewModal: React.FC<{
           isNotPrivate={isNotPrivate}
           isResourceEventPreview={calendar.owner?.resource}
           isTeamCalendar={calendar.owner?.teamCalendar}
+          teamName={
+            calendar.owner?.teamCalendar ? makeDisplayName(calendar) : undefined
+          }
           calendarName={calendar.name}
           ownerEmail={calendar.owner.emails?.[0]}
         />

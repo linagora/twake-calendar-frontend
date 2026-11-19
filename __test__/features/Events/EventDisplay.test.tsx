@@ -2309,6 +2309,63 @@ describe('Event Preview Display', () => {
         ).toBeInTheDocument()
       }
     )
+
+    it('shows the team of the calendar as organizer and keeps the event organizer visible', () => {
+      renderTeamPreview(2)
+
+      fireEvent.click(screen.getByText('eventPreview.showMore'))
+
+      expect(screen.getByTestId('GroupsIcon')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'event.teamOrganizerWithName(organizerName=alice@example.com)'
+        )
+      ).toBeInTheDocument()
+    })
+  })
+
+  describe('EventDisplayPreview - X-OPENPAAS-TEAM-CALENDAR-ID', () => {
+    it('ignores it on an invitation opened in a personal calendar', () => {
+      const calendarId = '667037022b752d0026472254/cal1'
+      const personalCalendar = preloadedState.calendars.list[calendarId]
+      const invitation = {
+        ...personalCalendar.events.event1,
+        organizer: { cn: 'Mallory', cal_address: 'mallory@example.com' },
+        passthroughProps: [
+          ['x-openpaas-team-calendar-id', {}, 'text', 'some-team-id']
+        ]
+      }
+
+      renderWithProviders(
+        <EventPreviewModal
+          open={true}
+          onClose={mockOnClose}
+          calId={calendarId}
+          eventId="event1"
+        />,
+        {
+          ...preloadedState,
+          calendars: {
+            ...preloadedState.calendars,
+            list: {
+              ...preloadedState.calendars.list,
+              [calendarId]: {
+                ...personalCalendar,
+                events: { event1: invitation }
+              }
+            }
+          }
+        }
+      )
+
+      fireEvent.click(screen.getByText('eventPreview.showMore'))
+
+      expect(screen.queryByTestId('GroupsIcon')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText(/event\.teamOrganizerWithName/)
+      ).not.toBeInTheDocument()
+      expect(screen.getAllByText('Mallory').length).toBeGreaterThan(0)
+    })
   })
 
   describe('BUGFIX', () => {
