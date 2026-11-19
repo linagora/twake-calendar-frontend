@@ -16,6 +16,7 @@ import { DateSelectInfo } from '@fullcalendar/react'
 import { useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventPreviewTitleRow } from './EventPreviewTitleRow'
+import { getOrganizingTeamName } from './teamOrganizer'
 import { isListView } from '../Calendar/utils/constants'
 
 const EventPreviewModal: React.FC<{
@@ -137,6 +138,8 @@ const EventPreviewModal: React.FC<{
 
   const hasMultipleAttendees = (event?.attendee?.length ?? 0) > 1
 
+  const organizingTeamName = getOrganizingTeamName(calendar, event.organizer)
+
   return (
     <>
       <ResponsiveDialog
@@ -176,10 +179,8 @@ const EventPreviewModal: React.FC<{
           isOrganizer={isOrganizer}
           isNotPrivate={isNotPrivate}
           isResourceEventPreview={calendar.owner?.resource}
-          isTeamCalendar={calendar.owner?.teamCalendar}
-          teamName={
-            calendar.owner?.teamCalendar ? makeDisplayName(calendar) : undefined
-          }
+          isTeamCalendar={Boolean(organizingTeamName)}
+          teamName={organizingTeamName}
           calendarName={calendar.name}
           ownerEmail={calendar.owner.emails?.[0]}
         />

@@ -2322,6 +2322,49 @@ describe('Event Preview Display', () => {
         )
       ).toBeInTheDocument()
     })
+
+    it('shows an external organizer as such, not as the team', () => {
+      const state = makeTeamState(2)
+      const teamCalendar = state.calendars.list['team1/cal1']
+      renderWithProviders(
+        <EventPreviewModal
+          eventId="event-1"
+          calId="team1/cal1"
+          open={true}
+          onClose={mockOnClose}
+        />,
+        {
+          ...state,
+          calendars: {
+            ...state.calendars,
+            list: {
+              'team1/cal1': {
+                ...teamCalendar,
+                events: {
+                  'event-1': {
+                    ...teamCalendar.events['event-1'],
+                    organizer: {
+                      cn: 'John',
+                      cal_address: 'john@external.com'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      )
+
+      fireEvent.click(screen.getByText('eventPreview.showMore'))
+
+      expect(screen.queryByTestId('GroupsIcon')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText(/event\.teamOrganizerWithName/)
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText('event.teamOrganizer')).not.toBeInTheDocument()
+      expect(screen.getByText('event.organizer')).toBeInTheDocument()
+      expect(screen.getAllByText('John').length).toBeGreaterThan(0)
+    })
   })
 
   describe('EventDisplayPreview - X-OPENPAAS-TEAM-CALENDAR-ID', () => {

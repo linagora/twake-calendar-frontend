@@ -1,5 +1,9 @@
-import { getTeamOrganizer } from '@common/components/EventPreview/teamOrganizer'
+import {
+  getOrganizingTeamName,
+  getTeamOrganizer
+} from '@common/components/EventPreview/teamOrganizer'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
 
 const t = (key: string, options?: Record<string, string>): string =>
   `${key}:${options?.organizerName ?? ''}`
@@ -42,5 +46,48 @@ describe('getTeamOrganizer', () => {
       isOriginalOrganizer: true,
       organizerCaption: undefined
     })
+  })
+})
+
+describe('getOrganizingTeamName', () => {
+  const teamCalendar = {
+    id: 'team1/cal1',
+    name: 'Team A',
+    owner: {
+      lastname: 'Team A',
+      teamCalendar: true,
+      emails: ['alice@example.com', 'bob@example.com']
+    }
+  } as unknown as Calendar
+
+  it('names the team when one of its members organizes', () => {
+    expect(
+      getOrganizingTeamName(teamCalendar, {
+        cal_address: 'mailto:Alice@Example.com'
+      })
+    ).toBe('Team A')
+  })
+
+  it('does not name the team for an invitation from someone outside it', () => {
+    expect(
+      getOrganizingTeamName(teamCalendar, { cal_address: 'john@external.com' })
+    ).toBeUndefined()
+  })
+
+  it('does not name the team for an event without organizer', () => {
+    expect(getOrganizingTeamName(teamCalendar, undefined)).toBeUndefined()
+  })
+
+  it('does not name a team outside a team calendar', () => {
+    const personalCalendar = {
+      ...teamCalendar,
+      owner: { ...teamCalendar.owner, teamCalendar: false }
+    } as Calendar
+
+    expect(
+      getOrganizingTeamName(personalCalendar, {
+        cal_address: 'alice@example.com'
+      })
+    ).toBeUndefined()
   })
 })
