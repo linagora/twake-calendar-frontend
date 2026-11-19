@@ -25,6 +25,7 @@ export interface EventPreviewDetailsProps {
   calendarName?: string
   ownerEmail?: string
   isTeamCalendar?: boolean
+  teamName?: string
 }
 
 export const infoIconSx = (theme: Theme): SxProps<Theme> => ({
@@ -44,7 +45,8 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
   isResourceEventPreview,
   calendarName,
   ownerEmail,
-  isTeamCalendar
+  isTeamCalendar,
+  teamName
 }) => {
   const { t } = useI18n()
   const { resources, eventAttendees, attendees, organizer, organizerSentBy } =
@@ -97,7 +99,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           timezone={event.timezone}
           eventUid={event.uid}
           isTeamCalendar={isTeamCalendar}
-          teamCalendarId={event.teamCalendarId}
+          teamName={teamName}
         />
       )}
 

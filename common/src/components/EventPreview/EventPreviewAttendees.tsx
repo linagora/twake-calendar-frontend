@@ -16,7 +16,7 @@ import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { makeAttendeePreview } from '.'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { useTeamOrganizer } from './useTeamOrganizer'
+import { getTeamOrganizer } from './teamOrganizer'
 
 interface EventPreviewAttendeesProps {
   attendees: userAttendee[]
@@ -28,7 +28,7 @@ interface EventPreviewAttendeesProps {
   timezone?: string
   eventUid?: string | null
   isTeamCalendar?: boolean
-  teamCalendarId?: string
+  teamName?: string
 }
 
 const ATTENDEE_DISPLAY_LIMIT = 3
@@ -43,7 +43,7 @@ export function EventPreviewAttendees({
   timezone,
   eventUid,
   isTeamCalendar,
-  teamCalendarId
+  teamName
 }: EventPreviewAttendeesProps): JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
@@ -91,7 +91,7 @@ export function EventPreviewAttendees({
     displayOrganizer,
     isOriginalOrganizer,
     organizerCaption
-  } = useTeamOrganizer({ teamCalendarId, organizer, t })
+  } = getTeamOrganizer({ teamName, organizer, t })
 
   return (
     <>
