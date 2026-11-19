@@ -106,7 +106,7 @@ export function useEventSaveFeedback(
       autoHideDuration={6000}
       action={
         <Button
-          color="secondary"
+          color="inherit"
           variant="text"
           size="small"
           onClick={handleShow}

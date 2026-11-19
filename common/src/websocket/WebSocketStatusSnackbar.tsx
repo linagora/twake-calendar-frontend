@@ -21,6 +21,7 @@ export function WebSocketStatusSnackbar({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
+        variant="filled"
         severity={severity}
         onClose={onClose}
         sx={{ width: '100%' }}

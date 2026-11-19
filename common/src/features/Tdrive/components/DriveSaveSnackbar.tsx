@@ -137,7 +137,7 @@ export const DriveSaveSnackbar: React.FC<DriveSaveSnackbarProps> = ({
         onClose={handleErrorClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="error" onClose={handleErrorClose}>
+        <Alert variant="filled" severity="error" onClose={handleErrorClose}>
           {t('tdrive.organiseError')}
         </Alert>
       </Snackbar>

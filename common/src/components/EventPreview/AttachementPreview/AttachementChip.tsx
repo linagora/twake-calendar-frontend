@@ -62,7 +62,7 @@ const AttachmentChipWithSave: React.FC<AttachementChipProps> = props => {
           if (reason !== 'clickaway') dismiss()
         }}
       >
-        <Alert severity="error" onClose={dismiss}>
+        <Alert variant="filled" severity="error" onClose={dismiss}>
           {t('tdrive.saveError')}
         </Alert>
       </Snackbar>
