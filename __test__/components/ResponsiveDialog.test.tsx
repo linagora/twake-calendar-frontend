@@ -1,4 +1,5 @@
 import { ResponsiveDialog } from '@common/components/Dialog'
+import * as dynamicPosition from '@common/components/Dialog/useDynamicPosition'
 import { Button, TextField, TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
@@ -30,6 +31,38 @@ describe('ResponsiveDialog', () => {
     expect(screen.getByText('Test Dialog')).toBeInTheDocument()
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
   })
+
+  it.each([
+    { edge: 'top', top: 120, left: 280 },
+    { edge: 'bottom', bottom: 120, left: 280 }
+  ])(
+    'makes the full viewport height between insets available to $edge-anchored dialogs',
+    anchor => {
+      const position = vi
+        .spyOn(dynamicPosition, 'default')
+        .mockReturnValue(anchor)
+
+      try {
+        renderWithTheme(
+          <ResponsiveDialog
+            open={true}
+            onClose={mockOnClose}
+            title="Edit event"
+            dynamicPositioning
+          >
+            <div>Event details</div>
+          </ResponsiveDialog>
+        )
+
+        expect(screen.getByRole('dialog', { name: 'Edit event' })).toHaveStyle({
+          top: '70px',
+          'max-height': `${window.innerHeight - 70 - 28}px`
+        })
+      } finally {
+        position.mockRestore()
+      }
+    }
+  )
 
   it('renders title in normal mode', () => {
     renderWithTheme(

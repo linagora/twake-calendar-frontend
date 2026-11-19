@@ -29,7 +29,7 @@ interface VerticalPositionOptions {
   anchorRect: DOMRect
   dialogHeight: number
   viewportHeight: number
-  headerOffset: number
+  topInset: number
   padding: number
   bottomPadding: number
 }
@@ -43,7 +43,7 @@ const DEFAULT_HEADER_HEIGHT_PX = 70
 const DEFAULT_GAP = 12
 const DEFAULT_PADDING = 40
 const DEFAULT_LEFT_PADDING = 270
-const DEFAULT_BOTTOM_PADDING = 28
+export const DIALOG_BOTTOM_INSET = 28
 
 const FALLBACK_SELECTORS = [
   '[data-event-id="twake-draft-event"]',
@@ -124,8 +124,11 @@ const getDialogDimensions = (dialogId?: string): DialogDimensions | null => {
   return { width, height }
 }
 
-const parseHeaderOffset = (headerHeightStr: string): number =>
-  parseInt(headerHeightStr, 10) || DEFAULT_HEADER_HEIGHT_PX
+export const getDialogTopInset = (headerHeight: string): number =>
+  Math.max(
+    DEFAULT_PADDING,
+    parseInt(headerHeight, 10) || DEFAULT_HEADER_HEIGHT_PX
+  )
 
 export const calculateHorizontalPosition = ({
   anchorRect,
@@ -170,16 +173,15 @@ const calculateVerticalPosition = ({
   anchorRect,
   dialogHeight,
   viewportHeight,
-  headerOffset,
+  topInset,
   padding,
   bottomPadding
 }: VerticalPositionOptions): number => {
-  const minTop = Math.max(padding, headerOffset)
   const maxTop = Math.max(
     padding,
     viewportHeight - dialogHeight - bottomPadding
   )
-  const effectiveMinTop = Math.min(minTop, maxTop)
+  const effectiveMinTop = Math.min(topInset, maxTop)
 
   const anchorCenterY = anchorRect.top + anchorRect.height / 2
   const unclampedTop = anchorCenterY - dialogHeight / 2
@@ -204,8 +206,6 @@ const calculateDynamicPosition = (
   if (!dimensions) return null
 
   const { width: dialogWidth, height: dialogHeight } = dimensions
-  const headerOffset = parseHeaderOffset(headerHeightStr)
-
   const left = calculateHorizontalPosition({
     anchorRect,
     dialogWidth,
@@ -219,17 +219,15 @@ const calculateDynamicPosition = (
     anchorRect,
     dialogHeight,
     viewportHeight: window.innerHeight,
-    headerOffset,
+    topInset: getDialogTopInset(headerHeightStr),
     padding: DEFAULT_PADDING,
-    bottomPadding: DEFAULT_BOTTOM_PADDING
+    bottomPadding: DIALOG_BOTTOM_INSET
   })
 
   const anchorCenterY = anchorRect.top + anchorRect.height / 2
   const viewportCenterY = window.innerHeight / 2
 
-  // When the anchor is in the bottom half of the viewport we pin the dialog
-  // by its bottom edge so that as content grows it expands upward (towards the
-  // available space) instead of downward off-screen.
+  // Prefer growth toward the middle of the viewport.
   if (anchorCenterY > viewportCenterY) {
     const bottom = window.innerHeight - top - dialogHeight
     return { bottom, left }
@@ -249,14 +247,12 @@ const isPositioningEnabled = ({
 const clearPositionFromDOM = (dialogId?: string): void => {
   const paperEl = getDialogPaperElement(dialogId)
   if (!paperEl) return
-  paperEl.style.top = ''
   paperEl.style.left = ''
 }
 
 const applyPositionToDOM = (pos: DynamicPosition, dialogId?: string): void => {
   const paperEl = getDialogPaperElement(dialogId)
   if (!paperEl) return
-  if (pos.top !== undefined) paperEl.style.top = `${pos.top}px`
   if (pos.left !== undefined) paperEl.style.left = `${pos.left}px`
   paperEl.style.transform = ''
 }
