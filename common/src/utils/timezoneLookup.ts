@@ -19,3 +19,26 @@ export function findTimezoneAlias(name: string): string | undefined {
     ? TIMEZONES.aliases[name].aliasTo
     : undefined
 }
+
+let caseInsensitiveIndex: Map<string, string> | undefined
+
+function canonicalNames(): Map<string, string> {
+  caseInsensitiveIndex ??= new Map(
+    // Zones last, so that a zone wins over an alias differing only in case.
+    [...Object.keys(TIMEZONES.aliases), ...Object.keys(TIMEZONES.zones)].map(
+      name => [name.toLowerCase(), name]
+    )
+  )
+  return caseInsensitiveIndex
+}
+
+/**
+ * The name of the table a TZID written in another case stands for
+ * ("europe/paris" → "Europe/Paris"): moment-timezone reads such a TZID
+ * case-insensitively, so the writer must find its zone too. An exact name is
+ * kept as given.
+ */
+export function findCanonicalTimezoneName(name: string): string | undefined {
+  if (findTimezoneData(name) || findTimezoneAlias(name)) return name
+  return canonicalNames().get(name.toLowerCase())
+}
