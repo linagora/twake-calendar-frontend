@@ -11,24 +11,27 @@ import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 import { convertEventDateTimeToISO } from '@common/utils/timezone'
-import { EventApi, EventInput, SlotHeaderInfo } from '@fullcalendar/react'
+import {
+  EventApi,
+  EventInput,
+  SlotHeaderInfo,
+  ViewApi
+} from '@fullcalendar/react'
 import moment from 'moment-timezone'
 import { CALENDAR_VIEWS } from './constants'
 
 export const updateSlotLabelVisibility = (
   currentTime: Date,
-  slotLabel: SlotHeaderInfo,
+  slotLabel: Pick<SlotHeaderInfo, 'text' | 'view'>,
   timezone: string
 ): 'fc-timegrid-slot-label' | 'timegrid-slot-label-hidden' => {
-  const isCurrentWeekOrDay = checkIfCurrentWeekOrDay()
-
-  if (!isCurrentWeekOrDay) {
+  if (!isNowIndicatorShown(currentTime, slotLabel.view, timezone)) {
     return 'fc-timegrid-slot-label'
   }
 
   const current = moment.tz(currentTime, timezone)
   const currentMinutes = current.hours() * 60 + current.minutes()
-  const timeText = slotLabel?.text?.trim()
+  const timeText = slotLabel.text?.trim()
 
   if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
     const [hours, minutes] = timeText.split(':').map(Number)
@@ -48,17 +51,24 @@ export const updateSlotLabelVisibility = (
   return 'fc-timegrid-slot-label'
 }
 
-export const checkIfCurrentWeekOrDay = (): boolean => {
-  const todayColumn = document.querySelector('.fc-day-today')
-
-  if (!todayColumn) {
+// Whether the time grid shows its now indicator, read from the view rather
+// than from the DOM: FullCalendar computes slot header classes before it
+// mounts the today column and the indicator
+const isNowIndicatorShown = (
+  currentTime: Date,
+  view: ViewApi | undefined,
+  timezone: string
+): boolean => {
+  if (
+    !view ||
+    currentTime < view.currentStart ||
+    currentTime >= view.currentEnd
+  ) {
     return false
   }
 
-  const nowIndicator = document.querySelector(
-    '.fc-timegrid-now-indicator-arrow'
-  )
-  return !!nowIndicator
+  const hiddenDays = view.calendar.getOption('hiddenDays') ?? []
+  return !hiddenDays.includes(moment.tz(currentTime, timezone).day())
 }
 
 export function formatEventChipTitle(
