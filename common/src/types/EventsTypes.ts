@@ -1,6 +1,9 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { Calendar } from '@common/types/CalendarTypes'
-import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
+import {
+  VCalComponent,
+  VObjectProperty
+} from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Attachment } from './Attachment'
@@ -41,6 +44,9 @@ export interface CalendarEvent {
   alarms?: Valarms
   exdates?: string[]
   passthroughProps?: VObjectProperty[]
+  // The stored VTIMEZONEs of TZIDs other than the event zone, which properties
+  // the model does not hold may reference. See #2178.
+  storedVtimezones?: VCalComponent[]
   selectedResources?: Resource[]
   attach?: Attachment[]
 }

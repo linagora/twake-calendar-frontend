@@ -12,6 +12,8 @@ import {
   withStoredTimezones
 } from '@common/utils/timezone'
 import ICAL from 'ical.js'
+import { getTzidParam } from './recurrenceInstant'
+import { otherStoredVtimezones } from './seriesVtimezones'
 
 export function filterComponents(
   eventical: VCalComponent,
@@ -71,6 +73,22 @@ function resolveTimezoneFromDtstartTzid(
   return resolveTimezoneId(
     getTimeZone(dtstart?.[1] as Record<string, string> | undefined)
   )
+}
+
+// The stored VTIMEZONEs of the TZIDs other than the one of DTSTART, which the
+// event model does not hold (an X-MS-OLK-ORIGINALSTART for example): a save
+// writes them back when they are still referenced. See #2178.
+function storedVtimezonesOfOtherZones(
+  targetVevent: VCalComponent,
+  vtimezones: VCalComponent[]
+): Pick<CalendarEvent, 'storedVtimezones'> {
+  const ownTzid = getTzidParam(findDtstart(targetVevent)?.[1])
+  const storedVtimezones = otherStoredVtimezones(
+    targetVevent,
+    vtimezones,
+    ownTzid
+  )
+  return storedVtimezones.length > 0 ? { storedVtimezones } : {}
 }
 
 function isUtcDtstart(targetVevent: VCalComponent): boolean {
@@ -161,6 +179,11 @@ export function parseFetchedEvent(
     eventjson.timezone = finalTimezone
     applyTimezoneToDateFields(eventjson, finalTimezone)
 
-    return { ...event, ...eventjson, timezone: finalTimezone }
+    return {
+      ...event,
+      ...eventjson,
+      timezone: finalTimezone,
+      ...storedVtimezonesOfOtherZones(targetVevent, vtimezones)
+    }
   })
 }
