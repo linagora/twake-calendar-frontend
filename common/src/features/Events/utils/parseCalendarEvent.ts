@@ -419,6 +419,19 @@ function readStartInstant(start?: string, timezone?: string): Date {
   )
 }
 
+// RFC 5545 §3.3.6: the days and weeks of a duration are nominal (the same
+// wall clock on a later day, in the zone of the event), its time is exact
+function addDuration(
+  startInstant: Date,
+  duration: moment.Duration,
+  timezone?: string
+): Date {
+  if (timezone && moment.tz.zone(timezone)) {
+    return moment.tz(startInstant, timezone).add(duration).toDate()
+  }
+  return new Date(startInstant.getTime() + duration.asMilliseconds())
+}
+
 function computeMissingEnd(
   start?: string,
   timezone?: string,
@@ -428,10 +441,11 @@ function computeMissingEnd(
   // A start the client cannot read (a second 60...) gives no end to compute
   if (isNaN(startInstant.getTime())) return start
 
-  const timeToAdd = duration
-    ? moment.duration(duration).asMilliseconds()
-    : moment.duration(30, 'minutes').asMilliseconds()
-  const artificialEnd = new Date(startInstant.getTime() + timeToAdd)
+  const artificialEnd = addDuration(
+    startInstant,
+    duration ? moment.duration(duration) : moment.duration(30, 'minutes'),
+    timezone
+  )
   // The instant itself: a wall clock in the hour repeated at the end of
   // summer time would be read back as its first occurrence
   return timezone
