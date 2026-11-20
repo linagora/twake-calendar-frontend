@@ -23,7 +23,10 @@ import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import React, { ReactNode, useContext, useId, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import useDynamicPosition from './useDynamicPosition'
+import useDynamicPosition, {
+  DIALOG_BOTTOM_INSET,
+  getDialogTopInset
+} from './useDynamicPosition'
 
 const visuallyHidden: SxProps<Theme> = {
   position: 'absolute',
@@ -262,9 +265,7 @@ function ResponsiveDialog({
     dialogId: titleId
   })
 
-  // Once we have a position, freeze it for the lifetime of this open session.
-  // This prevents re-renders triggered by chip movement (e.g. all-day toggle)
-  // from updating left/top in the sx prop and jumping the dialog.
+  // Keep the initial vertical anchor for this open session, even if the event chip moves.
   const [lockedPosition, setLockedPosition] = useState<{
     top?: number
     bottom?: number
@@ -283,14 +284,28 @@ function ResponsiveDialog({
     }
   }, [open, position, lockedPosition])
 
-  // No ResizeObserver clamping needed here.  useDynamicPosition now returns
-  // `bottom` instead of `top` when the anchor sits in the bottom half of the
-  // viewport.  CSS `bottom` pinning makes the dialog grow upward naturally as
-  // its height increases, without any JS resize tracking.
-
   const isDynamic = !isExpanded && !isMobile && Boolean(dynamicPositioning)
-  const isPendingPosition = isDynamic && !lockedPosition
+  const anchoredPosition = isDynamic ? lockedPosition : null
+  const isPendingPosition = isDynamic && !anchoredPosition
   const hideBackdrop = isExpanded || isPendingPosition
+
+  const topInset = getDialogTopInset(headerHeight)
+  const availableHeight = `100dvh - ${topInset + DIALOG_BOTTOM_INSET}px`
+  const preferredOffset =
+    anchoredPosition?.bottom === undefined
+      ? `${(anchoredPosition?.top ?? topInset) - topInset}px`
+      : `calc(100dvh - ${topInset + anchoredPosition.bottom}px - 100%)`
+  // Translate from the top inset. The percentages in translate refer to the
+  // paper's own height, so the bounds adjust when the form grows.
+  const anchoredPaperSx = anchoredPosition
+    ? {
+        position: 'fixed' as const,
+        left: `${anchoredPosition.left}px`,
+        top: `${topInset}px`,
+        maxHeight: `calc(${availableHeight})`,
+        translate: `0 clamp(0px, ${preferredOffset}, calc(${availableHeight} - 100%))`
+      }
+    : {}
 
   const baseSx: SxProps<Theme> | undefined = isMobile
     ? undefined
@@ -300,7 +315,7 @@ function ResponsiveDialog({
           transition: hideBackdrop ? 'none !important' : undefined,
           pointerEvents: hideBackdrop ? 'none' : undefined
         },
-        ...(lockedPosition && !isExpanded
+        ...(anchoredPosition
           ? {
               '& .MuiDialog-container': {
                 display: 'flex',
@@ -319,22 +334,10 @@ function ResponsiveDialog({
           maxHeight: isExpanded ? '100%' : undefined,
           margin: isExpanded
             ? 'var(--twake-bar-height, 0px) 0 0 0'
-            : lockedPosition
+            : anchoredPosition
               ? '0 !important'
               : '32px',
-          position: lockedPosition && !isExpanded ? 'fixed' : undefined,
-          left:
-            lockedPosition && !isExpanded
-              ? `${lockedPosition.left}px`
-              : undefined,
-          top:
-            lockedPosition && !isExpanded && lockedPosition.top !== undefined
-              ? `${lockedPosition.top}px`
-              : undefined,
-          bottom:
-            lockedPosition && !isExpanded && lockedPosition.bottom !== undefined
-              ? `${lockedPosition.bottom}px`
-              : undefined,
+          ...anchoredPaperSx,
           visibility: isPendingPosition ? 'hidden' : undefined,
           opacity: isPendingPosition ? 0 : undefined,
           boxShadow: isExpanded ? 'none !important' : undefined,
