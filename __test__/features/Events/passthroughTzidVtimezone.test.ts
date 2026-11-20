@@ -22,7 +22,11 @@ const CUSTOM_VTIMEZONE = [
   'END:VTIMEZONE'
 ].join('\r\n')
 
-const ics = (originalStart: string, vtimezone = ''): string =>
+const ics = (
+  originalStart: string,
+  vtimezone = '',
+  start = 'America/New_York'
+): string =>
   [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -31,8 +35,8 @@ const ics = (originalStart: string, vtimezone = ''): string =>
     'BEGIN:VEVENT',
     'UID:event-1@example.com',
     'DTSTAMP:20250101T090000Z',
-    'DTSTART;TZID=America/New_York:20250317T100000',
-    'DTEND;TZID=America/New_York:20250317T110000',
+    `DTSTART;TZID=${start}:20250317T100000`,
+    `DTEND;TZID=${start}:20250317T110000`,
     `X-MS-OLK-ORIGINALSTART;TZID=${originalStart}:20250317T150000`,
     'SUMMARY:Review',
     'END:VEVENT',
@@ -92,5 +96,24 @@ describe('VTIMEZONE of the TZID of a kept property', () => {
     const event = parseFetchedEvent(base, ics('America/New_York'), true)
 
     expect(event.storedVtimezones).toBeUndefined()
+  })
+
+  it('keeps the stored VTIMEZONE of a custom event zone a kept property references', () => {
+    const event = parseFetchedEvent(
+      base,
+      ics('Custom Zone', CUSTOM_VTIMEZONE, 'Custom Zone'),
+      true
+    )
+    const vcal = save(event)
+
+    const vevent = vcal.getFirstSubcomponent('vevent')
+    const originalStartTzid = vevent
+      ?.getFirstProperty('x-ms-olk-originalstart')
+      ?.getParameter('tzid')
+    expect(originalStartTzid).toBe('Custom Zone')
+    expect(definedTzids(vcal)).toContain('Custom Zone')
+    expect(
+      definedTzids(vcal).filter(tzid => tzid === 'Custom Zone')
+    ).toHaveLength(1)
   })
 })

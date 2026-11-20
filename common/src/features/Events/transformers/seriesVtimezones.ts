@@ -83,9 +83,16 @@ export function referencedVtimezones(
     .filter((vtimezone): vtimezone is VCalComponent => Boolean(vtimezone))
 }
 
+function isTableZone(tzid: string): boolean {
+  return Boolean(findTimezoneData(resolveTimezone(tzid)))
+}
+
 /**
- * The stored VTIMEZONEs a VEVENT references other than `ownTzid`: kept on the
- * event read so that a save can write them back. See #2178.
+ * The stored VTIMEZONEs a VEVENT references, kept on the event read so that a
+ * save can write them back. See #2178. The one of `ownTzid` is left out when
+ * the timezone table defines it, the save writing it from the table; a custom
+ * own zone is kept, a kept property may still reference it while the dates
+ * are written in another zone.
  */
 export function otherStoredVtimezones(
   vevent: VCalComponent,
@@ -93,9 +100,11 @@ export function otherStoredVtimezones(
   ownTzid: string | undefined
 ): VCalComponent[] {
   const tzids = usedTzids([vevent])
+  const isRecoverableOwnZone = (tzid: string): boolean =>
+    tzid === ownTzid && isTableZone(tzid)
   return storedVtimezones.filter(vtimezone => {
     const tzid = tzidOf(vtimezone)
-    return Boolean(tzid) && tzid !== ownTzid && tzids.has(tzid as string)
+    return tzid !== undefined && tzids.has(tzid) && !isRecoverableOwnZone(tzid)
   })
 }
 
