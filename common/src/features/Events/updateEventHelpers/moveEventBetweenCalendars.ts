@@ -170,10 +170,14 @@ async function moveStandardEvent({
 }: StandardMoveParams): Promise<void> {
   const newCalId = targetCalendar.id
 
+  // The MOVE below removes the event from the old calendar: refreshing it
+  // right after this PUT would race the MOVE and re-fetch a vanished event.
+  // The moveEvent listener refreshes both calendars once the MOVE is done.
   const putResult = await dispatch(
     putEvent({
       cal: oldCalendar,
-      newEvent: { ...newEvent, calId: oldCalendar.id }
+      newEvent: { ...newEvent, calId: oldCalendar.id },
+      skipRefresh: true
     })
   )
   await assertThunkSuccess(putResult)

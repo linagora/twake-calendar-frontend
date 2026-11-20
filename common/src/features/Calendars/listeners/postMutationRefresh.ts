@@ -37,6 +37,7 @@ function triggerRefresh(
 startListening({
   actionCreator: putEvent.fulfilled,
   effect: (action, listenerApi) => {
+    if (action.meta.arg.skipRefresh) return
     triggerRefresh(
       listenerApi.dispatch,
       () => listenerApi.getState(),
