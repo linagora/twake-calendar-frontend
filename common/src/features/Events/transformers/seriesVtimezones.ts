@@ -62,24 +62,53 @@ function knownVtimezone(tzid: string): VCalComponent | undefined {
 }
 
 /**
- * The VTIMEZONE components a series write must carry: one per TZID its VEVENTs
- * reference (RFC 5545 §3.6.5). The VTIMEZONEs of the stored object are kept as
- * they were, so custom and unknown zones keep their definition; the missing
- * ones come from the known zones. `fallback` is used when no TZID could be
- * covered (floating, UTC or all-day series).
+ * The VTIMEZONE of each TZID the components reference, `excludedTzids` aside.
+ * The VTIMEZONEs of the stored object are kept as they were, so custom and
+ * unknown zones keep their definition; the missing ones come from the known
+ * zones. A TZID neither source defines is skipped.
  */
-export function makeSeriesVtimezones(
-  vevents: VCalComponent[],
+export function referencedVtimezones(
+  components: VCalComponent[],
   storedVtimezones: VCalComponent[],
-  fallback: () => VCalComponent
+  excludedTzids: string[] = []
 ): VCalComponent[] {
   const storedByTzid = new Map(
     storedVtimezones
       .map(vtimezone => [tzidOf(vtimezone), vtimezone] as const)
       .filter((entry): entry is [string, VCalComponent] => Boolean(entry[0]))
   )
-  const vtimezones = [...usedTzids(vevents)]
+  return [...usedTzids(components)]
+    .filter(tzid => !excludedTzids.includes(tzid))
     .map(tzid => storedByTzid.get(tzid) ?? knownVtimezone(tzid))
     .filter((vtimezone): vtimezone is VCalComponent => Boolean(vtimezone))
+}
+
+/**
+ * The stored VTIMEZONEs a VEVENT references other than `ownTzid`: kept on the
+ * event read so that a save can write them back. See #2178.
+ */
+export function otherStoredVtimezones(
+  vevent: VCalComponent,
+  storedVtimezones: VCalComponent[],
+  ownTzid: string | undefined
+): VCalComponent[] {
+  const tzids = usedTzids([vevent])
+  return storedVtimezones.filter(vtimezone => {
+    const tzid = tzidOf(vtimezone)
+    return Boolean(tzid) && tzid !== ownTzid && tzids.has(tzid as string)
+  })
+}
+
+/**
+ * The VTIMEZONE components a series write must carry: one per TZID its VEVENTs
+ * reference (RFC 5545 §3.6.5), see referencedVtimezones. `fallback` is used
+ * when no TZID could be covered (floating, UTC or all-day series).
+ */
+export function makeSeriesVtimezones(
+  vevents: VCalComponent[],
+  storedVtimezones: VCalComponent[],
+  fallback: () => VCalComponent
+): VCalComponent[] {
+  const vtimezones = referencedVtimezones(vevents, storedVtimezones)
   return vtimezones.length > 0 ? vtimezones : [fallback()]
 }
