@@ -8,7 +8,11 @@ import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 
 // TIMEZONES data must be imported or defined separately.
 import { TIMEZONES } from './timezone-data'
-import { findTimezoneAlias, findTimezoneData } from './timezoneLookup'
+import {
+  findCanonicalTimezoneName,
+  findTimezoneAlias,
+  findTimezoneData
+} from './timezoneLookup'
 
 export const browserDefaultTimeZone =
   Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -49,12 +53,13 @@ function findTimezone(tzid: string): ICAL.Timezone {
  * The zone of the table a TZID stands for. An alias may point to another alias
  * ("Pacific Standard Time (Mexico)" → America/Santa_Isabel → America/Tijuana):
  * the chain is followed up to a zone, so that a save writes a TZID the table
- * has a VTIMEZONE for. A name outside the table, or a chain that loops or ends
- * on no zone, stays as given, as an unknown zone.
+ * has a VTIMEZONE for. A name in another case than the table ("europe/paris")
+ * resolves to the table's name. A name outside the table, or a chain that
+ * loops or ends on no zone, stays as given, as an unknown zone.
  */
 export function resolveTimezone(tzName: string): string {
   const seen = new Set<string>()
-  let current = tzName
+  let current = findCanonicalTimezoneName(tzName) ?? tzName
   while (!findTimezoneData(current) && !seen.has(current)) {
     seen.add(current)
     const aliasTo = findTimezoneAlias(current)
