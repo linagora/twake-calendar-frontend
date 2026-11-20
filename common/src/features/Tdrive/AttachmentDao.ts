@@ -1,0 +1,54 @@
+import { Attachment } from '@common/types/Attachment'
+import { api } from '@common/utils/apiUtils'
+import { isHTTPError, isTimeoutError } from 'ky'
+
+// Long enough to send the 50 MiB the side service accepts over a slow
+// connection, short enough that a stalled request frees its place in the
+// upload queue
+export const UPLOAD_TIMEOUT_MS = 5 * 60 * 1000
+
+export type AttachmentUploadFailure =
+  'unavailable' | 'rejected' | 'tooLarge' | 'timeout' | 'failed'
+
+// The statuses of docs/apis/tdrive-attachment-upload.md in the side service
+const FAILURE_BY_STATUS: Record<number, AttachmentUploadFailure> = {
+  // Drive attachment storage is disabled: the route is not registered
+  404: 'unavailable',
+  // Invalid multipart data or file name, or no Drive instance found for the
+  // user
+  400: 'rejected',
+  413: 'tooLarge',
+  504: 'timeout'
+}
+
+/**
+ * Uploads a file to the Calendar folder of the user's Drive, through the side
+ * service, and returns the attachment pointing at its public read-only link.
+ */
+export async function uploadAttachment(file: File): Promise<Attachment> {
+  // A single part named file: the browser sets its name, its type and the
+  // boundary of the request
+  const body = new FormData()
+  body.append('file', file, file.name)
+  const response = await api.post('api/attachments', {
+    body,
+    // A large file takes longer to send than the default timeout allows
+    timeout: UPLOAD_TIMEOUT_MS
+  })
+  const { uri } = await response.json<{ uri: string }>()
+  return new Attachment(uri, file.type || undefined, file.name)
+}
+
+/**
+ * What to tell the user about a failed upload, or null when there is nothing
+ * to tell: a 401 already sends them to sign in again.
+ */
+export function toAttachmentUploadFailure(
+  error: unknown
+): AttachmentUploadFailure | null {
+  if (isTimeoutError(error)) return 'timeout'
+  if (!isHTTPError(error)) return 'failed'
+  if (error.response.status === 401) return null
+  // A 502 and anything undocumented: Drive failed upstream
+  return FAILURE_BY_STATUS[error.response.status] ?? 'failed'
+}

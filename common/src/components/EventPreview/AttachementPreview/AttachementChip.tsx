@@ -4,6 +4,7 @@ import {
   Alert,
   Box,
   Chip,
+  CircularProgress,
   Snackbar,
   Tooltip,
   Typography
@@ -20,6 +21,7 @@ interface AttachementChipProps {
   attachment: Attachment
   isOrganizer?: boolean
   onDelete?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void
+  loading?: boolean
 }
 
 export const AttachementChip: React.FC<AttachementChipProps> = props => {
@@ -76,7 +78,8 @@ const AttachmentChipContent: React.FC<{
   endIcon?: React.ReactNode
   isSaved?: boolean
   onDelete?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void
-}> = ({ attachment, onDelete, endIcon, isSaved }) => {
+  loading?: boolean
+}> = ({ attachment, onDelete, endIcon, isSaved, loading }) => {
   const [isEndIconActive, setIsEndIconActive] = React.useState(false)
   const filename = attachment.x_filename ?? ''
   const lastDot = filename.lastIndexOf('.')
@@ -99,7 +102,7 @@ const AttachmentChipContent: React.FC<{
   }, [attachment])
 
   const openFile = (): void => {
-    if (!safeHref) return
+    if (loading || !safeHref) return
     window.open(safeHref, '_blank', 'noopener noreferrer')
   }
 
@@ -159,7 +162,9 @@ const AttachmentChipContent: React.FC<{
           }
           label={label}
           endIcon={
-            endIcon ? (
+            loading ? (
+              <CircularProgress size={16} />
+            ) : endIcon ? (
               <span
                 onMouseEnter={() => setIsEndIconActive(true)}
                 onMouseLeave={() => setIsEndIconActive(false)}

@@ -109,6 +109,7 @@ function useEventFormSetters(
   setTitle: (v: string) => void
   setDescription: (v: string) => void
   setAttachments: (v: Attachment[]) => void
+  addAttachments: (added: Attachment[]) => void
   setOrganizer: (v: userOrganiser | undefined) => void
   setLocation: (v: string) => void
   setStart: (v: string) => void
@@ -204,6 +205,16 @@ function useEventFormSetters(
     (v: EventFormValues['attachments']) => set('attachments', v),
     [set]
   )
+  // Appends to the list as it is when React applies it: the Drive picker and
+  // the uploads finish at any time, none of them may drop what another added
+  const addAttachments = useCallback(
+    (added: Attachment[]) =>
+      setFormValues(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...added]
+      })),
+    [setFormValues]
+  )
   const setOrganizer = useCallback(
     (v: userOrganiser | undefined) => set('organizer', v),
     [set]
@@ -243,6 +254,7 @@ function useEventFormSetters(
     setShowRepeat,
     setHasEndDateChanged,
     setAttachments,
+    addAttachments,
     setOrganizer,
     handleAllDayChange
   }
