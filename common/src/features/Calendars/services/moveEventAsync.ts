@@ -9,7 +9,13 @@ import { CalendarState } from '../CalendarSlice'
 export const moveEventThunk = (create: ReducerCreators<CalendarState>) =>
   create.asyncThunk<
     { calId: string },
-    { cal: Calendar; newEvent: CalendarEvent; newURL: string },
+    {
+      cal: Calendar
+      newEvent: CalendarEvent
+      newURL: string
+      // The calendar the event leaves: refreshed once the MOVE settles
+      sourceCalId: string
+    },
     { rejectValue: RejectedError }
   >(
     async ({ cal, newEvent, newURL }, { rejectWithValue }) => {

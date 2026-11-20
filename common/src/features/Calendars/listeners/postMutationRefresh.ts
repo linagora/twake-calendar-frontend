@@ -82,19 +82,25 @@ startListening({
 startListening({
   actionCreator: moveEvent.fulfilled,
   effect: (action, listenerApi) => {
+    const getState = (): RootState => listenerApi.getState()
+    triggerRefresh(listenerApi.dispatch, getState, action.payload.calId)
+    const { sourceCalId } = action.meta.arg
+    if (sourceCalId !== action.payload.calId) {
+      triggerRefresh(listenerApi.dispatch, getState, sourceCalId)
+    }
+  }
+})
+
+// The PUT preceding the MOVE skipped its refresh: a failed MOVE leaves the
+// edited event in its source calendar, which still has to show the edits.
+startListening({
+  actionCreator: moveEvent.rejected,
+  effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
       () => listenerApi.getState(),
-      action.payload.calId
+      action.meta.arg.sourceCalId
     )
-    const sourceCalId = action.meta.arg.newEvent.calId
-    if (sourceCalId && sourceCalId !== action.payload.calId) {
-      triggerRefresh(
-        listenerApi.dispatch,
-        () => listenerApi.getState(),
-        sourceCalId
-      )
-    }
   }
 })
 

@@ -5,6 +5,7 @@ import reducer, {
   refreshCalendarWithSyncToken
 } from '@common/features/Calendars/CalendarSlice'
 import { postMutationRefreshMiddleware } from '@common/features/Calendars/listeners/postMutationRefresh'
+import { moveEvent as moveEventDao } from '@common/features/Events/EventDao'
 import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -117,5 +118,39 @@ describe('postMutationRefresh', () => {
     expect(moveDone).toBeGreaterThanOrEqual(0)
     expect(firstRefresh).toBeGreaterThan(moveDone)
     expect(refreshedCalendars().sort()).toEqual([myCalendar.id, perso.id])
+  })
+
+  it('refreshes the source calendar when the moved event already names the target', async () => {
+    const { store, refreshedCalendars } = setup()
+
+    // The edit form hands over an event whose calId is the chosen calendar
+    await moveEventBetweenCalendars({
+      dispatch: store.dispatch as AppDispatch,
+      calList: { [myCalendar.id]: myCalendar, [perso.id]: perso },
+      newEvent: { ...event, calId: perso.id },
+      oldCalId: myCalendar.id,
+      newCalId: perso.id
+    })
+    await flushListeners()
+
+    expect(refreshedCalendars().sort()).toEqual([myCalendar.id, perso.id])
+  })
+
+  it('refreshes the source calendar when the MOVE fails after the PUT', async () => {
+    const { store, refreshedCalendars } = setup()
+    vi.mocked(moveEventDao).mockRejectedValue(new Error('MOVE failed'))
+
+    await expect(
+      moveEventBetweenCalendars({
+        dispatch: store.dispatch as AppDispatch,
+        calList: { [myCalendar.id]: myCalendar, [perso.id]: perso },
+        newEvent: event,
+        oldCalId: myCalendar.id,
+        newCalId: perso.id
+      })
+    ).rejects.toBeDefined()
+    await flushListeners()
+
+    expect(refreshedCalendars()).toEqual([myCalendar.id])
   })
 })
