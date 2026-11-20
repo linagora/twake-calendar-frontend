@@ -208,14 +208,17 @@ th.fc-col-header-cell.fc-day
   --fc-classic-today: transparent
 
 // Stack events above booking links and let clicks through the empty parts of the layer.
+// FullCalendar sets z-index 1 !important on the day lane and on its event layer:
+// without !important here, the lane stays a stacking context below the booking
+// link overlay (z-index 1, later in the DOM) and the strips cover the events.
 .fc .fc-timegrid-col
-  z-index auto
+  z-index auto !important
 
 .fc [aria-hidden='true']:has(> div > .calendar-time-lane)
   pointer-events none
 
 .fc .calendar-time-events
-  z-index 2
+  z-index 2 !important
   pointer-events none
 
   > *
