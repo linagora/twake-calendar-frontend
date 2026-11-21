@@ -6,70 +6,20 @@ import { newEventWithAttendees } from '@common/features/Events/newEventDeepLinkU
 import type { CalendarEvent } from '@common/types/EventsTypes'
 import type { CalendarApi } from '@fullcalendar/react'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
-import { Button, Stack, Typography } from '@linagora/twake-mui'
-import { Portal } from '@mui/material'
 import type { IntentServiceAPI } from 'cozy-interapp'
 import type { JSX } from 'react'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { hasWritableCalendar } from './calendarsState'
+import {
+  ClosableMessage,
+  IntentFrame,
+  useNotifyShown,
+  useSettle
+} from './IntentFrame'
 import { createdEvent, type CreatedEvent } from './newEventIntent'
 
 const noop = (): void => {}
-
-// Without a calendar the form cannot save: say so, and let the user close it
-function NoCalendar({ onClose }: { onClose: () => void }): JSX.Element {
-  const { t } = useI18n()
-  return (
-    <Stack spacing={2} sx={{ alignItems: 'center', p: 3 }}>
-      <Typography>{t('error.calendarsNotFound')}</Typography>
-      <Button variant="contained" onClick={onClose}>
-        {t('actions.close')}
-      </Button>
-    </Stack>
-  )
-}
-
-/**
- * Answers the client once: the event, or null (cancelled). cozy-interapp
- * throws on a second answer; the ref drops it.
- */
-function useSettle(
-  service: IntentServiceAPI
-): (result: CreatedEvent | null) => void {
-  const settledRef = useRef(false)
-  return useCallback(
-    result => {
-      if (settledRef.current) return
-      settledRef.current = true
-      if (result === null) service.cancel()
-      else service.terminate(result)
-    },
-    [service]
-  )
-}
-
-/**
- * Once something is shown, tells the client the service is ready to use and
- * hides its close button: the form and the message without a calendar have
- * their own. In an Effect, as it talks to the page around; the ref keeps it
- * to once, under StrictMode too (cozy-interapp throws on a second call).
- */
-function useNotifyShown(service: IntentServiceAPI, isShown: boolean): void {
-  const notifiedRef = useRef(false)
-  useEffect(() => {
-    if (!isShown || notifiedRef.current) return
-    notifiedRef.current = true
-    service.notifyReadyToUse()
-    service.hideCross()
-  }, [service, isShown])
-}
 
 interface SaveInFlight {
   isSaving: boolean
@@ -132,8 +82,8 @@ export interface NewEventIntentPageProps {
 
 /**
  * The form of a new event alone in the frame of the intent
- * `CREATE io.cozy.calendar.events`: the app that asked for it (Twake Chat)
- * draws the dialog around. Saved, the client gets the event (CreatedEvent);
+ * `CREATE io.cozy.calendar.events`, drawn in the page (IntentFrame): the app
+ * that asked for it (Twake Chat) draws the dialog around, sized by the page. Saved, the client gets the event (CreatedEvent);
  * closed or cancelled, null. A failed save shows the calendar's error
  * snackbar over the form and tells the client nothing; without a calendar to
  * save into, a message the user closes. Closed, or the session ended, while a
@@ -155,7 +105,8 @@ export function NewEventIntentPage({
   const error = useAppSelector(state => state.calendars.error)
   // The attendees of this intent, read once: the form keeps its own state
   const [event] = useState(() => newEventWithAttendees(initialAttendees))
-  const settle = useSettle(service)
+  const { t } = useI18n()
+  const settle = useSettle<CreatedEvent>(service)
   const isShown = hasCalendar || !loading
   useNotifyShown(service, isShown)
 
@@ -179,10 +130,19 @@ export function NewEventIntentPage({
   // The form needs a calendar to save into: none once they are loaded is
   // said, never while they load (a load that failed is IntentPage's)
   if (!isShown) return <Loading />
-  if (!hasCalendar) return <NoCalendar onClose={() => settle(null)} />
+  if (!hasCalendar) {
+    return (
+      <IntentFrame service={service}>
+        <ClosableMessage
+          text={t('error.calendarsNotFound')}
+          onClose={() => settle(null)}
+        />
+      </IntentFrame>
+    )
+  }
 
   return (
-    <>
+    <IntentFrame service={service}>
       <EventPopover
         open
         embedded
@@ -195,12 +155,8 @@ export function NewEventIntentPage({
         event={event}
         anchorEl={document.body}
       />
-      {/* The error of a failed save, as the calendar shows it (CalendarLayout).
-          In a portal: the open form hides the rest of the page from assistive
-          technologies, not what is added to the page after it opened */}
-      <Portal>
-        <ErrorSnackbar error={error} type="calendar" />
-      </Portal>
-    </>
+      {/* The error of a failed save, as the calendar shows it (CalendarLayout) */}
+      <ErrorSnackbar error={error} type="calendar" />
+    </IntentFrame>
   )
 }

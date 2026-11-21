@@ -764,9 +764,10 @@
     "calendarUnavailable": "Lịch này không khả dụng. Có thể bạn không phải là thành viên của lịch."
   },
   "intents": {
+    "replyNotSent": "Sự kiện này đã thay đổi kể từ khi được chia sẻ: câu trả lời của bạn chưa được gửi. Hãy chọn lại ở bên dưới.",
     "unavailable": {
       "title": "Không thể mở Twake Calendar tại đây",
-      "description": "Hãy mở Twake Calendar để tạo sự kiện của bạn."
+      "description": "Hãy mở Twake Calendar để tiếp tục."
     },
     "forbidden": {
       "title": "Twake Calendar không được phép phản hồi tại đây",
@@ -785,12 +786,12 @@
       "description": "Ứng dụng này yêu cầu Twake Calendar một thao tác mà nó không hỗ trợ."
     },
     "invalidData": {
-      "title": "Không thể tạo sự kiện này",
-      "description": "Ứng dụng này đã gửi một sự kiện mà Twake Calendar không đọc được."
+      "title": "Twake Calendar không thể đọc sự kiện này",
+      "description": "Ứng dụng này đã gửi thông tin sự kiện ở định dạng mà Twake Calendar không nhận ra."
     },
     "untrustedFrame": {
       "title": "Không thể mở Twake Calendar trong trang này",
-      "description": "Một trang khác đang hiển thị ứng dụng này: hãy mở trực tiếp Twake Calendar để tạo sự kiện của bạn."
+      "description": "Một trang khác đang hiển thị ứng dụng này: hãy mở trực tiếp Twake Calendar để tiếp tục."
     }
   }
 }

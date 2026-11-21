@@ -21,6 +21,13 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
+import {
+  askedHeights as heightsAsked,
+  askedSizes as sizesAsked,
+  installLayout,
+  resizeContentTo,
+  uninstallLayout
+} from './layoutResizeObserver'
 
 // Twake Chat asks for a new event with the members of a room:
 //   intents.create('CREATE', 'io.cozy.calendar.events', { attendees })
@@ -385,17 +392,46 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
   })
 
   describe('the form in the frame', () => {
-    // Framed, the form is the whole page: around it is the empty page of the
-    // frame (wider than the form), where MUI sees a click on its backdrop
-    const besideTheForm = async (): Promise<HTMLElement> =>
-      (await findForm()).closest('.MuiDialog-container') as HTMLElement
+    // Framed, the form is the whole page: a click on the page around its
+    // fields, on each element that holds them (one of which a modal sees as
+    // its backdrop, whatever the markup)
+    const besideTheForm = async (): Promise<HTMLElement[]> => {
+      const around: HTMLElement[] = []
+      for (
+        let node = (await findForm()).parentElement;
+        node && node !== document.documentElement;
+        node = node.parentElement
+      ) {
+        around.push(node)
+      }
+      return around
+    }
+    const clickBesideTheForm = async (
+      user: ReturnType<typeof userEvent.setup>
+    ): Promise<void> => {
+      for (const element of await besideTheForm()) await user.click(element)
+    }
+
+    it('draws the form in the page itself, not in a dialog of its own', async () => {
+      openIntent()
+      await answerHandshake()
+
+      const title = await findForm()
+      // Chat draws the dialog around the frame: inside, the form is the page
+      expect(title.closest('[role="dialog"]')).toBeNull()
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.getByRole('main')).toContainElement(title)
+      expect(
+        screen.getByRole('button', { name: t('actions.save') })
+      ).toBeVisible()
+    })
 
     it('stays open, and tells the client nothing, when the user clicks beside it', async () => {
       const user = userEvent.setup()
       openIntent()
       await answerHandshake()
 
-      await user.click(await besideTheForm())
+      await clickBesideTheForm(user)
 
       await settle()
       expect(screen.getByRole('textbox', { name: /title/i })).toBeVisible()
@@ -411,7 +447,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       await user.click(screen.getByRole('button', { name: t('actions.save') }))
       await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
 
-      await user.click(await besideTheForm())
+      await clickBesideTheForm(user)
 
       await settle()
       expect(
@@ -445,14 +481,85 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       }
       openIntent()
       await answerHandshake()
-      const form = (await findForm()).closest('.MuiDialog-paper') as HTMLElement
-      const title = within(form).getByText(t('event.createEvent'))
+      await findForm()
+      const title = screen.getByText(t('event.createEvent'))
 
       pointer('pointerdown', title, { buttons: 1, clientX: 100, clientY: 100 })
-      pointer('pointermove', form, { buttons: 1, clientX: 400, clientY: 500 })
-      pointer('pointerup', form, {})
+      // On the title, so that every element around it sees the drag
+      pointer('pointermove', title, { buttons: 1, clientX: 400, clientY: 500 })
+      pointer('pointerup', title, {})
 
-      expect(form.style.transform).toBe('')
+      // Nothing around the title moved
+      for (
+        let node: HTMLElement | null = title;
+        node;
+        node = node.parentElement
+      ) {
+        expect(node.style.transform).toBe('')
+      }
+    })
+  })
+
+  describe('the size of the frame', () => {
+    const askedHeights = (): unknown[] => heightsAsked(sentOfType('resize'))
+    const askedSizes = (): { width: unknown; height: unknown }[] =>
+      sizesAsked(sentOfType('resize'))
+    // The width of the form in its own dialog of the calendar (the paper of
+    // ResponsiveDialog, 570 px): Chat's dialog starts at 900 px and keeps
+    // the width the page asks for, or that one when it asks none
+    const FORM_WIDTH = 570
+
+    beforeEach(() => installLayout(640))
+    afterEach(uninstallLayout)
+
+    it('asks the client for the width the form has in the calendar and the height of the form once it shows', async () => {
+      openIntent()
+      await answerHandshake()
+      await findForm()
+
+      await waitFor(() =>
+        expect(sentOfType('resize').length).toBeGreaterThan(0)
+      )
+      expect(askedSizes()[0]).toEqual({ width: FORM_WIDTH, height: 640 })
+      for (const [, target] of sentOfType('resize')) expect(target).toBe(CHAT)
+      expect(answers()).toEqual([])
+    })
+
+    it('asks again for the new height when the form grows, and keeps the width', async () => {
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await findForm()
+      await waitFor(() => expect(askedHeights()).toContain(640))
+
+      await user.click(
+        screen.getByRole('button', { name: t('common.moreOptions') })
+      )
+      resizeContentTo(880)
+
+      await waitFor(() => expect(askedHeights().at(-1)).toBe(880))
+      expect(askedSizes().at(-1)).toEqual({ width: FORM_WIDTH, height: 880 })
+      for (const { width } of askedSizes()) expect(width).toBe(FORM_WIDTH)
+    })
+
+    it('stops asking for a size once the client has its answer', async () => {
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+      await findForm()
+      await waitFor(() => expect(askedHeights()).toContain(640))
+
+      await user.click(screen.getByRole('button', { name: t('actions.close') }))
+      await waitFor(() => expect(answers()).toHaveLength(1))
+      const asked = sentOfType('resize').length
+
+      // The client closes the frame on its own time: the page may still be
+      // laid out meanwhile, and cozy-interapp throws on a message after the end
+      resizeContentTo(320)
+      await settle()
+
+      expect(sentOfType('resize')).toHaveLength(asked)
+      expect(answers()).toEqual([[{ type: 'intent-intent-1:cancel' }, CHAT]])
     })
   })
 
@@ -579,6 +686,7 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       expect(Object.keys(event).sort()).toEqual(
         [
           'allDay',
+          'attendees',
           'end',
           'start',
           'timeZone',
@@ -594,6 +702,27 @@ describe('the new event Twake Chat asks for with a cozy-stack intent', () => {
       expect(typeof event.timeZone).toBe('string')
       expect(answers()).toHaveLength(1)
       expect(window.history.length).toBe(entries)
+    })
+
+    it('gives the client every attendee of the saved event, the organizer included', async () => {
+      const user = userEvent.setup()
+      openIntent()
+      await answerHandshake()
+
+      await user.type(await findForm(), 'Weekly sync')
+      await user.click(screen.getByRole('button', { name: t('actions.save') }))
+
+      await waitFor(() => expect(sentOfType('done')).toHaveLength(1))
+      const { attendees } = sentOfType('done')[0][0].document as {
+        attendees: { email: string; name: string | null }[]
+      }
+      // The user, who organizes it, and the members of the room Chat sent
+      expect(attendees.map(attendee => attendee.email).sort()).toEqual([
+        'alice@example.com',
+        'bob@example.com',
+        'test@test.com'
+      ])
+      expect(attendees).toContainEqual({ email: 'test@test.com', name: 'test' })
     })
 
     it('gives the client null when the user closes the form with ✕', async () => {
