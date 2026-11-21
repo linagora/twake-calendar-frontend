@@ -1,84 +1,23 @@
 import { useAppSelector } from '@common/app/hooks'
 import { reportCrash } from '@common/app/sentry'
 import { Loading } from '@common/components/Loading/Loading'
-import { Stack, Typography } from '@linagora/twake-mui'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
 import type { IntentServiceAPI } from 'cozy-interapp'
 import type { JSX } from 'react'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useI18n } from 'twake-i18n'
 import { hasLoadFailed } from './calendarsState'
+import {
+  IntentMessageScreen,
+  RejectedIntent,
+  type RejectedIntentProps
+} from './IntentFrame'
 import { hasLoginRequired, subscribeLoginRequired } from './loginRequired'
 import { isNewEventIntent, parseNewEventData } from './newEventIntent'
 import { NewEventIntentPage } from './NewEventIntentPage'
-import {
-  failIntent,
-  useIntentService,
-  type IntentServiceError
-} from './useIntentService'
-
-/** What the page says when it cannot serve the intent */
-export type IntentMessage =
-  IntentServiceError | 'sessionExpired' | 'unsupported' | 'invalidData'
-
-/**
- * Why the intent cannot be served, as the whole page of the frame: the app
- * that framed it keeps its own close button. Used by IntentsApp and
- * IntentPage.
- */
-export function IntentMessageScreen({
-  message
-}: {
-  message: IntentMessage
-}): JSX.Element {
-  const { t } = useI18n()
-  return (
-    <Stack
-      component="main"
-      spacing={1}
-      sx={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        p: 3,
-        textAlign: 'center'
-      }}
-    >
-      <Typography variant="h5" component="h1">
-        {t(`intents.${message}.title`)}
-      </Typography>
-      <Typography>{t(`intents.${message}.description`)}</Typography>
-    </Stack>
-  )
-}
-
-interface RejectedIntentProps {
-  service: IntentServiceAPI
-  message: IntentMessage
-  /** What the client gets */
-  error: string
-}
-
-/**
- * Tells the client the intent fails, and the user why. In an Effect, as it
- * talks to the page around; the ref keeps it to once.
- */
-function RejectedIntent({
-  service,
-  message,
-  error
-}: RejectedIntentProps): JSX.Element {
-  const answeredRef = useRef(false)
-
-  useEffect(() => {
-    if (answeredRef.current) return
-    answeredRef.current = true
-    failIntent(service, new Error(error))
-  }, [service, error])
-
-  return <IntentMessageScreen message={message} />
-}
+import { isOpenEventIntent, parseOpenEventData } from './openEventIntent'
+import { OpenEventIntentPage } from './OpenEventIntentPage'
+import { useIntentService } from './useIntentService'
 
 /**
  * Whether the session ended: another tab of the calendar ended it, or the
@@ -114,7 +53,7 @@ function rejectionOf(
   if (hasSessionEnded) {
     return { message: 'sessionExpired', error: 'The session has ended' }
   }
-  if (!isNewEventIntent(action, type)) {
+  if (!isNewEventIntent(action, type) && !isOpenEventIntent(action, type)) {
     return {
       message: 'unsupported',
       error: `Twake Calendar does not handle ${action} ${type}`
@@ -130,10 +69,54 @@ function rejectionOf(
 }
 
 /**
+ * The preview of an event (`OPEN io.cozy.calendar.events`,
+ * openEventIntent.ts), its data read once, when the client answered. A crash
+ * of the preview is reported to Sentry and fails the intent.
+ */
+function OpenEventIntent({
+  service,
+  data
+}: {
+  service: IntentServiceAPI
+  data: unknown
+}): JSX.Element {
+  const parsed = parseOpenEventData(data)
+  if (parsed === null) {
+    return (
+      <RejectedIntent
+        service={service}
+        message="invalidData"
+        error="The data of the event to open has another shape"
+      />
+    )
+  }
+  return (
+    <ErrorBoundary
+      fallback={
+        <RejectedIntent
+          service={service}
+          message="failed"
+          error="The event preview of Twake Calendar failed"
+        />
+      }
+      onError={reportCrash}
+    >
+      <OpenEventIntentPage
+        service={service}
+        uid={parsed.uid}
+        askedReply={parsed.reply}
+        expected={parsed.expected}
+      />
+    </ErrorBoundary>
+  )
+}
+
+/**
  * The `/intents?intent=<id>` page, signed in: the service of an intent
- * another app (Twake Chat) started with cozy-interapp. Twake Calendar serves
- * one: `CREATE io.cozy.calendar.events`, a new event (newEventIntent.ts).
- * A crash of the form is reported to Sentry (reportCrash) and fails the
+ * another app (Twake Chat) started with cozy-interapp, by its action.
+ * Twake Calendar serves two: `CREATE io.cozy.calendar.events`, a new event
+ * (newEventIntent.ts), and `OPEN io.cozy.calendar.events`, the preview of an
+ * event (OpenEventIntent). A crash of the form is reported to Sentry (reportCrash) and fails the
  * intent, once the outcome of a save in flight is known: saved, the client
  * got the event. Used by IntentsApp.
  */
@@ -158,6 +141,10 @@ export function IntentPage({ intentId }: { intentId: string }): JSX.Element {
   })
   if (rejection !== null)
     return <RejectedIntent service={service} {...rejection} />
+  const { action, type } = service.getIntent().attributes
+  if (isOpenEventIntent(action, type)) {
+    return <OpenEventIntent service={service} data={state.data} />
+  }
   // Read once, when the client answered (useIntentService): later data of
   // the client never replaces the form
   const data = parseNewEventData(state.data)

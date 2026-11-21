@@ -3,6 +3,7 @@ import {
   isNewEventIntent,
   parseNewEventData
 } from '@common/features/intents/newEventIntent'
+import { userAttendee } from '@common/features/User/models/attendee'
 import type { CalendarEvent } from '@common/types/EventsTypes'
 
 // Twake Chat asks for a new event with the members of a room:
@@ -72,8 +73,62 @@ describe('the event the client gets back', () => {
       timeZone: 'Europe/Paris',
       videoConferenceUrl: 'https://meet.test/abc-defg-hij',
       // The deep link of the event in the calendar (/events/:uid)
-      url: `${window.location.origin}/events/0b8f6c1e-2d4a-4e8b-9f7a-1c2d3e4f5a6b`
+      url: `${window.location.origin}/events/0b8f6c1e-2d4a-4e8b-9f7a-1c2d3e4f5a6b`,
+      attendees: []
     })
+  })
+
+  // As the form saves them: the organizer first (CHAIR), the resources, then
+  // the people the user invited
+  const organizer = new userAttendee({
+    cal_address: 'alice@example.com',
+    cn: 'Alice Martin',
+    partstat: 'ACCEPTED',
+    role: 'CHAIR'
+  })
+  const bob = new userAttendee({ cal_address: 'bob@example.com', cn: 'Bob' })
+
+  it('has every attendee of the saved event, the organizer included, with their name', () => {
+    expect(
+      createdEvent(savedEvent({ attendee: [organizer, bob] })).attendees
+    ).toEqual([
+      { email: 'alice@example.com', name: 'Alice Martin' },
+      { email: 'bob@example.com', name: 'Bob' }
+    ])
+  })
+
+  it('leaves out the rooms and equipment booked with the event, as the calendar counts its participants', () => {
+    const room = new userAttendee({
+      cal_address: 'room-4@resources.example.com',
+      cn: 'Room 4',
+      cutype: 'RESOURCE'
+    })
+
+    expect(
+      createdEvent(savedEvent({ attendee: [organizer, room, bob] })).attendees
+    ).toEqual([
+      { email: 'alice@example.com', name: 'Alice Martin' },
+      { email: 'bob@example.com', name: 'Bob' }
+    ])
+  })
+
+  it('says an attendee without a name has none', () => {
+    const carol = new userAttendee({ cal_address: 'carol@example.com', cn: '' })
+
+    expect(
+      createdEvent(savedEvent({ attendee: [organizer, carol] })).attendees
+    ).toContainEqual({ email: 'carol@example.com', name: null })
+  })
+
+  it('gives the e-mail address of an attendee stored as a mailto: URI', () => {
+    const dave = new userAttendee({
+      cal_address: 'mailto:dave@example.com',
+      cn: 'Dave'
+    })
+
+    expect(
+      createdEvent(savedEvent({ attendee: [organizer, dave] })).attendees
+    ).toContainEqual({ email: 'dave@example.com', name: 'Dave' })
   })
 
   it('says an event without a video conference has none', () => {
