@@ -5,12 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### Upgrade instructions
+
+- Optionally set `TDRIVE_MAX_FILE_SIZE` (maximum size of one picked file, in bytes) and `TDRIVE_MAX_TOTAL_FILE_SIZE` (maximum total size of the Tdrive files of one event, in bytes) to limit the files attached from Tdrive. Both are disabled by default.
+
 ### Added
 
 - #1826 Deleting an event shows a notification with an undo button; the deletion is sent after 3 seconds unless undone
 - #2017 Toast notification when the participation status of an event is updated
 - #2048 "Enable keyboard shortcuts" switch in Settings → Calendar and events (desktop only), so the single key shortcuts can be turned off. The choice is remembered by the browser, and the shortcuts stay on by default
 - #2022 The new event form can be shown alone on `/embed/newEvent`, as the CREATE `io.cozy.calendar.events` intent, so Twake Chat can create an event with the members of a room as attendees
+- #2156 The Tdrive picker can refuse files over a size, for one file and for the total of an event, with `TDRIVE_MAX_FILE_SIZE` and `TDRIVE_MAX_TOTAL_FILE_SIZE`
 
 ### Changed
 
@@ -58,6 +63,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #1805 Fixed the double draggable modal
 - Updated twake-mui to fix the background
 - #2094 The Docker images stop nginx gracefully on SIGTERM instead of waiting for the kill timeout
+- #2148 Snackbars have the same background everywhere
+- #2163 The event dialog can no longer be dragged out of the window
 
 ### Security
 
@@ -66,6 +73,88 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #1940 #1944 Prevented ReDoS in the email scrubbing of Sentry reports and in attendee address validation (reachable through the `/newEvent?attendee=` deep link)
 - #1979 The `data-*` and `aria-*` attributes of event descriptions are dropped
 - #1994 Links whose scheme contains a digit are refused in event descriptions
+- #2159 #2160 The team shown as organizer of an event no longer comes from the legacy `X-OPENPAAS-TEAM-CALENDAR-ID` property of an invitation, which a sender could set to make an event look organized by any Team Calendar; it comes from the calendar the event is opened in
+
+### Kept from before
+
+- #1938 #1939 #1977 #2034 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
+- #1982 #2037 The printed schedule puts events on the right days, including on 25-hour days
+
+## [1.4.1] - 2026-11-18
+
+### Added
+
+- #1826 Deleting an event shows a notification with an undo button; the deletion is sent after 3 seconds unless undone
+- #2017 Toast notification when the participation status of an event is updated
+- #2048 "Enable keyboard shortcuts" switch in Settings → Calendar and events (desktop only), so the single key shortcuts can be turned off. The choice is remembered by the browser, and the shortcuts stay on by default
+- #2022 The new event form can be shown alone on `/embed/newEvent`, as the CREATE `io.cozy.calendar.events` intent, so Twake Chat can create an event with the members of a room as attendees
+- #2029 #2030 Button to save an attachment to one's Drive, with a snackbar of the upload status
+
+### Changed
+
+- #2026 The RSVP page shows the event in the attendee's time zone, the browser one by default, and lets the attendee pick another
+- #2142 The RSVP page reads the answer from the `action` parameter of its link, and still accepts links signed before with the answer in the token
+- #1931 An end time before the start keeps the last valid duration instead of moving the end or creating a multi-day event
+- #1930 The Drive picker signs in without a Drive session and reports a failure to open after 30 s instead of loading forever
+- #2093 Fixed the Tdrive picker in Space
+- #1941 Events and series in a custom time zone (such as "Customized Time Zone" from Outlook) are read and saved with their stored VTIMEZONE, keeping their zone, overrides and recurrence ends instead of being shifted
+- #1949 #1978 #2001 #2033 Editing all the events of a series keeps `BYHOUR`, `UNTIL`, the overrides, `EXDATE`s and `RDATE`s consistent when the time of day changes
+- #2106 Changing the time of all the events of a series whose start has no time zone next to a custom VTIMEZONE moves its overrides and `EXDATE`s by the right amount
+- #2111 Renaming a series or adding an attendee no longer moves a start that falls in the gap of a spring DST change
+- #1948 A recurring event whose time zone is set on edit is saved with a UTC `UNTIL`
+- #1945 Editing an occurrence in the hour repeated at the end of summer time edits the right occurrence
+- #1938 #1939 #1977 #2034 #2067 Editing one occurrence of a series no longer overwrites the override of another occurrence or loses its own values
+- #2104 #2107 Editing one occurrence no longer overwrites another override that has the same wall clock but no time zone
+- #1950 Answering "All the events" works for a series whose time zone is unknown
+- #1943 A new organizer listed twice among the attendees is written once, with their answer kept
+- Removing the footer of a description no longer leaves it in the form or loses a note written after it
+- #1937 Saving an unchanged event no longer moves it by one hour, nor resets the attendees' answers, in zones where browser and application time zone data disagree (e.g. Africa/Casablanca)
+- #1999 #2000 An event without an end, or in a repeated hour, is read and compared in its own zone, so an unchanged save no longer invites everyone again
+- #2108 An event with a start time and neither end nor duration is saved without a made-up 30-minute end
+- #2105 An event whose end is in a different time zone than its start (a flight from Paris to New York) shows and saves the right end
+- #2109 A saved event always carries the VTIMEZONE of its time zone, including zones such as Etc/GMT-14 and Windows names
+- Opening the edit form of a simple event shows it in its stored time zone instead of the browser one
+- #1993 An event whose VTIMEZONE cannot be expanded can still be opened
+- #2015 The forms opened from an event link are shown, centred
+- #1981 #1980 #1983 #1984 #1995 Events with an `RRULE` without `FREQ`, an unreadable start, `UNTIL` or `COUNT` are still shown and can be opened, without "Invalid Date" or made-up ends
+- #1982 #2037 #2059 The printed schedule puts events on the right days, including on 25-hour days and across a spring DST change
+- #2046 Plain-text descriptions are shown as typed in the preview, including text between angle brackets
+- #2044 Opening a series whose answered occurrence is stored before its master reads the rule of the series
+- #2072 The `REPEAT`, `DURATION`, `ATTACH` and `X-` properties of an alarm are kept when the event is saved
+- #2060 The type and parameters of an alarm `TRIGGER` are kept when the event is saved, so an absolute reminder or one relative to the end no longer changes
+- #2062 Attachments keep their value type and parameters (inline data, `SIZE`, `MANAGED-ID`, `X-` parameters) when the event is saved
+- #2061 A booked event keeps its link to the booking when it is saved
+- #2077 The `DELEGATED-TO`, `DELEGATED-FROM`, `SENT-BY`, `LANGUAGE`, `SCHEDULE-STATUS` and `X-` parameters of attendees are kept when the event is saved
+- #2063 The status of an event (cancelled, tentative) is kept when it is saved instead of becoming confirmed
+- #2071 An unrecognized event class is treated as private instead of being saved as public
+- #2068 #2069 Events with a property named like `__proto__` are no longer dropped from the calendar
+- #2065 A Windows time zone name (such as "Pacific Standard Time (Mexico)") is read in its IANA zone even when a VTIMEZONE is stored, so editing all the events or one occurrence no longer shifts or duplicates overrides
+- #2066 Deleting an occurrence of a series without a known time zone removes its override
+- #2064 An event whose UID contains a "/" is saved under its own UID
+- #2047 The mini calendar selects the day of the navigated month after Next month
+- #2045 The name and answer class of an event chip stay current after an answer, a move or a change of calendar
+- #2049 All-day event chips are named after their calendar day in time zones east of UTC
+- #1805 Fixed the double draggable modal
+- Updated twake-mui to fix the background
+- #2094 The Docker images stop nginx gracefully on SIGTERM instead of waiting for the kill timeout
+- #2125 Fixed the color management of extremely light calendar colors
+- #2134 #2138 Resource calendars are no longer offered as the calendar of the user's events, so an event is no longer stored in a resource calendar without inviting the resource
+- #2133 #2139 A burst of notifications, such as importing many events into a team calendar, refreshes the calendar once at a time instead of flooding the server with requests that fail with 429 or "events could not be loaded"
+- #2150 #2153 The event preview no longer shows someone else's answer as "Attending?" on shared and team calendars
+- #2132 #2140 Screen readers no longer announce the answer of the owner of a shared calendar as the user's own
+- #2135 #2137 The settings switches are announced once by screen readers instead of their label twice
+- #2136 The "Timed" row header of the week and day grids is translated for screen readers
+- #2130 #2141 The remove button of participant chips is named "Remove <participant>" for screen readers, in every supported language
+- #2144 Fixed the hidden attendee answer text overflowing its badge
+
+### Security
+
+- Secrets and email addresses are better scrubbed from Sentry reports: credentials in percent-encoded nested URLs and parameter names, non-ASCII and percent-encoded addresses, with no loss of unrelated parameters such as `status-code`
+- #2074 Email addresses glued after another address are now masked in Sentry reports
+- #1940 #1944 Prevented ReDoS in the email scrubbing of Sentry reports and in attendee address validation (reachable through the `/newEvent?attendee=` deep link)
+- #1979 The `data-*` and `aria-*` attributes of event descriptions are dropped
+- #1994 Links whose scheme contains a digit are refused in event descriptions
+- #2149 #2154 The team calendar id of an event is encoded and validated, so an event placed in a user's calendar can no longer make their browser send an authenticated request to an arbitrary side service path
 
 ### Kept from before
 
