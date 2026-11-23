@@ -21,6 +21,7 @@ import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.linagora.calendar.e2e.pages.PublicBookingPage;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 
 /**
@@ -279,13 +280,15 @@ class BookingLinksTest extends TwakeCalendarE2ETest {
         String name = uniqueName("With visio");
         String publicId = aScheduleOn(calendar, name, day, "10:00", "12:00");
 
-        String confirmation = PublicBookingPage.open(page, publicId)
+        PublicBookingPage.open(page, publicId)
             .selectDay(day)
             .pickSlot("10:00")
             .bookAs("Camille Visitor", "camille.visitor@open-paas.org")
             .successMessage();
 
-        assertThat(confirmation).contains("Join the video conference");
+        // The video conference link is fetched asynchronously after the confirmation dialog opens
+        PlaywrightAssertions.assertThat(page.getByText("Join the video conference"))
+            .isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(30_000));
         Awaitility.await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
             assertThat(probe.rawEvents(user)).isNotEmpty();
             assertThat(probe.singleEvent(user))
