@@ -124,7 +124,6 @@ describe('useTdrivePicker', () => {
       'PICK',
       'io.cozy.files',
       {
-        theme: { type: 'light' },
         multiple: true,
         sharingLink: { label: 'tdrive.addAsAttachment' },
         downloadLink: null,
