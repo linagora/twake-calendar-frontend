@@ -15,8 +15,7 @@ const attendeeToUser = (a: userAttendee, openpaasId?: string): User => ({
   openpaasId: a.openpaasId || openpaasId || ''
 })
 
-const hasCalendar = (u: User): boolean =>
-  u.objectType === 'user' && !!u.openpaasId
+const isContact = (u: User): boolean => u.objectType === 'contact'
 
 function useAttendeeSearchLogic({
   attendees,
@@ -91,12 +90,12 @@ function useAttendeeSearchLogic({
       .map(toAttendee)
 
     const nextNew = selectedUsers
-      .filter(u => !initialEmails.has(u.email) && hasCalendar(u))
+      .filter(u => !initialEmails.has(u.email) && !isContact(u))
       .map(toAttendee)
 
     const contacts = Object.fromEntries(
       selectedUsers
-        .filter(u => !initialEmails.has(u.email) && !hasCalendar(u))
+        .filter(u => !initialEmails.has(u.email) && isContact(u))
         .map(u => [u.email, 'contact' as const])
     )
 
