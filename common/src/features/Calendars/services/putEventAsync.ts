@@ -10,7 +10,16 @@ import { CalendarState } from '../CalendarSlice'
 export const putEventThunk = (create: ReducerCreators<CalendarState>) =>
   create.asyncThunk<
     { calId: string; calType?: 'temp' },
-    { cal: Calendar; newEvent: CalendarEvent; calType?: 'temp' },
+    {
+      cal: Calendar
+      newEvent: CalendarEvent
+      calType?: 'temp'
+      /**
+       * Skips the post-mutation refresh of `cal`: set when a later mutation of
+       * the same flow (e.g. the MOVE following this PUT) refreshes it anyway.
+       */
+      skipRefresh?: boolean
+    },
     { rejectValue: RejectedError }
   >(
     async ({ cal, newEvent, calType }, { rejectWithValue }) => {
