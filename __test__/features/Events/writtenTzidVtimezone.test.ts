@@ -113,6 +113,14 @@ describe('calendarEventToJCal', () => {
     if (used) expect(definedTzids(second)).toContain(used)
   })
 
+  it('keeps the zone of a TZID written in another case (#2177)', () => {
+    const vcal = save(parseFetchedEvent(base, ics('europe/paris'), true))
+
+    expect(dtstart(vcal).getParameter('tzid')).toBe('Europe/Paris')
+    expect(dtstart(vcal).getFirstValue().toString()).toBe('2025-03-17T10:00:00')
+    expect(definedTzids(vcal)).toEqual(['Europe/Paris'])
+  })
+
   it('still writes a zone of the table under its TZID', () => {
     const vcal = save(parseFetchedEvent(base, ics('Europe/Paris'), true))
 
@@ -127,6 +135,12 @@ describe('resolveTimezone', () => {
       'America/Tijuana'
     )
     expect(resolveTimezone('America/Santa_Isabel')).toBe('America/Tijuana')
+  })
+
+  it('resolves a name written in another case to the name of the table', () => {
+    expect(resolveTimezone('europe/paris')).toBe('Europe/Paris')
+    expect(resolveTimezone('EUROPE/PARIS')).toBe('Europe/Paris')
+    expect(resolveTimezone('us/central')).toBe('America/Chicago')
   })
 
   it('keeps a zone of the table and an unknown name as given', () => {
