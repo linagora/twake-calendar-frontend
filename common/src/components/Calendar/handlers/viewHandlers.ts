@@ -134,20 +134,12 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     if (arg.inPopover) return React.createElement('span', null, arg.text)
 
     const isMonthView = arg.view.type === CALENDAR_VIEWS.dayGridMonth
-    const weekDay = (
-      isMonthView
-        ? arg.date.toLocaleDateString(t('locale'), {
-            weekday: 'short',
-            timeZone: 'UTC'
-          })
-        : moment
-            .tz(arg.date, timezone)
-            .toDate()
-            .toLocaleDateString(t('locale'), {
-              weekday: 'short',
-              timeZone: timezone
-            })
-    ).toUpperCase()
+    const weekDay = arg.date
+      .toLocaleDateString(t('locale'), {
+        weekday: 'short',
+        timeZone: timezone
+      })
+      .toUpperCase()
 
     return React.createElement(
       'div',
@@ -254,26 +246,39 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
     return (partstat && PARTSTAT_CLASS_MAP[partstat]) ?? ''
   }
 
+  const resolveEventBounds = (
+    event: EventDisplayInfo['event'],
+    fallbackStart: Date
+  ): { start: Date; end: Date | null } => {
+    if (!event.allDay) {
+      return { start: fallbackStart, end: event.end }
+    }
+    return {
+      start: allDayDate(event.startStr),
+      end: event.endStr ? allDayDate(event.endStr) : null
+    }
+  }
+
   const syncEventElement = (el: HTMLElement, arg: EventDisplayInfo): void => {
     if (arg.event.id) {
       el.setAttribute('data-event-id', arg.event.id)
     }
 
     // FullCalendar already opens a focused event on Enter and Space
-    if (isListView(arg.view.type) || el.tabIndex !== 0 || !arg.event.start) {
-      return
-    }
+    if (isListView(arg.view.type)) return
+    if (el.tabIndex !== 0) return
+    if (!arg.event.start) return
 
     const { calendar, partstat } = eventDetails(arg.event)
-    const { allDay, startStr, endStr } = arg.event
+    const { start, end } = resolveEventBounds(arg.event, arg.event.start)
     el.setAttribute('role', 'button')
     el.setAttribute(
       'aria-label',
       eventAccessibleLabel({
         title: arg.event.title,
-        start: allDay ? allDayDate(startStr) : arg.event.start,
-        end: allDay ? (endStr ? allDayDate(endStr) : null) : arg.event.end,
-        allDay,
+        start,
+        end,
+        allDay: arg.event.allDay,
         calendarName: calendarLabel(calendar, userId, t),
         partstat: ownAnswer(calendar, userId, partstat),
         timeZone: timezone,
