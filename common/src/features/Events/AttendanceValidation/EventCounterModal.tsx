@@ -302,7 +302,7 @@ export function EventCounterModal({
             margin="dense"
             multiline
             size="small"
-            minRows={2}
+            minRows={3}
             maxRows={10}
             fullWidth
             placeholder={t('eventPreview.optionalMessage')}
@@ -310,10 +310,6 @@ export function EventCounterModal({
             onChange={e => setMessage(e.target.value)}
             sx={{
               mt: 2,
-              '& .MuiInputBase-root': {
-                overflowY: 'auto',
-                padding: 0
-              },
               '& textarea': {
                 resize: 'vertical'
               }
