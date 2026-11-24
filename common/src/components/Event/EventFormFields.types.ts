@@ -125,6 +125,9 @@ export interface EventFormFieldsProps {
 
   // Dirty notification for parent (e.g. to enable unsaved-changes guard)
   onDirtyChange?: (isDirty: boolean) => void
+
+  // Attachments uploading to the Drive: the form cannot be saved meanwhile
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 export interface UseEventFormValuesReturn {
@@ -151,6 +154,7 @@ export interface UseEventFormValuesReturn {
   setShowRepeat: (v: boolean) => void
   setHasEndDateChanged: (v: boolean) => void
   setAttachments: (v: EventFormValues['attachments']) => void
+  addAttachments: (added: EventFormValues['attachments']) => void
   setOrganizer: (v: userOrganiser | undefined) => void
   handleAllDayChange: (
     newAllDay: boolean,

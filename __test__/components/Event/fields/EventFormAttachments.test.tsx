@@ -21,15 +21,18 @@ vi.mock('@common/features/Tdrive/helpers/isTdrivePickerAvailable', () => ({
   isTdrivePickerAvailable: () => true
 }))
 
-let pickFiles: (files: TdriveFile[]) => void = () => undefined
+const picker = vi.hoisted(() => ({
+  onFilesSelected: null as ((files: TdriveFile[]) => void) | null
+}))
 
+// The picker keeps the callback it was opened with until the user picks
 vi.mock('@common/features/Tdrive/components/TdriveButton', () => ({
   TdriveButton: ({
     onFilesSelected
   }: {
     onFilesSelected: (files: TdriveFile[]) => void
   }) => {
-    pickFiles = onFilesSelected
+    picker.onFilesSelected ??= onFilesSelected
     return null
   }
 }))
@@ -44,20 +47,25 @@ const pickedFile: TdriveFile = {
 }
 
 const pickAndAttach = (file: TdriveFile): Attachment[] => {
-  const setAttachments = vi.fn()
+  const addAttachments = vi.fn()
   render(
     <EventFormAttachments
       v={{ ...DEFAULT_FORM_VALUES, attachments: [] }}
-      setAttachments={setAttachments}
+      setAttachments={vi.fn()}
+      addAttachments={addAttachments}
       showMore={false}
       isExpanded={false}
     />
   )
-  pickFiles([file])
-  return setAttachments.mock.calls[0][0] as Attachment[]
+  picker.onFilesSelected?.([file])
+  return addAttachments.mock.calls[0][0] as Attachment[]
 }
 
 describe('EventFormAttachments', () => {
+  beforeEach(() => {
+    picker.onFilesSelected = null
+  })
+
   afterEach(() => {
     window.TDRIVE_MAX_TOTAL_FILE_SIZE = undefined
   })
@@ -81,5 +89,29 @@ describe('EventFormAttachments', () => {
     const [attachment] = pickAndAttach({ ...pickedFile, size: undefined })
 
     expect(attachment.otherParams).toEqual({})
+  })
+
+  it('appends the picked files instead of replacing the list it opened with', () => {
+    const existing = new Attachment('https://drive.example.com/a', '', 'a.pdf')
+    const setAttachments = vi.fn()
+    const addAttachments = vi.fn()
+    render(
+      <EventFormAttachments
+        v={{ ...DEFAULT_FORM_VALUES, attachments: [existing] }}
+        setAttachments={setAttachments}
+        addAttachments={addAttachments}
+        showMore
+        isExpanded
+      />
+    )
+
+    picker.onFilesSelected?.([
+      { url: 'https://drive.example.com/c', name: 'c.pdf' } as TdriveFile
+    ])
+
+    expect(addAttachments).toHaveBeenCalledWith([
+      expect.objectContaining({ uri: 'https://drive.example.com/c' })
+    ])
+    expect(setAttachments).not.toHaveBeenCalled()
   })
 })

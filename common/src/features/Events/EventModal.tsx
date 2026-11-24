@@ -67,6 +67,7 @@ const EventPopover: React.FC<{
     string | undefined
   >(undefined)
   const [isFormDirty, setIsFormDirty] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const formRef = useRef<EventFormHandle>(null)
 
   const guard = useUnsavedChangesGuard(open && isFormDirty)
@@ -192,7 +193,7 @@ const EventPopover: React.FC<{
               await formRef.current?.submit()
             }}
             onExpanded={() => setShowMore(s => !s)}
-            saving={saving}
+            isSaveDisabled={saving || isUploading}
           />
         }
         expandText={t('tooltip.moreEventOptions')}
@@ -213,6 +214,7 @@ const EventPopover: React.FC<{
           onEndChange={handleEndChange}
           onAllDayChange={handleAllDayChange}
           onDirtyChange={setIsFormDirty}
+          onUploadingChange={setIsUploading}
         />
       </ResponsiveDialog>
       <ConfirmDiscardChangesDialog

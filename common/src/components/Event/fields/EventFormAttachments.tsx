@@ -18,9 +18,18 @@ const showInputLabel = (showMore: boolean, label: string): string =>
 export const EventFormAttachments: React.FC<{
   v: EventFormValues
   setAttachments: (v: Attachment[]) => void
+  addAttachments: (added: Attachment[]) => void
   showMore: boolean
   isExpanded: boolean
-}> = ({ v, setAttachments, showMore, isExpanded }) => {
+  onUploadingChange?: (isUploading: boolean) => void
+}> = ({
+  v,
+  setAttachments,
+  addAttachments,
+  showMore,
+  isExpanded,
+  onUploadingChange
+}) => {
   const { t } = useI18n()
   const platformURL = useAppSelector(selectPlatformURL)
   const hasVisibleAttachments = v.attachments.some(a => isSafeHttpUrl(a.uri))
@@ -37,9 +46,11 @@ export const EventFormAttachments: React.FC<{
             sizeParams(file.size)
           )
       )
-      setAttachments([...v.attachments, ...attachments])
+      // The picker hands its files back long after it opened: uploads may have
+      // added attachments in between
+      addAttachments(attachments)
     },
-    [v.attachments, setAttachments]
+    [addAttachments]
   )
 
   if (isTdrivePickerAvailable(platformURL)) {
@@ -49,6 +60,8 @@ export const EventFormAttachments: React.FC<{
         showMore={showMore}
         attachments={v.attachments}
         setAttachments={setAttachments}
+        addAttachments={addAttachments}
+        onUploadingChange={onUploadingChange}
       />
     )
   }
