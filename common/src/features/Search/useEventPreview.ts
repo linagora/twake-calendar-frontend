@@ -7,6 +7,7 @@ import { getEvent } from '../Calendars/CalendarSlice'
 import { buildDelegatedEventURL } from '../Events/utils/buildDelegatedEventURL'
 import { SearchEventResult } from './types/SearchEventResult'
 import { userAttendee } from '../User/models/attendee'
+import { previewEventIdOf } from './previewEventId'
 
 export function useEventPreview(
   eventData: SearchEventResult,
@@ -16,6 +17,7 @@ export function useEventPreview(
   setOpenPreview: (b: boolean) => void
   handleOpen: () => Promise<void>
   timeZone: string
+  previewEventId: string | undefined
 } {
   const dispatch = useAppDispatch()
   const timeZone =
@@ -47,5 +49,7 @@ export function useEventPreview(
     await dispatch(getEvent(event))
   }
 
-  return { openPreview, setOpenPreview, handleOpen, timeZone }
+  const previewEventId = previewEventIdOf(calendar, eventData)
+
+  return { openPreview, setOpenPreview, handleOpen, timeZone, previewEventId }
 }

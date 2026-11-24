@@ -107,10 +107,8 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
   const calendar = calendars[calId]
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
 
-  const { openPreview, setOpenPreview, handleOpen, timeZone } = useEventPreview(
-    eventData,
-    calendar
-  )
+  const { openPreview, setOpenPreview, handleOpen, timeZone, previewEventId } =
+    useEventPreview(eventData, calendar)
 
   const startDate = new Date(eventData.data.start)
   const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate
@@ -164,9 +162,9 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
         />
       </Box>
 
-      {calendar?.events?.[eventData.data.uid] && (
+      {calendar && previewEventId && (
         <EventPreviewModal
-          eventId={eventData.data.uid}
+          eventId={previewEventId}
           calId={calendar.id}
           open={openPreview}
           onClose={() => setOpenPreview(false)}
