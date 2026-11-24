@@ -20,14 +20,22 @@ vi.mock('@common/features/Calendars/CalendarSlice', async () => {
 
 vi.mock('@common/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
-    onChange
+    onChange,
+    label,
+    placeholder
   }: {
     onChange: (
       event: null,
       value: { displayName: string; openpaasId: string; email?: string }[]
     ) => void
+    label?: string
+    placeholder?: string
   }) => (
-    <div data-testid="people-search">
+    <div
+      data-testid="people-search"
+      data-label={label}
+      data-placeholder={placeholder}
+    >
       <button
         data-testid="mock-resource-search-select"
         onClick={() =>
@@ -69,13 +77,13 @@ describe('RegisterCalendars', () => {
     tokens: { accessToken: 'token' }
   }
 
-  const setup = (isOpen = true) => {
+  const setup = (isOpen = true, objectTypes = ['resource']) => {
     const onClose = vi.fn()
     renderWithProviders(
       <RegisterCalendars
         onClose={onClose}
         open={isOpen}
-        objectTypes={['resource']}
+        objectTypes={objectTypes}
         onSave={mockedAddCalendarResource as any}
       />,
       {
@@ -88,9 +96,7 @@ describe('RegisterCalendars', () => {
   it('renders correctly and closes on cancel', () => {
     const { onClose } = setup()
 
-    expect(
-      screen.getByText('calendar.browseOtherCalendars')
-    ).toBeInTheDocument()
+    expect(screen.getByText('calendar.browseResources')).toBeInTheDocument()
 
     const cancelButton = screen.getByRole('button', {
       name: 'common.cancel'
@@ -103,8 +109,40 @@ describe('RegisterCalendars', () => {
   it('does not render when isOpen is false', () => {
     setup(false)
     expect(
+      screen.queryByText('calendar.browseResources')
+    ).not.toBeInTheDocument()
+  })
+
+  it('describes a resource search when browsing resources', () => {
+    setup(true, ['resource'])
+
+    expect(screen.getByText('calendar.browseResources')).toBeInTheDocument()
+    expect(
       screen.queryByText('calendar.browseOtherCalendars')
     ).not.toBeInTheDocument()
+    const search = screen.getByTestId('people-search')
+    expect(search).toHaveAttribute('data-label', 'resourceSearch.label')
+    expect(search).toHaveAttribute(
+      'data-placeholder',
+      'resourceSearch.placeholder'
+    )
+  })
+
+  it('describes a people search when browsing other calendars', () => {
+    setup(true, ['user'])
+
+    expect(
+      screen.getByText('calendar.browseOtherCalendars')
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('calendar.browseResources')
+    ).not.toBeInTheDocument()
+    const search = screen.getByTestId('people-search')
+    expect(search).toHaveAttribute('data-label', 'peopleSearch.label')
+    expect(search).toHaveAttribute(
+      'data-placeholder',
+      'peopleSearch.placeholder'
+    )
   })
 
   it('fetches resource calendars and adds them using Promise.allSettled logic', async () => {

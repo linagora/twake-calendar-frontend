@@ -17,6 +17,7 @@ import { AsyncThunkAction, AsyncThunkConfig } from '@reduxjs/toolkit'
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
 import { defaultColors } from '@common/utils/defaultColors'
+import { getRegisterCalendarsTextKeys } from './registerCalendarsTexts'
 
 const RegisterCalendars: React.FC<{
   open: boolean
@@ -67,6 +68,8 @@ const RegisterCalendars: React.FC<{
     }
     return 'displayName'
   }, [objectTypes])
+
+  const textKeys = getRegisterCalendarsTextKeys(objectTypes)
 
   const checkIfCalendarExisted = (
     calendars: Record<string, Calendar>,
@@ -172,7 +175,7 @@ const RegisterCalendars: React.FC<{
       open={open}
       contentSx={{ paddingTop: '8px !important' }}
       onClose={() => handleClose({}, 'backdropClick')}
-      title={t('calendar.browseOtherCalendars')}
+      title={t(textKeys.title)}
       actions={
         <>
           <Button
@@ -191,6 +194,8 @@ const RegisterCalendars: React.FC<{
       <PeopleSearch
         objectTypes={objectTypes}
         selectedUsers={selectedUsers}
+        label={t(textKeys.searchLabel)}
+        placeholder={t(textKeys.searchPlaceholder)}
         inputSlot={params => (
           <TextField
             {...params}

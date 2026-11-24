@@ -8,20 +8,22 @@ let emitSearchState: (state: SearchState) => void
 
 vi.mock('@common/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
-    onSearchStateChange
+    onSearchStateChange,
+    placeholder
   }: {
     onSearchStateChange: (state: SearchState) => void
+    placeholder?: string
   }): JSX.Element => {
     emitSearchState = onSearchStateChange
-    return <div data-testid="people-search" />
+    return <div data-testid="people-search" data-placeholder={placeholder} />
   }
 }))
 
 describe('SearchCalendarsDialog', () => {
-  const setup = (): void => {
+  const setup = (objectTypes = ['resource']): void => {
     renderWithProviders(
       <SearchCalendarsDialog
-        objectTypes={['resource']}
+        objectTypes={objectTypes}
         open
         selectedUsers={[]}
         onChange={vi.fn()}
@@ -30,6 +32,24 @@ describe('SearchCalendarsDialog', () => {
       />
     )
   }
+
+  it('hints a resource search when browsing resources', () => {
+    setup(['resource'])
+
+    expect(screen.getByTestId('people-search')).toHaveAttribute(
+      'data-placeholder',
+      'resourceSearch.placeholder'
+    )
+  })
+
+  it('hints a people search when browsing other calendars', () => {
+    setup(['user'])
+
+    expect(screen.getByTestId('people-search')).toHaveAttribute(
+      'data-placeholder',
+      'peopleSearch.placeholder'
+    )
+  })
 
   it('shows no results message when the search found nothing', () => {
     setup()
