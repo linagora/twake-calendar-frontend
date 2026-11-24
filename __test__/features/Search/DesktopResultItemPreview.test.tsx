@@ -1,7 +1,8 @@
 import type { JSX } from 'react'
 import DesktopResultItem from '@common/features/Search/DesktopResultItem'
 import { SearchEventResult } from '@common/features/Search/types/SearchEventResult'
-import { fireEvent, screen } from '@testing-library/react'
+import { addEvent } from '@common/features/Calendars/CalendarSlice'
+import { act, fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 vi.mock('@common/features/Events/EventDao', async importOriginal => ({
@@ -78,6 +79,39 @@ it('opens the preview of a series whose occurrences are loaded (#2204)', () => {
   )
 
   fireEvent.click(screen.getByRole('button'))
+
+  expect(screen.getByTestId('preview')).toHaveTextContent(occurrenceKey)
+})
+
+it('keeps the preview on its occurrence when an earlier one loads later', () => {
+  const laterResult = {
+    ...seriesResult,
+    data: { ...seriesResult.data, start: '2026-12-01T10:00:00Z' }
+  } as SearchEventResult
+  const { store } = renderWithProviders(
+    <DesktopResultItem
+      eventData={laterResult}
+      hasDetails={false}
+      hasVideo={false}
+    />,
+    preloadedState
+  )
+  fireEvent.click(screen.getByRole('button'))
+
+  act(() => {
+    store.dispatch(
+      addEvent({
+        calendarUid: 'user1/cal1',
+        event: {
+          uid: 'series/2026-11-17T10:00:00Z',
+          calId: 'user1/cal1',
+          title: 'Plainseries',
+          start: '2026-11-17T10:00:00Z',
+          end: '2026-11-17T11:00:00Z'
+        } as never
+      })
+    )
+  })
 
   expect(screen.getByTestId('preview')).toHaveTextContent(occurrenceKey)
 })
