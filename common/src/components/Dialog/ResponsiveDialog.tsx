@@ -338,8 +338,11 @@ function ResponsiveDialog({
               ? '0 !important'
               : '32px',
           ...anchoredPaperSx,
-          visibility: isPendingPosition ? 'hidden' : undefined,
+          // Hidden by opacity, not visibility: MUI focuses the paper as it
+          // opens, and a paper with hidden visibility cannot take the focus,
+          // which leaves Escape outside the dialog
           opacity: isPendingPosition ? 0 : undefined,
+          pointerEvents: isPendingPosition ? 'none' : undefined,
           boxShadow: isExpanded ? 'none !important' : undefined,
           transition:
             isPendingPosition || isExpanded ? 'none !important' : undefined,
