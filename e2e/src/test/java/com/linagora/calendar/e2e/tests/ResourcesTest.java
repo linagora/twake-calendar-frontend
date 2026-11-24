@@ -266,7 +266,7 @@ class ResourcesTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
         page.getByLabel("Add resource").click();
-        Locator search = page.getByPlaceholder("Start typing a name or email");
+        Locator search = page.getByPlaceholder("Search by name");
         search.click();
         search.pressSequentially(room, new Locator.PressSequentiallyOptions().setDelay(30));
         page.locator("li[role=option]").first().waitFor(
