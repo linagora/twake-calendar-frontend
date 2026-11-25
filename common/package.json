@@ -7,6 +7,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fullcalendar/react": "^7.1.5",
+    "@linagora/twake-app-skeleton": "^1.0.0",
     "@linagora/twake-bar": "^1.2.0",
     "@linagora/twake-embed": "^3.7.1",
     "@linagora/twake-icons": "^3.2.1",
