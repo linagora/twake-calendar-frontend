@@ -539,7 +539,7 @@
     },
     "externalSender": {
       "title": "Gesendet von %{sentBy} im Namen von %{organizerName}",
-      "description": "Diese Einladung wurde nicht von ihrem Organisator (%{organizerEmail}) gesendet, sondern von einer Adresse einer anderen Domain. Fragen Sie beim Organisator nach, bevor Sie ihr vertrauen."
+      "description": "Diese Einladung wurde nicht von ihrem Organisator (%{organizerEmail}) gesendet, sondern von einer Adresse, die nicht zu seiner Domain gehört. Fragen Sie beim Organisator nach, bevor Sie ihr vertrauen."
     }
   },
   "dateTimeFields": {
