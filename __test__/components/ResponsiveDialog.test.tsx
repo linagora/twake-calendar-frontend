@@ -723,4 +723,32 @@ describe('ResponsiveDialog', () => {
       expect(document.body).not.toHaveClass('fullscreen-view')
     })
   })
+  it('takes the focus and closes on Escape while its position is pending', () => {
+    // Positions come from an animation frame: the dialog opens without one
+    const position = vi.spyOn(dynamicPosition, 'default').mockReturnValue(null)
+
+    try {
+      renderWithTheme(
+        <ResponsiveDialog
+          open={true}
+          onClose={mockOnClose}
+          title="Event preview"
+          dynamicPositioning
+        >
+          <div>Event details</div>
+        </ResponsiveDialog>
+      )
+
+      const dialog = screen.getByRole('dialog', { name: 'Event preview' })
+      // A paper with hidden visibility cannot take the focus in a browser
+      expect(dialog).not.toHaveStyle({ visibility: 'hidden' })
+      expect(dialog).toHaveFocus()
+
+      fireEvent.keyDown(dialog, { key: 'Escape' })
+
+      expect(mockOnClose).toHaveBeenCalledTimes(1)
+    } finally {
+      position.mockRestore()
+    }
+  })
 })
