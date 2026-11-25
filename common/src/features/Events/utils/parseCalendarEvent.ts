@@ -176,6 +176,17 @@ function parseRruleProperty(
   event.repetition = parseRepetitionRule(value as RepetitionRule)
 }
 
+// Events are stored in plain objects keyed by their UID: Immer turns a write
+// under `__proto__` into a prototype change and throws, which dropped every
+// event of the load and kept failing the next ones (#2214). Such an event is
+// rejected like any unreadable one, its callers skip and report it.
+function readableUid(uid: string): string {
+  if (uid === '__proto__') {
+    throw new Error('Unsupported UID')
+  }
+  return uid
+}
+
 const PROPERTY_PARSERS: Record<
   string,
   (
@@ -187,7 +198,7 @@ const PROPERTY_PARSERS: Record<
   ) => void
 > = {
   uid: (params, value, event) => {
-    event.uid = safeString(value)
+    event.uid = readableUid(safeString(value))
   },
   transp: (params, value, event) => {
     event.transp = safeString(value)
