@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { Box, IconButton } from '@linagora/twake-mui'
 import { Dialog } from '@common/ds/Dialog/Dialog'
 import { Close as CloseIcon } from '@mui/icons-material'
-import { PickerSkeleton } from './PickerSkeleton'
+import { DrivePickerSkeleton } from '@linagora/twake-app-skeleton/drive'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { useI18n } from 'twake-i18n'
 
@@ -41,7 +41,7 @@ const PickerContent: React.FC<PickerContentProps> = ({
               width: '100%'
             }}
           >
-            <PickerSkeleton />
+            <DrivePickerSkeleton data-testid="drive-picker-skeleton" />
           </Box>
         )}
         <Box
