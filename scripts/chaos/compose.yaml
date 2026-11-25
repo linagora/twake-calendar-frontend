@@ -9,7 +9,7 @@
 # the side service's reach esn-sabre as esn_sabre, the LDAP as esn_ldap.
 
 x-mongo: &mongo
-  image: mongo:8.0.6
+  image: mongo:9.0.8
   mem_limit: 640m
   # the WiredTiger cache sized under the limit (its default, half the host's memory, is not the container's)
   command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25"]
@@ -20,7 +20,7 @@ x-mongo: &mongo
     retries: 60
 
 x-opensearch: &opensearch
-  image: opensearchproject/opensearch:2.19.2
+  image: opensearchproject/opensearch:3.10.0
   mem_limit: 1280m
   ulimits:
     nofile: {soft: 65536, hard: 65536}
@@ -43,7 +43,7 @@ x-opensearch: &opensearch
     retries: 120
 
 x-rabbitmq: &rabbitmq
-  image: rabbitmq:4.1.1-management
+  image: rabbitmq:4.2.9-management
   mem_limit: 512m
   environment:
     RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -setcookie twake-chaos-cookie
@@ -57,7 +57,7 @@ x-rabbitmq: &rabbitmq
     retries: 60
 
 x-redis: &redis
-  image: redis:8.0.2
+  image: redis:8.12.0
   mem_limit: 256m
   entrypoint: ["/node.sh"]
   volumes:
