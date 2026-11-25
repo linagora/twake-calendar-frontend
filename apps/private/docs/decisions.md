@@ -24,3 +24,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Benoit Tellier, after the twake-qa security review of twake-calendar-side-service (SEV-1, 2026-11-23); the pipeline of twake-contacts-frontend is the model.
 - Why: the agents are persistent and shared, so code of a pull request that runs before the check can read a credential bound later in the same build, or leave a process behind for a later one. A review is tied to a commit by GitHub, unlike a comment, so a commit pushed after the approval is not built until a member reviews it again.
 - Scope: `Jenkinsfile` (packages `apps/private`, `apps/public` and `common`).
+
+## 2026-11-24, [UX] Hovering an event shows its details
+
+- Decision: hovering an event of the day, week or month grid, or giving it the keyboard focus, shows after 500 ms a preview with its full title, its date and time, its calendar (colour and name), its location and the first four lines of its description as plain text. A private event of someone else's calendar shows no location and no description, as in the event preview. Screens without hover show nothing, pressing the event closes the preview, and a dragged or resized event shows none.
+- Decided by: Crash-- (CTO), [#2208](https://github.com/linagora/twake-calendar-frontend/pull/2208)
+- Why: with several calendars shown side by side the events are too narrow to read their title.
+- Scope: desktop, package `common` (event chip of the calendar grid); the list view keeps its rows.
