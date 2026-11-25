@@ -17,3 +17,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Benoit Tellier, [#2215](https://github.com/linagora/twake-calendar-frontend/issues/2215)
 - Why: the name is free text and often starts with an article ("Il mio calendario", the default calendar), which "di" would have to contract with ("del mio calendario"); a colon reads well whatever the name.
 - Scope: `common/src/locales/it.json`.
+
+## 2026-11-25, [Tech] An event whose UID is `__proto__` is rejected when it is read
+
+- Decision: `parseCalendarEvent` throws on `UID:__proto__`, so the readers skip and report that event like any unreadable one. The stores keep their plain objects keyed by UID; the other events of the load are stored as before.
+- Decided by: claude, applying the short-term remediation of the twake-qa security review of 2026-11-25 (SEV-1, [#2214](https://github.com/linagora/twake-calendar-frontend/issues/2214)); to be confirmed in the review of the pull request.
+- Why: Immer turns a write under `__proto__` into a prototype change and throws, which dropped every event of the load and failed every later one. Anyone could cause this with one invitation. Every server read goes through `parseCalendarEvent`, so one check covers the 7 writes keyed by UID. Moving every `events` map to `Object.create(null)` would mean changing each place that creates one, and a missed one would bring the bug back. Such an event cannot be shown in the web UI: it has to be removed through CalDAV.
+- Scope: `common/src/features/Events/utils/parseCalendarEvent.ts`.

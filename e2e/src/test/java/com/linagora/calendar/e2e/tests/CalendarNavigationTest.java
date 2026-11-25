@@ -366,4 +366,23 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
             .contains(String.valueOf(nextIsoWeek));
     }
 
+    @Test
+    @DisplayName("NAV-20 Hovering an event shows its full title and location")
+    void hoveringAnEventShowsItsDetails(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = "Quarterly roadmap review " + UUID.randomUUID().toString().substring(0, 6);
+        String location = "Room " + UUID.randomUUID().toString().substring(0, 6);
+        calendar.createEvent().title(title).expand().location(location)
+            .startTime("10:00").endTime("11:00").save();
+
+        calendar.eventCard(title).first().hover();
+
+        var preview = page.getByRole(com.microsoft.playwright.options.AriaRole.TOOLTIP);
+        PlaywrightAssertions.assertThat(preview).containsText(title);
+        PlaywrightAssertions.assertThat(preview).containsText(location);
+
+        page.mouse().move(0, 0);
+        PlaywrightAssertions.assertThat(preview).isHidden();
+    }
+
 }
