@@ -148,4 +148,30 @@ describe('extractCalendarEvents', () => {
     )
     consoleError.mockRestore()
   })
+
+  it('skips and reports an event whose UID is __proto__, keeping the others', () => {
+    // Events are stored keyed by their UID: a write under __proto__ makes
+    // Immer throw, which dropped every event of the load (#2214)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const protoUid = [
+      'vevent',
+      [
+        ['uid', {}, 'text', '__proto__'],
+        ['dtstart', {}, 'date-time', '20250316T100000Z']
+      ],
+      []
+    ]
+    const item = {
+      _links: { self: { href: '/calendars/u1/u1/event-uid.ics' } },
+      data: ['vcalendar', [], [protoUid, vevent]]
+    } as unknown as CalDavItem
+
+    const events = extractCalendarEvents(item, { cal, color: cal.color })
+
+    expect(events.map(event => event.uid)).toEqual(['event-uid'])
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Unsupported UID')
+    )
+    consoleError.mockRestore()
+  })
 })
