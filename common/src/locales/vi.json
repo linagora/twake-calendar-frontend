@@ -169,6 +169,7 @@
     "teamOrganizerWithName": "Người tổ chức của nhóm: %{organizerName}",
     "teamOrganizer": "Người tổ chức của nhóm",
     "sentBy": "Được gửi bởi: %{email}",
+    "sentByExternal": "Được gửi bởi: %{email}, bên ngoài, không phải người tổ chức",
     "untitled": "Không có tiêu đề",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "Không có sự kiện để hiển thị",
@@ -535,6 +536,10 @@
       "ACCEPTED": "Đã chấp nhận lời mời",
       "DECLINED": "Đã từ chối lời mời",
       "TENTATIVE": "Đã tạm chấp nhận lời mời"
+    },
+    "externalSender": {
+      "title": "Được gửi bởi %{sentBy} thay mặt %{organizerName}",
+      "description": "Lời mời này không được gửi bởi người tổ chức (%{organizerEmail}) mà bởi một địa chỉ thuộc tên miền khác. Hãy xác nhận với người tổ chức trước khi tin tưởng."
     }
   },
   "dateTimeFields": {

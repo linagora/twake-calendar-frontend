@@ -14,6 +14,7 @@ import {
   EventVideoRow
 } from './EventDetailsRows'
 import { EventPreviewAttendees } from './EventPreviewAttendees'
+import { ExternalSenderNotice } from './ExternalSenderNotice'
 import { PrivateEventPreview } from './PrivateEventPreview'
 
 export interface EventPreviewDetailsProps {
@@ -49,12 +50,18 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
   teamName
 }) => {
   const { t } = useI18n()
-  const { resources, eventAttendees, attendees, organizer, organizerSentBy } =
-    useFilterEventAttendees({
-      event,
-      isResourceEventPreview,
-      calendarName
-    })
+  const {
+    resources,
+    eventAttendees,
+    attendees,
+    organizer,
+    organizerSentBy,
+    organizerSentByExternal
+  } = useFilterEventAttendees({
+    event,
+    isResourceEventPreview,
+    calendarName
+  })
 
   const showDetails = isNotPrivate || isOwn
 
@@ -74,6 +81,10 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
         flexDirection: 'column'
       }}
     >
+      {organizerSentBy && organizerSentByExternal && (
+        <ExternalSenderNotice organizer={organizer} sentBy={organizerSentBy} />
+      )}
+
       <EventVideoRow meetingLink={event.x_openpass_videoconference} />
 
       {isResourceEventPreview &&
@@ -85,7 +96,8 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           isFull: true,
           isOrganizer: true,
           isTeamCalendar,
-          sentBy: organizerSentBy
+          sentBy: organizerSentBy,
+          sentByExternal: organizerSentByExternal
         })}
 
       {shouldShowAttendeesSection && (
@@ -93,6 +105,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           attendees={attendees}
           organizer={organizer}
           organizerSentBy={organizerSentBy}
+          organizerSentByExternal={organizerSentByExternal}
           allAttendees={eventAttendees ?? []}
           start={event.start}
           end={event.end}

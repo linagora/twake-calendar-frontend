@@ -59,3 +59,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: claude, applying the short-term remediation of the twake-qa security review of 2026-11-25 (SEV-1, [#2214](https://github.com/linagora/twake-calendar-frontend/issues/2214)); to be confirmed in the review of the pull request.
 - Why: Immer turns a write under `__proto__` into a prototype change and throws, which dropped every event of the load and failed every later one. Anyone could cause this with one invitation. Every server read goes through `parseCalendarEvent`, so one check covers the 7 writes keyed by UID. Moving every `events` map to `Object.create(null)` would mean changing each place that creates one, and a missed one would bring the bug back. Such an event cannot be shown in the web UI: it has to be removed through CalDAV.
 - Scope: `common/src/features/Events/utils/parseCalendarEvent.ts`.
+
+## 2026-11-25, [UX] The preview warns of a SENT-BY outside the domain of the organizer
+
+- Decision: when the `SENT-BY` of the organizer is an address of another domain than the organizer, or has no domain, the event preview shows a warning notice right under the date, naming the sender, the organizer and the organizer's address, and the expanded participant list shows the `Sent by` line in warning color with an icon, marked external, not the organizer. A `SENT-BY` of the organizer's domain (an assistant) keeps the discreet caption. Domains are compared exactly, case-insensitively: a subdomain counts as another domain.
+- Decided by: chibenwa in [#2223](https://github.com/linagora/twake-calendar-frontend/issues/2223), with mockups.
+- Why: Twake Mail lets a user add an invitation whose mail was not sent by its organizer (linagora/tmail-backend#3162) and records the actual sender as `SENT-BY`; once in the calendar the mail and its warning banner are gone, so the preview is the only place left to tell the user, and a grey caption behind *Show more* looked the same for a legit assistant and an outsider.
+- Scope: `common`, `apps/public`, event preview.
