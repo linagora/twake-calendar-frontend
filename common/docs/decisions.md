@@ -11,6 +11,13 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Why: the fix stays in the search results and leaves the store as the grid reads it since #492, where an entry under the plain uid next to the occurrences could be shown as one more event; the grid already previews occurrences by their key.
 - Scope: `common`, search results on desktop and mobile.
 
+## 2026-11-25, [UI] The Italian options menus put the name after a colon
+
+- Decision: the Italian name of the options menu of a calendar, booking link or event is "Opzioni: %{name}", like the Russian one, instead of "Opzioni di %{name}".
+- Decided by: Benoit Tellier, [#2215](https://github.com/linagora/twake-calendar-frontend/issues/2215)
+- Why: the name is free text and often starts with an article ("Il mio calendario", the default calendar), which "di" would have to contract with ("del mio calendario"); a colon reads well whatever the name.
+- Scope: `common/src/locales/it.json`.
+
 ## 2026-11-25, [Tech] An event whose UID is `__proto__` is rejected when it is read
 
 - Decision: `parseCalendarEvent` throws on `UID:__proto__`, so the readers skip and report that event like any unreadable one. The stores keep their plain objects keyed by UID; the other events of the load are stored as before.
