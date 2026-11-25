@@ -161,7 +161,6 @@ async function startTdrivePicker({
     'PICK',
     'io.cozy.files',
     {
-      theme: { type: 'light' },
       multiple: true,
       // The picker disables its button for a selection over the limits
       sharingLink: { label: t('tdrive.addAsAttachment'), ...limits },

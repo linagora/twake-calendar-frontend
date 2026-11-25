@@ -56,7 +56,7 @@ it('passes the original attachment URL to UPLOAD without fetching it in the brow
   ).toBeVisible()
   expect(mocks.create).toHaveBeenCalledWith('UPLOAD', 'io.cozy.files', {
     url: attachment.uri,
-    folderId: 'io.cozy.files.root-dir',
+    folderId: 'io.cozy.apps/calendar',
     name: 'report.pdf'
   })
   expect(open).not.toHaveBeenCalled()
