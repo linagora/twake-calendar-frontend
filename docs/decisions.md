@@ -66,3 +66,9 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: chibenwa in [#2223](https://github.com/linagora/twake-calendar-frontend/issues/2223), with mockups.
 - Why: Twake Mail lets a user add an invitation whose mail was not sent by its organizer (linagora/tmail-backend#3162) and records the actual sender as `SENT-BY`; once in the calendar the mail and its warning banner are gone, so the preview is the only place left to tell the user, and a grey caption behind *Show more* looked the same for a legit assistant and an outsider.
 - Scope: `common`, `apps/public`, event preview.
+## 2026-11-25, [Tech] The schedule finds the first row of each day from one index per event store
+
+- Decision: the schedule rows no longer scan and sort every event of FullCalendar to know whether they draw the day indicator. A map from each day to its first event is built in one pass over `calendar.getEvents()`, with the order of `sortEventsByDateTime`, and cached per FullCalendar event store (`getCurrentData().eventStore`) and time zone. The rows read it.
+- Decided by: proposed in the fix of [#2220](https://github.com/linagora/twake-calendar-frontend/issues/2220), a variant of option A of the issue by Eriikah; open to review.
+- Why: the old per-row scan was quadratic, and opening the schedule of a busy week blocked the main thread for 5.5 s. FullCalendar replaces its event store whenever its events change, so the store tells when the index is stale. The rows keep comparing FullCalendar occurrences, as before, and do not need to match them against the inputs of the grid. Without the store, the index is built again for each row, which still costs one pass and no sort.
+- Scope: `common`, schedule (list) view on desktop and mobile.
