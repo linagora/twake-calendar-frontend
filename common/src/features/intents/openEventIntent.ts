@@ -157,33 +157,70 @@ export type EventLookup =
   | { status: 'missing'; message: string }
   | { status: 'failed' }
 
+// The VEVENT is the one the card shows: the same title once trimmed (case
+// counts) and the same instant, whatever the offset, as its start (DTSTART
+// of a master, RECURRENCE-ID of an occurrence)
+function isCardEvent(event: CalendarEvent, expected: ExpectedEvent): boolean {
+  return (
+    event.title?.trim() === expected.title.trim() &&
+    Date.parse(event.recurrenceId ?? event.start) === Date.parse(expected.start)
+  )
+}
+
 /**
- * Whether an event of the UID is the one the card shows: the same title once
- * trimmed (case counts) and the same instant, whatever the offset, as the
- * start of the master (DTSTART) or of an occurrence (RECURRENCE-ID). Used
- * by foundLookup, and by the page again before it writes the reply asked.
+ * Whether an event of the UID is the one the card shows (isCardEvent). Used
+ * by foundLookup, and by the page again before it writes the reply asked,
+ * each on the VEVENTs of cardCandidates.
  */
 export function isExpectedEvent(
   events: CalendarEvent[],
   expected: ExpectedEvent | null
 ): boolean {
-  if (expected === null) return false
-  const instant = Date.parse(expected.start)
-  return events.some(
-    event =>
-      event.title?.trim() === expected.title.trim() &&
-      Date.parse(event.recurrenceId ?? event.start) === instant
+  return expected !== null && events.some(event => isCardEvent(event, expected))
+}
+
+/**
+ * The VEVENTs that may be the card of the event picked: the whole series
+ * for its master (the reply goes to every occurrence); for an occurrence (the
+ * master does not invite the user), that occurrence (its RECURRENCE-ID, kept
+ * in its uid), and the master (its DTSTART) only when no other occurrence
+ * invites the user: with several, a card of the master names none of them.
+ */
+export function cardCandidates(
+  events: CalendarEvent[],
+  picked: CalendarEvent,
+  email: string
+): CalendarEvent[] {
+  if (!picked.recurrenceId) return events
+  const invitedTo = events.filter(
+    event => event.recurrenceId && attendeeRowOf(event, email)
+  )
+  const masters = events.filter(event => !event.recurrenceId)
+  return invitedTo.length === 1 ? [picked, ...masters] : [picked]
+}
+
+// The event of that UID, else the occurrence the card shows, else the first
+function pickEvent(
+  candidates: CalendarEvent[],
+  uid: string,
+  expected: ExpectedEvent | null
+): CalendarEvent | undefined {
+  return (
+    candidates.find(candidate => candidate.uid === uid) ??
+    candidates.find(candidate => isExpectedEvent([candidate], expected)) ??
+    candidates[0]
   )
 }
 
 /**
  * The event the lookup found (getEventByUid), as the link `/events/:uid`
- * picks it (the event of that UID, else its first occurrence), among the
- * VEVENTs the user is an attendee of when there are any: a user invited to
- * one occurrence of a series alone replies to that occurrence. One its
- * organizer cancelled is missing, as a cancelled series is. Nothing found
- * means the server answered with nothing the page can show (an event in a
- * calendar the user does not list, an empty answer): the lookup failed.
+ * picks it (the event of that UID, else the occurrence the card shows, else
+ * the first one), among the VEVENTs the user is an attendee of when there
+ * are any: a user invited to one occurrence of a series alone replies to
+ * that occurrence. One its organizer cancelled is missing, as a cancelled
+ * series is. Nothing found means the server answered with nothing the page
+ * can show (an event in a calendar the user does not list, an empty
+ * answer): the lookup failed.
  */
 export function foundLookup(
   found: FoundEvent | null,
@@ -193,9 +230,11 @@ export function foundLookup(
 ): EventLookup {
   const events = found?.events ?? []
   const invitedTo = events.filter(event => attendeeRowOf(event, email))
-  const candidates = invitedTo.length > 0 ? invitedTo : events
-  const event =
-    candidates.find(candidate => candidate.uid === uid) ?? candidates[0]
+  const event = pickEvent(
+    invitedTo.length > 0 ? invitedTo : events,
+    uid,
+    expected
+  )
   if (!found || !event) return { status: 'failed' }
   // The thunk checks the master alone: an occurrence the organizer cancelled
   // is no invitation either
@@ -206,7 +245,7 @@ export function foundLookup(
     status: 'found',
     calId: found.calId,
     eventId: event.uid,
-    isExpected: isExpectedEvent(events, expected)
+    isExpected: isExpectedEvent(cardCandidates(events, event, email), expected)
   }
 }
 

@@ -101,7 +101,9 @@ describe('the events of other shapes Twake Chat opens', () => {
       await waitFor(() => expect(writes()).toHaveLength(1))
     })
 
-    it('sends nothing, and shows the preview, when the card shows a start that is neither the master nor an occurrence', async () => {
+    // CodeRabbit on PR #2218 (round 2): the WEEKLY rule generates every
+    // Monday at 10:00 (IN_TWO_WEEKS among them); a Wednesday is none of them
+    it('sends nothing, and shows the preview, when the card shows a start the series never has', async () => {
       serve(
         calendarObject(
           { isSeries: true },
@@ -112,7 +114,7 @@ describe('the events of other shapes Twake Chat opens', () => {
       await answerHandshake({
         uid: EVENT_UID,
         partstat: 'ACCEPTED',
-        expected: { ...CARD, start: IN_TWO_WEEKS }
+        expected: { ...CARD, start: '2026-12-02T10:00:00Z' }
       })
 
       await findPreview()
@@ -237,6 +239,60 @@ describe('the events of other shapes Twake Chat opens', () => {
       const last = written().slice(-1)[0]
       expect(userReplyIn(last, NEXT_WEEK)).toBe('ACCEPTED')
       expect(userReplyIn(last, IN_TWO_WEEKS)).toBe('NEEDS-ACTION')
+    })
+
+    // CodeRabbit on PR #2218 (round 2, foundLookup): the card is about the
+    // second occurrence the user is invited to, not the first one found
+    it('records the reply for the occurrence the card shows, when the user is invited to several', async () => {
+      serve(
+        calendarObject(
+          { isSeries: true, user: null },
+          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' },
+          { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+        )
+      )
+      openIntent()
+      await answerHandshake({
+        uid: EVENT_UID,
+        partstat: 'ACCEPTED',
+        expected: { ...CARD, start: IN_TWO_WEEKS }
+      })
+
+      await findPreview()
+      await waitFor(() => expect(written().length).toBeGreaterThan(0))
+      await settle()
+      const last = written().slice(-1)[0]
+      expect(userReplyIn(last, IN_TWO_WEEKS)).toBe('ACCEPTED')
+      expect(userReplyIn(last, NEXT_WEEK)).toBe('NEEDS-ACTION')
+
+      await closePreview()
+      await waitFor(() => expect(answers()).toEqual([done('ACCEPTED')]))
+    })
+
+    // Rule of the orchestrator, 2026-11-27 (case 4): the card shows the start
+    // of the master, which does not invite the user, and several occurrences
+    // do; which one is meant is unknown, so the user replies by hand
+    it('writes no reply, and shows the preview with no reply chosen, when the card shows the start of the series and the user is invited to several occurrences', async () => {
+      serve(
+        calendarObject(
+          { isSeries: true, user: null },
+          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' },
+          { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+        )
+      )
+      openIntent()
+      await answerHandshake({
+        uid: EVENT_UID,
+        partstat: 'ACCEPTED',
+        expected: CARD
+      })
+
+      await findPreview()
+      await settle()
+      expect(writes()).toEqual([])
+      for (const reply of ['ACCEPTED', 'DECLINED', 'TENTATIVE'] as const) {
+        expect(replyButton(reply)).toHaveAttribute('aria-pressed', 'false')
+      }
     })
 
     // CodeRabbit on PR #2218 (foundLookup): the organizer cancelled the

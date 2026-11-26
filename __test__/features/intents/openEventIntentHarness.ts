@@ -460,9 +460,32 @@ export const written = (): VCalComponent[] =>
     ([, jCal]) => jCal
   )
 
+// The client got one answer, `done` with `reply`, and no other after it
+export const answeredOnceWith = async (reply: Reply | null): Promise<void> => {
+  await waitFor(() => expect(answers()).toEqual([done(reply)]))
+  await settle()
+  expect(answers()).toHaveLength(1)
+}
+
+// A server that answers the reply when the test says so: `answer` for
+// serve(), `respond` with the status of the answer
+export const heldAnswer = (): {
+  answer: () => Promise<Response>
+  respond: (status: number) => void
+} => {
+  let deliver: (response: Response) => void = () => undefined
+  return {
+    answer: () =>
+      new Promise<Response>(resolve => {
+        deliver = resolve
+      }),
+    respond: status => deliver(new Response(null, { status }))
+  }
+}
+
 // The lookups after the first one (the reloads after a reply to an
-// occurrence) wait until the test lets them through, each on its own;
-// `fail` makes them fail instead
+// occurrence) wait until the test lets them through, each on its own, with
+// what the server held when asked; `fail` makes them fail instead
 export const holdReloads = (): {
   pending: (() => void)[]
   fail: (error: Error) => void
@@ -474,9 +497,11 @@ export const holdReloads = (): {
   ;(fetchEventByUid as Mock)
     .mockImplementationOnce(lookUp)
     .mockImplementation(async (...args: unknown[]) => {
+      const held: Promise<unknown> = lookUp(...args)
+      held.catch(() => undefined)
       await new Promise<void>(resolve => pending.push(resolve))
       if (failure) throw failure
-      return lookUp(...args)
+      return held
     })
   return {
     pending,

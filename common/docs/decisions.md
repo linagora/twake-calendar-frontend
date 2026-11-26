@@ -113,9 +113,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 ## 2026-11-26, [Product] OPEN replies to an occurrence alone, as the user
 
 - Decision: when the event `OPEN` shows is an occurrence (the master of the series does not invite the user), the reply, asked or clicked, is written on that occurrence alone (its RECURRENCE-ID, the « this occurrence » path of the reply buttons), with the address of the signed-in user, never on the other occurrences they are invited to, nor as the owner of a delegated calendar. A close waits for every reload of a reply in flight (counted), and a reply the server confirmed stays the answer even when the reload fails. It makes precise « A recurring event gets the reply for the whole series » of « Intent OPEN io.cozy.calendar.events: preview and reply »: that holds when the master invites the user.
-- Proposed by: Twake Chat team, from the CodeRabbit review of PR #2218 (2026-11-26); to be confirmed by the maintainers of Twake Calendar.
+- Decision (2026-11-27, makes precise « OPEN replies to the occurrence the user is invited to » and the check of `expected`): the reply asked goes at once (1) to the occurrence whose RECURRENCE-ID is `expected.start`, when that occurrence invites the user and the master does not; (2) to the whole series when `expected.start` is the DTSTART of a master that invites the user, as before; (3) to the one occurrence that invites the user when `expected.start` is the DTSTART of a master that does not; (4) to none when several occurrences invite the user and `expected.start` is that DTSTART: the card names none of them, the preview shows and the user clicks. The read again before the write checks the same VEVENTs. Two reloads of an occurrence in flight at once (two clicks) leave the store with the answer of the newer one, whichever ends last.
+- Proposed by: Twake Chat team, from the CodeRabbit review of PR #2218 (2026-11-26, rules 1 to 4 on 2026-11-27); to be confirmed by the maintainers of Twake Calendar.
 - Why: the « all occurrences » path wrote every future occurrence that lists the user, and the address of the owner of a delegated calendar; the preview checked another row.
-- Scope: `useReplyToOccurrence`, `useCloseOnceAnswered` (`common/src/features/intents/useOpenEventReplies.ts`).
+- Scope: `useReplyToOccurrence`, `useCloseOnceAnswered` (`common/src/features/intents/useOpenEventReplies.ts`), `foundLookup`, `cardCandidates` (`common/src/features/intents/openEventIntent.ts`).
 
 ## 2026-11-26, [UX] The form of CREATE drawn in the page takes dropped files
 

@@ -3,12 +3,13 @@ import {
   EVENT_UID,
   NEXT_WEEK,
   answerHandshake,
+  answeredOnceWith,
   answers,
   calendarObject,
   closeButton,
-  done,
   fakeTodayBeforeTheMeetings,
   findPreview,
+  heldAnswer,
   holdReloads,
   replyButton,
   resetServers,
@@ -28,31 +29,33 @@ import { Provider } from 'react-redux'
 // A close of the preview while the reply the user clicked is on its way: the
 // client removes the frame once it has its answer, which would abort that
 // reply, so the page answers once the server did (openEventIntentHarness.ts)
-const openIntent = (): void => {
+const openPreview = async (): Promise<ReturnType<typeof userEvent.setup>> => {
+  const user = userEvent.setup()
   window.history.replaceState(null, '', '/intents?intent=intent-1')
   render(
     <Provider store={signedInStore()}>
       <IntentsApp />
     </Provider>
   )
+  await answerHandshake({ uid: EVENT_UID })
+  await findPreview()
+  return user
 }
+
+const AN_EVENT = calendarObject({ user: 'TENTATIVE' })
+const AN_OCCURRENCE = calendarObject({
+  recurrenceId: NEXT_WEEK,
+  user: 'TENTATIVE'
+})
 
 describe('a close of the event Twake Chat opens, while the reply the user clicked is in flight', () => {
   beforeEach(resetServers)
   fakeTodayBeforeTheMeetings()
 
   it('gives the client the reply being sent once the server confirmed it, never the former one', async () => {
-    let confirm: (response: Response) => void = () => undefined
-    serve(calendarObject({ user: 'ACCEPTED' }), {
-      answer: () =>
-        new Promise<Response>(resolve => {
-          confirm = resolve
-        })
-    })
-    const user = userEvent.setup()
-    openIntent()
-    await answerHandshake({ uid: EVENT_UID })
-    await findPreview()
+    const server = heldAnswer()
+    serve(calendarObject({ user: 'ACCEPTED' }), { answer: server.answer })
+    const user = await openPreview()
 
     await user.click(replyButton('DECLINED'))
     await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
@@ -61,20 +64,15 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
     // Not the former reply while the new one is in flight
     expect(answers()).toEqual([])
 
-    act(() => confirm(new Response(null, { status: 204 })))
+    act(() => server.respond(204))
 
-    await waitFor(() => expect(answers()).toEqual([done('DECLINED')]))
-    await settle()
-    expect(answers()).toHaveLength(1)
+    await answeredOnceWith('DECLINED')
   })
 
   it('gives the client the reply clicked on an occurrence once the event, loaded again, shows it', async () => {
-    serve(calendarObject({ recurrenceId: NEXT_WEEK, user: 'TENTATIVE' }))
+    serve(AN_OCCURRENCE)
     const reloads = holdReloads()
-    const user = userEvent.setup()
-    openIntent()
-    await answerHandshake({ uid: EVENT_UID })
-    await findPreview()
+    const user = await openPreview()
 
     await user.click(replyButton('DECLINED'))
     await waitFor(() => expect(written()).toHaveLength(1))
@@ -87,23 +85,18 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
 
     act(() => reloads.pending[0]())
 
-    await waitFor(() => expect(answers()).toEqual([done('DECLINED')]))
-    await settle()
-    expect(answers()).toHaveLength(1)
+    await answeredOnceWith('DECLINED')
   })
 
   // CodeRabbit on PR #2218 (useReplyToWholeSeries): the server confirmed the
   // reply; the reload after it is only there to show it
   it('gives the client the reply clicked on an occurrence once the server confirmed it, even when the event cannot be loaded again', async () => {
-    serve(calendarObject({ recurrenceId: NEXT_WEEK, user: 'TENTATIVE' }))
+    serve(AN_OCCURRENCE)
     const reloads = holdReloads()
     reloads.fail(
       Object.assign(new Error('Server down'), { response: { status: 500 } })
     )
-    const user = userEvent.setup()
-    openIntent()
-    await answerHandshake({ uid: EVENT_UID })
-    await findPreview()
+    const user = await openPreview()
 
     await user.click(replyButton('DECLINED'))
     await waitFor(() => expect(written()).toHaveLength(1))
@@ -111,61 +104,68 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
     await user.click(closeButton())
     act(() => reloads.pending[0]())
 
-    await waitFor(() => expect(answers()).toEqual([done('DECLINED')]))
-    await settle()
-    expect(answers()).toHaveLength(1)
+    await answeredOnceWith('DECLINED')
   })
 
-  // CodeRabbit on PR #2218 (useCloseOnceAnswered): two replies clicked one
-  // after the other on an occurrence, each followed by its reload
-  it('waits for every reload of the occurrence before it answers, and gives the last reply clicked', async () => {
-    serve(calendarObject({ recurrenceId: NEXT_WEEK, user: 'TENTATIVE' }))
-    const reloads = holdReloads()
-    const user = userEvent.setup()
-    openIntent()
-    await answerHandshake({ uid: EVENT_UID })
-    await findPreview()
+  // Two replies clicked one after the other on an occurrence, each followed
+  // by its reload
+  describe('two replies clicked on an occurrence', () => {
+    const clickTwoReplies = async (): Promise<{
+      user: ReturnType<typeof userEvent.setup>
+      pending: (() => void)[]
+    }> => {
+      serve(AN_OCCURRENCE)
+      const reloads = holdReloads()
+      const user = await openPreview()
+      await user.click(replyButton('DECLINED'))
+      await waitFor(() => expect(reloads.pending).toHaveLength(1))
+      await waitFor(() => expect(replyButton('ACCEPTED')).toBeEnabled())
+      await user.click(replyButton('ACCEPTED'))
+      await waitFor(() => expect(reloads.pending).toHaveLength(2))
+      expect(userReplyIn(written().slice(-1)[0], NEXT_WEEK)).toBe('ACCEPTED')
+      return { user, pending: reloads.pending }
+    }
 
-    await user.click(replyButton('DECLINED'))
-    await waitFor(() => expect(reloads.pending).toHaveLength(1))
-    await waitFor(() => expect(replyButton('ACCEPTED')).toBeEnabled())
-    await user.click(replyButton('ACCEPTED'))
-    await waitFor(() => expect(reloads.pending).toHaveLength(2))
-    expect(userReplyIn(written().slice(-1)[0], NEXT_WEEK)).toBe('ACCEPTED')
-    await user.click(closeButton())
+    // CodeRabbit on PR #2218 (useCloseOnceAnswered)
+    it('waits for every reload of the occurrence before it answers, and gives the last reply clicked', async () => {
+      const { user, pending } = await clickTwoReplies()
+      await user.click(closeButton())
 
-    act(() => reloads.pending[0]())
-    await settle()
-    // The second reload is still on its way
-    expect(answers()).toEqual([])
+      act(() => pending[0]())
+      await settle()
+      // The second reload is still on its way
+      expect(answers()).toEqual([])
 
-    act(() => reloads.pending[1]())
+      act(() => pending[1]())
 
-    await waitFor(() => expect(answers()).toEqual([done('ACCEPTED')]))
-    await settle()
-    expect(answers()).toHaveLength(1)
+      await answeredOnceWith('ACCEPTED')
+    })
+
+    // CodeRabbit on PR #2218 (round 2, getEventByUid): the server answers
+    // the reload of the first reply, as it held the event then, last
+    it('shows and gives the last reply clicked, when the reload of the first one comes back after the reload of the second', async () => {
+      const { user, pending } = await clickTwoReplies()
+
+      act(() => pending[1]())
+      await settle()
+      act(() => pending[0]())
+      await settle()
+
+      expect(replyButton('ACCEPTED')).toHaveAttribute('aria-pressed', 'true')
+      await user.click(closeButton())
+      await answeredOnceWith('ACCEPTED')
+    })
   })
 
   it.each([
-    ['an event', calendarObject({ user: 'TENTATIVE' })],
-    [
-      'an occurrence',
-      calendarObject({ recurrenceId: NEXT_WEEK, user: 'TENTATIVE' })
-    ]
+    ['an event', AN_EVENT],
+    ['an occurrence', AN_OCCURRENCE]
   ])(
     'gives the client the former reply once the server refused the one clicked (%s)',
     async (_, stored) => {
-      let refuse: (response: Response) => void = () => undefined
-      serve(stored, {
-        answer: () =>
-          new Promise<Response>(resolve => {
-            refuse = resolve
-          })
-      })
-      const user = userEvent.setup()
-      openIntent()
-      await answerHandshake({ uid: EVENT_UID })
-      await findPreview()
+      const server = heldAnswer()
+      serve(stored, { answer: server.answer })
+      const user = await openPreview()
 
       await user.click(replyButton('DECLINED'))
       await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
@@ -173,31 +173,23 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
       await settle()
       expect(answers()).toEqual([])
 
-      act(() => refuse(new Response(null, { status: 500 })))
+      act(() => server.respond(500))
 
-      await waitFor(() => expect(answers()).toEqual([done('TENTATIVE')]))
-      await settle()
-      expect(answers()).toHaveLength(1)
+      await answeredOnceWith('TENTATIVE')
     }
   )
 
   // Chat's close button is hidden (hideCross): the close of the page is the
   // only way out, so it waits for the server 10 s at most
   it.each([
-    ['an event', calendarObject({ user: 'TENTATIVE' })],
-    [
-      'an occurrence',
-      calendarObject({ recurrenceId: NEXT_WEEK, user: 'TENTATIVE' })
-    ]
+    ['an event', AN_EVENT],
+    ['an occurrence', AN_OCCURRENCE]
   ])(
     'gives the client the former reply and closes, once the server has not answered the one clicked for 10 s (%s)',
     async (_, stored) => {
       // The reply is sent, and the server never answers it
       serve(stored, { answer: () => new Promise<Response>(() => {}) })
-      const user = userEvent.setup()
-      openIntent()
-      await answerHandshake({ uid: EVENT_UID })
-      await findPreview()
+      const user = await openPreview()
       await user.click(replyButton('DECLINED'))
       await waitFor(() => expect(putEvent).toHaveBeenCalledTimes(1))
       // The clock of the time limit, from the close on: the rest of the page
@@ -216,9 +208,7 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
         await vi.advanceTimersByTimeAsync(1_000)
       })
 
-      await waitFor(() => expect(answers()).toEqual([done('TENTATIVE')]))
-      await settle()
-      expect(answers()).toHaveLength(1)
+      await answeredOnceWith('TENTATIVE')
     }
   )
 })

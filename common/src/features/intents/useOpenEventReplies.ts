@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
+import type { AppDispatch } from '@common/app/store'
 import {
   getEventByUid,
   setCalendarError
@@ -11,8 +12,10 @@ import { handleRSVPClick } from '@common/features/Events/AttendanceValidation/ha
 import { createEventContext } from '@common/features/Events/createEventContext'
 import type { Calendar } from '@common/types/CalendarTypes'
 import type { CalendarEvent } from '@common/types/EventsTypes'
+import type { UnknownAction } from '@reduxjs/toolkit'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  cardCandidates,
   isExpectedEvent,
   replyToSend,
   type ExpectedEvent,
@@ -43,14 +46,46 @@ const noop = (): void => {}
 export function useReplyToOccurrence(uid: string): ReplyToOccurrence {
   const dispatch = useAppDispatch()
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
+  const reloadsRef = useRef<Reloads>({ started: 0, newest: null })
   return useCallback(
     async (updater: unknown): Promise<void> => {
       const afterChoice = (updater as () => (type: 'solo') => Promise<void>)()
       await afterChoice('solo')
-      await dispatch(getEventByUid({ userId, uid }))
+      const order = ++reloadsRef.current.started
+      const answer = await dispatch(getEventByUid({ userId, uid }))
+      keepNewestAnswer(reloadsRef.current, order, answer, dispatch)
     },
     [dispatch, userId, uid]
   )
+}
+
+/** The reloads of an occurrence, counted in the order they were asked */
+interface Reloads {
+  started: number
+  /** The newest one answered: its order, and its answer */
+  newest: { order: number; answer: UnknownAction } | null
+}
+
+// Two clicks reload the event at once, and each answer replaces the event in
+// the store as it ends (getEventByUid, shared with the rest of Calendar): an
+// older answer ending last would show the reply the user changed since. The
+// newest answer is then put back, without asking the server again: local to
+// OPEN, the thunk is left as the rest of Calendar uses it.
+function keepNewestAnswer(
+  reloads: Reloads,
+  order: number,
+  answer: UnknownAction,
+  dispatch: AppDispatch
+): void {
+  const { newest } = reloads
+  if (newest && order < newest.order) dispatch(copyOf(newest.answer))
+  else reloads.newest = { order, answer }
+}
+
+// The reducer of getEventByUid writes into the events of its payload, which
+// the store then freezes: the answer is put back as a copy
+function copyOf(answer: UnknownAction): UnknownAction {
+  return { ...answer, payload: structuredClone(answer.payload) }
 }
 
 // The reply asked, to send at once: none outside a calendar the user may
@@ -69,11 +104,13 @@ function askedReplyToSend(
 
 // The event as the server holds it now, read again right before the write,
 // is still the one the card shows: its organizer may have renamed or moved
-// it since the lookup. Read as the lookup reads it (extractCalendarEvents).
+// it since the lookup. Read as the lookup reads it (extractCalendarEvents),
+// and on the same VEVENTs (cardCandidates).
 async function isStillExpected(
   event: CalendarEvent,
   calendar: Calendar,
-  expected: ExpectedEvent | null
+  expected: ExpectedEvent | null,
+  email: string
 ): Promise<boolean> {
   const jCal = await fetchEventJCal(event)
   const events = extractCalendarEvents(
@@ -83,7 +120,7 @@ async function isStillExpected(
     },
     { cal: calendar, color: calendar.color }
   )
-  return isExpectedEvent(events, expected)
+  return isExpectedEvent(cardCandidates(events, event, email), expected)
 }
 
 /** The reply asked with OPEN, and what the card showed of its event */
@@ -125,7 +162,7 @@ export function useAskedReply(
     // the reply is answered once that follow-up is done too
     let followUp: Promise<void> = Promise.resolve()
     const send = async (): Promise<void> => {
-      if (!(await isStillExpected(event, calendar, expected))) {
+      if (!(await isStillExpected(event, calendar, expected, user.email))) {
         setHasChanged(true)
         return
       }
