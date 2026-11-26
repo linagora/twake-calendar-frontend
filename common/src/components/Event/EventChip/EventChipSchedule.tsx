@@ -1,13 +1,12 @@
 import React from 'react'
-import { EventDisplayInfo, EventApi } from '@fullcalendar/react'
+import { EventDisplayInfo } from '@fullcalendar/react'
 import moment from 'moment-timezone'
-import { sortEventsByDateTime } from '@common/components/Calendar/utils/calendarUtils'
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { useI18n } from 'twake-i18n'
 import { DesktopEventChipSchedule } from './DesktopEventChipSchedule'
 import { MobileEventChipSchedule } from './MobileEventChipSchedule'
+import { getEventInstanceKey, getFirstRowByDay } from './scheduleFirstRows'
 
 export interface EventChipScheduleProps {
   arg: EventDisplayInfo
@@ -31,35 +30,6 @@ const getEffectiveDayMoment = (
   return moment(arg.event.start).tz(timezone).add(1, 'day')
 }
 
-const isEventOnDay = (
-  e: EventApi,
-  dayKey: string,
-  timezone: string
-): boolean => {
-  if (!e.start) return false
-  const eStartDay = moment(e.start).tz(timezone).format('YYYY-MM-DD')
-  if (eStartDay === dayKey) return true
-  if (e.end) {
-    const eEndInclusiveDay = moment(e.end)
-      .tz(timezone)
-      .subtract(1, 'millisecond')
-      .format('YYYY-MM-DD')
-    return eStartDay < dayKey && eEndInclusiveDay >= dayKey
-  }
-  return false
-}
-
-const getEventInstanceKey = (e: EventApi): string => {
-  // Use FullCalendar's internal instanceId (unique per occurrence) when available.
-  // This prevents recurring events sharing the same id/calId/start from all
-  // matching as the "first" event and showing the day indicator multiple times.
-  const instanceId = (e as unknown as { _instance?: { instanceId?: string } })
-    ._instance?.instanceId
-  if (instanceId) return instanceId
-  const ext = e.extendedProps as unknown as CalendarEvent
-  return `${e.id}_${ext.calId ?? ''}_${e.start?.getTime() ?? ''}`
-}
-
 const buildListDayData = (
   arg: EventDisplayInfo,
   timezone: string,
@@ -74,17 +44,9 @@ const buildListDayData = (
   const effectiveDayMoment = getEffectiveDayMoment(arg, timezone)
   const dayKey = effectiveDayMoment.format('YYYY-MM-DD')
 
-  const allEvents = arg.view.calendar.getEvents()
-  const sameDayEvents = allEvents
-    .filter(e => isEventOnDay(e, dayKey, timezone))
-    .sort(sortEventsByDateTime)
-
-  const firstEvent = sameDayEvents[0]
-
-  const isFirstRow = Boolean(
-    firstEvent &&
-    getEventInstanceKey(firstEvent) === getEventInstanceKey(arg.event)
-  )
+  const isFirstRow =
+    getFirstRowByDay(arg.view.calendar, timezone).get(dayKey) ===
+    getEventInstanceKey(arg.event)
 
   const now = moment().tz(timezone)
   const isToday = effectiveDayMoment.isSame(now, 'day')
