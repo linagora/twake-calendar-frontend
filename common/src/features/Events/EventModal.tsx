@@ -2,6 +2,11 @@ import { useAppSelector } from '@common/app/hooks'
 import { canHoldUserEvents } from '@common/features/Calendars/utils/calendarPermissions'
 import { ConfirmDiscardChangesDialog } from '@common/components/Dialog/ConfirmDiscardChangesDialog'
 import { ResponsiveDialog } from '@common/components/Dialog'
+import {
+  DialogFileDropProvider,
+  FILE_DROP_FRAME,
+  useDialogFileDropArea
+} from '@common/components/Dialog/DialogFileDrop'
 import EventFormFields from '@common/components/Event/EventFormFields'
 import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
@@ -237,6 +242,21 @@ function isPlainEnter(e: React.KeyboardEvent): boolean {
   )
 }
 
+// The title field of the compact form
+function isCompactTitle(target: EventTarget, isCompact: boolean): boolean {
+  return (
+    isCompact &&
+    target instanceof HTMLInputElement &&
+    target.dataset.eventTitle === 'true'
+  )
+}
+
+// Ctrl/Cmd+Enter anywhere, or Enter without Shift in the compact title
+function isSaveKey(e: React.KeyboardEvent, isCompact: boolean): boolean {
+  if (e.ctrlKey || e.metaKey) return true
+  return !e.shiftKey && isCompactTitle(e.target, isCompact)
+}
+
 // Enter in the title of the compact form, or Ctrl/Cmd+Enter anywhere,
 // saves
 function submitOnEnter(
@@ -244,24 +264,18 @@ function submitOnEnter(
   isCompact: boolean,
   formRef: React.RefObject<EventFormHandle | null>
 ): void {
-  if (!isPlainEnter(e)) return
-  const target = e.target as HTMLElement
-  const compactTitle =
-    isCompact &&
-    target instanceof HTMLInputElement &&
-    target.dataset.eventTitle === 'true'
-  if (e.ctrlKey || e.metaKey || (compactTitle && !e.shiftKey)) {
-    e.preventDefault()
-    e.stopPropagation()
-    void formRef.current?.submit()
-  }
+  if (!isPlainEnter(e) || !isSaveKey(e, isCompact)) return
+  e.preventDefault()
+  e.stopPropagation()
+  void formRef.current?.submit()
 }
 
 /**
  * Framed by another page (the intent of Twake Chat), the form is the page
  * itself, not a dialog of its own: its title and close button, the fields,
  * the actions, the full width of the frame. Nothing around it closes it nor
- * drags it.
+ * drags it. The fields take the files dropped on them, as in the dialog
+ * (useDialogFileDropArea, the zone placed in the frame: FILE_DROP_FRAME).
  */
 function EmbeddedForm({
   title,
@@ -277,8 +291,15 @@ function EmbeddedForm({
   children: React.ReactNode
 }): React.JSX.Element {
   const { t } = useI18n()
+  const contentRef = useRef<HTMLDivElement>(null)
+  const fileDrop = useDialogFileDropArea({ open: true, contentRef })
   return (
-    <Stack spacing={2} sx={{ p: 3 }} onKeyDownCapture={onKeyDownCapture}>
+    <Stack
+      spacing={2}
+      sx={{ p: 3, position: 'relative' }}
+      onKeyDownCapture={onKeyDownCapture}
+      {...FILE_DROP_FRAME}
+    >
       <Box
         sx={{
           display: 'flex',
@@ -297,7 +318,13 @@ function EmbeddedForm({
           <CloseIcon />
         </IconButton>
       </Box>
-      {children}
+      <DialogFileDropProvider value={fileDrop.register}>
+        <Box ref={contentRef} {...fileDrop.contentHandlers}>
+          {/* The column of fields the zone covers, as in the dialog */}
+          <Stack spacing={2}>{children}</Stack>
+        </Box>
+      </DialogFileDropProvider>
+      {fileDrop.overlay}
       {actions}
     </Stack>
   )

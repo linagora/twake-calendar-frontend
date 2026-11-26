@@ -102,3 +102,24 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Proposed by: Twake Chat team (branch feat/chat-intents-v2), to be confirmed by the maintainers of Twake Calendar.
 - Why: a renamed or moved event is the normal path, not an attack, and the reader must not believe they answered.
 - Scope: OpenEventIntentPage (`EventPreviewInPage`), `common/src/locales/*.json`.
+
+## 2026-11-26, [Product] OPEN: what the reply asked is checked against before it is written
+
+- Decision: the reply asked with `OPEN` is written at once only when (1) the calendar it was found in lets the user write (their own, or a delegation with write); (2) the event, read again from the server right before the write, still has the title and the start of `expected` (the organizer may have renamed or moved it since the lookup; otherwise nothing is written and the preview shows the « not sent » line of `intents.replyNotSent`); (3) the occurrence picked is not one its organizer cancelled: a cancelled occurrence reads as a cancelled event (`error.eventCanceled`, then cancel), as a cancelled series does. `expected.start` must be an ISO 8601 date or date-time (any offset): another shape `Date.parse` would take (« Nov 23 2026 ») is invalid data.
+- Proposed by: Twake Chat team, from the CodeRabbit review of PR #2218 (2026-11-26); to be confirmed by the maintainers of Twake Calendar.
+- Why: the reply must go out only on the meeting the card showed, as the user, where they may answer; and `Date.parse` reads non-ISO strings differently in each browser.
+- Scope: `parseExpected`, `foundLookup` (`openEventIntent.ts`), `useAskedReply` (`useOpenEventReplies.ts`).
+
+## 2026-11-26, [Product] OPEN replies to an occurrence alone, as the user
+
+- Decision: when the event `OPEN` shows is an occurrence (the master of the series does not invite the user), the reply, asked or clicked, is written on that occurrence alone (its RECURRENCE-ID, the « this occurrence » path of the reply buttons), with the address of the signed-in user, never on the other occurrences they are invited to, nor as the owner of a delegated calendar. A close waits for every reload of a reply in flight (counted), and a reply the server confirmed stays the answer even when the reload fails. It makes precise « A recurring event gets the reply for the whole series » of « Intent OPEN io.cozy.calendar.events: preview and reply »: that holds when the master invites the user.
+- Proposed by: Twake Chat team, from the CodeRabbit review of PR #2218 (2026-11-26); to be confirmed by the maintainers of Twake Calendar.
+- Why: the « all occurrences » path wrote every future occurrence that lists the user, and the address of the owner of a delegated calendar; the preview checked another row.
+- Scope: `useReplyToOccurrence`, `useCloseOnceAnswered` (`common/src/features/intents/useOpenEventReplies.ts`).
+
+## 2026-11-26, [UX] The form of CREATE drawn in the page takes dropped files
+
+- Decision: the form of the intent `CREATE`, drawn in the page (no dialog), takes the files dropped on its fields as attachments, with the same drop zone as in its dialog; a file dropped beside it is ignored instead of the browser opening it.
+- Proposed by: Twake Chat team, from the CodeRabbit review of PR #2218 (2026-11-26).
+- Why: the drop zone lived in the dialog the page no longer draws.
+- Scope: `EmbeddedForm` (`common/src/features/Events/EventModal.tsx`), `measureDropArea` (`FILE_DROP_FRAME`, `common/src/components/Dialog/DialogFileDrop.tsx`).

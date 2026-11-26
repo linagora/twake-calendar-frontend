@@ -61,14 +61,29 @@ export function isOpenEventIntent(action: string, type: string): boolean {
   return isIntent(OPEN_EVENT_INTENT, action, type)
 }
 
-// null when it is not `{ title, start }` with a date
+// A plain object, as the client sends one in a message
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+// An ISO 8601 date, or date and time, with any offset: Date.parse alone also
+// takes other shapes (« Nov 23 2026 »), read differently by each browser
+const ISO_DATE =
+  /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/
+
+function isIsoDate(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    ISO_DATE.test(value) &&
+    !Number.isNaN(Date.parse(value))
+  )
+}
+
+// null when it is not `{ title, start }` with an ISO date
 function parseExpected(value: unknown): ExpectedEvent | null {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return null
-  }
-  const { title, start } = value as { title?: unknown; start?: unknown }
-  if (typeof title !== 'string' || typeof start !== 'string') return null
-  return Number.isNaN(Date.parse(start)) ? null : { title, start }
+  if (!isRecord(value)) return null
+  const { title, start } = value
+  return typeof title === 'string' && isIsoDate(start) ? { title, start } : null
 }
 
 // The reply and the card, each absent or valid: null when one is not
@@ -90,14 +105,8 @@ function parseAsked(
  * the intent then fails.
  */
 export function parseOpenEventData(data: unknown): OpenEventData | null {
-  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    return null
-  }
-  const { uid, partstat, expected } = data as {
-    uid?: unknown
-    partstat?: unknown
-    expected?: unknown
-  }
+  if (!isRecord(data)) return null
+  const { uid, partstat, expected } = data
   if (typeof uid !== 'string' || uid.trim() === '') return null
   const asked = parseAsked(partstat, expected)
   return asked && { uid, ...asked }
@@ -151,9 +160,10 @@ export type EventLookup =
 /**
  * Whether an event of the UID is the one the card shows: the same title once
  * trimmed (case counts) and the same instant, whatever the offset, as the
- * start of the master (DTSTART) or of an occurrence (RECURRENCE-ID)
+ * start of the master (DTSTART) or of an occurrence (RECURRENCE-ID). Used
+ * by foundLookup, and by the page again before it writes the reply asked.
  */
-function isExpectedEvent(
+export function isExpectedEvent(
   events: CalendarEvent[],
   expected: ExpectedEvent | null
 ): boolean {
@@ -170,7 +180,8 @@ function isExpectedEvent(
  * The event the lookup found (getEventByUid), as the link `/events/:uid`
  * picks it (the event of that UID, else its first occurrence), among the
  * VEVENTs the user is an attendee of when there are any: a user invited to
- * one occurrence of a series alone replies to that occurrence. Nothing found
+ * one occurrence of a series alone replies to that occurrence. One its
+ * organizer cancelled is missing, as a cancelled series is. Nothing found
  * means the server answered with nothing the page can show (an event in a
  * calendar the user does not list, an empty answer): the lookup failed.
  */
@@ -186,6 +197,11 @@ export function foundLookup(
   const event =
     candidates.find(candidate => candidate.uid === uid) ?? candidates[0]
   if (!found || !event) return { status: 'failed' }
+  // The thunk checks the master alone: an occurrence the organizer cancelled
+  // is no invitation either
+  if (event.status === 'CANCELLED') {
+    return { status: 'missing', message: EVENT_CANCELED_ERROR }
+  }
   return {
     status: 'found',
     calId: found.calId,
