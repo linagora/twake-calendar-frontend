@@ -113,6 +113,7 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
     const clickTwoReplies = async (): Promise<{
       user: ReturnType<typeof userEvent.setup>
       pending: (() => void)[]
+      fail: (error: Error | null) => void
     }> => {
       serve(AN_OCCURRENCE)
       const reloads = holdReloads()
@@ -123,7 +124,7 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
       await user.click(replyButton('ACCEPTED'))
       await waitFor(() => expect(reloads.pending).toHaveLength(2))
       expect(userReplyIn(written().slice(-1)[0], NEXT_WEEK)).toBe('ACCEPTED')
-      return { user, pending: reloads.pending }
+      return { user, pending: reloads.pending, fail: reloads.fail }
     }
 
     // CodeRabbit on PR #2218 (useCloseOnceAnswered)
@@ -148,6 +149,26 @@ describe('a close of the event Twake Chat opens, while the reply the user clicke
 
       act(() => pending[1]())
       await settle()
+      act(() => pending[0]())
+      await settle()
+
+      expect(replyButton('ACCEPTED')).toHaveAttribute('aria-pressed', 'true')
+      await user.click(closeButton())
+      await answeredOnceWith('ACCEPTED')
+    })
+
+    // CodeRabbit on PR #2218 (round 3, keepNewestAnswer): the server
+    // confirmed the second reply; its reload failing says nothing against it,
+    // and the reload of the first one, ending last, is older
+    it('shows and gives the last reply clicked, when its reload fails and the reload of the first one comes back after it', async () => {
+      const { user, pending, fail } = await clickTwoReplies()
+
+      fail(
+        Object.assign(new Error('Server down'), { response: { status: 500 } })
+      )
+      act(() => pending[1]())
+      await settle()
+      fail(null)
       act(() => pending[0]())
       await settle()
 

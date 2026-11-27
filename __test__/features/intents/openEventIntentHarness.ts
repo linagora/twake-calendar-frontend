@@ -485,10 +485,11 @@ export const heldAnswer = (): {
 
 // The lookups after the first one (the reloads after a reply to an
 // occurrence) wait until the test lets them through, each on its own, with
-// what the server held when asked; `fail` makes them fail instead
+// what the server held when asked; `fail` makes those let through from then
+// on fail instead (null: answer again)
 export const holdReloads = (): {
   pending: (() => void)[]
-  fail: (error: Error) => void
+  fail: (error: Error | null) => void
 } => {
   const lookUp = (fetchEventByUid as Mock).getMockImplementation()
   if (!lookUp) throw new Error('serve() the event before holding its reloads')

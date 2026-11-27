@@ -185,6 +185,8 @@ export function isExpectedEvent(
  * master does not invite the user), that occurrence (its RECURRENCE-ID, kept
  * in its uid), and the master (its DTSTART) only when no other occurrence
  * invites the user: with several, a card of the master names none of them.
+ * The occurrence is taken from the events given (its uid), not from the one
+ * picked, which may be the one loaded at the lookup: none when it is gone.
  */
 export function cardCandidates(
   events: CalendarEvent[],
@@ -192,11 +194,15 @@ export function cardCandidates(
   email: string
 ): CalendarEvent[] {
   if (!picked.recurrenceId) return events
+  // The occurrence as these events hold it (read again, its organizer may
+  // have renamed it since), none when it is gone
+  const occurrence = events.find(event => event.uid === picked.uid)
+  if (!occurrence) return []
   const invitedTo = events.filter(
     event => event.recurrenceId && attendeeRowOf(event, email)
   )
   const masters = events.filter(event => !event.recurrenceId)
-  return invitedTo.length === 1 ? [picked, ...masters] : [picked]
+  return invitedTo.length === 1 ? [occurrence, ...masters] : [occurrence]
 }
 
 // The event of that UID, else the occurrence the card shows, else the first

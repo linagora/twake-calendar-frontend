@@ -5,6 +5,7 @@ import {
   EVENT_UID,
   IN_TWO_WEEKS,
   NEXT_WEEK,
+  NOTICE,
   answerHandshake,
   answers,
   calendarObject,
@@ -24,6 +25,8 @@ import {
   writes,
   written
 } from './openEventIntentHarness'
+import type { Mock } from 'vitest'
+import { fetchEventJCal } from '@common/features/Events/EventDao'
 import { IntentsApp } from '@private/IntentsApp'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -215,59 +218,90 @@ describe('the events of other shapes Twake Chat opens', () => {
       }
     )
 
-    // CodeRabbit on PR #2218 (OpenEventIntentPage, afterChoice('all')): the
-    // user invited to two occurrences, not to the series, replies to the
-    // one of the card; the other keeps its own reply
-    it('records the reply for the occurrence of the card alone, not for the other occurrences they are invited to', async () => {
-      serve(
+    // The user is invited to two occurrences, not to the series, and replies
+    // to the one of the card; the other keeps its own reply. CodeRabbit on
+    // PR #2218: afterChoice('all') (the card shows the first occurrence),
+    // then round 2, foundLookup (the card shows the second one, not the
+    // first one found)
+    it.each([
+      ['the first one', NEXT_WEEK, IN_TWO_WEEKS],
+      ['the second one', IN_TWO_WEEKS, NEXT_WEEK]
+    ])(
+      'records the reply for the occurrence of the card alone, not for the other occurrences they are invited to (card on %s)',
+      async (_, cardStart, other) => {
+        serve(
+          calendarObject(
+            { isSeries: true, user: null },
+            { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' },
+            { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+          )
+        )
+        openIntent()
+        await answerHandshake({
+          uid: EVENT_UID,
+          partstat: 'ACCEPTED',
+          expected: { ...CARD, start: cardStart }
+        })
+
+        await findPreview()
+        await waitFor(() => expect(written().length).toBeGreaterThan(0))
+        await settle()
+        const last = written().slice(-1)[0]
+        expect(userReplyIn(last, cardStart)).toBe('ACCEPTED')
+        expect(userReplyIn(last, other)).toBe('NEEDS-ACTION')
+
+        await closePreview()
+        await waitFor(() => expect(answers()).toEqual([done('ACCEPTED')]))
+      }
+    )
+
+    // CodeRabbit on PR #2218 (round 3, cardCandidates): the event is read
+    // again right before the reply is written; the occurrence of the card,
+    // as the server holds it then, decides, not the one the lookup loaded
+    it.each([
+      [
+        'its organizer renamed that occurrence',
         calendarObject(
           { isSeries: true, user: null },
-          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' },
-          { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION', title: 'Pizza' }
         )
-      )
-      openIntent()
-      await answerHandshake({
-        uid: EVENT_UID,
-        partstat: 'ACCEPTED',
-        expected: { ...CARD, start: NEXT_WEEK }
-      })
-
-      await findPreview()
-      await waitFor(() => expect(written().length).toBeGreaterThan(0))
-      await settle()
-      const last = written().slice(-1)[0]
-      expect(userReplyIn(last, NEXT_WEEK)).toBe('ACCEPTED')
-      expect(userReplyIn(last, IN_TWO_WEEKS)).toBe('NEEDS-ACTION')
-    })
-
-    // CodeRabbit on PR #2218 (round 2, foundLookup): the card is about the
-    // second occurrence the user is invited to, not the first one found
-    it('records the reply for the occurrence the card shows, when the user is invited to several', async () => {
-      serve(
-        calendarObject(
-          { isSeries: true, user: null },
-          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' },
-          { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+      ],
+      [
+        'that occurrence is no longer there',
+        calendarObject({ isSeries: true, user: null })
+      ]
+    ])(
+      'writes no reply, and says it was not sent, when between the lookup and the write %s',
+      async (_, now) => {
+        serve(
+          calendarObject(
+            { isSeries: true, user: null },
+            { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' }
+          )
         )
-      )
-      openIntent()
-      await answerHandshake({
-        uid: EVENT_UID,
-        partstat: 'ACCEPTED',
-        expected: { ...CARD, start: IN_TWO_WEEKS }
-      })
+        // The lookup finds the occurrence of the card; the read before the
+        // write gets the event as it is now
+        ;(fetchEventJCal as Mock).mockImplementation(async () =>
+          structuredClone(now)
+        )
+        openIntent()
+        await answerHandshake({
+          uid: EVENT_UID,
+          partstat: 'ACCEPTED',
+          expected: { ...CARD, start: NEXT_WEEK }
+        })
 
-      await findPreview()
-      await waitFor(() => expect(written().length).toBeGreaterThan(0))
-      await settle()
-      const last = written().slice(-1)[0]
-      expect(userReplyIn(last, IN_TWO_WEEKS)).toBe('ACCEPTED')
-      expect(userReplyIn(last, NEXT_WEEK)).toBe('NEEDS-ACTION')
-
-      await closePreview()
-      await waitFor(() => expect(answers()).toEqual([done('ACCEPTED')]))
-    })
+        await screen.findByRole(
+          'button',
+          { name: t('eventPreview.ACCEPTED') },
+          { timeout: 10000 }
+        )
+        await settle()
+        expect(writes()).toEqual([])
+        expect(replyButton('ACCEPTED')).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.getByText(NOTICE)).toBeVisible()
+      }
+    )
 
     // Rule of the orchestrator, 2026-11-27 (case 4): the card shows the start
     // of the master, which does not invite the user, and several occurrences

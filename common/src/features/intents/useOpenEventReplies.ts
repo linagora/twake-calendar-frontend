@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import type { AppDispatch } from '@common/app/store'
 import {
   getEventByUid,
   setCalendarError
@@ -46,46 +45,32 @@ const noop = (): void => {}
 export function useReplyToOccurrence(uid: string): ReplyToOccurrence {
   const dispatch = useAppDispatch()
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
-  const reloadsRef = useRef<Reloads>({ started: 0, newest: null })
+  const reloadsRef = useRef(0)
   return useCallback(
     async (updater: unknown): Promise<void> => {
       const afterChoice = (updater as () => (type: 'solo') => Promise<void>)()
       await afterChoice('solo')
-      const order = ++reloadsRef.current.started
-      const answer = await dispatch(getEventByUid({ userId, uid }))
-      keepNewestAnswer(reloadsRef.current, order, answer, dispatch)
+      const order = ++reloadsRef.current
+      const reload = getEventByUid({ userId, uid })
+      // Two clicks reload the event at once, and each answer replaces the
+      // event in the store (getEventByUid, shared with the rest of Calendar).
+      // A newer reload starts once the newer reply was answered, which the
+      // store holds: an older answer ending after it started is dropped
+      // before the reducer sees it, whether the newer one succeeds or fails.
+      // Local to OPEN, the thunk is left as the rest of Calendar uses it.
+      await dispatch((storeDispatch, getState, extra) =>
+        reload(
+          ((action: UnknownAction): UnknownAction =>
+            order < reloadsRef.current
+              ? action
+              : storeDispatch(action)) as typeof storeDispatch,
+          getState,
+          extra
+        )
+      )
     },
     [dispatch, userId, uid]
   )
-}
-
-/** The reloads of an occurrence, counted in the order they were asked */
-interface Reloads {
-  started: number
-  /** The newest one answered: its order, and its answer */
-  newest: { order: number; answer: UnknownAction } | null
-}
-
-// Two clicks reload the event at once, and each answer replaces the event in
-// the store as it ends (getEventByUid, shared with the rest of Calendar): an
-// older answer ending last would show the reply the user changed since. The
-// newest answer is then put back, without asking the server again: local to
-// OPEN, the thunk is left as the rest of Calendar uses it.
-function keepNewestAnswer(
-  reloads: Reloads,
-  order: number,
-  answer: UnknownAction,
-  dispatch: AppDispatch
-): void {
-  const { newest } = reloads
-  if (newest && order < newest.order) dispatch(copyOf(newest.answer))
-  else reloads.newest = { order, answer }
-}
-
-// The reducer of getEventByUid writes into the events of its payload, which
-// the store then freezes: the answer is put back as a copy
-function copyOf(answer: UnknownAction): UnknownAction {
-  return { ...answer, payload: structuredClone(answer.payload) }
 }
 
 // The reply asked, to send at once: none outside a calendar the user may
