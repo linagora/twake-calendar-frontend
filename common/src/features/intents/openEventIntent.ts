@@ -205,6 +205,29 @@ export function cardCandidates(
   return invitedTo.length === 1 ? [occurrence, ...masters] : [occurrence]
 }
 
+// The check of getEventByUidAsync (isCanceled) is private and reads a
+// FoundEvent by its UID; this one reads any VEVENT
+const isCancelled = (event: CalendarEvent): boolean =>
+  event.status === 'CANCELLED'
+
+/**
+ * Whether the event picked still takes the reply, in the events read again
+ * right before the write: it is still there (its uid), still lists the user
+ * among its attendees, and neither it nor the master of its series is
+ * cancelled. Otherwise the write would put back the attendees read at the
+ * lookup. Used by the page (useAskedReply), with isExpectedEvent.
+ */
+export function isStillInvited(
+  events: CalendarEvent[],
+  picked: CalendarEvent,
+  email: string
+): boolean {
+  const target = events.find(event => event.uid === picked.uid)
+  if (!target || !attendeeRowOf(target, email)) return false
+  const masters = events.filter(event => !event.recurrenceId)
+  return ![target, ...masters].some(isCancelled)
+}
+
 // The event of that UID, else the occurrence the card shows, else the first
 function pickEvent(
   candidates: CalendarEvent[],
@@ -244,7 +267,7 @@ export function foundLookup(
   if (!found || !event) return { status: 'failed' }
   // The thunk checks the master alone: an occurrence the organizer cancelled
   // is no invitation either
-  if (event.status === 'CANCELLED') {
+  if (isCancelled(event)) {
     return { status: 'missing', message: EVENT_CANCELED_ERROR }
   }
   return {

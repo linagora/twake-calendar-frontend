@@ -230,11 +230,15 @@ describe('the event Twake Chat opens with a reply to send', () => {
 
   // CodeRabbit on PR #2218 (handleRSVPClick): the event is read again just
   // before the reply is written. Renamed or moved in between, it is no
-  // longer the one the card shows: the reply asked is not sent.
+  // longer the one the card shows: the reply asked is not sent. Nor when the
+  // organizer took the user out of it, or cancelled it (CodeRabbit, round 4):
+  // the write would put back the attendees read at the lookup
   describe('the event changed between the lookup and the reply', () => {
     it.each([
       ['renamed', calendarObject({ title: 'Pizza Friday' })],
-      ['moved one hour later', movedOneHourLater(calendarObject({}))]
+      ['moved one hour later', movedOneHourLater(calendarObject({}))],
+      ['without the user among its attendees', calendarObject({ user: null })],
+      ['cancelled', calendarObject({ status: 'CANCELLED' })]
     ])(
       'sends nothing and says the reply was not sent when the event read again was %s',
       async (_why, now) => {

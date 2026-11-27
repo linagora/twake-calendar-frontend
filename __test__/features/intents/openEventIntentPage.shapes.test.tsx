@@ -257,29 +257,67 @@ describe('the events of other shapes Twake Chat opens', () => {
 
     // CodeRabbit on PR #2218 (round 3, cardCandidates): the event is read
     // again right before the reply is written; the occurrence of the card,
-    // as the server holds it then, decides, not the one the lookup loaded
+    // as the server holds it then, decides, not the one the lookup loaded.
+    // Round 4: nor when the organizer took the user out of it, or cancelled
+    // it or the whole series
+    const occurrence = calendarObject(
+      { isSeries: true, user: null },
+      { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' }
+    )
     it.each([
       [
         'its organizer renamed that occurrence',
+        occurrence,
         calendarObject(
           { isSeries: true, user: null },
           { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION', title: 'Pizza' }
-        )
+        ),
+        NEXT_WEEK
       ],
       [
         'that occurrence is no longer there',
-        calendarObject({ isSeries: true, user: null })
+        occurrence,
+        calendarObject({ isSeries: true, user: null }),
+        NEXT_WEEK
+      ],
+      [
+        'its organizer took the user out of that occurrence',
+        occurrence,
+        calendarObject(
+          { isSeries: true, user: null },
+          { recurrenceId: NEXT_WEEK, user: null }
+        ),
+        NEXT_WEEK
+      ],
+      [
+        'its organizer cancelled that occurrence',
+        occurrence,
+        calendarObject(
+          { isSeries: true, user: null },
+          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION', status: 'CANCELLED' }
+        ),
+        NEXT_WEEK
+      ],
+      [
+        'its organizer cancelled the series of that occurrence',
+        occurrence,
+        calendarObject(
+          { isSeries: true, user: null, status: 'CANCELLED' },
+          { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' }
+        ),
+        NEXT_WEEK
+      ],
+      [
+        'its organizer cancelled the series the card shows',
+        calendarObject({ isSeries: true }),
+        calendarObject({ isSeries: true, status: 'CANCELLED' }),
+        CARD.start
       ]
     ])(
       'writes no reply, and says it was not sent, when between the lookup and the write %s',
-      async (_, now) => {
-        serve(
-          calendarObject(
-            { isSeries: true, user: null },
-            { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION' }
-          )
-        )
-        // The lookup finds the occurrence of the card; the read before the
+      async (_, before, now, start) => {
+        serve(before)
+        // The lookup finds the event of the card; the read before the
         // write gets the event as it is now
         ;(fetchEventJCal as Mock).mockImplementation(async () =>
           structuredClone(now)
@@ -288,7 +326,7 @@ describe('the events of other shapes Twake Chat opens', () => {
         await answerHandshake({
           uid: EVENT_UID,
           partstat: 'ACCEPTED',
-          expected: { ...CARD, start: NEXT_WEEK }
+          expected: { ...CARD, start }
         })
 
         await screen.findByRole(

@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   cardCandidates,
   isExpectedEvent,
+  isStillInvited,
   replyToSend,
   type ExpectedEvent,
   type Reply
@@ -88,9 +89,10 @@ function askedReplyToSend(
 }
 
 // The event as the server holds it now, read again right before the write,
-// is still the one the card shows: its organizer may have renamed or moved
-// it since the lookup. Read as the lookup reads it (extractCalendarEvents),
-// and on the same VEVENTs (cardCandidates).
+// is still the one the card shows and still invites the user: its organizer
+// may have renamed, moved or cancelled it, or taken the user out, since the
+// lookup. Read as the lookup reads it (extractCalendarEvents), and on the
+// same VEVENTs (cardCandidates, isStillInvited).
 async function isStillExpected(
   event: CalendarEvent,
   calendar: Calendar,
@@ -105,7 +107,10 @@ async function isStillExpected(
     },
     { cal: calendar, color: calendar.color }
   )
-  return isExpectedEvent(cardCandidates(events, event, email), expected)
+  return (
+    isExpectedEvent(cardCandidates(events, event, email), expected) &&
+    isStillInvited(events, event, email)
+  )
 }
 
 /** The reply asked with OPEN, and what the card showed of its event */
@@ -121,7 +126,8 @@ export interface AskedReply {
  * Sends the reply the client asked for, once the event is found, through
  * the path of the reply buttons (handleRSVPClick), before the preview shows:
  * nothing can close the frame while it is in flight. The event is read
- * again first: changed since the lookup, nothing is written. A refused
+ * again first: changed since the lookup, cancelled, or no longer inviting
+ * the user, nothing is written. A refused
  * reply shows the calendar's error over the preview. In an Effect, as it
  * talks to the calendar server; the ref keeps it to once. Used by
  * OpenEventIntentPage.
