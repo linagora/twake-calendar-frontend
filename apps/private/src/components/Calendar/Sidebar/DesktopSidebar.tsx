@@ -1,10 +1,10 @@
-import { Box, Button, Drawer, radius } from '@linagora/twake-mui'
-import AddIcon from '@mui/icons-material/Add'
+import { Box, Button, Drawer } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { MiniCalendar } from '@common/components/Calendar/MiniCalendar'
 import { CalendarSidebarProps } from './SideBar'
 import { SidebarCommonContent } from './SidebarCommonContent'
 import Tooltip from '@common/components/Tooltip'
+import { Icon, Plus } from '@linagora/twake-icons'
 
 export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
   calendarRef,
@@ -48,18 +48,12 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
       >
         <Tooltip title={t('tooltip.createEvent')}>
           <Button
-            size="medium"
             variant="contained"
             fullWidth
+            startIcon={<Icon size={12} icon={Plus} />}
             onClick={onCreateEvent}
-            sx={{
-              borderRadius: radius.lg,
-              fontSize: '16px',
-              fontWeight: 500,
-              lineHeight: 'normal'
-            }}
+            className="u-bdrs-6 u-fz-small"
           >
-            <AddIcon sx={{ marginRight: 0.5, fontSize: '20px' }} />{' '}
             {t('event.createEvent')}
           </Button>
         </Tooltip>

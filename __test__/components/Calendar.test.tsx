@@ -5,7 +5,7 @@ import * as servicesModule from '@common/features/Calendars/CalendarSlice'
 import { setKeyboardShortcuts } from '@common/features/Settings/SettingsSlice'
 import { searchPeople } from '@common/features/User/UserDao'
 import CalendarLayout from '@private/components/Calendar/CalendarLayout'
-import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 
@@ -254,7 +254,13 @@ describe('CalendarSelection', () => {
       .getByText('calendar.other')
       .closest('.MuiAccordionSummary-root')
 
-    const addButton = screen.getAllByTestId('AddIcon')[2]
+    // The add icon inside the summary is a hidden placeholder, the real
+    // button is laid over it, outside the summary
+    const sharedSection = sharedAccordionSummary?.closest('.MuiAccordion-root')
+      ?.parentElement as HTMLElement
+    const addButton = within(sharedSection)
+      .getAllByTestId('AddIcon')
+      .find(icon => !sharedAccordionSummary?.contains(icon)) as HTMLElement
     await act(async () => {
       fireEvent.click(addButton)
     })
