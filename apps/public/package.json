@@ -5,9 +5,9 @@
   "dependencies": {
     "@calendar/common": "*",
     "@linagora/twake-mui": "^20.0.0",
-    "@mui/icons-material": "^9.5.0",
+    "@mui/icons-material": "^9.6.0",
     "@mui/x-date-pickers": "^9",
-    "@sentry/react": "^11.16.0",
+    "@sentry/react": "^11.17.0",
     "date-fns": "^4.4.0",
     "dayjs": "^1.11.23",
     "ky": "^2.2.0",
