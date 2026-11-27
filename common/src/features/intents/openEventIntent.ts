@@ -229,6 +229,7 @@ export function isStillInvited(
 }
 
 // The event of that UID, else the occurrence the card shows, else the first
+// one that goes on (a cancelled one only when all are)
 function pickEvent(
   candidates: CalendarEvent[],
   uid: string,
@@ -237,6 +238,7 @@ function pickEvent(
   return (
     candidates.find(candidate => candidate.uid === uid) ??
     candidates.find(candidate => isExpectedEvent([candidate], expected)) ??
+    candidates.find(candidate => !isCancelled(candidate)) ??
     candidates[0]
   )
 }

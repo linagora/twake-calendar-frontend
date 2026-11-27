@@ -368,30 +368,35 @@ describe('the events of other shapes Twake Chat opens', () => {
     })
 
     // CodeRabbit on PR #2218 (foundLookup): the organizer cancelled the
-    // occurrence the user is invited to; the series goes on without them
+    // occurrence the user is invited to; the series goes on without them.
+    // The master does not invite the user; NEXT_WEEK is the cancelled
+    // occurrence, IN_TWO_WEEKS (when there) an active one they are invited to
+    const cancelledFirst = calendarObject(
+      { isSeries: true, user: null },
+      { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION', status: 'CANCELLED' }
+    )
+    const cancelledThenActive = calendarObject(
+      { isSeries: true, user: null },
+      { recurrenceId: NEXT_WEEK, user: 'NEEDS-ACTION', status: 'CANCELLED' },
+      { recurrenceId: IN_TWO_WEEKS, user: 'NEEDS-ACTION' }
+    )
+    const cardOfTheCancelledOne = {
+      uid: EVENT_UID,
+      partstat: 'ACCEPTED',
+      expected: { ...CARD, start: NEXT_WEEK }
+    }
     it.each([
-      ['without a reply asked', { uid: EVENT_UID }],
+      ['without a reply asked', cancelledFirst, { uid: EVENT_UID }],
+      ['with a reply asked', cancelledFirst, cardOfTheCancelledOne],
       [
-        'with a reply asked',
-        {
-          uid: EVENT_UID,
-          partstat: 'ACCEPTED',
-          expected: { ...CARD, start: NEXT_WEEK }
-        }
+        'the card names it, another occurrence goes on',
+        cancelledThenActive,
+        cardOfTheCancelledOne
       ]
     ])(
       'says the event was cancelled, writes nothing, then cancels the intent, when that occurrence is cancelled (%s)',
-      async (_, data) => {
-        serve(
-          calendarObject(
-            { isSeries: true, user: null },
-            {
-              recurrenceId: NEXT_WEEK,
-              user: 'NEEDS-ACTION',
-              status: 'CANCELLED'
-            }
-          )
-        )
+      async (_, stored, data) => {
+        serve(stored)
         const user = userEvent.setup()
         openIntent()
         await answerHandshake(data)
@@ -413,6 +418,36 @@ describe('the events of other shapes Twake Chat opens', () => {
           ])
         )
         expect(writes()).toEqual([])
+      }
+    )
+
+    // CodeRabbit on PR #2218 (openEventIntent.ts:266, pickEvent): with no
+    // card to match, the first occurrence the server returns is the
+    // cancelled one; the one that goes on is the invitation
+    it.each([
+      ['without a reply asked', { uid: EVENT_UID }],
+      ['with a reply asked, no card', { uid: EVENT_UID, partstat: 'ACCEPTED' }]
+    ])(
+      'shows the occurrence that goes on, with its replies, and does not cancel the intent, when the first one is cancelled (%s)',
+      async (_, data) => {
+        serve(cancelledThenActive)
+        openIntent()
+        await answerHandshake(data)
+
+        await findPreview()
+        expect(screen.getByText(/7 December 2026/)).toBeInTheDocument()
+        expect(screen.queryByText(/30 November 2026/)).toBeNull()
+        expect(screen.queryByText(t('error.eventCanceled'))).toBeNull()
+        for (const reply of ['ACCEPTED', 'DECLINED', 'TENTATIVE'] as const) {
+          expect(replyButton(reply)).toBeEnabled()
+        }
+        await settle()
+        // No card to check: no reply goes at once (CARD, harness)
+        expect(writes()).toEqual([])
+        expect(answers()).toEqual([])
+
+        await closePreview()
+        await waitFor(() => expect(answers()).toEqual([done(null)]))
       }
     )
   })
