@@ -115,7 +115,7 @@ function useCallbackExchange(
 
 /**
  * Not signed in: goes to the SSO once, silently (the `framed` option of
- * twake-oidc, index.tsx), which comes back to /intents/callback.
+ * twake-oidc, intents/index.tsx), which comes back to /intents/callback.
  */
 function useSilentLogin(
   phase: Phase,
@@ -188,8 +188,8 @@ function IntentsPageContent({
  * (Twake Chat): the calendar's theme and texts, no Twake bar, never the
  * calendar. Every path under `/intents` shows the intent or why it cannot be
  * served. Without a redirect URI to come back to from the SSO (`canSignIn`
- * false, index.tsx), it says it failed. Rendered instead of App by index.tsx,
- * inside the store Provider.
+ * false, intents/index.tsx), it says it failed. Rendered by intents/index.tsx,
+ * the entry of the intents page, inside the store Provider.
  */
 export function IntentsApp({
   canSignIn = true

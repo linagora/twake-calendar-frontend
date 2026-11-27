@@ -5,8 +5,10 @@ import { configureAuth, startLogin } from '@linagora/twake-oidc'
 import { screen, waitFor } from '@testing-library/react'
 import type { Mock } from 'vitest'
 
-// The page as the browser loads it (apps/private/src/index.tsx): every path
-// under /intents is the intents page or an error, never the calendar, and its
+// The page as the browser loads it: nginx serves the intents entry
+// (apps/private/src/intents/index.tsx) for every path under /intents, the
+// calendar entry (apps/private/src/index.tsx) for the rest. Every path under
+// /intents is the intents page or an error, never the calendar, and its
 // sign-in is silent and comes back to /intents/callback, not to the callback
 // of the calendar (which no other app may frame)
 const { sdk } = vi.hoisted(() => {
@@ -66,12 +68,17 @@ const t = (key: string): string => {
   return text
 }
 
-// Loads the page at that address, as a new document
+// Loads the page at that address, as a new document: the entry nginx serves
+// there
 const boot = async (path: string): Promise<void> => {
   vi.resetModules()
   window.history.replaceState(null, '', path)
   document.body.innerHTML = '<div id="root"></div>'
-  await import('@private/index')
+  if (/^\/intents([/?]|$)/.test(path)) {
+    await import('@private/intents/index')
+  } else {
+    await import('@private/index')
+  }
 }
 
 // What the page hands to twake-oidc, read at each sign-in

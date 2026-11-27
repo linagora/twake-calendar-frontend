@@ -79,3 +79,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Crash-- (CTO), 2026-11-25.
 - Why: the apps that open the Drive picker show the same skeleton while it loads; one shared component keeps them alike ([linagora/twake-libs#79](https://github.com/linagora/twake-libs/pull/79)).
 - Scope: `common/src/features/Tdrive/components/TdrivePickerDialog.tsx`.
+
+## 2026-11-27, [Architecture] The intents page is its own entry of the bundler
+
+- Decision: the cozy-stack intents page has its own rsbuild entry, `apps/private/src/intents/index.tsx`, built as `intents.html`; nginx and the dev server serve it for `/intents` and every path under it, `index.html` (the calendar) for the rest. The calendar entry no longer imports `IntentsApp`, and the intents entry does not import `App`.
+- Decided by: Quentin (Crash--) suggestion in the Twake Calendar room 2026-11-26 after The Manh Le's question
+- Why: with one entry, every opening of the calendar loaded the intents app (cozy-interapp and its client) and the intents page loaded the whole calendar; two entries keep each page to its own code.
+- Scope: `apps/private` (entries, `rsbuild.config.ts`), `nginx.conf`.

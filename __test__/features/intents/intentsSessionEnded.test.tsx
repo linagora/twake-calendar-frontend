@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event'
 
 // The session ends while the user saves the new event in the frame of Twake
 // Chat: the calendar server answers 401. The page as the browser loads it
-// (apps/private/src/index.tsx, its own configureAuth), the real ky client and
+// (apps/private/src/intents/index.tsx, its own configureAuth), the real ky client and
 // twake-oidc: framed, twake-oidc never goes to the SSO, it calls the
 // onLoginRequired of the app. On /intents, as the old embed did with its
 // `login-required`, the page says the session expired and the client gets an
@@ -168,7 +168,7 @@ describe('the new event intent when the session ends while it saves', () => {
       await store.dispatch(getCalendarsList())
     })
     document.body.innerHTML = '<div id="root"></div>'
-    await import('@private/index')
+    await import('@private/intents/index')
 
     // Chat answers the `ready` of the page with the members of the room
     await waitFor(() => expect(sentOfType('ready')).toHaveLength(1), {
