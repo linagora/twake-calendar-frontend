@@ -45,7 +45,6 @@ var WS_PING_TIMEOUT_PERIOD_MS = 35000
 // var HIDE_RESOURCES = true; // optional
 var DISABLE_PUBLIC_VISIBILITY = false
 var ASK_FOR_TZ_UPDATE = true
-var TOOLTIP_DELAY_MS = 2000
 var HIDE_LANGUAGE_SELECTOR = false
 // Hides the theme selector of the settings, for deployments where Twake
 // Workplace common settings own the theme. Defaults to false.

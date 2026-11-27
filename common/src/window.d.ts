@@ -63,8 +63,6 @@ declare global {
 
     ASK_FOR_TZ_UPDATE: boolean
 
-    TOOLTIP_DELAY_MS: number
-
     displayOrgAvatar?: boolean
 
     __ws?: WebSocket

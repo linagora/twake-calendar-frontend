@@ -18,7 +18,6 @@ var LANDING_PAGE_URL = 'http://landing.e2e.local'
 
 var DEBUG = true
 var LANG = 'en'
-var TOOLTIP_DELAY_MS = 0
 var HIDE_LANGUAGE_SELECTOR = false
 var BOOKING_LINK_ENABLED = true
 var ENABLE_CREATE_BOOKING = true

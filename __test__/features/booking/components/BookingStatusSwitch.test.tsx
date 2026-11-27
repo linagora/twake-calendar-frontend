@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen, fireEvent } from '@testing-library/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { BookingStatusSwitch } from '@private/features/booking/components/BookingStatusSwitch'
 
@@ -15,37 +15,53 @@ describe('BookingStatusSwitch', () => {
     render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>)
 
   it('renders switch with active state and handles change', async () => {
-    const handleChange = vi.fn()
-    renderWithTheme(
-      <BookingStatusSwitch active={true} onChange={handleChange} />
-    )
+    vi.useFakeTimers()
+    try {
+      const handleChange = vi.fn()
+      renderWithTheme(
+        <BookingStatusSwitch active={true} onChange={handleChange} />
+      )
 
-    const switchElement = screen.getByRole('switch', {
-      name: 'booking.activeSchedule'
-    })
-    expect(switchElement).toBeChecked()
-    fireEvent.mouseOver(switchElement)
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'booking.activeSchedule'
-    )
+      const switchElement = screen.getByRole('switch', {
+        name: 'booking.activeSchedule'
+      })
+      expect(switchElement).toBeChecked()
+      fireEvent.mouseOver(switchElement)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000)
+      })
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'booking.activeSchedule'
+      )
 
-    fireEvent.click(switchElement)
-    expect(handleChange).toHaveBeenCalledWith(false)
+      fireEvent.click(switchElement)
+      expect(handleChange).toHaveBeenCalledWith(false)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('renders switch with inactive state', async () => {
-    const handleChange = vi.fn()
-    renderWithTheme(
-      <BookingStatusSwitch active={false} onChange={handleChange} />
-    )
+    vi.useFakeTimers()
+    try {
+      const handleChange = vi.fn()
+      renderWithTheme(
+        <BookingStatusSwitch active={false} onChange={handleChange} />
+      )
 
-    const switchElement = screen.getByRole('switch', {
-      name: 'booking.activeSchedule'
-    })
-    expect(switchElement).not.toBeChecked()
-    fireEvent.mouseOver(switchElement)
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'booking.inactiveSchedule'
-    )
+      const switchElement = screen.getByRole('switch', {
+        name: 'booking.activeSchedule'
+      })
+      expect(switchElement).not.toBeChecked()
+      fireEvent.mouseOver(switchElement)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000)
+      })
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'booking.inactiveSchedule'
+      )
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
