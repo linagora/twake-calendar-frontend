@@ -1,6 +1,7 @@
 import React from 'react'
 import { CheckCircle, AddToCloud, Icon } from '@linagora/twake-icons'
-import { Box, CircularProgress, IconButton, Tooltip } from '@linagora/twake-mui'
+import { Box, CircularProgress, IconButton } from '@linagora/twake-mui'
+import { Tooltip } from '@common/components/Tooltip'
 import { useI18n } from 'twake-i18n'
 
 export const AttachmentUploadEndIcon: React.FC<{
