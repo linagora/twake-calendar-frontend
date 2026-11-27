@@ -18,10 +18,10 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
-const EVENT_NOT_FOUND_ERROR = 'TRANSLATION:error.eventNotFound'
-const EVENT_CANCELED_ERROR = 'TRANSLATION:error.eventCanceled'
+export const EVENT_NOT_FOUND_ERROR = 'TRANSLATION:error.eventNotFound'
+export const EVENT_CANCELED_ERROR = 'TRANSLATION:error.eventCanceled'
 
-type FoundEvent = { calId: string; events: CalendarEvent[] }
+export type FoundEvent = { calId: string; events: CalendarEvent[] }
 
 export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
   create.asyncThunk<

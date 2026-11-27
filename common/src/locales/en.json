@@ -774,9 +774,10 @@
     "calendarUnavailable": "This calendar is not available. You may not be a member of it."
   },
   "intents": {
+    "replyNotSent": "This event changed since it was shared: your answer was not sent. Choose it below.",
     "unavailable": {
       "title": "Twake Calendar cannot open here",
-      "description": "Open Twake Calendar to create your event."
+      "description": "Open Twake Calendar to continue."
     },
     "forbidden": {
       "title": "Twake Calendar is not allowed to answer here",
@@ -795,12 +796,12 @@
       "description": "This app asked Twake Calendar for something it does not offer."
     },
     "invalidData": {
-      "title": "This event cannot be created",
-      "description": "This app sent an event Twake Calendar cannot read."
+      "title": "Twake Calendar cannot read this event",
+      "description": "This app sent event details in a form Twake Calendar does not know."
     },
     "untrustedFrame": {
       "title": "Twake Calendar cannot open in this page",
-      "description": "Another page shows this app: open Twake Calendar directly to create your event."
+      "description": "Another page shows this app: open Twake Calendar directly to continue."
     }
   }
 }

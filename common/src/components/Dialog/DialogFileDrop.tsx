@@ -51,12 +51,21 @@ interface DropArea {
 export const FILE_DROP_START_AFTER = { 'data-file-drop-start-after': true }
 
 /**
- * Where the fields of the body are in the dialog, without what is marked to
+ * Marks what the drop zone is placed in when there is no dialog around the
+ * body (the form drawn in the page of an intent, EventModal): positioned, as
+ * the paper of a dialog is.
+ */
+export const FILE_DROP_FRAME = { 'data-file-drop-frame': true }
+
+/**
+ * Where the fields of the body are in the dialog (or the frame), without what is marked to
  * stay above the zone, and only what is visible of them however the body is
  * scrolled.
  */
 function measureDropArea(content: HTMLElement): DropArea | null {
-  const paper = content.closest<HTMLElement>('.MuiDialog-paper')
+  const paper = content.closest<HTMLElement>(
+    '.MuiDialog-paper, [data-file-drop-frame]'
+  )
   // The column of fields, narrower than the body in expanded mode
   const fields = content.firstElementChild
   if (!paper || !fields) return null

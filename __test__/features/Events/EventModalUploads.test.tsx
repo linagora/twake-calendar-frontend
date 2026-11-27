@@ -126,6 +126,49 @@ describe('EventPopover with attachments uploading', () => {
     expect(saveButton()).toBeInTheDocument()
   })
 
+  // CodeRabbit on PR #2218 (EventModal, EmbeddedForm): framed by Twake Chat
+  // (the CREATE intent), the form is the page, not a dialog; a file dragged
+  // onto its fields is attached as in the dialog of the calendar
+  describe.each([
+    ['in its dialog', false],
+    ['drawn in the page of an intent', true]
+  ])('the form %s', (_where, embedded) => {
+    const renderForm = (): void => {
+      renderWithProviders(
+        <EventPopover
+          open={true}
+          onClose={onClose}
+          selectedRange={selectedRange}
+          setSelectedRange={vi.fn()}
+          calendarRef={{ current: { select: vi.fn() } } as never}
+          embedded={embedded}
+        />,
+        preloadedState
+      )
+    }
+    const dataTransfer = { types: ['Files'], files: [file] }
+    const titleField = (): HTMLElement =>
+      screen.getByRole('textbox', { name: 'event.form.title' })
+
+    it('shows where to drop the files once they are dragged over it', () => {
+      renderForm()
+
+      fireEvent.dragEnter(titleField(), { dataTransfer })
+
+      expect(screen.getByTestId('dialog-file-drop-overlay')).toBeInTheDocument()
+    })
+
+    it('attaches the files dropped on its fields', () => {
+      renderForm()
+
+      fireEvent.dragEnter(titleField(), { dataTransfer })
+      fireEvent.drop(titleField(), { dataTransfer })
+
+      expect(mockUploadAttachment).toHaveBeenCalledWith(file)
+      expect(saveButton()).toBeDisabled()
+    })
+  })
+
   it('asks before closing and losing the files on their way', () => {
     renderWithUploadRunning()
 

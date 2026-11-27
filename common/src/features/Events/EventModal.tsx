@@ -2,11 +2,18 @@ import { useAppSelector } from '@common/app/hooks'
 import { canHoldUserEvents } from '@common/features/Calendars/utils/calendarPermissions'
 import { ConfirmDiscardChangesDialog } from '@common/components/Dialog/ConfirmDiscardChangesDialog'
 import { ResponsiveDialog } from '@common/components/Dialog'
+import {
+  DialogFileDropProvider,
+  FILE_DROP_FRAME,
+  useDialogFileDropArea
+} from '@common/components/Dialog/DialogFileDrop'
 import EventFormFields from '@common/components/Event/EventFormFields'
 import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
+import { Box, IconButton, Stack, Typography } from '@linagora/twake-mui'
+import CloseIcon from '@mui/icons-material/Close'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -32,9 +39,9 @@ const EventPopover: React.FC<{
   /** Called with the event once it is saved */
   onCreated?: (event: CalendarEvent) => void
   /**
-   * Framed by another page, the form is all the page shows: no expand arrow
-   * (More options still opens the full form), no backdrop (a click beside
-   * it does not close it), not draggable out of the frame
+   * Framed by another page, the form is all the page shows, drawn in the
+   * page (EmbeddedForm): no dialog, so no expand arrow (More options still
+   * opens the full form), no backdrop to click, nothing to drag
    */
   embedded?: boolean
   /**
@@ -147,76 +154,75 @@ const EventPopover: React.FC<{
     [setDraftCalendarId]
   )
 
+  const onKeyDownCapture = (e: React.KeyboardEvent): void =>
+    submitOnEnter(e, !showMore, formRef)
+
+  const actions = (
+    <EventActions
+      showExpandedBtn={!showMore}
+      onClose={handleClose}
+      onSave={async () => {
+        await formRef.current?.submit()
+      }}
+      onExpanded={() => setShowMore(s => !s)}
+      isSaveDisabled={saving || isUploading}
+    />
+  )
+  const fields = (
+    <EventFormFields
+      ref={formRef}
+      initialValues={initialValues}
+      showMore={showMore}
+      isOpen={open}
+      typeOfAction={undefined}
+      eventId={event?.uid ?? null}
+      userPersonalCalendars={userPersonalCalendars}
+      onSubmit={embedded ? submitOnce : handleSubmit}
+      onCancel={handleClose}
+      tempStorageKey="create"
+      onCalendarChange={handleCalendarChange}
+      onStartChange={handleStartChange}
+      onEndChange={handleEndChange}
+      onAllDayChange={handleAllDayChange}
+      onDirtyChange={setIsFormDirty}
+      onUploadingChange={setIsUploading}
+    />
+  )
+
   return (
     <>
-      <ResponsiveDialog
-        open={open}
-        onKeyDownCapture={e => {
-          if (
-            e.key !== 'Enter' ||
-            e.nativeEvent.isComposing ||
-            e.repeat ||
-            e.altKey
-          )
-            return
-          const target = e.target as HTMLElement
-          const compactTitle =
-            !showMore &&
-            target instanceof HTMLInputElement &&
-            target.dataset.eventTitle === 'true'
-          if (e.ctrlKey || e.metaKey || (compactTitle && !e.shiftKey)) {
-            e.preventDefault()
-            e.stopPropagation()
-            void formRef.current?.submit()
-          }
-        }}
-        anchorEl={anchorEl}
-        dynamicPositioning={
-          !isListView(currentView) &&
-          Boolean(anchorEl) &&
-          anchorEl !== document.body
-        }
-        onClose={handleClose}
-        title={modalTitle}
-        isExpanded={showMore}
-        onExpandToggle={embedded ? undefined : (): void => setShowMore(s => !s)}
-        hideBackdrop={embedded}
-        // Framed, the form is the whole page: the error of a failed save,
-        // beside it, must stay reachable with the keyboard
-        disableEnforceFocus={embedded}
-        draggable={!showMore && !embedded}
-        actions={
-          <EventActions
-            showExpandedBtn={!showMore}
+      {embedded ? (
+        open && (
+          <EmbeddedForm
+            title={modalTitle}
+            onKeyDownCapture={onKeyDownCapture}
             onClose={handleClose}
-            onSave={async () => {
-              await formRef.current?.submit()
-            }}
-            onExpanded={() => setShowMore(s => !s)}
-            isSaveDisabled={saving || isUploading}
-          />
-        }
-        expandText={t('tooltip.moreEventOptions')}
-      >
-        <EventFormFields
-          ref={formRef}
-          initialValues={initialValues}
-          showMore={showMore}
-          isOpen={open}
-          typeOfAction={undefined}
-          eventId={event?.uid ?? null}
-          userPersonalCalendars={userPersonalCalendars}
-          onSubmit={embedded ? submitOnce : handleSubmit}
-          onCancel={handleClose}
-          tempStorageKey="create"
-          onCalendarChange={handleCalendarChange}
-          onStartChange={handleStartChange}
-          onEndChange={handleEndChange}
-          onAllDayChange={handleAllDayChange}
-          onDirtyChange={setIsFormDirty}
-          onUploadingChange={setIsUploading}
-        />
-      </ResponsiveDialog>
+            actions={actions}
+          >
+            {fields}
+          </EmbeddedForm>
+        )
+      ) : (
+        <ResponsiveDialog
+          open={open}
+          onKeyDownCapture={onKeyDownCapture}
+          anchorEl={anchorEl}
+          dynamicPositioning={
+            !isListView(currentView) &&
+            Boolean(anchorEl) &&
+            anchorEl !== document.body
+          }
+          onClose={handleClose}
+          title={modalTitle}
+          isExpanded={showMore}
+          onExpandToggle={(): void => setShowMore(s => !s)}
+          draggable={!showMore}
+          actions={actions}
+          expandText={t('tooltip.moreEventOptions')}
+        >
+          {fields}
+        </ResponsiveDialog>
+      )}
       <ConfirmDiscardChangesDialog
         open={guard.showConfirm}
         onCancel={guard.cancelClose}
@@ -226,6 +232,101 @@ const EventPopover: React.FC<{
         }}
       />
     </>
+  )
+}
+
+// A plain press of Enter: not while composing (an IME), held, nor with Alt
+function isPlainEnter(e: React.KeyboardEvent): boolean {
+  return (
+    e.key === 'Enter' && !e.nativeEvent.isComposing && !e.repeat && !e.altKey
+  )
+}
+
+// The title field of the compact form
+function isCompactTitle(target: EventTarget, isCompact: boolean): boolean {
+  return (
+    isCompact &&
+    target instanceof HTMLInputElement &&
+    target.dataset.eventTitle === 'true'
+  )
+}
+
+// Ctrl/Cmd+Enter anywhere, or Enter without Shift in the compact title
+function isSaveKey(e: React.KeyboardEvent, isCompact: boolean): boolean {
+  if (e.ctrlKey || e.metaKey) return true
+  return !e.shiftKey && isCompactTitle(e.target, isCompact)
+}
+
+// Enter in the title of the compact form, or Ctrl/Cmd+Enter anywhere,
+// saves
+function submitOnEnter(
+  e: React.KeyboardEvent,
+  isCompact: boolean,
+  formRef: React.RefObject<EventFormHandle | null>
+): void {
+  if (!isPlainEnter(e) || !isSaveKey(e, isCompact)) return
+  e.preventDefault()
+  e.stopPropagation()
+  void formRef.current?.submit()
+}
+
+/**
+ * Framed by another page (the intent of Twake Chat), the form is the page
+ * itself, not a dialog of its own: its title and close button, the fields,
+ * the actions, the full width of the frame. Nothing around it closes it nor
+ * drags it. The fields take the files dropped on them, as in the dialog
+ * (useDialogFileDropArea, the zone placed in the frame: FILE_DROP_FRAME).
+ */
+function EmbeddedForm({
+  title,
+  onKeyDownCapture,
+  onClose,
+  actions,
+  children
+}: {
+  title: string
+  onKeyDownCapture: (e: React.KeyboardEvent) => void
+  onClose: () => void
+  actions: React.ReactNode
+  children: React.ReactNode
+}): React.JSX.Element {
+  const { t } = useI18n()
+  const contentRef = useRef<HTMLDivElement>(null)
+  const fileDrop = useDialogFileDropArea({ open: true, contentRef })
+  return (
+    <Stack
+      spacing={2}
+      sx={{ p: 3, position: 'relative' }}
+      onKeyDownCapture={onKeyDownCapture}
+      {...FILE_DROP_FRAME}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Typography variant="h3" component="h2">
+          {title}
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          aria-label={t('actions.close')}
+          size="xsmall"
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <DialogFileDropProvider value={fileDrop.register}>
+        <Box ref={contentRef} {...fileDrop.contentHandlers}>
+          {/* The column of fields the zone covers, as in the dialog */}
+          <Stack spacing={2}>{children}</Stack>
+        </Box>
+      </DialogFileDropProvider>
+      {fileDrop.overlay}
+      {actions}
+    </Stack>
   )
 }
 

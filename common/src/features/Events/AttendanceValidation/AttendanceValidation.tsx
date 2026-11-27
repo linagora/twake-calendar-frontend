@@ -26,6 +26,8 @@ interface AttendanceValidationProps {
   ) => void
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>
   hideCounterProposalSection?: boolean
+  /** Told when a reply starts and once the server answered it */
+  onReplyingChange?: (isReplying: boolean) => void
 }
 
 export function AttendanceValidation({
@@ -33,7 +35,8 @@ export function AttendanceValidation({
   user,
   setAfterChoiceFunc,
   setOpenEditModePopup,
-  hideCounterProposalSection
+  hideCounterProposalSection,
+  onReplyingChange
 }: AttendanceValidationProps): JSX.Element | null {
   const { calendar } = contextualizedEvent
   const theme = useTheme()
@@ -54,6 +57,7 @@ export function AttendanceValidation({
   const handleLoadingChange = (loading: boolean, value?: PartStat): void => {
     setIsLoading(loading)
     setLoadingValue(loading && value ? value : null)
+    onReplyingChange?.(loading)
   }
 
   const commonButtonProps = {

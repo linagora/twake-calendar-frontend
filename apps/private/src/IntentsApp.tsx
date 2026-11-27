@@ -11,10 +11,8 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { history, type AppDispatch } from '@common/app/store'
 import { Loading } from '@common/components/Loading/Loading'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
-import {
-  IntentMessageScreen,
-  IntentPage
-} from '@common/features/intents/IntentPage'
+import { IntentMessageScreen } from '@common/features/intents/IntentFrame'
+import { IntentPage } from '@common/features/intents/IntentPage'
 import {
   isIntentsCallbackPath,
   parseIntentPath

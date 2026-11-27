@@ -774,9 +774,10 @@
     "calendarUnavailable": "Dieser Kalender ist nicht verfügbar. Möglicherweise sind Sie kein Mitglied."
   },
   "intents": {
+    "replyNotSent": "Dieser Termin hat sich seit dem Teilen geändert: Ihre Antwort wurde nicht gesendet. Wählen Sie sie unten aus.",
     "unavailable": {
       "title": "Twake Calendar kann hier nicht geöffnet werden",
-      "description": "Öffnen Sie Twake Calendar, um Ihren Termin zu erstellen."
+      "description": "Öffnen Sie Twake Calendar, um fortzufahren."
     },
     "forbidden": {
       "title": "Twake Calendar darf hier nicht antworten",
@@ -795,12 +796,12 @@
       "description": "Diese App hat Twake Calendar um etwas gebeten, das es nicht anbietet."
     },
     "invalidData": {
-      "title": "Dieser Termin kann nicht erstellt werden",
-      "description": "Diese App hat einen Termin gesendet, den Twake Calendar nicht lesen kann."
+      "title": "Twake Calendar kann diesen Termin nicht lesen",
+      "description": "Diese App hat Termindetails in einer Form gesendet, die Twake Calendar nicht kennt."
     },
     "untrustedFrame": {
       "title": "Twake Calendar kann auf dieser Seite nicht geöffnet werden",
-      "description": "Eine andere Seite zeigt diese App an: Öffnen Sie Twake Calendar direkt, um Ihren Termin zu erstellen."
+      "description": "Eine andere Seite zeigt diese App an: Öffnen Sie Twake Calendar direkt, um fortzufahren."
     }
   }
 }
