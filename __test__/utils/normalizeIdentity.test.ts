@@ -1,5 +1,45 @@
 import { userOrganiser } from '@common/features/User/userDataTypes'
-import { normalizeIdentity, stripMailto } from '@common/utils/normalizeIdentity'
+import {
+  domainOf,
+  isOfAnotherDomain,
+  normalizeIdentity,
+  stripMailto
+} from '@common/utils/normalizeIdentity'
+
+describe('domainOf', () => {
+  it.each([
+    ['mailto:Bob@Open-Paas.org', 'open-paas.org'],
+    ['mailto: bob@sub.example.com ', 'sub.example.com'],
+    ['bob', ''],
+    [undefined, '']
+  ])('reads the domain of %p as %p', (address, domain) => {
+    expect(domainOf(address)).toBe(domain)
+  })
+})
+
+describe('isOfAnotherDomain', () => {
+  it('matches domains whatever their case and scheme', () => {
+    expect(
+      isOfAnotherDomain('mailto:assistant@OPEN-PAAS.org', 'bob@open-paas.org')
+    ).toBe(false)
+  })
+
+  it('tells another domain apart', () => {
+    expect(
+      isOfAnotherDomain('attacker@evil.example', 'bob@open-paas.org')
+    ).toBe(true)
+  })
+
+  it('does not take a subdomain for the domain', () => {
+    expect(
+      isOfAnotherDomain('attacker@open-paas.org.evil', 'bob@open-paas.org')
+    ).toBe(true)
+  })
+
+  it('counts an address without a domain as external', () => {
+    expect(isOfAnotherDomain('attacker', 'bob')).toBe(true)
+  })
+})
 
 describe('normalizeIdentity', () => {
   it.each([

@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-11-25
+
+### Added
+
+- #2208 Hovering an event, or focusing it with the keyboard, shows a preview with its title, time, calendar and description after a short delay, so events too narrow to read side by side can be read. It is never shown on touch screens, and closes when the event is pressed or dragged
+
+## [1.4.2] - 2026-11-25
+
 ### Upgrade instructions
 
 - Optionally set `TDRIVE_MAX_FILE_SIZE` (maximum size of one picked file, in bytes) and `TDRIVE_MAX_TOTAL_FILE_SIZE` (maximum total size of the Tdrive files of one event, in bytes) to limit the files attached from Tdrive. Both are disabled by default.
@@ -16,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #2048 "Enable keyboard shortcuts" switch in Settings → Calendar and events (desktop only), so the single key shortcuts can be turned off. The choice is remembered by the browser, and the shortcuts stay on by default
 - #2022 The new event form can be shown alone on `/embed/newEvent`, as the CREATE `io.cozy.calendar.events` intent, so Twake Chat can create an event with the members of a room as attendees
 - #2156 The Tdrive picker can refuse files over a size, for one file and for the total of an event, with `TDRIVE_MAX_FILE_SIZE` and `TDRIVE_MAX_TOTAL_FILE_SIZE`
+- #2031 A drag and drop zone for attachments
 
 ### Changed
 
@@ -65,6 +74,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - #2094 The Docker images stop nginx gracefully on SIGTERM instead of waiting for the kill timeout
 - #2148 Snackbars have the same background everywhere
 - #2163 The event dialog can no longer be dragged out of the window
+- #2172 Events can be clicked over the availability strip of a booking link in the Week view, so a narrow event can be opened
+- #2178 An event saved with a property it keeps as is and that has a `TZID` (such as `X-MS-OLK-ORIGINALSTART;TZID=Europe/Paris`) now carries the VTIMEZONE of that zone
+- #2177 An event whose `TZID` is written in another case (such as "europe/paris") is saved in its zone instead of in UTC
+- #2176 An event with a `DURATION` in days or weeks spanning a DST change ends at the right hour and is saved with the right end
+- #2188 The month view starts the week on Monday
+- #1925 Availability is displayed correctly
+- #2205 The "Add resource" dialog is titled "Browse resources" and searches resources with the "Search by name" label and placeholder
+- #2169 Fixed the current hour indicator
+- #2191 The Drive picker follows the theme instead of being forced to light, and files are uploaded to My Drive
+- #2202 The event preview closes again on Escape, and the time slot is no longer highlighted when hovering over an event
+- #2204 Clicking a recurring event in the search results opens its preview when occurrences of the series are already loaded
+- #2187 Removed the white border around event chips
 
 ### Security
 

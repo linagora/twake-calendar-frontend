@@ -99,7 +99,7 @@ async function runUploadIntent({
     'io.cozy.files',
     {
       url: attachment.uri,
-      folderId: 'io.cozy.files.root-dir',
+      folderId: 'io.cozy.apps/calendar',
       name: attachment.x_filename?.trim() ?? ''
     }
   ) as UploadIntent

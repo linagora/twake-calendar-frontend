@@ -24,8 +24,9 @@ export const createMouseHandlers = (props: MouseHandlersProps) => {
       }
     }
 
+    // Over an event, the event is what the pointer is on, not its slot
     const target = e.target as HTMLElement
-    if (target && target.closest('.fc-timegrid-slot-label')) {
+    if (target && target.closest('.fc-timegrid-slot-label, .fc-event')) {
       timegridEl
         .querySelectorAll('.hour-highlight')
         .forEach((el: Element) => el.remove())

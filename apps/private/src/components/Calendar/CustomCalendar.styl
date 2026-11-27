@@ -2,8 +2,11 @@
 .fc
   --fc-classic-background: var(--twake-palette-background-paper)
   --fc-classic-muted: var(--twake-palette-background-contrast)
+  --fc-classic-foreground: var(--twake-palette-text-primary)
+  --fc-classic-faint-foreground: var(--twake-palette-text-disabled)
   --fc-classic-muted-foreground: var(--twake-palette-text-secondary)
   --fc-classic-border: var(--twake-palette-divider)
+  --fc-classic-strong-border: var(--twake-palette-border-main)
   --fc-list-event-hover-bg-color: var(--twake-palette-action-hover)
   --fc-classic-now: var(--twake-palette-primary-main)
 
@@ -412,6 +415,7 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 .fc-event
   background-color transparent !important
   border none !important
+  box-shadow none !important
   width 95%
   height 100%
   .fc-event-main
@@ -420,8 +424,9 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
     align-items center
     padding: 0
 
+.fc-timegrid-event,
 .fc-timegrid-event-harness-inset .fc-timegrid-event
-  box-shadow none
+  box-shadow none !important
 
 /* Hide 00:00 time slot label */
 .fc-timegrid-slot-label[data-time="00:00:00"] .fc-timegrid-slot-label-cushion,

@@ -1,4 +1,4 @@
-import { Tooltip } from '@linagora/twake-mui'
+import { Tooltip } from '@common/components/Tooltip'
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import { useI18n } from 'twake-i18n'
@@ -40,8 +40,9 @@ export const FreeBusyIndicator: React.FC<FreeBusyIndicatorProps> = ({
       slotProps={{ tooltip: { sx: { opacity: 1, bgcolor: 'grey.900' } } }}
     >
       <StatusIcon
-        titleAccess={label}
+        role="img"
         aria-label={label}
+        aria-hidden={false}
         sx={{ color: status === 'busy' ? 'warning.main' : undefined }}
         style={{
           margin: '0 -6px 0 5px',

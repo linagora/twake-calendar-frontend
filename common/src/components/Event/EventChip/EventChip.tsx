@@ -29,6 +29,11 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { getCalendarOwnerAttendee } from '@common/utils/getCalendarOwnerAttendee'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 import { BookingLinkEventChip } from './BookingLinkEventChip'
+import { EventHoverPreview } from './EventHoverPreview'
+import { calendarLabel } from '@common/components/Event/utils/eventAccessibleLabel'
+import { formatDate } from '@common/components/EventPreview/utils/formatDate'
+import { formatEnd } from '@common/components/EventPreview/utils/formatEnd'
+import { useI18n } from 'twake-i18n'
 
 const PRIVATE_CLASSIFICATIONS = ['PRIVATE', 'CONFIDENTIAL']
 
@@ -46,6 +51,8 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
 
   const calendars = useAppSelector(state => state.calendars.list)
   const tempcalendars = useAppSelector(state => state.calendars.templist)
+  const user = useAppSelector(state => state.user.userData)
+  const { t } = useI18n()
 
   const event = arg.event
   const props = event._def.extendedProps
@@ -160,7 +167,30 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
       ? stringAvatar(organizer.cn ?? organizer.cal_address ?? '')
       : { color: undefined, children: null }
 
-    return (
+    // All-day dates are YYYY-MM-DD strings, as formatDate expects
+    const previewStart = event.allDay ? event.startStr : (event.start ?? '')
+    const previewEnd = event.allDay ? event.endStr : event.end
+    const previewEndLabel = previewEnd
+      ? formatEnd({
+          start: previewStart,
+          end: previewEnd,
+          t,
+          timeZone,
+          allday: event.allDay
+        })
+      : null
+    const previewStartLabel = formatDate(
+      previewStart,
+      t,
+      timeZone,
+      event.allDay
+    )
+    // Same rule as the event preview: a private event of someone else's
+    // calendar shows no details
+    const showDetails =
+      !isPrivate || !!calendar.owner?.emails?.includes(user?.email ?? '')
+
+    const chip = (
       <Card
         variant="outlined"
         style={{
@@ -330,6 +360,25 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
             </Avatar>
           )}
       </Card>
+    )
+
+    return (
+      <EventHoverPreview
+        anchorRef={cardRef}
+        disabled={arg.isDragging || arg.isResizing || arg.isMirror}
+        title={event.title}
+        time={
+          previewEndLabel
+            ? `${previewStartLabel} – ${previewEndLabel}`
+            : previewStartLabel
+        }
+        calendarName={calendarLabel(calendar, user?.openpaasId, t)}
+        calendarColor={effectiveColor.light}
+        location={showDetails ? (props.location as string) : undefined}
+        description={showDetails ? displayDescription : undefined}
+      >
+        {chip}
+      </EventHoverPreview>
     )
   } catch (e) {
     return (

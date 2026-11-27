@@ -45,6 +45,7 @@ import { useSwipeNavigation } from './hooks/useSwipeNavigation'
 import { useAutoScrollToUpcommingEvent } from '../Event/hooks/useAutoScrollToUpcommingEvent'
 import { usePreserveScrollPositionInScheduleView } from './hooks/usePreserveScrollPositionInScheduleView'
 import { useDraftEvent } from './hooks/useDraftEvent'
+import { useCurrentMinute } from './hooks/useCurrentMinute'
 import { BookingLinkOverlay } from './BookingLinkOverlay'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
 
@@ -144,6 +145,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   const { lang, t } = useI18n()
   const { isTooSmall: isMobile, isTablet } = useScreenSizeDetection()
   const isNotDesktop = isTablet || isMobile
+  const now = useCurrentMinute()
 
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
     null
@@ -267,7 +269,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           slotHeaderClass={arg =>
             cx(
               'fc-timegrid-slot fc-timegrid-slot-label',
-              updateSlotLabelVisibility(new Date(), arg, otherProps.timezone)
+              updateSlotLabelVisibility(now, arg, otherProps.timezone)
             )
           }
           slotHeaderInnerClass="fc-timegrid-slot-label-cushion fc-timegrid-slot-label-frame"

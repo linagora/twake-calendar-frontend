@@ -56,7 +56,7 @@ it('passes the original attachment URL to UPLOAD without fetching it in the brow
   ).toBeVisible()
   expect(mocks.create).toHaveBeenCalledWith('UPLOAD', 'io.cozy.files', {
     url: attachment.uri,
-    folderId: 'io.cozy.files.root-dir',
+    folderId: 'io.cozy.apps/calendar',
     name: 'report.pdf'
   })
   expect(open).not.toHaveBeenCalled()
@@ -190,30 +190,38 @@ it('renders the save button inside the Chip endIcon slot', () => {
 })
 
 it('shows only the save tooltip when moving from the filename to the save button', async () => {
-  render(<AttachementChip isOrganizer={false} attachment={attachment} />)
-  const label = screen.getByText('report')
-  const button = screen.getByRole('button', { name: 'tdrive.saveToDrive' })
-  fireEvent.mouseOver(label)
-  expect(
-    await screen.findByRole('tooltip', { name: 'report.pdf' })
-  ).toBeVisible()
+  vi.useFakeTimers()
+  try {
+    render(<AttachementChip isOrganizer={false} attachment={attachment} />)
+    const label = screen.getByText('report')
+    const button = screen.getByRole('button', { name: 'tdrive.saveToDrive' })
+    fireEvent.mouseOver(label)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100)
+    })
+    expect(screen.getByRole('tooltip', { name: 'report.pdf' })).toBeVisible()
 
-  fireEvent.mouseOut(label, { relatedTarget: button })
-  fireEvent.mouseOver(button, { relatedTarget: label })
-  expect(
-    await screen.findByRole('tooltip', { name: 'tdrive.saveToDrive' })
-  ).toBeVisible()
-  await waitFor(() =>
+    fireEvent.mouseOut(label, { relatedTarget: button })
+    fireEvent.mouseOver(button, { relatedTarget: label })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000)
+    })
+    expect(
+      screen.getByRole('tooltip', { name: 'tdrive.saveToDrive' })
+    ).toBeVisible()
     expect(
       screen.queryByRole('tooltip', { name: 'report.pdf' })
     ).not.toBeInTheDocument()
-  )
 
-  fireEvent.mouseOut(button, { relatedTarget: label })
-  fireEvent.mouseOver(label, { relatedTarget: button })
-  expect(
-    await screen.findByRole('tooltip', { name: 'report.pdf' })
-  ).toBeVisible()
+    fireEvent.mouseOut(button, { relatedTarget: label })
+    fireEvent.mouseOver(label, { relatedTarget: button })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000)
+    })
+    expect(screen.getByRole('tooltip', { name: 'report.pdf' })).toBeVisible()
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 it('keeps the inline saved state after the notification timeout and prevents another copy', async () => {

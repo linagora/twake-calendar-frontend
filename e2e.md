@@ -206,7 +206,7 @@ day, 23:45) — 48 tests.
 - [x] `SHELL-14` Saving a full screen event edit gives the menubar its actions back
 - [x] `SHELL-15` Saving a full screen event creation gives the menubar its actions back
 
-## NAV — Navigation and views (18)
+## NAV — Navigation and views (19)
 
 - [x] `NAV-01` Next moves the week view to the following week
 - [x] `NAV-02` Today comes back to the current week after browsing away
@@ -226,6 +226,7 @@ day, 23:45) — 48 tests.
 - [x] `NAV-16` Browsing twelve weeks in a row does not duplicate any event
 - [x] `NAV-17` The month view shows the events of the adjacent-month days of its last row ([#1412](https://github.com/linagora/twake-calendar-frontend/issues/1412))
 - [x] `NAV-19` The schedule view lists an ongoing multi-day all day event from today on, not on its past days ([#1461](https://github.com/linagora/twake-calendar-frontend/issues/1461))
+- [x] `NAV-20` Hovering an event shows its full title and location
 
 ## CRUD — Creating a simple event (22)
 

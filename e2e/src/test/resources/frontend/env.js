@@ -39,7 +39,6 @@ var WS_PING_TIMEOUT_PERIOD_MS = 35000
 var DISABLE_PUBLIC_VISIBILITY = false
 // No timezone prompt: it would steal the focus from the tests
 var ASK_FOR_TZ_UPDATE = false
-var TOOLTIP_DELAY_MS = 0
 var HIDE_LANGUAGE_SELECTOR = false
 var BOOKING_LINK_ENABLED = true
 var ENABLE_EVENT_ATTACHMENTS = false

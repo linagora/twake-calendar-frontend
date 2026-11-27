@@ -35,7 +35,6 @@ import {
   Checkbox,
   IconButton,
   ListItem,
-  Tooltip,
   Typography,
   useTheme
 } from '@linagora/twake-mui'
@@ -64,6 +63,7 @@ import {
   getBestColor,
   useSchemeBackground
 } from '@common/components/Event/EventChip/EventChipUtils'
+import Tooltip from '@common/components/Tooltip'
 
 type CalendarModalTab = 'settings' | 'access'
 
@@ -279,7 +279,7 @@ const getBookingLinkIcon = (active: boolean, iconColor: string): ReactNode => {
 const BookingLinkLabel: React.FC<{ name: string }> = ({ name }) => {
   const theme = useTheme()
   return (
-    <Tooltip title={name} enterDelay={500} placement="bottom-start">
+    <Tooltip title={name} placement="bottom-start">
       <div
         style={{
           display: 'flex',
@@ -875,7 +875,7 @@ const CalendarSelector: React.FC<{
           }
         }}
       >
-        <Tooltip title={displayName} enterDelay={500} placement="bottom-start">
+        <Tooltip title={displayName} placement="bottom-start">
           <label
             style={{
               display: 'flex',

@@ -24,6 +24,7 @@ const NODE_INLINE = [
   '@linagora/twake-sdk',
   '@linagora/twake-bar',
   '@linagora/twake-websocket',
+  '@linagora/twake-app-skeleton',
   'html-react-parser',
   'domhandler',
   'htmlparser2',

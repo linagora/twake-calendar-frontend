@@ -11,6 +11,7 @@ import Tooltip from '@common/components/Tooltip'
 import GroupsIcon from '@mui/icons-material/Groups'
 import { stringAvatar } from './eventUtils'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import { stripMailto } from '@common/utils/normalizeIdentity'
 
 type Translate = (key: string, options?: Record<string, string>) => string
@@ -62,25 +63,46 @@ const clickableCaptionSx = {
   }
 }
 
+const externalSenderCaptionSx = {
+  ...clickableCaptionSx,
+  color: 'warning.main',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.5
+}
+
 /**
  * The organizer stated by the event and the delegate who actually sent it may
  * differ, which is exactly what a phishing attempt exploits: spelling the
  * sender out, and letting the user inspect their contact, is the disclosure.
+ * A sender outside the domain of the organizer is flagged as such.
  */
 function OrganizerSentBy({
   sentBy,
+  sentByExternal,
   t
 }: {
   sentBy: string
+  sentByExternal?: boolean
   t: Translate
 }): JSX.Element {
   const email = stripMailto(sentBy)
 
   return (
     <AttendeePopover attendee={new userAttendee({ cal_address: email })}>
-      <Typography variant="caption" sx={clickableCaptionSx}>
-        {t('event.sentBy', { email })}
-      </Typography>
+      {sentByExternal ? (
+        <Typography variant="caption" sx={externalSenderCaptionSx}>
+          <WarningAmberOutlinedIcon
+            sx={{ fontSize: '16px' }}
+            aria-hidden="true"
+          />
+          {t('event.sentByExternal', { email })}
+        </Typography>
+      ) : (
+        <Typography variant="caption" sx={clickableCaptionSx}>
+          {t('event.sentBy', { email })}
+        </Typography>
+      )}
     </AttendeePopover>
   )
 }
@@ -152,13 +174,15 @@ function renderTeamOrganizerFullBadge({
   key,
   t,
   originalOrganizer,
-  sentBy
+  sentBy,
+  sentByExternal
 }: {
   a: userAttendee
   key: string
   t: Translate
   originalOrganizer: userAttendee
   sentBy?: string
+  sentByExternal?: boolean
 }): JSX.Element {
   const icon = classIcon(a.partstat)
   const displayName = a.cn || a.cal_address
@@ -232,7 +256,13 @@ function renderTeamOrganizerFullBadge({
             {translatedStr}
           </Typography>
         </AttendeePopover>
-        {sentBy && <OrganizerSentBy sentBy={sentBy} t={t} />}
+        {sentBy && (
+          <OrganizerSentBy
+            sentBy={sentBy}
+            sentByExternal={sentByExternal}
+            t={t}
+          />
+        )}
       </Box>
     </Box>
   )
@@ -245,7 +275,8 @@ function renderFullAttendeeBadge({
   isOrganizer,
   isTeamCalendar,
   caption,
-  sentBy
+  sentBy,
+  sentByExternal
 }: {
   a: userAttendee
   key: string
@@ -254,6 +285,7 @@ function renderFullAttendeeBadge({
   isTeamCalendar?: boolean
   caption?: string
   sentBy?: string
+  sentByExternal?: boolean
 }): JSX.Element {
   const icon = classIcon(a.partstat)
   const displayName = a.cn || a.cal_address
@@ -336,7 +368,13 @@ function renderFullAttendeeBadge({
             {caption}
           </Typography>
         )}
-        {sentBy && <OrganizerSentBy sentBy={sentBy} t={t} />}
+        {sentBy && (
+          <OrganizerSentBy
+            sentBy={sentBy}
+            sentByExternal={sentByExternal}
+            t={t}
+          />
+        )}
       </Box>
     </Box>
   )
@@ -360,7 +398,8 @@ export function renderAttendeeBadge({
   caption,
   isTeamOverride,
   originalOrganizer,
-  sentBy
+  sentBy,
+  sentByExternal
 }: {
   a: userAttendee
   key: string
@@ -372,6 +411,7 @@ export function renderAttendeeBadge({
   isTeamOverride?: boolean
   originalOrganizer?: userAttendee
   sentBy?: string
+  sentByExternal?: boolean
 }): JSX.Element {
   if (!a) return <></>
 
@@ -388,7 +428,8 @@ export function renderAttendeeBadge({
       key,
       t,
       originalOrganizer,
-      sentBy
+      sentBy,
+      sentByExternal
     })
   }
 
@@ -399,6 +440,7 @@ export function renderAttendeeBadge({
     isOrganizer,
     isTeamCalendar,
     caption,
-    sentBy
+    sentBy,
+    sentByExternal
   })
 }

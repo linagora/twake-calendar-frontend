@@ -1,6 +1,8 @@
 import React from 'react'
 import { Tooltip as MuiTooltip } from '@linagora/twake-mui'
 
+const TOOLTIP_DELAY_MS = 2000
+
 type MuiTooltipProps = React.ComponentProps<typeof MuiTooltip>
 
 export interface TooltipProps extends Omit<MuiTooltipProps, 'title'> {
@@ -16,8 +18,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <MuiTooltip
       title={title}
-      enterDelay={window.TOOLTIP_DELAY_MS}
-      enterNextDelay={window.TOOLTIP_DELAY_MS}
+      enterDelay={TOOLTIP_DELAY_MS}
+      enterNextDelay={TOOLTIP_DELAY_MS}
       placement="top"
       {...props}
     >

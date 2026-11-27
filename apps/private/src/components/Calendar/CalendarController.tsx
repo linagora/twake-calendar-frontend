@@ -14,8 +14,7 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import type {
   DatesSetInfo,
   EventApi,
-  MoreLinkHandler,
-  SlotHeaderInfo
+  MoreLinkHandler
 } from '@fullcalendar/react'
 import { CalendarApi, DateSelectInfo } from '@fullcalendar/react'
 import {
@@ -42,7 +41,6 @@ import { useOpenEventFromUrl } from '@common/components/Calendar/hooks/useOpenEv
 import { useOpenNewEventFromUrl } from '@common/components/Calendar/hooks/useOpenNewEventFromUrl'
 import { useHiddenDays } from '@common/components/Calendar/hooks/useCalendarControllerHooks'
 import { useTouchListener } from '@common/components/Calendar/hooks/useTouchListener'
-import { updateSlotLabelVisibility } from '@common/components/Calendar/utils/calendarUtils'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { buildCreateEventRange } from '@common/components/Calendar/utils/createEventRange'
 import { isWithinRange } from '@common/components/Calendar/utils/isWithinRange'
@@ -401,10 +399,6 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     onPeriodChange?.(period)
 
     setCurrentView(arg.view.type)
-
-    setTimeout(() => {
-      updateSlotLabelVisibility(new Date(), {} as SlotHeaderInfo, timezone)
-    }, 100)
   }
 
   return (

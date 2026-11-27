@@ -1,4 +1,4 @@
 # Build context: the e2e/ directory
-FROM bitnamilegacy/openldap
+FROM bitnamilegacy/openldap:2.6.10
 
 COPY src/test/resources/twake-calendar-side-service-conf/ldap_populate.ldif /ldifs/populate.ldif

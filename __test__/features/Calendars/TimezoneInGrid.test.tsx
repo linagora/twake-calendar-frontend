@@ -5,6 +5,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import * as SettingsSlice from '@common/features/Settings/SettingsSlice'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import type { ViewApi } from '@fullcalendar/react'
 
 describe('Calendar - Timezone Integration', () => {
   const mockCalendarRef = { current: null }
@@ -112,70 +113,83 @@ describe('Calendar - Timezone Integration', () => {
 })
 
 describe('Calendar - Timezone Slot Label Visibility', () => {
-  // updateSlotLabelVisibility calls checkIfCurrentWeekOrDay directly, which a
-  // spy on the export does not intercept: give it the DOM it looks at instead
-  const mockCurrentWeekOrDay = (isCurrent: boolean): void => {
-    document.body.innerHTML = isCurrent
-      ? '<div class="fc-day-today"></div><div class="fc-timegrid-now-indicator-arrow"></div>'
-      : ''
-  }
+  // The week of 2025-01-13 in UTC, the time grid shows it with its now
+  // indicator when the current time falls in it
+  const makeView = (
+    currentStart = new Date('2025-01-13T00:00:00Z'),
+    currentEnd = new Date('2025-01-20T00:00:00Z'),
+    hiddenDays: number[] = []
+  ): ViewApi =>
+    ({
+      currentStart,
+      currentEnd,
+      calendar: { getOption: () => hiddenDays }
+    }) as unknown as ViewApi
 
-  afterEach(() => {
-    document.body.innerHTML = ''
-  })
+  const slot = (text: string, view = makeView()) => ({ text, view })
 
   it('hides slot labels within 15 minutes of current time', () => {
     const currentTime = new Date('2025-01-15T14:30:00Z')
     const timezone = 'UTC'
-    mockCurrentWeekOrDay(true)
 
     // 14:25 - within 15 minutes
-    const slot1425 = { text: '14:25' }
-    expect(updateSlotLabelVisibility(currentTime, slot1425, timezone)).toBe(
-      'timegrid-slot-label-hidden'
-    )
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:25'), timezone)
+    ).toBe('timegrid-slot-label-hidden')
 
     // 14:30 - exact match
-    const slot1430 = { text: '14:30' }
-    expect(updateSlotLabelVisibility(currentTime, slot1430, timezone)).toBe(
-      'timegrid-slot-label-hidden'
-    )
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:30'), timezone)
+    ).toBe('timegrid-slot-label-hidden')
 
     // 14:35 - within 15 minutes
-    const slot1435 = { text: '14:35' }
-    expect(updateSlotLabelVisibility(currentTime, slot1435, timezone)).toBe(
-      'timegrid-slot-label-hidden'
-    )
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:35'), timezone)
+    ).toBe('timegrid-slot-label-hidden')
   })
 
   it('shows slot labels more than 15 minutes from current time', () => {
-    mockCurrentWeekOrDay(true)
-
-    const currentTime = new Date('2025-01-15T14:30:00')
+    const currentTime = new Date('2025-01-15T14:30:00Z')
     const timezone = 'UTC'
 
     // 14:00 - 30 minutes before
-    const slot1400 = { text: '14:00' }
-    expect(updateSlotLabelVisibility(currentTime, slot1400, timezone)).toBe(
-      'fc-timegrid-slot-label'
-    )
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:00'), timezone)
+    ).toBe('fc-timegrid-slot-label')
 
     // 15:00 - 30 minutes after
-    const slot1500 = { text: '15:00' }
-    expect(updateSlotLabelVisibility(currentTime, slot1500, timezone)).toBe(
-      'fc-timegrid-slot-label'
-    )
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('15:00'), timezone)
+    ).toBe('fc-timegrid-slot-label')
+  })
+
+  it('compares the slot label with the current time in the calendar timezone', () => {
+    // 14:30 in UTC is 09:30 in New York
+    const currentTime = new Date('2025-01-15T14:30:00Z')
+
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('09:30'), 'America/New_York')
+    ).toBe('timegrid-slot-label-hidden')
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:30'), 'America/New_York')
+    ).toBe('fc-timegrid-slot-label')
   })
 
   it('returns visible class when not in current week/day', () => {
-    mockCurrentWeekOrDay(false)
-    const currentTime = new Date('2025-01-15T14:30:00')
-    const timezone = 'UTC'
-    const slot = { text: '14:30' }
+    const currentTime = new Date('2025-01-22T14:30:00Z')
 
-    // Should return visible class when not in current view
-    const result = updateSlotLabelVisibility(currentTime, slot, timezone)
+    const result = updateSlotLabelVisibility(currentTime, slot('14:30'), 'UTC')
     expect(result).toBe('fc-timegrid-slot-label')
+  })
+
+  it('returns visible class when today is a hidden day of the week', () => {
+    // 2025-01-18 is a Saturday
+    const currentTime = new Date('2025-01-18T14:30:00Z')
+    const view = makeView(undefined, undefined, [0, 6])
+
+    expect(
+      updateSlotLabelVisibility(currentTime, slot('14:30', view), 'UTC')
+    ).toBe('fc-timegrid-slot-label')
   })
 })
 
