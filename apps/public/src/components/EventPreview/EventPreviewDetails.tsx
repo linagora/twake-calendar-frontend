@@ -9,6 +9,7 @@ import {
   EventVideoRow
 } from '@common/components/EventPreview/EventDetailsRows'
 import { EventPreviewDetailsProps } from '@common/components/EventPreview/EventPreviewDetails'
+import { ExternalSenderNotice } from '@common/components/EventPreview/ExternalSenderNotice'
 import { PrivateEventPreview } from '@common/components/EventPreview/PrivateEventPreview'
 import { Box } from '@linagora/twake-mui'
 import React from 'react'
@@ -24,11 +25,12 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
 }) => {
   const { t } = useI18n()
 
-  const { attendees, organizer, organizerSentBy } = useFilterEventAttendees({
-    event,
-    isResourceEventPreview,
-    calendarName
-  })
+  const { attendees, organizer, organizerSentBy, organizerSentByExternal } =
+    useFilterEventAttendees({
+      event,
+      isResourceEventPreview,
+      calendarName
+    })
 
   const shouldShowAttendeesSection =
     !isResourceEventPreview &&
@@ -46,6 +48,10 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
         flexDirection: 'column'
       }}
     >
+      {organizerSentBy && organizerSentByExternal && (
+        <ExternalSenderNotice organizer={organizer} sentBy={organizerSentBy} />
+      )}
+
       <EventVideoRow meetingLink={event.x_openpass_videoconference} />
 
       <EventLocationRow location={event.location} />
@@ -64,7 +70,8 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           t,
           isFull: true,
           isOrganizer: true,
-          sentBy: organizerSentBy
+          sentBy: organizerSentBy,
+          sentByExternal: organizerSentByExternal
         })}
 
       {shouldShowAttendeesSection && (
@@ -72,6 +79,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           attendees={attendees}
           organizer={organizer}
           organizerSentBy={organizerSentBy}
+          organizerSentByExternal={organizerSentByExternal}
           allAttendees={event.attendee ?? []}
           start={event.start}
           end={event.end}

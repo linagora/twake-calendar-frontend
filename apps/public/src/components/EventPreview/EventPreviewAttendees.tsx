@@ -12,6 +12,7 @@ export interface EventPreviewAttendeesProps {
   attendees: userAttendee[]
   organizer: userAttendee | undefined
   organizerSentBy?: string
+  organizerSentByExternal?: boolean
   allAttendees: userAttendee[]
   start?: string
   end?: string
@@ -22,7 +23,8 @@ export interface EventPreviewAttendeesProps {
 export function EventPreviewAttendees({
   allAttendees,
   organizer,
-  organizerSentBy
+  organizerSentBy,
+  organizerSentByExternal
 }: EventPreviewAttendeesProps): React.JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
@@ -109,7 +111,8 @@ export function EventPreviewAttendees({
           t,
           isFull: true,
           isOrganizer: true,
-          sentBy: organizerSentBy
+          sentBy: organizerSentBy,
+          sentByExternal: organizerSentByExternal
         })}
       {attendeesWithoutOrganizer.map((a, idx) =>
         renderAttendeeBadge({

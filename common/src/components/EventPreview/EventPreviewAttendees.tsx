@@ -22,6 +22,7 @@ interface EventPreviewAttendeesProps {
   attendees: userAttendee[]
   organizer: userAttendee | undefined
   organizerSentBy?: string
+  organizerSentByExternal?: boolean
   allAttendees: userAttendee[]
   start?: string
   end?: string
@@ -37,6 +38,7 @@ export function EventPreviewAttendees({
   attendees,
   organizer,
   organizerSentBy,
+  organizerSentByExternal,
   allAttendees,
   start,
   end,
@@ -172,7 +174,8 @@ export function EventPreviewAttendees({
                     caption: organizerCaption,
                     isTeamOverride,
                     originalOrganizer: organizer,
-                    sentBy: organizerSentBy
+                    sentBy: organizerSentBy,
+                    sentByExternal: organizerSentByExternal
                   })}
                 {attendees.map((a, idx) =>
                   renderAttendeeBadge({
@@ -227,7 +230,8 @@ export function EventPreviewAttendees({
           caption: organizerCaption,
           isTeamOverride,
           originalOrganizer: organizer,
-          sentBy: organizerSentBy
+          sentBy: organizerSentBy,
+          sentByExternal: organizerSentByExternal
         })}
       {showAllAttendees &&
         attendees.map((a, idx) =>

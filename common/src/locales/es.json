@@ -169,6 +169,7 @@
     "teamOrganizerWithName": "Organizador del equipo: %{organizerName}",
     "teamOrganizer": "Organizador del equipo",
     "sentBy": "Enviado por: %{email}",
+    "sentByExternal": "Enviado por: %{email}, externo, no el organizador",
     "untitled": "Sin título",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "No hay eventos que mostrar",
@@ -535,6 +536,10 @@
       "ACCEPTED": "Invitación aceptada",
       "DECLINED": "Invitación rechazada",
       "TENTATIVE": "Invitación aceptada provisionalmente"
+    },
+    "externalSender": {
+      "title": "Enviado por %{sentBy} en nombre de %{organizerName}",
+      "description": "Esta invitación no la envió su organizador (%{organizerEmail}), sino una dirección que no pertenece a su dominio. Confírmelo con el organizador antes de fiarse de ella."
     }
   },
   "dateTimeFields": {

@@ -169,6 +169,7 @@
     "teamOrganizerWithName": "Организатор команды: %{organizerName}",
     "teamOrganizer": "Организатор команды",
     "sentBy": "Отправлено: %{email}",
+    "sentByExternal": "Отправлено: %{email}, внешний адрес, не организатор",
     "untitled": "Без названия",
     "chipLabel": "%{title}, %{date}, %{time}, %{calendar}%{status}",
     "noEventsToDisplay": "Нет событий для отображения",
@@ -535,6 +536,10 @@
       "ACCEPTED": "Приглашение принято",
       "DECLINED": "Приглашение отклонено",
       "TENTATIVE": "Приглашение принято предварительно"
+    },
+    "externalSender": {
+      "title": "Отправлено %{sentBy} от имени %{organizerName}",
+      "description": "Это приглашение отправлено не организатором (%{organizerEmail}), а адресом, не принадлежащим его домену. Уточните у организатора, прежде чем доверять ему."
     }
   },
   "dateTimeFields": {

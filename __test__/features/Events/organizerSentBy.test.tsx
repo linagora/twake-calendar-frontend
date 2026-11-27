@@ -1,6 +1,7 @@
 import { fireEvent, renderHook, screen } from '@testing-library/react'
 import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
 import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
+import { ExternalSenderNotice } from '@common/components/EventPreview/ExternalSenderNotice'
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
 import { parseCalendarEvent } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
@@ -189,5 +190,108 @@ describe('organizer badge with a delegate', () => {
     fireEvent.click(screen.getByText('Alice'))
 
     expect(screen.getByText('alice@example.com')).toBeInTheDocument()
+  })
+})
+
+describe('useFilterEventAttendees organizerSentByExternal', () => {
+  const sentByExternalOf = (sentBy?: string): boolean => {
+    const organizer = new userOrganiser({
+      cal_address: 'mailto:bob@open-paas.org',
+      sentBy
+    })
+
+    const { result } = renderHook(() =>
+      useFilterEventAttendees({ event: eventWith(organizer) })
+    )
+
+    return result.current.organizerSentByExternal
+  }
+
+  it('flags a sender of another domain than the organizer', () => {
+    expect(sentByExternalOf('mailto:attacker@evil.example')).toBe(true)
+  })
+
+  it('trusts an assistant of the domain of the organizer', () => {
+    expect(sentByExternalOf('mailto:Assistant@Open-Paas.org')).toBe(false)
+  })
+
+  it('flags a sender without a domain', () => {
+    expect(sentByExternalOf('mailto:attacker')).toBe(true)
+  })
+
+  it('does not flag an event without a delegate', () => {
+    expect(sentByExternalOf(undefined)).toBe(false)
+  })
+})
+
+describe('organizer badge with an external delegate', () => {
+  const organizer = new userAttendee({
+    cal_address: 'bob@open-paas.org',
+    cn: 'Bob'
+  })
+
+  const renderBadge = (sentByExternal: boolean): void => {
+    renderWithProviders(
+      renderAttendeeBadge({
+        a: organizer,
+        key: 'org',
+        t,
+        isFull: true,
+        isOrganizer: true,
+        sentBy: 'mailto:attacker@evil.example',
+        sentByExternal
+      }),
+      { user: { userData: { email: 'alice@open-paas.org' } } }
+    )
+  }
+
+  it('marks the sender as external, not the organizer', () => {
+    renderBadge(true)
+
+    expect(
+      screen.getByText('event.sentByExternal(email=attacker@evil.example)')
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/^event\.sentBy\(/)).not.toBeInTheDocument()
+  })
+
+  it('keeps the discreet caption for a sender of the same domain', () => {
+    renderBadge(false)
+
+    expect(
+      screen.getByText('event.sentBy(email=attacker@evil.example)')
+    ).toBeInTheDocument()
+  })
+})
+
+describe('ExternalSenderNotice', () => {
+  it('names the sender, the organizer and their address', () => {
+    renderWithProviders(
+      <ExternalSenderNotice
+        organizer={
+          new userAttendee({ cal_address: 'bob@open-paas.org', cn: 'Bob' })
+        }
+        sentBy="mailto:attacker@evil.example"
+      />
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'eventPreview.externalSender.title(sentBy=attacker@evil.example,organizerName=Bob)'
+    )
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'eventPreview.externalSender.description(organizerEmail=bob@open-paas.org)'
+    )
+  })
+
+  it('names the organizer by their address when they have no name', () => {
+    renderWithProviders(
+      <ExternalSenderNotice
+        organizer={new userAttendee({ cal_address: 'bob@open-paas.org' })}
+        sentBy="attacker@evil.example"
+      />
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'organizerName=bob@open-paas.org'
+    )
   })
 })

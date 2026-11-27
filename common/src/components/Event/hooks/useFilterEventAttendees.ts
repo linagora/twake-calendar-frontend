@@ -1,6 +1,9 @@
 import { userAttendee } from '@common/features/User/models/attendee'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { normalizeIdentity } from '@common/utils/normalizeIdentity'
+import {
+  isOfAnotherDomain,
+  normalizeIdentity
+} from '@common/utils/normalizeIdentity'
 import { useMemo } from 'react'
 
 const isResourceAttendee = (attendee: userAttendee): boolean =>
@@ -28,6 +31,7 @@ export const useFilterEventAttendees = ({
   attendees: userAttendee[]
   organizer: userAttendee
   organizerSentBy: string | undefined
+  organizerSentByExternal: boolean
 } => {
   const rawAttendees = useMemo(() => event.attendee ?? [], [event.attendee])
 
@@ -75,5 +79,19 @@ export const useFilterEventAttendees = ({
     return sentByOrganizerThemselves ? undefined : eventOrganizer.sentBy
   }, [event.organizer])
 
-  return { resources, eventAttendees, attendees, organizer, organizerSentBy }
+  // An assistant shares the domain of the organizer; a sender of another
+  // domain is what an invitation forwarded by a third party looks like.
+  const organizerSentByExternal = Boolean(
+    organizerSentBy &&
+    isOfAnotherDomain(organizerSentBy, event.organizer?.cal_address)
+  )
+
+  return {
+    resources,
+    eventAttendees,
+    attendees,
+    organizer,
+    organizerSentBy,
+    organizerSentByExternal
+  }
 }
