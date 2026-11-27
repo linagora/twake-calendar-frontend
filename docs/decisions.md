@@ -79,3 +79,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Crash-- (CTO), 2026-11-25.
 - Why: the apps that open the Drive picker show the same skeleton while it loads; one shared component keeps them alike ([linagora/twake-libs#79](https://github.com/linagora/twake-libs/pull/79)).
 - Scope: `common/src/features/Tdrive/components/TdrivePickerDialog.tsx`.
+
+## 2026-11-27, [Tech] Twake MUI determines the compatible Lab version
+
+- Decision: The calendar relies on npm to install `@mui/lab` from the peer requirement declared by `@linagora/twake-mui`.
+- Decided by: Codex, in the local review of [#2234](https://github.com/linagora/twake-calendar-frontend/pull/2234), to be confirmed by the calendar maintainers.
+- Why: The calendar has no direct Lab imports, and updating the root declaration independently can make `npm ci` fail on incompatible Twake MUI and Material UI peer requirements.
+- Scope: Root `package.json` and `package-lock.json` for all calendar workspaces.
