@@ -1,12 +1,13 @@
 // Framed, twake-oidc never goes to the SSO on a 401 of the calendar server:
-// it calls the onLoginRequired of the app (index.tsx), once per page load.
+// it calls the onLoginRequired of the app (apps/private/src/intents/index.tsx),
+// once per page load.
 // Kept here, so that the intents page can tell the client (IntentPage).
 let isLoginRequired = false
 const listeners = new Set<() => void>()
 
 /**
  * Records that the session ended (the calendar server answered 401) and tells
- * the subscribers. Called by the onLoginRequired of index.tsx.
+ * the subscribers. Called by the onLoginRequired of the intents entry.
  */
 export function reportLoginRequired(): void {
   isLoginRequired = true

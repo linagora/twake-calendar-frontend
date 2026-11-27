@@ -21,12 +21,18 @@ export default defineConfig({
   },
   server: {
     port: 5000,
-    historyApiFallback: true,
+    // As nginx.conf: /intents and every path under it is the intents page
+    historyApiFallback: {
+      rewrites: [{ from: /^\/intents(\/|$)/i, to: '/intents.html' }]
+    },
     publicDir: [{ name: '../../public' }, { name: 'public' }]
   },
   source: {
     entry: {
-      index: './src/index.tsx'
+      index: './src/index.tsx',
+      // The cozy-stack intents page, its own bundle: the calendar never
+      // loads it, and it never loads the calendar (intents.html)
+      intents: './src/intents/index.tsx'
     }
   },
   output: {
@@ -62,8 +68,14 @@ export default defineConfig({
     }
   },
   tools: {
-    rspack(_, { appendPlugins }) {
+    rspack(config, { appendPlugins }) {
       setupSentryPlugin(appendPlugins, 'dist')
+      // The chunks of the calendar stay as they were with one entry: the
+      // intents page shares none with it, its modules in its own chunks
+      const splitChunks = config.optimization?.splitChunks
+      if (splitChunks) {
+        splitChunks.chunks = chunk => chunk.name !== 'intents'
+      }
     }
   }
 })
