@@ -9,6 +9,12 @@ const DAY_FORMAT = 'YYYY-MM-DD'
 // first event listed on that day
 export type FirstRowByDay = Map<string, string>
 
+// The range the schedule displays, end excluded, as FullCalendar's active range
+export interface DisplayedRange {
+  start: Date
+  end: Date
+}
+
 export const getEventInstanceKey = (e: EventApi): string => {
   // Use FullCalendar's internal instanceId (unique per occurrence) when available.
   // This prevents recurring events sharing the same id/calId/start from all
@@ -20,16 +26,25 @@ export const getEventInstanceKey = (e: EventApi): string => {
   return `${e.id}_${ext.calId ?? ''}_${e.start?.getTime() ?? ''}`
 }
 
-const daysCovered = (e: EventApi, timezone: string): string[] => {
+// Only the days in view can have rows: clipping the event to them bounds the
+// work by the view, not by the span of the event, which nothing limits (#2237)
+const daysCovered = (
+  e: EventApi,
+  timezone: string,
+  range: DisplayedRange
+): string[] => {
   if (!e.start) return []
-  const start = moment(e.start).tz(timezone).startOf('day')
+  const eventStart = moment(e.start).tz(timezone)
   // The end is exclusive: an all-day event ending on the 8th lasts until the 7th
-  const lastDay = e.end
-    ? moment(e.end).tz(timezone).subtract(1, 'millisecond').startOf('day')
-    : start
-  const days = [start.format(DAY_FORMAT)]
+  const eventLast = e.end
+    ? moment(e.end).tz(timezone).subtract(1, 'millisecond')
+    : eventStart
+  const rangeStart = moment(range.start).tz(timezone)
+  const rangeLast = moment(range.end).tz(timezone).subtract(1, 'millisecond')
+  const lastDay = moment.min(eventLast, rangeLast).clone().startOf('day')
+  const days: string[] = []
   for (
-    const day = start.clone().add(1, 'day');
+    const day = moment.max(eventStart, rangeStart).clone().startOf('day');
     !day.isAfter(lastDay);
     day.add(1, 'day')
   ) {
@@ -42,11 +57,12 @@ const daysCovered = (e: EventApi, timezone: string): string[] => {
 // the earliest listed one on a tie, as a stable sort would
 export const buildFirstRowByDay = (
   events: EventApi[],
-  timezone: string
+  timezone: string,
+  range: DisplayedRange
 ): FirstRowByDay => {
   const firstByDay = new Map<string, EventApi>()
   events.forEach(event =>
-    daysCovered(event, timezone).forEach(day => {
+    daysCovered(event, timezone, range).forEach(day => {
       const current = firstByDay.get(day)
       if (!current || sortEventsByDateTime(event, current) < 0) {
         firstByDay.set(day, event)
@@ -60,6 +76,7 @@ export const buildFirstRowByDay = (
 
 interface CachedFirstRows {
   timezone: string
+  range: DisplayedRange
   firstRows: FirstRowByDay
 }
 
@@ -74,17 +91,34 @@ const getEventStore = (calendar: CalendarApi): object | undefined =>
     }
   ).getCurrentData?.()?.eventStore
 
+const getDisplayedRange = (calendar: CalendarApi): DisplayedRange => ({
+  start: calendar.view.activeStart,
+  end: calendar.view.activeEnd
+})
+
+const isSameRange = (a: DisplayedRange, b: DisplayedRange): boolean =>
+  a.start.getTime() === b.start.getTime() && a.end.getTime() === b.end.getTime()
+
+const isUpToDate = (
+  cached: CachedFirstRows | undefined,
+  timezone: string,
+  range: DisplayedRange
+): cached is CachedFirstRows =>
+  !!cached && cached.timezone === timezone && isSameRange(cached.range, range)
+
 // Every row of the schedule asks for its day: build the index once per set of
-// events instead of scanning and sorting all the events for each row (#2220)
+// events and displayed range instead of scanning and sorting all the events
+// for each row (#2220)
 export const getFirstRowByDay = (
   calendar: CalendarApi,
   timezone: string
 ): FirstRowByDay => {
+  const range = getDisplayedRange(calendar)
   const eventStore = getEventStore(calendar)
   const cached = eventStore ? cache.get(eventStore) : undefined
-  if (cached && cached.timezone === timezone) return cached.firstRows
+  if (isUpToDate(cached, timezone, range)) return cached.firstRows
 
-  const firstRows = buildFirstRowByDay(calendar.getEvents(), timezone)
-  if (eventStore) cache.set(eventStore, { timezone, firstRows })
+  const firstRows = buildFirstRowByDay(calendar.getEvents(), timezone, range)
+  if (eventStore) cache.set(eventStore, { timezone, range, firstRows })
   return firstRows
 }
