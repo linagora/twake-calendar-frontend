@@ -73,3 +73,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Crash-- (CTO), 2026-11-25.
 - Why: the apps that open the Drive picker show the same skeleton while it loads; one shared component keeps them alike ([linagora/twake-libs#79](https://github.com/linagora/twake-libs/pull/79)).
 - Scope: `common/src/features/Tdrive/components/TdrivePickerDialog.tsx`.
+
+## 2026-11-27, [Tech] The apps load the `.u-*` utility classes of @linagora/twake-css
+
+- Decision: the private and public apps import `@linagora/twake-css/dist/utils.css` in their entry (`index.tsx`), so components can style themselves with the `.u-*` utility classes (for example `u-bdrs-6`, `u-fz-small`). `vars.css` is not imported: `TwakeMuiThemeProvider` emits the `--twake-*` variables those classes read.
+- Decided by: Camille Moussu, 2026-11-27, while restyling the sidebar create button ([#1287](https://github.com/linagora/twake-calendar-frontend/issues/1287)).
+- Why: the classes were used but had no effect, because the stylesheet was a dependency that no entry imported. These are the shared Twake utilities that replace those of cozy-ui.
+- Scope: `apps/private` and `apps/public`, desktop and mobile.
