@@ -67,6 +67,13 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Why: the old per-row scan was quadratic, and opening the schedule of a busy week blocked the main thread for 5.5 s. FullCalendar replaces its event store whenever its events change, so the store tells when the index is stale. The rows keep comparing FullCalendar occurrences, as before, and do not need to match them against the inputs of the grid. Without the store, the index is built again for each row, which still costs one pass and no sort.
 - Scope: `common`, schedule (list) view on desktop and mobile.
 
+## 2026-11-27, [Tech] The schedule index only covers the days in view
+
+- Decision: the index of the first row of each day only lists the days of the displayed range (`calendar.view.activeStart` to `activeEnd`). Each event is clipped to that range before its days are enumerated, and the cache is kept per event store, time zone and displayed range.
+- Decided by: proposed in the fix of [#2237](https://github.com/linagora/twake-calendar-frontend/issues/2237), following the remediation of the issue; open to review.
+- Why: the server does not bound the span of an event. Enumerating every day of an invitation from year 1 to 9999 froze the tab of each attendee showing the schedule. Only days in view have rows, so the work is now bounded by the view and not by the data.
+- Scope: `common/src/components/Event/EventChip/scheduleFirstRows.ts`.
+
 ## 2026-11-25, [UI] The Drive picker skeleton comes from @linagora/twake-app-skeleton
 
 - Decision: the Drive picker dialog shows `DrivePickerSkeleton` of `@linagora/twake-app-skeleton/drive` until the intent is ready, in place of the local `PickerSkeleton`.
