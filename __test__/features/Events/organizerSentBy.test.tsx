@@ -194,9 +194,12 @@ describe('organizer badge with a delegate', () => {
 })
 
 describe('useFilterEventAttendees organizerSentByExternal', () => {
-  const sentByExternalOf = (sentBy?: string): boolean => {
+  const sentByExternalOf = (
+    sentBy?: string,
+    organizerAddress = 'mailto:bob@open-paas.org'
+  ): boolean => {
     const organizer = new userOrganiser({
-      cal_address: 'mailto:bob@open-paas.org',
+      cal_address: organizerAddress,
       sentBy
     })
 
@@ -217,6 +220,15 @@ describe('useFilterEventAttendees organizerSentByExternal', () => {
 
   it('flags a sender without a domain', () => {
     expect(sentByExternalOf('mailto:attacker')).toBe(true)
+  })
+
+  it('flags a sender whose domain the organizer hides in hfields', () => {
+    expect(
+      sentByExternalOf(
+        'mailto:attacker@evil.example',
+        'mailto:ceo@company.example?x=@evil.example'
+      )
+    ).toBe(true)
   })
 
   it('does not flag an event without a delegate', () => {
