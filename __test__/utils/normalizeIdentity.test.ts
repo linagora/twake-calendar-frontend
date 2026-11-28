@@ -11,7 +11,13 @@ describe('domainOf', () => {
     ['mailto:Bob@Open-Paas.org', 'open-paas.org'],
     ['mailto: bob@sub.example.com ', 'sub.example.com'],
     ['bob', ''],
-    [undefined, '']
+    [undefined, ''],
+    ['ceo@company.example?x=@evil.example', ''],
+    ['mailto:ceo@company.example#@evil.example', ''],
+    ['ceo%40company.example@evil.example', ''],
+    ['a@b@evil.example', ''],
+    ['@evil.example', ''],
+    ['bob@', '']
   ])('reads the domain of %p as %p', (address, domain) => {
     expect(domainOf(address)).toBe(domain)
   })
@@ -34,6 +40,19 @@ describe('isOfAnotherDomain', () => {
     expect(
       isOfAnotherDomain('attacker@open-paas.org.evil', 'bob@open-paas.org')
     ).toBe(true)
+  })
+
+  it('does not let hfields of the reference borrow the domain of the sender', () => {
+    expect(
+      isOfAnotherDomain(
+        'attacker@evil.example',
+        'ceo@company.example?x=@evil.example'
+      )
+    ).toBe(true)
+  })
+
+  it('counts an address with several @ as external', () => {
+    expect(isOfAnotherDomain('a@b@evil.example', 'bob@evil.example')).toBe(true)
   })
 
   it('counts an address without a domain as external', () => {

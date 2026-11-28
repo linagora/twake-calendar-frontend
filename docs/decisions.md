@@ -79,3 +79,10 @@ Categories: UX, UI, Product, Architecture, Infra, Tech.
 - Decided by: Crash-- (CTO), 2026-11-25.
 - Why: the apps that open the Drive picker show the same skeleton while it loads; one shared component keeps them alike ([linagora/twake-libs#79](https://github.com/linagora/twake-libs/pull/79)).
 - Scope: `common/src/features/Tdrive/components/TdrivePickerDialog.tsx`.
+
+## 2026-11-28, [Tech] An organizer or SENT-BY address that is not a plain local-part@domain has no domain
+
+- Decision: when the preview compares the domains of the `SENT-BY` and of the organizer (decision of 2026-11-25, "The preview warns of a SENT-BY outside the domain of the organizer"), an address holding `?`, `#` or `%`, or not exactly one `@` with a non-empty local part and domain, has no domain, so the sender counts as external.
+- Decided by: claude, applying the remediation of the twake-qa security review of 2026-11-28 (SEV-1, [#2241](https://github.com/linagora/twake-calendar-frontend/issues/2241)); to be confirmed in the review of the pull request.
+- Why: Twake Mail reads the ORGANIZER as a mailto URI and drops its hfields, so `ceo@company.example?x=@evil.example` is `ceo@company.example` for it, while the domain after the last `@` was `evil.example`, the domain of the sender, and the warning disappeared. Refusing such an address is simpler than reproducing the parsing of the backend, and only flags addresses no real mailbox has.
+- Scope: `common/src/utils/normalizeIdentity.ts`, event preview of `common` and `apps/public`.
